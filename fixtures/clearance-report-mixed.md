@@ -13,7 +13,7 @@
 
 | Noun | Item | Verdict | Why | Document |
 |---|---|---|---|---|
-| fact | The Orphan Works Directive permits commercial  | **UNKNOWN** | the source was read and does not state this claim | `https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32012L0028` |
+| fact | The Orphan Works Directive permits commercial  | **UNKNOWN** | no admissible passage found by locator 'string': no_passage | `https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32012L0028` |
 | fact | 94% of film archives are unclearable for AI tr | **UNKNOWN** | no source offered for this claim | — |
 | asset | Newsreel | **RED** | in copyright — permission required from the rights-holder | `http://rightsstatements.org/vocab/InC/1.0/` |
 | asset | Newsreel | **RED** | NonCommercial + NoDerivatives | `http://creativecommons.org/licenses/by-nc-nd/4.0/` |
@@ -32,7 +32,7 @@
 > "The copyright and related rights status of this Item has not been evaluated. Please refer to the organization that has made the Item available for more information. You are free to use this Item in an…"
 
 **C4 · fact · UNKNOWN** — https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32012L0028
-> "document opened, 42,469 characters read; the phrase "commercial use is permitted" does not occur in it…"
+> "document opened, 42,469 characters read; the locator proposed nothing…"
 
 **/2022096/10622_37926A4D_11DD_4E6D_AC90_BB9DBB76F018_cho · asset · RED** — http://rightsstatements.org/vocab/InC/1.0/
 > "This Item is protected by copyright and/or related rights. You are free to use this Item in any way that is permitted by the copyright and related rights legislation that applies to your use. For othe…"

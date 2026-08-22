@@ -10,7 +10,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from clearance import corpus, engine, facts, instruments
+from clearance import corpus, engine, facts, instruments, verify as V
 from clearance.verdict import (Verdict, UncitedVerdict, GREEN, RED, UNKNOWN, ASSET, FACT,
                                NO_INSTRUMENT, UNRULED, UNREAD_TERMS, NOT_EVALUATED,
                                NO_SOURCE, SOURCE_UNREAD, SOURCE_SILENT,
@@ -300,8 +300,13 @@ def t_silent_source_does_not_quote_furniture():
     if v.cause == SOURCE_UNREAD:
         return  # nothing fetched in this environment; nothing to assert
     assert v.cause == SOURCE_SILENT
-    assert "does not occur in it" in (v.quoted_terms or ""), \
-        f"a non-finding must be stated, not excerpted: {v.quoted_terms!r:.90}"
+    q = v.quoted_terms or ""
+    assert "characters read;" in q, \
+        f"a non-finding must be a stated fact about the document: {q!r:.90}"
+    body = instruments.document(
+        "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32012L0028")
+    assert q not in (body or ""), \
+        "the non-finding is an excerpt of the document, which reads as evidence"
 
 
 def t_cited_unknown_set_is_closed():
@@ -343,8 +348,96 @@ def t_a_string_in_navigation_is_not_a_source():
     """If the only occurrence is chrome, refuse the GREEN rather than quote it."""
     body = ("Skip to main content Log in My EUR-Lex Hide table of contents "
             "All consolidated versions 2012/28/EU Select Display Text")
-    assert facts._passage(body, [body.find("2012/28/EU")], len("2012/28/EU")) is None, \
-        "a match sitting only in navigation must not yield a quotable passage"
+    from clearance.locate import StringLocator
+    got = StringLocator().propose(claim="c", must_contain="2012/28/EU", document=body)
+    assert got is None, \
+        f"a match sitting only in navigation yielded a quotable passage: {got!r:.60}"
+
+
+# ---------------------------------------------------------------------------
+# Adversarial proposers. A locator is UNTRUSTED by design, so the verifier is only
+# real if it has been watched refusing a locator that lies. These are the failures a
+# model will actually produce - fluent text that is not in the document, and a real
+# passage from the wrong one.
+# ---------------------------------------------------------------------------
+INC_URL = "https://rightsstatements.org/vocab/InC/1.0/"
+INC_CLAIM = facts.Claim("f", "An 'In Copyright' item requires permission",
+                        INC_URL, "you need to obtain permission from the rights-holder")
+
+
+class _Loc:
+    def __init__(self, name, fn):
+        self.name, self._fn = name, fn
+
+    def propose(self, *, claim, must_contain, document):
+        return self._fn(document, must_contain)
+
+
+def _judged_by(fn, name="adversarial", claim=None):
+    return facts.judge_claim(claim or INC_CLAIM, locator=_Loc(name, fn))
+
+
+def t_hallucinated_passage_is_refused():
+    """Fluent, plausible, correct-sounding, and not in the document."""
+    fake = ("This Item is in the public domain and you need to obtain permission "
+            "from the rights-holder only for commercial reuse in the EU.")
+    v = _judged_by(lambda doc, mc: fake)
+    assert v.verdict == UNKNOWN, "a hallucinated passage became a GREEN"
+    assert "not_in_document" in v.reason, v.reason
+
+
+def t_real_passage_from_the_wrong_document_is_refused():
+    """The substitution defect, arriving from the direction a model produces it."""
+    other = instruments.document("https://rightsstatements.org/vocab/CNE/1.0/")
+    if not other:
+        return
+    i = other.find("has not been evaluated")
+    lifted = other[max(0, i - 80):i + 60]
+    v = _judged_by(lambda doc, mc: lifted)
+    assert v.verdict == UNKNOWN, "a passage from another document became a GREEN"
+    assert "not_in_document" in v.reason, v.reason
+
+
+def t_passage_that_does_not_carry_the_claim_is_refused():
+    """In the document, verbatim, and about something else entirely."""
+    def near_miss(doc, mc):
+        i = doc.find(mc)
+        return doc[i + len(mc):i + len(mc) + 220]
+    v = _judged_by(near_miss)
+    assert v.verdict == UNKNOWN, "a passage missing the claim's own terms became GREEN"
+    assert "does_not_carry_the_claim" in v.reason, v.reason
+
+
+def t_whole_page_is_refused():
+    """Technically contains everything; evidences nothing."""
+    v = _judged_by(lambda doc, mc: doc)
+    assert v.verdict == UNKNOWN, "the entire document was accepted as a quote"
+    assert "not_a_statement" in v.reason, v.reason
+
+
+def t_midword_slice_is_refused():
+    def midword(doc, mc):
+        i = doc.find(mc)
+        return doc[i - 3:i + len(mc) + 120]
+    v = _judged_by(midword)
+    assert v.verdict == UNKNOWN or v.quoted_terms[0].isalnum(), \
+        f"a mid-word slice was accepted: {v.quoted_terms[:40]!r}"
+
+
+def t_a_good_locator_still_passes():
+    """The verifier must not refuse everything — that is the false-UNKNOWN direction."""
+    v = facts.judge_claim(INC_CLAIM)
+    assert v.verdict == GREEN, \
+        f"the string locator's real passage was refused: {v.reason}"
+    assert v.quoted_terms in instruments.document(INC_URL)
+
+
+def t_verifier_carries_no_site_specific_chrome_list():
+    """The guard must hold on the third website, not just the two we fetched."""
+    src = (Path(__file__).resolve().parents[1] / "clearance" / "verify.py").read_text()
+    for leaked in ("Hrvatski", "EUR-Lex", "consolidated versions", "Skip to main"):
+        assert leaked not in src, \
+            f"{leaked!r} leaked into the verifier — it is overfitted to two pages"
 
 
 print("WATCH IT GO RED — control tests\n")

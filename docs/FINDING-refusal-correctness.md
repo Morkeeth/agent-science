@@ -59,3 +59,22 @@ Rough shape, not a specification:
 
 **Every mechanism that can refuse needs a test that watches it refuse wrongly.**
 Not built today; named so it does not evaporate.
+
+
+---
+
+## Update, same day: half of this is now built
+
+The locator/verifier split (`clearance/locate.py`, `clearance/verify.py`) is the answer
+to this finding, arriving from the admissibility requirement rather than from the
+finding itself.
+
+A refusal is now **traceable to the implementation that caused it** — every
+`source_does_not_state_it` prints the locator's name and the refusal code, so a false
+UNKNOWN can be attributed rather than merely observed. `StringLocator` is named as one
+implementation, not as the product, and the site-specific navigation list lives inside
+it. A control greps `verify.py` to keep that list out of the guard.
+
+**Still unbuilt, and still the finding:** a held-out set with known verdicts, where the
+suite fails on a false UNKNOWN. Traceability is not correctness. Nothing yet watches a
+refusal being wrong.
