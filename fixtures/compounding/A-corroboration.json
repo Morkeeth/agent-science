@@ -1,0 +1,11 @@
+{
+  "leg": "A-corroboration",
+  "script": "fixtures/scripts/powered-A-law.txt",
+  "claims": 10,
+  "corpus_hits": 0,
+  "parallel_calls": 10,
+  "gemini_calls": 11,
+  "seconds": 191.8,
+  "cost": 0.0511,
+  "sourced": 4
+}

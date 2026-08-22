@@ -28,6 +28,22 @@ KEY_PATH = Path.home() / ".config" / "keys" / "parallel.key"
 CACHE = Path(__file__).resolve().parent.parent / "cache" / "searches.json"
 
 
+# Every live call to Parallel is counted HERE, at the only place one is made. The
+# per-claim counter in agent_science.py missed escalation searches entirely, because
+# those happen inside the engine below it - so the reported cost undercounted the real
+# spend. A meter that only sees one of two call sites is not a meter.
+LIVE_CALLS = 0
+
+
+def calls() -> int:
+    return LIVE_CALLS
+
+
+def reset_calls() -> None:
+    global LIVE_CALLS
+    LIVE_CALLS = 0
+
+
 class NoKey(RuntimeError):
     """Raised when the Parallel key is absent. Never stubbed around."""
 
@@ -87,6 +103,8 @@ def find_sources(objective: str, queries: list[str], *, mode: str = "advanced",
     req = urllib.request.Request(
         ENDPOINT, data=body, method="POST",
         headers={"Content-Type": "application/json", "x-api-key": load_key()})
+    global LIVE_CALLS
+    LIVE_CALLS += 1
     try:
         with urllib.request.urlopen(req, timeout=45) as r:
             payload = json.load(r)
