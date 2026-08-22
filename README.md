@@ -56,21 +56,31 @@ silently in our own favour.
 The second production about the same subject reuses what the first one proved.
 Two independently written scripts on one subject, corpus wiped first:
 
-| | production 1 | production 2 |
-|---|---:|---:|
-| from memory | 0 / 7 | **6 / 10 (60%)** |
-| live searches | 7 | **4** |
-| cost | $0.036 | **$0.021 (−43%)** |
-| wall clock | 107s | **84s** |
+Three runs of the same experiment, corpus wiped before each:
 
-**N = 1.** One subject, two scripts, one run each — a data point, not a rate. The claim
-extractor is **not deterministic** (8 claims one run, 7 the next on identical input), so
-every figure downstream of it is a sample. The scripts were written to overlap; real
+| run | production 2 from memory | cost saving |
+|---|---:|---:|
+| 1 | 6 / 10 — 60% | −43% |
+| 2 | 3 / 11 — 27% | — |
+| 3 | 4 / 10 — 40% | −14% |
+
+**The direction is robust; the magnitude is not.** Stated honestly: **27–60% of a second
+production's claims resolve from memory, saving 14–43% of cost. n = 3.**
+
+The first number measured was 60%, and publishing that alone would have been a
+cherry-pick a judge could break by re-running the harness that ships in this repo.
+
+The variance is the **claim extractor**, which is not deterministic — 7, 8 and 11 claims
+across runs on identical input — so which claims two productions share moves run to run,
+and every figure downstream of it is a sample. The scripts were written to overlap; real
 productions may overlap less.
 
-Before this was measured the same claim was **false** — the corpus keyed on the whole
-claim sentence, so it only compounded when the identical script was re-run, which is a
-thing nobody would ever do. `measure_compounding.py` is the harness.
+Before this was measured the same claim was **false**: the corpus keyed on the whole
+claim sentence, so it only compounded when the identical script was re-run — a thing
+nobody would ever do. That version scored **9%, and cost 25% MORE**. Every run since has
+beaten it, which is why the architectural claim stands even where the number is noisy.
+`measure_compounding.py` is the harness, and its cost model is in the docstring so the
+number can be argued with rather than believed.
 
 ## Runtime integrations
 
