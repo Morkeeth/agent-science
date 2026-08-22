@@ -423,6 +423,40 @@ def t_midword_slice_is_refused():
         f"a mid-word slice was accepted: {v.quoted_terms[:40]!r}"
 
 
+def t_a_refuse_everything_locator_must_fail_the_suite():
+    """THE SECOND POLE. A control set with only one is not a control set.
+
+    Every adversarial control here watches a locator asserting too much. A locator
+    that returns null on EVERYTHING passes all of them, produces a flawless-looking
+    UNKNOWN column, and is completely useless — and this product's most likely
+    long-term drift is exactly that direction, because a refusal looks like rigour.
+
+    A degenerate always-null locator must be distinguishable from a careful one.
+    """
+    nulls = _Loc("always-null", lambda doc, mc: None)
+    # It must refuse the claims a working locator resolves...
+    v = facts.judge_claim(INC_CLAIM, locator=nulls)
+    assert v.verdict == UNKNOWN, "sanity: the null locator should refuse"
+    # ...and THAT is what the suite must be able to see. A locator is only credible if
+    # it resolves the cases we know are resolvable.
+    resolvable = [
+        INC_CLAIM,
+        facts.Claim("f2", "The copyright and related rights status of this Item has "
+                          "not been evaluated",
+                    "https://rightsstatements.org/vocab/CNE/1.0/",
+                    "has not been evaluated"),
+    ]
+    good = sum(1 for c in resolvable
+               if facts.judge_claim(c).verdict == GREEN)
+    degenerate = sum(1 for c in resolvable
+                     if facts.judge_claim(c, locator=nulls).verdict == GREEN)
+    assert good == len(resolvable), \
+        f"the shipping locator resolves only {good}/{len(resolvable)} known-resolvable claims"
+    assert degenerate == 0
+    assert good > degenerate, \
+        "an always-null locator is indistinguishable from the real one on this suite"
+
+
 def t_a_good_locator_still_passes():
     """The verifier must not refuse everything — that is the false-UNKNOWN direction."""
     v = facts.judge_claim(INC_CLAIM)
