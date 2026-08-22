@@ -128,6 +128,40 @@ def t_cne_is_unknown_but_cited():
         f"CNE must quote its OWN clause, not page boilerplate: {v.quoted_terms!r:.90}"
 
 
+def t_not_evaluated_REQUIRES_a_citation():
+    """The required direction, watched going red — not just the forbidden one."""
+    try:
+        Verdict(subject_id="x", subject_title="t", noun=ASSET, use="ai_training",
+                verdict=UNKNOWN, reason="r", cause=NOT_EVALUATED)
+    except UncitedVerdict:
+        pass
+    else:
+        raise AssertionError(
+            "holder_states_not_evaluated was constructed with no citation — "
+            "the narrow permission has become a general one")
+    # and the same in the half-evidenced case
+    try:
+        Verdict(subject_id="x", subject_title="t", noun=ASSET, use="ai_training",
+                verdict=UNKNOWN, reason="r", cause=NOT_EVALUATED,
+                citation_url="http://x", quoted_terms="  ")
+    except UncitedVerdict:
+        return
+    raise AssertionError("a citation with no quoted terms was accepted")
+
+
+def t_cne_never_read_degrades_to_unread_not_to_a_claim():
+    """Strip the CNE terms: it must fall back to UNREAD_TERMS, not assert non-evaluation."""
+    real = instruments._load()
+    try:
+        instruments._save({k: v for k, v in real.items() if k != engine.CNE})
+        v = engine.judge(subject_id="x", subject_title="t",
+                         instrument_uri=engine.CNE, use=engine.AI_TRAINING)
+        assert v.cause == UNREAD_TERMS, \
+            f"unread CNE must not claim the holder said anything, got cause={v.cause}"
+    finally:
+        instruments._save(real)
+
+
 def t_orphan_work_is_red_with_its_own_reason():
     v = engine.judge(subject_id="x", subject_title="t",
                      instrument_uri="http://rightsstatements.org/vocab/InC-OW-EU/1.0/",
@@ -165,6 +199,55 @@ def t_no_verdict_quotes_a_document_it_did_not_read():
         if v.substituted:
             bad.append((v.published_instrument, v.citation_url))
     assert not bad, f"{len(bad)} verdicts quote a sibling document, e.g. {bad[0]}"
+
+
+def t_second_question_touches_no_network():
+    """The compounding claim, enforced.
+
+    If answering a NEW question about an ALREADY-INDEXED library reaches the network,
+    then the corpus is a cache that misses, not a memory that compounds, and the
+    'second production costs a fraction' line in the pitch is false.
+    """
+    import urllib.request
+
+    items = json.loads(
+        (Path(__file__).resolve().parents[1] / "fixtures" /
+         "europeana-broad.json").read_text())
+
+    calls = []
+    real_urlopen = urllib.request.urlopen
+
+    def tripwire(*a, **kw):
+        calls.append(a[0] if a else "?")
+        raise AssertionError("network touched while answering a second question")
+
+    urllib.request.urlopen = tripwire
+    try:
+        for use in engine.USES:
+            for it in items:
+                engine.judge(subject_id=it["subject_id"],
+                             subject_title=it["subject_title"],
+                             instrument_uri=it["instrument_uri"], use=use)
+    finally:
+        urllib.request.urlopen = real_urlopen
+    assert not calls, f"{len(calls)} network call(s), first was {calls[0]}"
+
+
+def t_the_second_question_actually_splits_the_library():
+    """A second use case that changes nothing is not a second use case."""
+    items = json.loads(
+        (Path(__file__).resolve().parents[1] / "fixtures" /
+         "europeana-broad.json").read_text())
+    a = {}
+    b = {}
+    for it in items:
+        for use, sink in ((engine.AI_TRAINING, a), (engine.NONCOMMERCIAL_REUSE, b)):
+            sink[it["subject_id"]] = engine.judge(
+                subject_id=it["subject_id"], subject_title=it["subject_title"],
+                instrument_uri=it["instrument_uri"], use=use).verdict
+    moved = sum(1 for k in a if a[k] != b[k])
+    assert moved / len(a) > 0.10, \
+        f"only {moved}/{len(a)} items change verdict — the two buyers are one buyer"
 
 
 print("WATCH IT GO RED — control tests\n")

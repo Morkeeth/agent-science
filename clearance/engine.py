@@ -18,50 +18,64 @@ from .verdict import (Verdict, GREEN, RED, UNKNOWN, ASSET,
 AI_TRAINING = "ai_training"
 COMMERCIAL = "commercial_license"
 BROADCAST = "broadcast"
-USES = (AI_TRAINING, COMMERCIAL, BROADCAST)
+# The question a cultural institution, university or public-service archive asks.
+# Added after rendering ai_training vs broadcast side by side and finding they barely
+# differ (9 of 600): NonCommercial blocks both, so the two "different buyers" were
+# largely the same buyer. This is the question that genuinely splits the library.
+NONCOMMERCIAL_REUSE = "noncommercial_reuse"
+USES = (AI_TRAINING, COMMERCIAL, BROADCAST, NONCOMMERCIAL_REUSE)
 
 # Instrument URI -> per-use ruling.
 #   value = (verdict, reason, interpretive?)
 # `interpretive=True` marks a reading that is OURS, not the instrument's plain words.
 # Printing that distinction is the difference between evidence and an opinion.
 _FREE = (GREEN, "no rights reserved that block this use", False)
+_NC_OK = (GREEN, "non-commercial use permitted by the licence", False)
 
 _RULES: dict[str, dict[str, tuple]] = {
     "http://rightsstatements.org/vocab/InC/1.0/": {
         AI_TRAINING: (RED, "in copyright — permission required from the rights-holder", False),
         COMMERCIAL: (RED, "in copyright — permission required from the rights-holder", False),
         BROADCAST: (RED, "in copyright — permission required from the rights-holder", False),
+        NONCOMMERCIAL_REUSE: (RED, "in copyright — copyright does not exempt non-commercial use", False),
     },
     "http://rightsstatements.org/vocab/InC-EDU/1.0/": {
         AI_TRAINING: (RED, "educational use only — commercial AI training not covered", False),
         COMMERCIAL: (RED, "educational use only", False),
         BROADCAST: (RED, "educational use only", False),
+        NONCOMMERCIAL_REUSE: (GREEN, "educational use is exactly what this permits", False),
     },
     "http://creativecommons.org/publicdomain/mark/1.0/": {
         AI_TRAINING: _FREE, COMMERCIAL: _FREE, BROADCAST: _FREE,
+        NONCOMMERCIAL_REUSE: _FREE,
     },
     "http://creativecommons.org/publicdomain/zero/1.0/": {
         AI_TRAINING: _FREE, COMMERCIAL: _FREE, BROADCAST: _FREE,
+        NONCOMMERCIAL_REUSE: _FREE,
     },
     "http://creativecommons.org/licenses/by/4.0/": {
         AI_TRAINING: (GREEN, "permitted with attribution", False),
         COMMERCIAL: (GREEN, "permitted with attribution", False),
         BROADCAST: (GREEN, "permitted with attribution", False),
+        NONCOMMERCIAL_REUSE: (GREEN, "permitted with attribution", False),
     },
     "http://creativecommons.org/licenses/by-nd/4.0/": {
         AI_TRAINING: (RED, "NoDerivatives — training produces a derivative", True),
         COMMERCIAL: (GREEN, "commercial use permitted if distributed unmodified", False),
         BROADCAST: (GREEN, "permitted if distributed unmodified, with attribution", False),
+        NONCOMMERCIAL_REUSE: (GREEN, "permitted if distributed unmodified", False),
     },
     "http://creativecommons.org/licenses/by-nc/4.0/": {
         AI_TRAINING: (RED, "NonCommercial — commercial training not permitted", False),
         COMMERCIAL: (RED, "NonCommercial", False),
         BROADCAST: (RED, "NonCommercial", False),
+        NONCOMMERCIAL_REUSE: _NC_OK,
     },
     "http://creativecommons.org/licenses/by-nc-sa/4.0/": {
         AI_TRAINING: (RED, "NonCommercial + ShareAlike", False),
         COMMERCIAL: (RED, "NonCommercial", False),
         BROADCAST: (RED, "NonCommercial", False),
+        NONCOMMERCIAL_REUSE: (GREEN, "non-commercial permitted; derivatives must share alike", False),
     },
 }
 
@@ -85,12 +99,19 @@ _RULES["http://creativecommons.org/licenses/by-nc-nd/4.0/"] = {
     AI_TRAINING: (RED, "NonCommercial + NoDerivatives", False),
     COMMERCIAL: (RED, "NonCommercial", False),
     BROADCAST: (RED, "NonCommercial", False),
+    NONCOMMERCIAL_REUSE: (GREEN, "non-commercial permitted if distributed unmodified", False),
 }
 
 _RULES["http://rightsstatements.org/vocab/InC-OW-EU/1.0/"] = {
     AI_TRAINING: (RED, "EU orphan work — in copyright, rights-holder not locatable", False),
     COMMERCIAL: (RED, "EU orphan work — in copyright, rights-holder not locatable", False),
     BROADCAST: (RED, "EU orphan work — in copyright, rights-holder not locatable", False),
+    # The Orphan Works Directive permits certain non-commercial uses by cultural
+    # institutions — but ONLY on the record of a documented diligent search, which
+    # does not exist in this dataset. Saying GREEN here would be inventing the record.
+    NONCOMMERCIAL_REUSE: (RED, "EU orphan work — non-commercial use by a cultural "
+                          "institution may be permitted, but only on a documented "
+                          "diligent search, which is not on file", False),
 }
 
 # "Copyright Not Evaluated": the holder is telling us they never assessed it.
@@ -136,10 +157,14 @@ def judge(
 
     if instrument_uri == CNE:
         quoted = instruments.terms(CNE)
+        if not quoted:
+            # We have not read the CNE statement, so we cannot assert what it says.
+            return unknown(
+                f"instrument {CNE} has never been fetched — "
+                "no verbatim terms on file to cite", UNREAD_TERMS)
         return unknown(
             "the holder states copyright was never evaluated for this item",
-            NOT_EVALUATED,
-            **({"citation_url": CNE, "quoted_terms": quoted} if quoted else {}),
+            NOT_EVALUATED, citation_url=CNE, quoted_terms=quoted,
         )
 
     resolved = _resolve(instrument_uri)

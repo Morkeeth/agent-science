@@ -26,7 +26,11 @@ FACT = "fact"
 NO_INSTRUMENT = "no_instrument"        # the holder published nothing
 UNRULED = "unruled_instrument"         # they published; WE have not ruled it yet
 UNREAD_TERMS = "terms_never_fetched"   # we have a rule but never read the instrument
-NOT_EVALUATED = "holder_not_evaluated" # the instrument itself says "not evaluated"
+NOT_EVALUATED = "holder_states_not_evaluated"
+# ^ the instrument's OWN text states copyright was never assessed. This is the single
+# UNKNOWN cause where a citation is REQUIRED, not merely allowed. A required citation
+# on one narrow cause is a stronger rule than an optional citation on all of them:
+# there is no discretionary path a later commit can widen "just for the demo".
 CAUSES = (NO_INSTRUMENT, UNRULED, UNREAD_TERMS, NOT_EVALUATED)
 
 
@@ -83,10 +87,15 @@ class Verdict:
                 raise ValueError(
                     f"UNKNOWN for {self.subject_id!r} must name a cause from {CAUSES}"
                 )
-            # NOT_EVALUATED is the one UNKNOWN that DOES have evidence: an instrument
-            # whose own text says the holder never assessed copyright. Refusing to cite
-            # it would throw away the most useful fact in the record.
-            if self.cause != NOT_EVALUATED and (self.citation_url or self.quoted_terms):
+            if self.cause == NOT_EVALUATED:
+                # Evidence of absence is still evidence, and it must be produced.
+                if not self.citation_url or not (self.quoted_terms or "").strip():
+                    raise UncitedVerdict(
+                        f"UNKNOWN/{NOT_EVALUATED} for {self.subject_id!r} asserts that the "
+                        "holder documented non-evaluation. That is a claim about a document, "
+                        "so the document must be cited and quoted."
+                    )
+            elif self.citation_url or self.quoted_terms:
                 raise UncitedVerdict(
                     f"UNKNOWN/{self.cause} must not carry a citation — "
                     "if there is evidence, judge it."
