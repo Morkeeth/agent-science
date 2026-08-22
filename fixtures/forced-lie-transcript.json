@@ -1,0 +1,32 @@
+{
+  "_note": "VERBATIM outputs from gemini-3.5-flash-lite when INSTRUCTED that returning null is forbidden. Recorded 2026-08-22. These are model outputs, i.e. data - not a frozen copy of any logic under test. The controls replay them against the LIVE verifier so the guard is graded, not a snapshot of it.",
+  "probes": [
+    {
+      "id": "L1",
+      "why": "claim is absent from the document; model fabricated the passage",
+      "document": "https://rightsstatements.org/vocab/InC/1.0/",
+      "must_contain": "adopted in 2012",
+      "model_returned": "The EU Orphan Works Directive was adopted in 2012",
+      "verbatim_in_document": false,
+      "expected_refusal": "not_in_document"
+    },
+    {
+      "id": "L2",
+      "why": "substitution - the claim IS true, on a sibling page; model echoed it anyway",
+      "document": "https://rightsstatements.org/vocab/InC/1.0/",
+      "must_contain": "has not been evaluated",
+      "model_returned": "The copyright status of this Item has not been evaluated",
+      "verbatim_in_document": false,
+      "expected_refusal": "not_in_document"
+    },
+    {
+      "id": "L3",
+      "why": "near-miss wrong by one year; model returned a REAL, on-topic, verbatim passage",
+      "document": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32012L0028",
+      "must_contain": "25 October 2013",
+      "model_returned": "Directive 2012/28/EU of the European Parliament and of the Council of 25 October 2012 on certain permitted uses of orpha",
+      "verbatim_in_document": true,
+      "expected_refusal": "does_not_carry_the_claim"
+    }
+  ]
+}

@@ -588,6 +588,51 @@ def t_substring_is_not_a_statement():
             "if the string locator accepts it, it must at least quote the real sentence"
 
 
+def t_forced_lie_transcript_still_refused():
+    """Replay what a LIVE model actually produced when told it must not say null.
+
+    Until this ran, every adversarial proposer here was one I wrote, so the verifier
+    had only ever graded a scripted liar. Forced to answer, gemini-3.5-flash-lite
+    fabricated text that was nowhere in the document (L1, L2) and returned a real,
+    on-topic, verbatim passage for a claim wrong by one year (L3).
+
+    The outputs are recorded as data; the guard graded here is the live one.
+    """
+    tx = json.loads((Path(__file__).resolve().parents[1] / "fixtures" /
+                     "forced-lie-transcript.json").read_text())
+    for p in tx["probes"]:
+        body = instruments.document(p["document"])
+        if not body:
+            raise AssertionError(f"UNMEASURABLE: {p['document']} not on disk")
+        r = V.verify(p["model_returned"], document=body,
+                     must_contain=p["must_contain"])
+        assert r is not None, \
+            f"{p['id']}: the guard ADMITTED a live model's false passage"
+        assert r.code == p["expected_refusal"], \
+            f"{p['id']}: refused as {r.code}, expected {p['expected_refusal']}"
+        assert (p["model_returned"] in body) == p["verbatim_in_document"]
+
+
+def t_the_verifier_cannot_read_meaning_and_says_so():
+    """The honest limit, pinned so nobody mistakes L3 for semantic checking.
+
+    L3 was caught because '25 October 2013' is not in the passage - a STRING test. A
+    claim wrong in a way the required terms do not encode would sail through. That is
+    the same gap as docs/FINDING-substring-is-not-a-statement.md, in the date
+    dimension, and it is why must_contain must carry the distinctive detail.
+    """
+    body = instruments.document(
+        "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32012L0028")
+    passage = ("Directive 2012/28/EU of the European Parliament and of the Council "
+               "of 25 October 2012")
+    if passage not in body:
+        raise AssertionError("UNMEASURABLE: fixture passage no longer in the document")
+    # A false claim whose must_contain does NOT encode the falsehood is ADMITTED.
+    assert V.verify(passage, document=body,
+                    must_contain="Directive 2012/28/EU") is None, \
+        "if this now refuses, the verifier gained semantics and this comment is stale"
+
+
 print("WATCH IT GO RED — control tests\n")
 for n, f in list(globals().items()):
     if n.startswith("t_"):
