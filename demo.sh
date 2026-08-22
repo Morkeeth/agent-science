@@ -16,6 +16,7 @@ set -uo pipefail
 cd "$(dirname "$0")"
 B=$'\033[1m'; D=$'\033[2m'; R=$'\033[0m'
 pause() { sleep "${1:-2}"; }
+now() { python3 -c 'import time;print(f"{time.time():.1f}")'; }
 say() { printf "\n${B}%s${R}\n" "$1"; }
 
 say "AGENT SCIENCE — a clearance desk for factual production"
@@ -26,9 +27,12 @@ pause 2
 say "1 · THE FIRST PRODUCTION — cold. Nothing in memory."
 printf "${D}A documentary script goes in. Gemini extracts the checkable claims,\nParallel searches the open web, every passage is verified verbatim.${R}\n\n"
 rm -f cache/corpus.db
-/usr/bin/time -p python3 -u agent_science.py \
+T1=$(now)
+python3 -u agent_science.py \
   fixtures/scripts/documentary-orphan-works.txt --subject demo 2>&1 \
   | sed -n '1,3p;/^2\. C1/,/^2\. C3/p;/^# GAP REPORT/,/^## Claims requiring action/p'
+COLD=$(python3 -c "print(f'{$(now) - $T1:.0f}')")
+printf "\n${B}   cold run: %ss, 7 live searches${R}\n" "$COLD"
 pause 2
 
 # ---------------------------------------------------------------------------
@@ -67,9 +71,12 @@ pause 2
 # ---------------------------------------------------------------------------
 say "4 · THE SECOND PRODUCTION — same subject, different script, warm corpus"
 printf "${D}This is the company. The second production about the same subject\nreuses what the first one proved, and it costs a fraction.${R}\n\n"
-/usr/bin/time -p python3 -u agent_science.py \
+T2=$(now)
+python3 -u agent_science.py \
   fixtures/scripts/documentary-orphan-works-B.txt --subject demo 2>&1 \
   | sed -n '/^1\. Gemini/p;/^# GAP REPORT/,/^## Claims requiring action/p;/Parallel calls/p'
+WARM=$(python3 -c "print(f'{$(now) - $T2:.0f}')")
+printf "\n${B}   warm run: %ss  (cold was %ss)${R}\n" "$WARM" "$COLD"
 pause 2
 
 say "MEASURED, this run"
