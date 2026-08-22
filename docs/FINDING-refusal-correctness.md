@@ -78,3 +78,18 @@ it. A control greps `verify.py` to keep that list out of the guard.
 **Still unbuilt, and still the finding:** a held-out set with known verdicts, where the
 suite fails on a false UNKNOWN. Traceability is not correctness. Nothing yet watches a
 refusal being wrong.
+
+
+---
+
+## Correction, 2026-08-22, same day: the premise above is half wrong
+
+This file says every control watches the assert-too-much direction and nothing watches a
+wrong refusal. **The first half is not true.** The controls watch whether a quote is
+GENUINE — real, verbatim, chrome-free. Nothing watched whether a genuine quote actually
+*states the claim*. A live model found the gap on the first run:
+`docs/FINDING-substring-is-not-a-statement.md`.
+
+So the incentive table stands, but the score does not. **A false GREEN was live in the
+product all day**, produced by the string matcher and invisible to 31 green controls.
+Both directions were unwatched; I only knew about one of them.

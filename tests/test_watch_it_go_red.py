@@ -510,6 +510,50 @@ def t_the_key_is_nowhere_in_the_tree():
     assert key not in log, "the Parallel key appears in git history"
 
 
+def t_transport_failure_must_not_become_a_refusal():
+    """A 429 is not evidence of absence.
+
+    The most dangerous way this product could fail is for an infrastructure error to
+    render as UNKNOWN: the report would say 'the source does not state this' when the
+    truth is 'we were rate-limited'. A locator that raises must propagate, never be
+    caught and turned into a verdict.
+    """
+    def boom(doc, mc):
+        raise RuntimeError("Gemini call failed: HTTP 429 Too Many Requests")
+    try:
+        facts.judge_claim(INC_CLAIM, locator=_Loc("exploding", boom))
+    except RuntimeError:
+        return
+    raise AssertionError("a transport error was silently converted into a verdict")
+
+
+def t_substring_is_not_a_statement():
+    """The live-model finding, pinned offline.
+
+    'Copyright Not Evaluated means THE HOLDER never assessed the item' is not what the
+    CNE statement says - it says the STATUS has not been evaluated and refers you to
+    the organisation. StringLocator accepted it because the substring matched, which
+    is a FALSE GREEN in the expensive direction. Gemini refused it and accepted the
+    precisely-worded version.
+
+    This control does not need a model: it pins the claim so a future locator cannot
+    quietly start accepting it again.
+    """
+    doc = instruments.document("https://rightsstatements.org/vocab/CNE/1.0/")
+    if not doc:
+        raise AssertionError("UNMEASURABLE: CNE document not on disk")
+    sloppy = facts.Claim("x", "Copyright Not Evaluated means the holder never assessed "
+                              "the item", "https://rightsstatements.org/vocab/CNE/1.0/",
+                         "has not been evaluated")
+    v = facts.judge_claim(sloppy)
+    # StringLocator still passes this - RECORDED, not asserted away. See
+    # docs/FINDING-substring-is-not-a-statement.md
+    assert v.verdict in (GREEN, UNKNOWN)
+    if v.verdict == GREEN:
+        assert "status of this Item has not been evaluated" in v.quoted_terms, \
+            "if the string locator accepts it, it must at least quote the real sentence"
+
+
 print("WATCH IT GO RED — control tests\n")
 for n, f in list(globals().items()):
     if n.startswith("t_"):

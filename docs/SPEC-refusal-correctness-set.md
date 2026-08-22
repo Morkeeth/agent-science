@@ -61,6 +61,13 @@ language, an occurrence after the first, a PDF, a claim supported across two sen
   must fail — including one where the claim is *nearly* stated, differing by a negation, a
   date, or a quantity. That is where a model will be most confident and most wrong.
 - Items where the document does not mention the subject at all.
+- **A third group, added 2026-08-22 after a live model refuted this spec's own premise:
+  claims whose required terms DO appear, in a passage that does not state them.** See
+  `docs/FINDING-substring-is-not-a-statement.md`. A substring proves a passage mentions
+  the right words; it cannot prove the passage asserts the claim. This is the
+  assert-too-much direction proper, and nothing in the suite was watching it — the
+  controls asked "is the quote genuine?", the quote was genuine, and the verdict was
+  still wrong.
 
 ## The metric, and the five-cause rule it must respect
 
