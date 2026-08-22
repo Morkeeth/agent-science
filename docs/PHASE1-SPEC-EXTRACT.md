@@ -32,8 +32,14 @@ Anything not quoted below is NOT a known constraint.
       Gemini models on Agent Platform, BigQuery ML, and relevant APIs)"
 - [ ] **"No other AI models, agent frameworks, or AI APIs are permitted, regardless of vendor — this
       includes but is not limited to AWS, Microsoft, OpenAI, and Anthropic AI tools."**
-- [ ] Framing: "a functional, production-ready AI agent or multi-agent network—powered by Gemini and
-      Google Cloud Agent Builder"
+- [ ] **"Build a functional, production-ready AI agent or multi-agent network—powered by Gemini and
+      Google Cloud Agent Builder"** — CONJUNCTIVE. Not "uses Gemini somewhere".
+- [ ] **THE CLAUSE THAT DECIDES ADMISSIBILITY** (re-fetched 2026-08-22, verbatim):
+      *"must demonstrate the use of Google Cloud and the Partner services at runtime in your code
+      — imported and actually called (a library import, an app/backend entry point, or a loaded
+      agent/flow/MCP config), not just named in the README"*
+      → Two runtime integrations, both checkable by a judge reading the repo: **Google Cloud AI**
+      and **the partner (ClickHouse MCP)**. Neither is optional and neither can live in prose.
 - [ ] ClickHouse track requirement: **"ClickHouse MCP server connection"** — at runtime
 - [ ] "integrate a Partner Entity's product or MCP to power a real media & entertainment workflow"
 
@@ -68,6 +74,24 @@ MCP scores twice. A feature beside it scores once.
 ## PRIZES / FIELD
 - [ ] 5 tracks x ($7,500 / $4,500 / $3,000) = 15 paying slots, "$75,000 in prizes"
 - [ ] Registered participants at 2026-08-22: **7,415** (registration != submission)
+
+## SELF-AUDIT vs THIS SPEC — 2026-08-22, after the engine was built
+Checked the repo against the clause above rather than against my own summary of it.
+
+| Requirement | `~/CODE/cleared` @ 23f29fe | Verdict |
+|---|---|---|
+| Gemini called at runtime | absent — `urllib` + `str.find` only | **FAIL** |
+| Google Cloud Agent Builder | absent | **FAIL** |
+| ClickHouse MCP called at runtime | absent — SQLite | **FAIL** |
+| Hosted project URL | none | FAIL (Phase 6 work, not yet due) |
+| Public repo + OSI licence | local only, no licence file | held for Oscar |
+| 3-min video | none | not yet due |
+
+**I quoted this requirement into this file at the start of the run and then built for hours
+without checking the build against it.** The spec extract existed; the comparison did not. That
+is the wrong-object failure again — a correct document, never pointed at the thing it governs.
+The engine is not wasted (the guard, the corpus and the refusal primitive are the product), but
+**as of 23f29fe this repo is not an admissible submission and would not have been one.**
 
 ## OPEN / UNVERIFIED
 - [ ] Per-track submission counts — unknowable before the gallery opens. Track pick reasoned, not measured.
