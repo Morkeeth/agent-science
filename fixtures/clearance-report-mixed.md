@@ -23,13 +23,13 @@
 ## The evidence, verbatim
 
 **C1 · fact · GREEN** — https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32012L0028
-> "nts All consolidated versions Hide consolidated versions 28/10/2012 Legal act ​ Directive 2012/28/EU of the European Parliament and of the Council of 25 October 2012 on certain permitted use…"
+> "Legal act ​ Directive 2012/28/EU of the European Parliament and of the Council of 25 October 2012 on certain permitted uses of orphan works Text with EEA…"
 
 **C2 · fact · GREEN** — https://rightsstatements.org/vocab/InC/1.0/
-> "by the copyright and related rights legislation that applies to your use. For other uses you need to obtain permission from the rights-holder(s). Notices Unless expressly stated otherwise, the organiz…"
+> "For other uses you need to obtain permission from the rights-holder(s).…"
 
 **C3 · fact · GREEN** — https://rightsstatements.org/vocab/CNE/1.0/
-> "ch Polski Go Copyright Not Evaluated The copyright and related rights status of this Item has not been evaluated. Please refer to the organization that has made the Item available for more information…"
+> "The copyright and related rights status of this Item has not been evaluated. Please refer to the organization that has made the Item available for more information. You are free to use this Item in an…"
 
 **C4 · fact · UNKNOWN** — https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32012L0028
 > "document opened, 42,469 characters read; the phrase "commercial use is permitted" does not occur in it…"

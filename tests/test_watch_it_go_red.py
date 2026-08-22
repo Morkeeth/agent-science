@@ -309,6 +309,44 @@ def t_cited_unknown_set_is_closed():
         "the required-citation set grew; each member must be added deliberately"
 
 
+def t_green_evidence_carries_the_claim():
+    """The fix that went where I was looking.
+
+    The furniture fix landed on the UNKNOWN branch only; the GREEN branch three
+    lines down in the same report still printed navigation chrome under the word
+    "evidence". A GREEN quoting furniture is worse than an UNKNOWN doing it: it is
+    the product asserting a claim is sourced while showing text that does not
+    source it.
+    """
+    from check_pitch import CLAIMS
+    chrome = ("consolidated versions", "Skip to main content", "table of contents",
+              "Hrvatski", "Log in", "My EUR-Lex")
+    checked = 0
+    for c in CLAIMS:
+        v = facts.judge_claim(c)
+        if v.verdict != GREEN:
+            continue
+        checked += 1
+        q = v.quoted_terms or ""
+        assert c.must_contain in q, \
+            f"{c.claim_id}: GREEN quote does not contain the claim's own terms"
+        assert q[:1].isalnum() or q[:1] in "\"'(", \
+            f"{c.claim_id}: quote starts mid-word or on punctuation: {q[:40]!r}"
+        assert q.count(" ") >= 6, f"{c.claim_id}: quote is a run of labels: {q[:60]!r}"
+        for ch in chrome:
+            assert ch not in q, \
+                f"{c.claim_id}: navigation text printed as evidence ({ch!r}): {q[:80]!r}"
+    assert checked >= 3, f"only {checked} GREEN claims exercised this control"
+
+
+def t_a_string_in_navigation_is_not_a_source():
+    """If the only occurrence is chrome, refuse the GREEN rather than quote it."""
+    body = ("Skip to main content Log in My EUR-Lex Hide table of contents "
+            "All consolidated versions 2012/28/EU Select Display Text")
+    assert facts._passage(body, [body.find("2012/28/EU")], len("2012/28/EU")) is None, \
+        "a match sitting only in navigation must not yield a quotable passage"
+
+
 print("WATCH IT GO RED — control tests\n")
 for n, f in list(globals().items()):
     if n.startswith("t_"):
