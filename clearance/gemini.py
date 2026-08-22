@@ -39,6 +39,45 @@ LADDER = ("gemini-3.5-flash", "gemini-3.5-flash-lite", "gemini-3.6-flash",
 ENDPOINT = ("https://generativelanguage.googleapis.com/v1beta/models/"
             "{model}:generateContent")
 KEY_PATH = Path.home() / ".config" / "keys" / "gemini.key"
+
+# Vertex AI (the Gemini Enterprise Agent Platform) on Google Cloud, reached with
+# Application Default Credentials rather than an API key. Two reasons this is the
+# preferred path, not a fallback:
+#   1. The submission requires Google CLOUD AI, and an AI Studio key is not the
+#      cloud project - Vertex is. This is "Gemini models on Agent Platform" literally.
+#   2. It is a DIFFERENT QUOTA POOL. gemini-3.5-flash was exhausted on the AI Studio
+#      key (20/day/model, free tier) and answered HTTP 200 on Vertex the same minute.
+# Only the `global` location publishes these models; every regional endpoint 404s.
+VERTEX = ("https://aiplatform.googleapis.com/v1/projects/{project}/locations/global"
+          "/publishers/google/models/{model}:generateContent")
+GCLOUD = Path.home() / "google-cloud-sdk" / "bin" / "gcloud"
+
+
+def vertex_project() -> Optional[str]:
+    """The active gcloud project, or None if gcloud/ADC is not configured."""
+    import subprocess
+    if not GCLOUD.exists():
+        return None
+    try:
+        p = subprocess.run([str(GCLOUD), "config", "get-value", "project"],
+                           capture_output=True, text=True, timeout=20)
+        proj = p.stdout.strip()
+        return proj or None
+    except Exception:
+        return None
+
+
+def vertex_token() -> Optional[str]:
+    import subprocess
+    if not GCLOUD.exists():
+        return None
+    try:
+        p = subprocess.run(
+            [str(GCLOUD), "auth", "application-default", "print-access-token"],
+            capture_output=True, text=True, timeout=30)
+        return p.stdout.strip() or None
+    except Exception:
+        return None
 MAX_DOC = 120_000   # characters of document sent; flash handles far more
 CACHE = Path(__file__).resolve().parent.parent / "cache" / "gemini.json"
 
@@ -125,6 +164,29 @@ def call(model: str, system: str, user: str, timeout: int = 90) -> tuple[dict, s
         "contents": [{"role": "user", "parts": [{"text": user}]}],
         "generationConfig": {"temperature": 0, "responseMimeType": "application/json"},
     }).encode()
+    # VERTEX FIRST. Google Cloud is the required platform and it is a separate quota
+    # pool from the AI Studio key. Falls through to the key path if ADC is absent, and
+    # says which path answered so a verdict never misreports its own provenance.
+    project, token = vertex_project(), vertex_token()
+    if project and token:
+        for candidate in [model] + [m for m in LADDER if m != model]:
+            vreq = urllib.request.Request(
+                VERTEX.format(project=project, model=candidate), data=body,
+                method="POST", headers={"Content-Type": "application/json",
+                                        "Authorization": f"Bearer {token}"})
+            try:
+                with urllib.request.urlopen(vreq, timeout=timeout) as r:
+                    return json.load(r), f"{candidate} (vertex:{project})"
+            except urllib.error.HTTPError as e:
+                if e.code in (401, 403, 404):
+                    break          # not a quota problem; fall back to the key path
+                if e.code == 429:
+                    continue       # try the next rung on Vertex
+                raise RuntimeError(
+                    f"Vertex call failed: HTTP {e.code} {e.reason}") from None
+            except Exception:
+                break
+
     tried, chain = [], [model] + [m for m in LADDER if m != model]
     for candidate in chain:
         req = urllib.request.Request(
