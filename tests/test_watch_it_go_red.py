@@ -336,7 +336,8 @@ def t_green_evidence_carries_the_claim():
             f"{c.claim_id}: GREEN quote does not contain the claim's own terms"
         assert q[:1].isalnum() or q[:1] in "\"'(", \
             f"{c.claim_id}: quote starts mid-word or on punctuation: {q[:40]!r}"
-        assert q.count(" ") >= 6, f"{c.claim_id}: quote is a run of labels: {q[:60]!r}"
+        assert q.count(" ") >= V.MIN_WORDS, \
+            f"{c.claim_id}: quote is a run of labels: {q[:60]!r}"
         for ch in chrome:
             assert ch not in q, \
                 f"{c.claim_id}: navigation text printed as evidence ({ch!r}): {q[:80]!r}"
@@ -631,6 +632,51 @@ def t_the_verifier_cannot_read_meaning_and_says_so():
     assert V.verify(passage, document=body,
                     must_contain="Directive 2012/28/EU") is None, \
         "if this now refuses, the verifier gained semantics and this comment is stale"
+
+
+def t_cursor_proposers_ported():
+    """Four attacks from the Cursor review lane, ported into the build suite.
+
+    They were refused when the review lane ran them, but a proposer that only lives in
+    a review script is not a control: it is not run before a commit and nothing fails
+    when it regresses. Credit: review/adversarial_proposers.py.
+    """
+    inc = instruments.document(INC_URL)
+    if not inc:
+        raise AssertionError("UNMEASURABLE: InC document not on disk")
+
+    # A. NEGATED SENTENCE CARRYING THE REQUIRED TERMS. The most dangerous shape a model
+    #    can produce: fluent, on-topic, contains every required word, and asserts the
+    #    OPPOSITE. Refused only because it is not verbatim in the document.
+    negated = ("This Item is protected by copyright and you do NOT need to obtain "
+               "permission from the rights-holder for any use.")
+    r = V.verify(negated, document=inc,
+                 must_contain="permission from the rights-holder")
+    assert r is not None and r.code == "not_in_document", \
+        f"a negated sentence carrying the terms was admitted: {r}"
+
+    # B. UNICODE HOMOGLYPH. One Cyrillic character inside an otherwise perfect quote.
+    i = inc.find("copyright")
+    homoglyph = inc[i:i + 60].replace("copyright", "copyrigh\u0430t", 1)
+    r = V.verify(homoglyph, document=inc, must_contain="copy")
+    assert r is not None and r.code == "not_in_document", \
+        f"a homoglyph-substituted quote was admitted: {r}"
+
+    # C. TWO NON-ADJACENT FRAGMENTS CONCATENATED. Each half is real; the join is not.
+    a, b = inc.find("permission"), inc.find("rights-holder")
+    if a >= 0 and b >= 0:
+        lo, hi = min(a, b), max(a, b)
+        stitched = inc[lo:lo + 30] + inc[hi:hi + 30]
+        if stitched not in inc:
+            r = V.verify(stitched, document=inc, must_contain="permission")
+            assert r is not None, "a stitched passage was admitted"
+
+    # D. PASSAGE PRESENT, REQUIRED TERMS ABSENT FROM IT.
+    j = inc.find("rights-holder")
+    r = V.verify(inc[j:j + 200], document=inc,
+                 must_contain="you need to obtain permission")
+    assert r is not None and r.code == "does_not_carry_the_claim", \
+        f"a passage missing the claim's terms was admitted: {r}"
 
 
 print("WATCH IT GO RED — control tests\n")

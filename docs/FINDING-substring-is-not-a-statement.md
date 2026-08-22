@@ -60,3 +60,56 @@ assert-too-much direction. **That was wrong.** They watch whether a quote is gen
 Nothing was watching whether a genuine quote *supports the claim*, which is the
 assert-too-much direction proper. `docs/SPEC-refusal-correctness-set.md` needs a third
 group: claims whose supporting terms appear in a passage that does not state them.
+
+
+---
+
+# CORRECTION, 2026-08-22, same day — I overstated this and Cursor caught it
+
+**What I claimed:** *"`GeminiLocator` closes it... it is correct where the deterministic
+version was wrong."* I put that in a commit message, in this file, and relayed it to the
+coordinator, who called it the headline of the run.
+
+**What is actually true.** Cursor's review lane reported the sloppy C3 claim still
+reaching GREEN with Gemini. I measured it across the model ladder rather than trusting
+either of us:
+
+| Locator | sloppy C3 claim |
+|---|---|
+| `StringLocator` | **GREEN** |
+| `gemini-3.5-flash` | UNKNOWN — refused (my original single run) |
+| `gemini-3.5-flash-lite` | **GREEN** — quotes the status sentence |
+| `gemini-3.6-flash` | **GREEN** — quotes the status sentence |
+| `gemini-3.7-flash` | UNMEASURABLE — HTTP 503 |
+
+**The refusal was ONE MODEL ON ONE RUN, not a property of using a model.** I generalised
+from a single observation to a claim about the architecture, which is exactly the error
+this product exists to catch, committed in the write-up of a finding about that error.
+
+## What survives, and it is still worth having
+
+The **defect** is real and unchanged: a passage can be genuine, verbatim, on-topic and
+still not state the claim, and `StringLocator` admits it. That was invisible to every
+control before today.
+
+What does **not** survive is the fix. **No locator closes this gap, because it is not a
+locator problem.** `verify.py` is structural by design: verbatim presence plus
+`must_contain`. **Nothing in this system reads meaning.** A stricter model may refuse a
+sloppy claim on a given day; that is a behaviour, not a guarantee, and it varies by model
+and by run.
+
+So the honest statement is narrower and more useful:
+
+> **`must_contain` must carry the distinctive detail of the claim — the attribution, the
+> date, the quantity — because it is the only thing standing between a real quote and a
+> claim it does not support. Where the falsehood is not encoded in the required terms,
+> nothing in this system will catch it.**
+
+That is also why the forced-lie probe L3 was caught: `"25 October 2013"` was absent from
+the passage. A **string** test, not a semantic one — pinned in
+`t_the_verifier_cannot_read_meaning_and_says_so`.
+
+## The rule this leaves behind
+
+**One observation of a model behaving well is not a property of the system.** Test a model
+claim across the ladder before writing it down, and never on the run that produced it.
