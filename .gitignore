@@ -1,0 +1,3 @@
+cache/corpus.db
+__pycache__/
+*.pyc
