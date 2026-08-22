@@ -1,22 +1,29 @@
 ---
 date: 2026-08-22
 horizon: 30 days · Aug 22 → Sep 21
-deadline: Agentic Cinema · Sep 9 2026 14:00 PT (day 18)
-rule: rank every task by whether it moves THE ONE THING THAT CAN FAIL THE SUBMISSION
+deadline: Agentic Cinema · Sep 9 2026 14:00 PT (day 18) — checkpoint, not "done"
+rule: over-build the product; Oscar cuts scope. Never assess as near-ship. Video/Devpost late.
+oscar: 2026-08-22 — "you can fix me 30 more days of building… over build and ill stop you"
 ---
 
 # 30 DAYS
 
-Days 1–18 win the event. **Days 19–30 are the company** — the part that exists whether
-or not we place. Both are in here because the Ideation Law says pitch the vision, not
-the sprint.
+**Default stance: over-build.** Prefer depth (corpus, refusal, independence, second subject,
+asset leg) over packaging urgency. Sep 9 is a **checkpoint**. Days 19–30 are the company
+whether or not we place. Oscar stops over-scope — do not self-thin into a demo.
 
-`⛔` = a missing one makes the entry **inadmissible**, regardless of how good the build is.
-`🔴` = blocked on Oscar. `🤖` = mine. `👁` = Cursor's review lane.
+`🔴` = blocked on Oscar. `🤖` = build. `👁` = Cursor review.
+`⛔` = **a missing one makes the entry inadmissible, however good the build is.**
+
+**Over-build is the stance; `⛔` is the floor, and the two do not conflict.** Packaging is
+not next work and should not crowd out depth — but the marks stay visible, because the
+recorded failure here is not over-scoping, it is a finished build that was inadmissible
+for a knowable reason nobody was looking at. A live demo and a clean repo are still a
+fail without the video. Build deep; never lose sight of what voids the entry.
 
 ---
 
-## PHASE 0 · TONIGHT — close the wound (Aug 22)
+## PHASE 0 · CLOSE THE WOUND (Aug 22–23)
 
 | # | Task | Who |
 |---|---|---|
@@ -31,19 +38,19 @@ A rule that lives in a file gets bypassed; a rule that lives in a test gets caug
 
 ---
 
-## PHASE 1 · ADMISSIBILITY — days 1–5 (Aug 23–27)
+## PHASE 1 · FOUNDATION — days 1–5 (Aug 23–27)
 
-Nothing else matters until every ⛔ is green. A perfect build with a missing video is a fail.
+Product foundation, not packaging panic. Hosted URL exists; **clean deploy + real store** do not.
 
 | # | Task | Who |
 |---|---|---|
-| 1.1 | ⛔🤖 **Hosted URL** — redeployed clean, `/healthz` reports the path that actually answers, cold visitor sees a real page not a stack trace | me |
-| 1.2 | ⛔👁 Fix `cloud/service.py` health check: it reports `gemini:false` on a working keyless service | Cursor |
-| 1.3 | ⛔🤖 **Agent Builder actually called on the default path**, proved with `env -u`, not claimed | me |
-| 1.4 | ⛔🤖 **Pre-publication audit widened** — no keys, no transcripts, no cached document containing anything of Oscar's, no `cache/` blob that shouldn't travel | me |
-| 1.5 | ⛔🔴 Flip the repo public **at submission, not before** — 7,415 registrants, Devpost only requires public at submit | Oscar |
-| 1.6 | 🤖 **Firestore** as the corpus store — for the product reason: a corpus that compounds wants a managed store | me |
-| 1.7 | 🤖 Kill `SUBMISSION.md`'s false ✅s — "public repo" (it is private) and "Agent Builder" (never executed) | me |
+| 1.1 | 🤖 **Hosted URL redeployed clean** — `/health` reports the path that answers; cold visitor gets a page not a stack | me |
+| 1.2 | 👁 Health check — `gemini_path` (done in tree @ `a1817b6`; must be live after redeploy) | Cursor |
+| 1.3 | 🤖 **Agent Builder on the default path**, proved with `env -u`, not claimed | me |
+| 1.4 | 🤖 **Pre-publication audit** — no keys/transcripts/`cache/` blobs that shouldn't travel | me |
+| 1.5 | 🔴 Public repo **only at submit** — not now | Oscar / late |
+| 1.6 | 🤖 **Firestore** (or managed) corpus — `/tmp` is not compounding | me |
+| 1.7 | 🤖 Kill false ✅s in `SUBMISSION.md` — public repo / Agent Builder claims | me |
 
 ---
 
@@ -63,17 +70,20 @@ Anything here that needs him must land before the 26th or after the 31st.
 
 ---
 
-## PHASE 3 · FREEZE, FILM, SUBMIT — days 11–18 (Sep 2–9)
+## PHASE 3 · CHECKPOINT (Sep 2–9) — only when Phases 1–2 are real
+
+**Do not start this phase early. Do not nag Oscar about video.**
+If Phase 2 is thin, keep building — submission packaging waits.
 
 | # | Task | Who |
 |---|---|---|
-| 3.1 | 🤖 Feature freeze Sep 5. After this only defect fixes | me |
-| 3.2 | ⛔🔴 **Phase-6 gate: Oscar drives the full path himself**, fresh browser, no credentials. Not delegable | Oscar |
-| 3.3 | ⛔👁 **Pre-camera cold pass** — a non-builder drives the exact on-camera surface; **LIVE equals FIXED by hash** | Cursor |
-| 3.4 | 🤖 Grep `story-bank.md` before the script is written; rule every hit | me |
-| 3.5 | ⛔🔴 **Record the 3-min video** — "functioning as built, not a cinematic trailer" | Oscar |
-| 3.6 | ⛔🔴 Devpost form + partner track + public repo + licence + hosted URL + video | Oscar |
-| 3.7 | 🤖 Sealed prediction written before results | me |
+| 3.1 | 🤖 Soft freeze only when compounding + demo path + refusal set exist | me |
+| 3.2 | 🔴 Oscar drives the full path himself, fresh browser — when *he* says ready | Oscar |
+| 3.3 | 👁 Pre-camera cold pass — only after 3.2 | Cursor |
+| 3.4 | 🤖 Grep story-bank before any script; rule every hit | me |
+| 3.5 | 🔴 Video — **Oscar's call, late, not a build-lane prompt** | Oscar |
+| 3.6 | 🔴 Devpost + public repo — late | Oscar |
+| 3.7 | 🤖 Sealed prediction after the exhibit exists | me |
 
 ---
 
