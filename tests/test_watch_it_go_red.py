@@ -834,6 +834,60 @@ def t_a_short_complete_sentence_is_a_statement():
         "the label-run rejection was lost while fixing the short-sentence case"
 
 
+def t_mirrors_collapse_to_one_origin():
+    """Three citations to one source is one citation."""
+    from clearance.independence import assess, origin_key
+    mirrors = ["https://en.wikipedia.org/wiki/X",
+               "https://bafy.ipfs.dweb.link/wiki/X",
+               "https://www.wikiwand.com/en/X"]
+    assert len({origin_key(u) for u in mirrors}) == 1, \
+        "mirrors of one document counted as separate sources"
+    a = assess(mirrors)
+    assert a["origins"] == 1 and not a["has_independent_support"], \
+        f"three mirrors reported as independent support: {a}"
+
+
+def t_more_sources_is_not_more_confidence():
+    """The trap this whole rung exists to refuse.
+
+    A claim with THREE sources that all trace to one origin is LESS independent than a
+    claim with ONE primary source. If the naive count wins, the check is decorative.
+    """
+    from clearance.independence import assess
+    many_derived = assess(["https://en.wikipedia.org/wiki/X",
+                           "https://bafy.ipfs.dweb.link/wiki/X",
+                           "https://dbpedia.org/page/X"])
+    one_primary = assess(["https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=X"])
+    assert not many_derived["has_independent_support"]
+    assert one_primary["has_independent_support"], \
+        "a single primary source failed while three mirrors would have passed"
+
+
+def t_unclassified_is_never_promoted_to_support():
+    """Unclassified is a question, not a yes."""
+    from clearance.independence import assess
+    a = assess(["https://some-legal-blog.example/post"])
+    assert a["unclassified"] and not a["has_independent_support"], \
+        "an unclassified source was silently counted as independent support"
+
+
+def t_independence_actually_demotes_a_real_claim():
+    """If it does not demote anything, it is not doing anything.
+
+    Measured on the real demo run: 6 SOURCED before independence, 3 after. C4, C5 and
+    C6 dropped because their only sources were blogs, aggregators and Wikipedia.
+    """
+    from clearance.independence import assess
+    # C6's real source set from the run
+    c6 = assess(["https://en.wikipedia.org/wiki/BFI_National_Archive"])
+    assert not c6["has_independent_support"], \
+        "the Wikipedia-only claim would still read SOURCED"
+    # and a claim whose set contains a primary source must survive
+    c1 = assess(["https://www.wipo.int/wipolex/en/legislation/details/13043"])
+    assert c1["has_independent_support"], \
+        "independence demoted a claim with a genuine primary source"
+
+
 print("WATCH IT GO RED — control tests\n")
 for n, f in list(globals().items()):
     if n.startswith("t_"):

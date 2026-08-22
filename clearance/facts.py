@@ -22,9 +22,11 @@ from typing import Optional
 
 from . import instruments, search as _search
 from .locate import DEFAULT, Locator
+from .independence import assess as assess_independence
 from .verify import verify
 from .verdict import (Verdict, GREEN, UNKNOWN, FACT,
-                      NO_SOURCE, SOURCE_UNREAD, SOURCE_SILENT, SEARCH_FOUND_NOTHING)
+                      NO_SOURCE, SOURCE_UNREAD, SOURCE_SILENT, SEARCH_FOUND_NOTHING,
+                      NO_INDEPENDENT_SOURCE)
 
 SOURCING = "sourcing"  # the "use" a fact is judged for
 
@@ -61,7 +63,11 @@ def judge_claim(claim: Claim, *, fetch: bool = False,
             return unknown(
                 f"searched and the search returned nothing: probe was {queries!r}",
                 SEARCH_FOUND_NOTHING)
-        read = 0
+        # GATHER THE WHOLE SET before judging any of it. Returning on the first
+        # candidate that verifies made independence unknowable by construction: you
+        # cannot assess a set you never assembled, and one citation always looked
+        # like enough.
+        read, verified = 0, []
         for c in cands:
             body = instruments.document(c.url, fetch=fetch)
             if body is None:
@@ -70,12 +76,32 @@ def judge_claim(claim: Claim, *, fetch: bool = False,
             proposed = locator.propose(claim=claim.text,
                                        must_contain=claim.must_contain, document=body)
             if verify(proposed, document=body, must_contain=claim.must_contain) is None:
-                return Verdict(
-                    subject_id=claim.claim_id, subject_title=claim.text, noun=FACT,
-                    use=SOURCING, verdict=GREEN,
-                    reason=f"source found by search, passage verified verbatim "
-                           f"(locator: {locator.name})",
-                    citation_url=c.url, quoted_terms=proposed.strip())
+                verified.append((c.url, proposed))
+
+        if verified:
+            ind = assess_independence([u for u, _ in verified])
+            if not ind["has_independent_support"]:
+                # Documents were found, read and VERIFIED - and every one of them
+                # traces to the same origin, or to a derived one. Three citations to
+                # one source is one citation. This DEMOTES a row that would otherwise
+                # have read SOURCED, which is the whole point of the check.
+                origins = ", ".join(sorted(ind["groups"]))
+                return unknown(
+                    f"{len(verified)} document(s) verified but they collapse to "
+                    f"{ind['origins']} non-independent origin(s) [{origins}]; "
+                    "derived or unclassified sources are not independent support",
+                    NO_INDEPENDENT_SOURCE)
+            url, proposed = next((u, p) for u, p in verified
+                                 if u.split("/")[2:3] and
+                                 assess_independence([u])["has_independent_support"])
+            return Verdict(
+                subject_id=claim.claim_id, subject_title=claim.text, noun=FACT,
+                use=SOURCING, verdict=GREEN,
+                reason=(f"source found by search, passage verified verbatim, "
+                        f"{len(ind['independent'])} independent origin(s) "
+                        f"of {ind['origins']} (locator: {locator.name})"),
+                citation_url=url, quoted_terms=proposed.strip())
+
         return unknown(
             f"searched, read {read} of {len(cands)} candidate document(s), "
             f"none states this claim; probe was {queries!r}",

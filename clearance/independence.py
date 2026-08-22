@@ -71,3 +71,62 @@ def note(url: str) -> str:
                 "If the script was researched from this, the check is a round trip. "
                 "The engine cannot tell; a human must.")
     return f"source class: UNCLASSIFIED ({why})"
+
+
+# ---------------------------------------------------------------------------
+# INDEPENDENCE IS A PROPERTY OF THE SOURCE SET, NOT OF A VERDICT.
+#
+# A claim with three sources that all trace to one origin is LESS independent than a
+# claim with one primary source, even though it has more citations. "More sources =
+# more confidence" is the trap this section exists to refuse.
+# ---------------------------------------------------------------------------
+
+_ORIGIN_FAMILIES = (
+    (("wikipedia.org", "wikiwand.com", "dbpedia.org", "everipedia",
+      "ipfs.dweb.link", "ipfs.io", "/wiki/"), "wikipedia"),
+    (("web.archive.org", "webcache.googleusercontent.com"), "cache"),
+)
+
+
+def origin_key(url: str) -> str:
+    """A stable id for where a document ultimately comes FROM.
+
+    Two URLs sharing an origin_key are ONE source, not two. Every Wikipedia mirror is
+    Wikipedia; every cache is the page it cached.
+    """
+    u = (url or "").lower()
+    for frags, family in _ORIGIN_FAMILIES:
+        if any(f in u for f in frags):
+            return family
+    host = (urlparse(url).netloc or "").lower().split(":")[0]
+    parts = [p for p in host.split(".") if p]
+    if len(parts) >= 3 and parts[-2] in ("co", "gov", "ac", "org", "com", "net"):
+        return ".".join(parts[-3:])
+    return ".".join(parts[-2:]) if len(parts) >= 2 else host
+
+
+def assess(urls) -> dict:
+    """Independence of a SET of candidate sources for one claim.
+
+    Only PRIMARY origins count as independent support. Unclassified is a question, not
+    a yes, and is never silently promoted.
+    """
+    groups = {}
+    for u in urls:
+        groups.setdefault(origin_key(u), []).append(u)
+
+    independent, derived, unclassified = [], [], []
+    for key, members in groups.items():
+        cls = classify(members[0])[0]
+        (independent if cls == "primary"
+         else derived if cls == "derived"
+         else unclassified).append(key)
+
+    return {
+        "groups": groups,
+        "origins": len(groups),
+        "independent": independent,
+        "derived": derived,
+        "unclassified": unclassified,
+        "has_independent_support": bool(independent),
+    }
