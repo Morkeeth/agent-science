@@ -10,9 +10,11 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from clearance import corpus, engine, instruments
-from clearance.verdict import (Verdict, UncitedVerdict, GREEN, RED, UNKNOWN, ASSET,
-                               NO_INSTRUMENT, UNRULED, UNREAD_TERMS, NOT_EVALUATED)
+from clearance import corpus, engine, facts, instruments
+from clearance.verdict import (Verdict, UncitedVerdict, GREEN, RED, UNKNOWN, ASSET, FACT,
+                               NO_INSTRUMENT, UNRULED, UNREAD_TERMS, NOT_EVALUATED,
+                               NO_SOURCE, SOURCE_UNREAD, SOURCE_SILENT,
+                               CITED_UNKNOWN_CAUSES)
 
 REAL_INC = "http://rightsstatements.org/vocab/InC/1.0/"
 passed, failed = 0, 0
@@ -248,6 +250,63 @@ def t_the_second_question_actually_splits_the_library():
     moved = sum(1 for k in a if a[k] != b[k])
     assert moved / len(a) > 0.10, \
         f"only {moved}/{len(a)} items change verdict — the two buyers are one buyer"
+
+
+def t_fact_and_asset_are_the_same_record():
+    """The claim both trees assert and neither demonstrated. One class, one guard."""
+    a = engine.judge(subject_id="a", subject_title="t", instrument_uri=REAL_INC,
+                     use=engine.AI_TRAINING)
+    f = facts.judge_claim(facts.Claim(
+        "f", "An 'In Copyright' item requires permission from the rights-holder",
+        "https://rightsstatements.org/vocab/InC/1.0/",
+        "you need to obtain permission from the rights-holder"))
+    assert type(a) is type(f) is Verdict, "two legs must not mean two classes"
+    assert a.noun == ASSET and f.noun == FACT
+    assert f.verdict == GREEN and f.citation_url and f.quoted_terms
+
+
+def t_fact_leg_did_not_get_its_own_softer_guard():
+    """A sourced fact with no citation must raise from the SAME constructor."""
+    try:
+        Verdict(subject_id="f", subject_title="t", noun=FACT, use="sourcing",
+                verdict=GREEN, reason="the source states it")
+    except UncitedVerdict:
+        pass
+    else:
+        raise AssertionError("the FACT noun was given a relaxed path")
+    # and the cited-UNKNOWN rule applies to the fact leg too
+    try:
+        Verdict(subject_id="f", subject_title="t", noun=FACT, use="sourcing",
+                verdict=UNKNOWN, reason="read it, silent", cause=SOURCE_SILENT)
+    except UncitedVerdict:
+        return
+    raise AssertionError("source_does_not_state_it was accepted with no document cited")
+
+
+def t_unsourced_claim_is_unknown_with_the_right_cause():
+    v = facts.judge_claim(facts.Claim("f", "94% of film archives are unclearable",
+                                      None, "94%"))
+    assert v.verdict == UNKNOWN and v.cause == NO_SOURCE, \
+        f"an unsourced claim must be UNKNOWN/no_source, got {v.verdict}/{v.cause}"
+    assert not v.citation_url
+
+
+def t_silent_source_does_not_quote_furniture():
+    """Quoting page navigation under the heading 'evidence' reads as evidence."""
+    v = facts.judge_claim(facts.Claim(
+        "f", "The Orphan Works Directive permits commercial use by cultural institutions",
+        "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32012L0028",
+        "commercial use is permitted"))
+    if v.cause == SOURCE_UNREAD:
+        return  # nothing fetched in this environment; nothing to assert
+    assert v.cause == SOURCE_SILENT
+    assert "does not occur in it" in (v.quoted_terms or ""), \
+        f"a non-finding must be stated, not excerpted: {v.quoted_terms!r:.90}"
+
+
+def t_cited_unknown_set_is_closed():
+    assert set(CITED_UNKNOWN_CAUSES) == {NOT_EVALUATED, SOURCE_SILENT}, \
+        "the required-citation set grew; each member must be added deliberately"
 
 
 print("WATCH IT GO RED — control tests\n")

@@ -31,7 +31,20 @@ NOT_EVALUATED = "holder_states_not_evaluated"
 # UNKNOWN cause where a citation is REQUIRED, not merely allowed. A required citation
 # on one narrow cause is a stronger rule than an optional citation on all of them:
 # there is no discretionary path a later commit can widen "just for the demo".
-CAUSES = (NO_INSTRUMENT, UNRULED, UNREAD_TERMS, NOT_EVALUATED)
+# The FACT noun's causes. Deliberately NOT a parallel taxonomy: a fact with no source
+# and an asset with no instrument are the same record, so they share this closed set
+# and the same constructor.
+NO_SOURCE = "no_source_offered"       # nothing was proposed to support the claim
+SOURCE_UNREAD = "source_never_fetched"  # a source was named but never opened
+SOURCE_SILENT = "source_does_not_state_it"  # we read it; it does not say this
+CAUSES = (NO_INSTRUMENT, UNRULED, UNREAD_TERMS, NOT_EVALUATED,
+          NO_SOURCE, SOURCE_UNREAD, SOURCE_SILENT)
+
+# The causes where a citation is REQUIRED rather than forbidden. Both are the same
+# fact about the world: we opened a document and it documented an absence. That is
+# evidence of absence, and it must be produced. This set is closed and each member
+# was added deliberately; it is not a general permission.
+CITED_UNKNOWN_CAUSES = (NOT_EVALUATED, SOURCE_SILENT)
 
 
 class UncitedVerdict(ValueError):
@@ -87,13 +100,13 @@ class Verdict:
                 raise ValueError(
                     f"UNKNOWN for {self.subject_id!r} must name a cause from {CAUSES}"
                 )
-            if self.cause == NOT_EVALUATED:
+            if self.cause in CITED_UNKNOWN_CAUSES:
                 # Evidence of absence is still evidence, and it must be produced.
                 if not self.citation_url or not (self.quoted_terms or "").strip():
                     raise UncitedVerdict(
-                        f"UNKNOWN/{NOT_EVALUATED} for {self.subject_id!r} asserts that the "
-                        "holder documented non-evaluation. That is a claim about a document, "
-                        "so the document must be cited and quoted."
+                        f"UNKNOWN/{self.cause} for {self.subject_id!r} asserts something "
+                        "about a document we opened. That is a claim about a document, so "
+                        "the document must be cited and quoted."
                     )
             elif self.citation_url or self.quoted_terms:
                 raise UncitedVerdict(

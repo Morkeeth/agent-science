@@ -91,3 +91,35 @@ def terms(uri: str) -> Optional[str]:
 
 def cached() -> dict:
     return _load()
+
+
+# ---------------------------------------------------------------------------
+# The FACT leg reads documents through the SAME cache and the SAME fetch path.
+# A rights instrument and a documentary source are both "a document you either
+# opened or did not", which is the entire point of the shared verdict object.
+# ---------------------------------------------------------------------------
+
+DOCS = Path(__file__).resolve().parent.parent / "cache" / "documents.json"
+
+
+def _load_docs() -> dict:
+    return json.loads(DOCS.read_text()) if DOCS.exists() else {}
+
+
+def document(url: str, *, fetch: bool = False, timeout: int = 30):
+    """Full visible text of a source document, or None if never fetched."""
+    docs = _load_docs()
+    if url in docs:
+        return docs[url]["text"]
+    if not fetch:
+        return None
+    req = urllib.request.Request(url, headers={"User-Agent": UA})
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as r:
+            text = _visible_text(r.read().decode("utf-8", errors="ignore"))
+    except Exception:
+        return None
+    docs[url] = {"text": text, "fetched_from": url}
+    DOCS.parent.mkdir(parents=True, exist_ok=True)
+    DOCS.write_text(json.dumps(docs))
+    return text

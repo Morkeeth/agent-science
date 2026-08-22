@@ -135,3 +135,41 @@ def render(verdicts: Sequence[Verdict], *, library: str, use: str) -> str:
             break
     out.append("")
     return "\n".join(out)
+
+
+def mixed(verdicts, *, production: str) -> str:
+    """Facts and assets in ONE report, out of one engine.
+
+    Rendered together deliberately. If the two legs need two reports, they are two
+    products with a shared README, and the 'same record, different noun' claim is
+    marketing.
+    """
+    from .verdict import FACT, ASSET
+
+    facts = [v for v in verdicts if v.noun == FACT]
+    assets = [v for v in verdicts if v.noun == ASSET]
+    n = len(verdicts)
+    blocked = [v for v in verdicts if v.verdict != GREEN]
+
+    out = [f"# CLEARANCE REPORT — {production}", "",
+           f"{len(facts)} factual claim(s) and {len(assets)} asset(s), judged by one "
+           "engine against one rule: cite the document or print that you could not.", "",
+           "| | Cleared | Not cleared |", "|---|---:|---:|",
+           f"| Facts | {sum(1 for v in facts if v.verdict == GREEN)} | "
+           f"{sum(1 for v in facts if v.verdict != GREEN)} |",
+           f"| Assets | {sum(1 for v in assets if v.verdict == GREEN)} | "
+           f"{sum(1 for v in assets if v.verdict != GREEN)} |", "",
+           f"> **{len(blocked)} of {n} items block this production.**", "",
+           "## Every item that blocks, with the document that decides it", "",
+           "| Noun | Item | Verdict | Why | Document |",
+           "|---|---|---|---|---|"]
+    for v in blocked:
+        doc = f"`{v.citation_url}`" if v.citation_url else "—"
+        out.append(f"| {v.noun} | {v.subject_title[:46]} | **{v.verdict}** | "
+                   f"{v.reason[:64]} | {doc} |")
+    out += ["", "## The evidence, verbatim", ""]
+    for v in verdicts:
+        if v.quoted_terms:
+            out += [f"**{v.subject_id} · {v.noun} · {v.verdict}** — {v.citation_url}",
+                    f'> "{v.quoted_terms[:200]}…"', ""]
+    return "\n".join(out)
