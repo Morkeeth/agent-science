@@ -22,9 +22,9 @@ source and an asset with no rights instrument are the same record — answering 
 against one index, and printing what it cannot clear, with the reason.
 
 **PROOF**
-- Repo: `/Users/morkeeth/CODE/cleared` @ `2f59fc6` (local only — never pushed, no licence
+- Repo: `/Users/morkeeth/CODE/cleared` @ `e13f430` (local only — never pushed, no licence
   file, no hosted URL; every outward act held for Oscar)
-- `python3 tests/test_watch_it_go_red.py` → **24 passed, 0 failed**, coordinator-run twice
+- `python3 tests/test_watch_it_go_red.py` → **31 passed, 0 failed**, coordinator-run twice
   on this machine, not self-reported
 - `/Users/morkeeth/CODE/cleared/fixtures/gap-report-600.md` — 561 of 600 (94%) blocked
 - `/Users/morkeeth/CODE/cleared/fixtures/shift-ai-training-vs-noncommercial.md` — 247 of
@@ -35,6 +35,20 @@ against one index, and printing what it cannot clear, with the reason.
   killed the "you can only demo this with an invented contract" gate
 - `/Users/morkeeth/CODE/cleared/docs/FINDING-refusal-correctness.md` — the next control,
   named and unbuilt
+- `/Users/morkeeth/CODE/cleared/docs/SPEC-refusal-correctness-set.md` — its design, written
+  while blocked; still not built
+- `/Users/morkeeth/CODE/cleared/clearance/verify.py` — the guard a model plugs into: five
+  adversarial proposers refused, including a real passage lifted from the wrong document
+
+**ADMISSIBILITY — stated first because it is the thing most likely to be misread**
+As of `e13f430` this repo is **NOT an admissible submission.** The rules require Google
+Cloud AI *and* the partner service "imported and actually called" at runtime. Gemini:
+absent. Agent Builder: absent. ClickHouse MCP: absent. I quoted that clause into
+`docs/PHASE1-SPEC-EXTRACT.md` in hour one and built for six hours without pointing it at
+the build — the document existed; the comparison did not. What has changed is the shape of
+the remaining work, not the status: the Gemini slice is now a one-file swap behind a
+red-tested guard. Agent Builder is a hosted GCP service, so this lane now sits behind
+Oscar's GCP gate as well as behind his fork ruling.
 
 **HONEST VERDICT**
 The middle is built and the ends are not, deliberately. Everything here is true whether
