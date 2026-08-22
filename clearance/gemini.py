@@ -95,6 +95,36 @@ Rules, all of them hard:
 Reply with JSON only: {"passage": "<exact text>"} or {"passage": null}"""
 
 
+def call(model: str, system: str, user: str, timeout: int = 90) -> dict:
+    """THE single place this codebase talks to Gemini.
+
+    Both callers - the locator and the claim extractor - go through here. The first
+    version of the backoff lived inside GeminiLocator.propose() and the extractor,
+    in another module, had none: it died on the first 429. A retry policy that
+    protects one of two call sites is not a retry policy.
+    """
+    body = json.dumps({
+        "systemInstruction": {"parts": [{"text": system}]},
+        "contents": [{"role": "user", "parts": [{"text": user}]}],
+        "generationConfig": {"temperature": 0, "responseMimeType": "application/json"},
+    }).encode()
+    req = urllib.request.Request(
+        ENDPOINT.format(model=model), data=body, method="POST",
+        headers={"Content-Type": "application/json", "x-goog-api-key": load_key()})
+    for attempt in range(RETRIES):
+        try:
+            with urllib.request.urlopen(req, timeout=timeout) as r:
+                return json.load(r)
+        except urllib.error.HTTPError as e:
+            if e.code == 429 and attempt < RETRIES - 1:
+                wait = e.headers.get("Retry-After")
+                time.sleep(int(wait) if (wait or "").isdigit() else BACKOFF[attempt])
+                continue
+            # Status and reason only. A key must never ride out in an exception.
+            raise RuntimeError(f"Gemini call failed: HTTP {e.code} {e.reason}") from None
+    raise RuntimeError("Gemini call failed: exhausted retries on HTTP 429")
+
+
 class GeminiLocator:
     """Proposes a passage. Untrusted, like every locator."""
 
@@ -112,43 +142,19 @@ class GeminiLocator:
 
     def propose(self, *, claim: str, must_contain: str,
                 document: str) -> Optional[str]:
-        body = json.dumps({
-            "systemInstruction": {"parts": [{"text": _INSTRUCTION}]},
-            # must_contain was NOT sent in the first version. The verifier rejects any
-            # passage lacking these terms, so the model was being graded on a criterion
-            # it had never been told — and it answered null on documents that plainly
-            # stated the claim. The stub knew the constraint; the model did not.
-            "contents": [{"role": "user", "parts": [{"text":
-                f"CLAIM:\n{claim}\n\nREQUIRED TERMS (must appear in the passage, "
-                f"verbatim):\n{must_contain}\n\nDOCUMENT:\n{document[:MAX_DOC]}"}]}],
-            "generationConfig": {"temperature": 0, "responseMimeType": "application/json"},
-        }).encode()
+        # must_contain was NOT sent in the first version. The verifier rejects any
+        # passage lacking these terms, so the model was being graded on a criterion it
+        # had never been told, and answered null on documents that plainly stated the
+        # claim. The stub knew the constraint; the model did not.
+        user = (f"CLAIM:\n{claim}\n\nREQUIRED TERMS (must appear in the passage, "
+                f"verbatim):\n{must_contain}\n\nDOCUMENT:\n{document[:MAX_DOC]}")
         ck = _cache_key(self.model, claim, must_contain, document)
         if self.cache:
             hit = _cache_load().get(ck)
             if hit is not None:
                 return hit or None
 
-        req = urllib.request.Request(
-            ENDPOINT.format(model=self.model), data=body, method="POST",
-            headers={"Content-Type": "application/json",
-                     "x-goog-api-key": load_key()})
-        payload = None
-        for attempt in range(RETRIES):
-            try:
-                with urllib.request.urlopen(req, timeout=self.timeout) as r:
-                    payload = json.load(r)
-                break
-            except urllib.error.HTTPError as e:
-                if e.code == 429 and attempt < RETRIES - 1:
-                    wait = e.headers.get("Retry-After")
-                    time.sleep(int(wait) if (wait or "").isdigit() else BACKOFF[attempt])
-                    continue
-                # Status and reason only. A key must never ride out in an exception.
-                raise RuntimeError(
-                    f"Gemini call failed: HTTP {e.code} {e.reason}") from None
-        if payload is None:
-            raise RuntimeError("Gemini call failed: exhausted retries on HTTP 429")
+        payload = call(self.model, _INSTRUCTION, user, self.timeout)
 
         try:
             text = payload["candidates"][0]["content"]["parts"][0]["text"]

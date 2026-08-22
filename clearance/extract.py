@@ -16,9 +16,7 @@ import json
 from typing import Optional
 
 from .facts import Claim
-from .gemini import GeminiLocator, load_key, ENDPOINT, MAX_DOC
-import urllib.error
-import urllib.request
+from .gemini import MAX_DOC, call
 
 _INSTRUCTION = """You extract check-worthy factual assertions from a documentary script.
 
@@ -52,19 +50,8 @@ class GeminiExtractor:
         self.model, self.timeout = model, timeout
 
     def extract(self, script: str) -> list[Claim]:
-        body = json.dumps({
-            "systemInstruction": {"parts": [{"text": _INSTRUCTION}]},
-            "contents": [{"role": "user", "parts": [{"text": f"SCRIPT:\n{script[:MAX_DOC]}"}]}],
-            "generationConfig": {"temperature": 0, "responseMimeType": "application/json"},
-        }).encode()
-        req = urllib.request.Request(
-            ENDPOINT.format(model=self.model), data=body, method="POST",
-            headers={"Content-Type": "application/json", "x-goog-api-key": load_key()})
-        try:
-            with urllib.request.urlopen(req, timeout=self.timeout) as r:
-                payload = json.load(r)
-        except urllib.error.HTTPError as e:
-            raise RuntimeError(f"Gemini extract failed: HTTP {e.code} {e.reason}") from None
+        payload = call(self.model, _INSTRUCTION, f"SCRIPT:\n{script[:MAX_DOC]}",
+                       self.timeout)
 
         try:
             raw = json.loads(payload["candidates"][0]["content"]["parts"][0]["text"])
