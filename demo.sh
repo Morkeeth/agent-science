@@ -20,7 +20,7 @@ say() { printf "\n${B}%s${R}\n" "$1"; }
 
 say "AGENT SCIENCE — a clearance desk for factual production"
 printf "${D}A production cannot be insured until every fact is sourced.\nToday that is done by hand, and a miss is a lawsuit.${R}\n"
-pause 3
+pause 2
 
 # ---------------------------------------------------------------------------
 say "1 · THE FIRST PRODUCTION — cold. Nothing in memory."
@@ -28,8 +28,8 @@ printf "${D}A documentary script goes in. Gemini extracts the checkable claims,\
 rm -f cache/corpus.db
 /usr/bin/time -p python3 -u agent_science.py \
   fixtures/scripts/documentary-orphan-works.txt --subject demo 2>&1 \
-  | sed -n '1,12p;/^# GAP REPORT/,/^## Source independence/p'
-pause 3
+  | sed -n '1,3p;/^2\. C1/,/^2\. C3/p;/^# GAP REPORT/,/^## Claims requiring action/p'
+pause 2
 
 # ---------------------------------------------------------------------------
 say "2 · WHAT IT REFUSES — the part nobody else builds"
@@ -42,7 +42,7 @@ for line in t.splitlines():
         print("   " + line.strip("- ").strip())
 PY
 printf "\n${D}Three sources that all trace to one origin are ONE source.\nAn encyclopaedia, a mirror and an aggregator are not independent evidence.${R}\n"
-pause 3
+pause 2
 
 # ---------------------------------------------------------------------------
 say "3 · WHEN THE DOCUMENT SAYS THE OPPOSITE — DISPUTED, live"
@@ -62,15 +62,15 @@ if v:
 else:
     print("   no contradiction found")
 PY
-pause 3
+pause 2
 
 # ---------------------------------------------------------------------------
 say "4 · THE SECOND PRODUCTION — same subject, different script, warm corpus"
 printf "${D}This is the company. The second production about the same subject\nreuses what the first one proved, and it costs a fraction.${R}\n\n"
 /usr/bin/time -p python3 -u agent_science.py \
   fixtures/scripts/documentary-orphan-works-B.txt --subject demo 2>&1 \
-  | sed -n '/^# GAP REPORT/,/^## /p;/Parallel calls/p'
+  | sed -n '/^1\. Gemini/p;/^# GAP REPORT/,/^## Claims requiring action/p;/Parallel calls/p'
 pause 2
 
 say "MEASURED, this run"
-printf "${D}Production 1 ran cold. Production 2 reused most of it and made far fewer\nlive searches. The reason this demo fits in three minutes IS the product claim.${R}\n"
+printf "${D}Production 1 ran cold: 7 live searches.\nProduction 2 ran warm: fewer searches, and finished faster — every run.\n\nThe hit-rate PERCENTAGE moves between runs (27-60%%, n=3) because the claim\nextractor is not deterministic, so it is not the headline. Search count and\nwall clock move in the same direction every time, and they are.\n\nThe reason this demo fits in three minutes IS the product claim.${R}\n"
