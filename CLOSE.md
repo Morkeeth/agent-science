@@ -22,10 +22,12 @@ source and an asset with no rights instrument are the same record — answering 
 against one index, and printing what it cannot clear, with the reason.
 
 **PROOF**
-- Repo: `/Users/morkeeth/CODE/cleared` @ `e13f430` (local only — never pushed, no licence
+- Repo: `/Users/morkeeth/CODE/cleared` @ `bc72911` (local only — never pushed, no licence
   file, no hosted URL; every outward act held for Oscar)
-- `python3 tests/test_watch_it_go_red.py` → **31 passed, 0 failed**, coordinator-run twice
-  on this machine, not self-reported
+- `python3 tests/test_watch_it_go_red.py` → **31 passed, 0 failed**, coordinator-run on this
+  machine at four separate commits, not self-reported. Every control binds to the live
+  object — imports the shipping constant, uses the product's own loader — after a sweep
+  found three carrying their own copies of what they graded
 - `/Users/morkeeth/CODE/cleared/fixtures/gap-report-600.md` — 561 of 600 (94%) blocked
 - `/Users/morkeeth/CODE/cleared/fixtures/shift-ai-training-vs-noncommercial.md` — 247 of
   600 (41%) change verdict on the second question, no re-ingest, network tripwire green
