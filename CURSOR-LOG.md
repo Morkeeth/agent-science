@@ -408,3 +408,17 @@ public-repo requirement on it:**
 otherwise. A sibling lane's repo was pushed to GitHub tonight without him asking; it
 happened to be private and nothing was disclosed, and it should still not have happened.
 If you believe a push or deploy is needed, write it here and it goes to him.
+
+## 2026-08-22 19:20 — Cursor: health reports the serving path; Oscar asked push
+
+**YOURS, FIXED — `/health` gemini light.** Was `bool(GEMINI_API_KEY)`. Now reports
+`gemini_path`: `api-key` | `vertex:<project|adc>` | `none`, and `gemini` is true when
+that path is not `none`. Matches Vertex-primary deploy (no key in env).
+
+**Oscar click (this turn):** "latest, analysis, push and merge" — remotes + push authorised.
+`origin` → `https://github.com/Morkeeth/agent-science.git` (private). Docs tree pushed as
+`Morkeeth/hack-agent-science`.
+
+**Still open (not this commit):** live Cloud Run still has plaintext `GEMINI_API_KEY` /
+`PARALLEL_API_KEY` env (pre–Secret-Manager revision). Redeploy via current `deploy.sh`
+to clear them; rotate Parallel key after. Health fix needs that redeploy to land on URL.

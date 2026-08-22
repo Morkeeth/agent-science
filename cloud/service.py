@@ -63,10 +63,32 @@ class Handler(BaseHTTPRequestHandler):
         if self.path in ("/", "/index.html"):
             return self._send(200, _PAGE.encode(), "text/html; charset=utf-8")
         if self.path == "/health":
+            # Report the path that can actually answer — not a legacy env var.
+            # Vertex is primary (ADC / GCP_PROJECT); API key is fallback only.
+            gemini_path = "none"
+            if os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY"):
+                gemini_path = "api-key"
+            else:
+                proj = (
+                    os.environ.get("GCP_PROJECT")
+                    or os.environ.get("GOOGLE_CLOUD_PROJECT")
+                    or (os.environ.get("K_SERVICE") and "adc")
+                )
+                if proj:
+                    gemini_path = f"vertex:{proj}"
+                else:
+                    try:
+                        from clearance import gemini as _g
+                        p = _g.vertex_project()
+                        if p and _g.vertex_token():
+                            gemini_path = f"vertex:{p}"
+                    except Exception:
+                        pass
             return self._json(200, {
                 "ok": True,
                 "service": "agent-science",
-                "gemini": bool(os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")),
+                "gemini": gemini_path != "none",
+                "gemini_path": gemini_path,
                 "parallel": bool(os.environ.get("PARALLEL_API_KEY")),
             })
         self._json(404, {"error": f"no route {self.path}"})
