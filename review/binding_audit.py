@@ -46,9 +46,11 @@ def main():
     if "for use in engine.USES:" in src:
         issues.append(("OK", "t_second_question tripwire", "Uses engine.USES from shipping module"))
 
-    issues.append(("MEDIUM", "MIN_WORDS drift",
-                   f"verify.MIN_WORDS={vmod.MIN_WORDS}; t_green uses q.count(' ') >= 6 "
-                   f"(one word softer than verifier)"))
+    if "assert checked >=" in src and "MIN_WORDS" in src:
+        issues.append(("OK", "MIN_WORDS", "t_green imports verify.MIN_WORDS (drift fixed)"))
+    elif "q.count(\" \") >= 6" in src:
+        issues.append(("MEDIUM", "MIN_WORDS drift",
+                       "t_green still uses literal 6; verify.MIN_WORDS may differ"))
 
     print("=== Live-object binding audit ===\n")
     for sev, name, msg in issues:

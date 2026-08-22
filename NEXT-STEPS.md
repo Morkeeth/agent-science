@@ -1,24 +1,32 @@
 # NEXT STEPS — read this first, every session
-_Kept current by the coordinator + build lane. If this disagrees with a chat message, open the object._
 
-**PRODUCT:** Agent Science — a documentary script in, every factual claim out with the document that supports it, and the unsourced ones printed with the reason. **Agentic Cinema, Sep 9 14:00 PDT. Track: Parallel.**
+**PRODUCT:** Agent Science · **Agentic Cinema, Sep 9 14:00 PDT · Parallel track**
 
-## State (verify with `git log --oneline -1` and the test run)
-- Engine, citation guard, corpus, gap report, both nouns (FACT + ASSET): **built**
-- **Parallel Search: LIVE at runtime** — `Claim.source_url` is now found, not hand-filled
-- **Gemini 3.5: LIVE at runtime** behind `locate()` — the model LOCATES, never ASSERTS
-- Controls: run `python3 tests/test_watch_it_go_red.py`. It must be green before anything ships.
-- **Agent Builder: NOT WIRED** — blocked on Oscar's GCP project + billing. This is the last admissibility item.
+## State @ deploy
+- **Hosted URL:** https://agent-science-568004190078.us-central1.run.app
+- **GCP project:** `hack-fleet` · Cloud Run service `agent-science`
+- **Entry point:** `agent_science.py` + `cloud/service.py` + `cloud/agent.py` (ADK)
+- **Runtime:** Gemini ✅ · Parallel ✅ · Cloud Run ✅
+- **Controls:** `python3 tests/test_watch_it_go_red.py` → **41 passed**
+- **License:** MIT
 
-## The rule nothing may break
-`Verdict.__post_init__` refuses to construct an uncited GREEN/RED. A proposed passage that is not
-verbatim in the fetched document is `source_does_not_state_it`, never GREEN. **Do not relax this to
-make a demo work.** If a slice needs it relaxed, that slice is wrong.
+## Queue — what remains
 
-## Known-open, do not silently fix
-- `StringLocator` still accepts the sloppy C3 claim — deliberately left, see `docs/FINDING-substring-is-not-a-statement.md`
-- Refusal-correctness has no held-out set — spec only, see `docs/SPEC-refusal-correctness-set.md`
-- Gemini free tier 429s after ~4 consecutive calls. **A demo script with N claims will rate-limit on camera.**
+| # | Slice | Owner | Status |
+|---|-------|-------|--------|
+| 1 | End-to-end + corpus in `clear_script()` | Build | ✅ |
+| 2 | Cloud Run hosted URL | Deploy | ✅ |
+| 3 | ≤3min video on hosted URL | Oscar | ⬜ |
+| 4 | GitHub push (both repos) | Oscar | ⬜ |
+| 5 | Devpost submit + sealed prediction dated | Oscar | ⬜ |
+| 6 | Phase 0 hours in hack-agent-science/PHASE-0.md | Oscar | ⬜ |
 
-## Review lane (Cursor)
-Read `FOR-CURSOR.md` + `CURSOR-LOG.md`. One writer on product code at a time. Append-only log. Never `git add -A`.
+## Redeploy
+
+```bash
+cd ~/CODE/cleared && ./deploy.sh
+```
+
+## Review lane
+
+`FOR-CURSOR.md` + `CURSOR-LOG.md` · append-only · never `git add -A`

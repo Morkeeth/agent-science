@@ -1,7 +1,7 @@
 ---
 date: 2026-08-22
 event: Agentic Cinema · Devpost · deadline 2026-09-09 14:00 PT
-repo: /Users/morkeeth/CODE/cleared @ 8ce8b7b (local only, never pushed)
+repo: /Users/morkeeth/CODE/cleared @ ab03e3a (local only, never pushed)
 status: fork UNRULED — this pitch holds under either ruling
 ---
 
@@ -30,10 +30,9 @@ constructor, not by convention.
 
 ## 2 · WHY IT IS DEFENSIBLE
 
-**The corpus compounds.** Run 1: 0 of 50 verdicts reused. Run 2: **50 of 50 reused, zero
-network calls**, asserted by a tripwire that replaces `urlopen` and fails the build if
-anything reaches out. The second production about the same subject costs a fraction of
-the first.
+**The corpus compounds.** Run 1 on `europeana-film-archive.json` (50 items): 0 of 50 reused.
+Run 2: **50 of 50 reused, zero network calls** (`review/corpus_compound_receipt.py`).
+The second production about the same subject costs a fraction of the first.
 
 **One index, N questions, N buyers.** Asked the same 600 items a second question —
 `noncommercial_reuse`, what a university or public-service archive may use — and **247 of
@@ -50,11 +49,14 @@ market. *(Competitor names sourced by cross-review 2026-08-22; re-verify before 
 
 | | |
 |---|---|
-| Repo | `/Users/morkeeth/CODE/cleared` @ `8ce8b7b` |
-| Controls | `python3 tests/test_watch_it_go_red.py` → **31 passed, 0 failed**, coordinator-run on this machine at four separate commits |
-| Gap report | `fixtures/gap-report-600.md` — **561 of 600 (94%)** of a real Europeana moving-image sample not sellable as-is |
+| Repo | `/Users/morkeeth/CODE/cleared` @ `ab03e3a` |
+| Entry point | `python3 agent_science.py <script.txt>` — Gemini + Parallel **live by default** |
+| Controls | `python3 tests/test_watch_it_go_red.py` → **41 passed, 0 failed** |
+| License | `LICENSE` (MIT) |
+| Gap report | `fixtures/gap-report-600.md` — **561 of 600 (94%)** not sellable as-is |
 | Second question | `fixtures/shift-ai-training-vs-noncommercial.md` — 247 of 600 flip |
 | Both legs, one engine | `fixtures/clearance-report-mixed.md` |
+| Live script run | `fixtures/scripts/split-sentence.txt` → 1 claim extracted, 1 SOURCED (Parallel found EUR-Lex) |
 | The probe that saved the idea | `docs/PROBE-real-rights-instruments.md` |
 
 **Always with the denominator.** 94% of *these 600 items*, measured. Never "94% of film
@@ -66,26 +68,20 @@ non-commercial institutional use — but only on a documented diligent search, w
 on file, so it stays RED. It is the one place the honest answer costs us the better number.
 
 **The demo nobody can call staged:** we pointed the product at *our own marketing*. Five
-claims, real sources fetched. Three verified verbatim. Two failed — and both were ours.
-One was an overclaim about the Orphan Works Directive that EUR-Lex does not support. The
-other was **"94% of film archives are unclearable"**, our own headline, generalised from
-one library to a category, returned `UNKNOWN / no_source_offered`. The number was never
-wrong; the object it was attached to was.
+claims, real sources fetched. Two verified verbatim (C1, C2). One passed on substring match
+but misattributes the source (C3 — see `docs/FINDING-substring-is-not-a-statement.md`).
+Two failed — and both were ours. C4: EUR-Lex does not support commercial-use overclaim.
+C5: **"94% of film archives"** generalised from one library returned
+`search_found_no_admissible_source` — the number was never wrong; the object was.
 
 ## 4 · HONEST VERDICT — read this first, not last
 
-**This is not yet an admissible submission.** The rules require Google Cloud AI *and* the
-partner service "imported and actually called" at runtime. Gemini: absent. Agent Builder:
-absent. Partner service: absent. The build is a deterministic Python engine.
+**Not yet submittable.** Runtime today: **Gemini ✅ · Parallel ✅ · Agent Builder ❌**.
+`agent_science.py` calls the first two on the default path; the hackathon also requires a
+**hosted Agent Builder URL**, which needs Oscar's GCP project.
 
-That clause was quoted into `docs/PHASE1-SPEC-EXTRACT.md` in hour one and never pointed at
-the build for six hours. **The document existed; the comparison did not.**
-
-What changed is the shape of the remaining work, not the status. The model's job is
-already scoped and its safety net already exists: a **locator** proposes a passage, a
-**verifier** proves it occurs verbatim in the fetched document, and five adversarial
-proposers are refused — including a real passage lifted from the wrong document. Gemini
-becomes a one-file swap behind a red-tested guard. A checked model, not a wrapped one.
+What remains is one slice, not a rebuild: wrap the pipeline in Agent Builder + Cloud Run.
+41 controls green. Forced-lie transcript replayed against the live verifier (six for six).
 
 **GCP access is the blocker where delay compounds.** The fork costs design time. Hours can
 be estimated late. But Agent Builder is a hosted service nobody here has provisioned, and

@@ -1,0 +1,16 @@
+.git
+.gitignore
+__pycache__
+*.pyc
+.pytest_cache
+cache/gemini.json
+cache/documents.json
+cache/searches.json
+cache/instruments.json
+review/
+probe_liar.py
+tests/
+fixtures/europeana-broad.json
+fixtures/europeana-film-archive.json
+*.md
+!README.md

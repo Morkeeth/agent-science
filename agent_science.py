@@ -5,41 +5,31 @@
                    and the ones that cannot be sourced printed with the reason.
 
 THIS IS THE ENTRY POINT A JUDGE RUNS, and it calls both partner services LIVE by
-default. That distinction is the whole reason this file exists: until now Gemini and
-Parallel were reachable but OPT-IN — `judge_claim` defaulted to `StringLocator` and
-`live_search=False` — so the default path called neither. **The seam existing is not
-the service being called, and a judge checks the second.**
-
-Pipeline, every stage load-bearing:
-  1. Gemini      extracts check-worthy factual assertions from the script
-  2. Parallel    searches the open web for a document that might carry each one
-  3. fetch       retrieves the candidate documents
-  4. Gemini      locates the passage that states the claim
-  5. verifier    proves that passage is verbatim in the fetched document, or refuses
-  6. gap report  every claim, sourced or not, with the denominator attached
-
-The model may only LOCATE evidence, never ASSERT it. A proposed passage that is not
-verbatim in the fetched document is UNSOURCED, never SOURCED.
+default. Pipeline: Gemini extract -> Parallel search -> fetch -> Gemini locate ->
+verifier -> gap report. Corpus remembers verdicts per subject so a second script
+on the same topic skips Parallel when a claim was already cleared.
 
 Usage:
-    python3 agent_science.py fixtures/scripts/real-orphan-works.txt
-    python3 agent_science.py <file> --offline     # no network; string matching only
+    python3 agent_science.py fixtures/scripts/split-sentence.txt
+    python3 agent_science.py <file> [--subject dust-bowl] [--offline]
 """
 from __future__ import annotations
 
+import hashlib
+import json
 import sys
+from dataclasses import asdict
 from pathlib import Path
+from typing import Optional
 
+from clearance import corpus
 from clearance.extract import GeminiExtractor
 from clearance.facts import Claim, judge_claim
 from clearance.gemini import GeminiLocator
-from clearance.locate import StringLocator
-from clearance.verdict import GREEN
+from clearance.independence import (classify as independence_classify,
+                                    note as independence_note)
+from clearance.verdict import GREEN, Verdict
 
-# Presentation vocabulary. Ruled 2026-08-22: the engine keeps GREEN/RED/UNKNOWN, which
-# is what the guard enforces and the controls grade; the label is a render-layer
-# concern. The CAUSE stays visible under the label, because "your gap or ours" is the
-# distinction a lawyer cares about most and three words flatten it.
 LABEL = {
     "no_source_offered": "UNSOURCED",
     "search_found_no_admissible_source": "UNSOURCED",
@@ -54,54 +44,218 @@ WHY = {
 }
 
 
-def run(path: Path, *, offline: bool = False, model: str = "gemini-3.5-flash-lite"):
+def _claim_key(text: str, subject: str) -> str:
+    h = hashlib.sha256(f"{subject}\0{text.strip().lower()}".encode()).hexdigest()
+    return h[:20]
+
+
+def _use(subject: str) -> str:
+    return f"sourcing:{subject}"
+
+
+def _present(v: Verdict) -> str:
+    if v.verdict == GREEN:
+        return "SOURCED"
+    return LABEL.get(v.cause or "", "UNSOURCED")
+
+
+def _row(v: Verdict, *, corpus_hit: bool = False) -> dict:
+    return {
+        "claim_id": v.subject_id,
+        "text": v.subject_title,
+        "label": _present(v),
+        "engine_verdict": v.verdict,
+        "cause": v.cause,
+        "reason": v.reason,
+        "why": WHY.get(v.cause or "", v.reason),
+        "citation_url": v.citation_url,
+        "quoted_terms": v.quoted_terms,
+        # The independence question, carried on the ROW so every surface prints it:
+        # markdown report, HTTP JSON, and the paste UI. It was dropped in a rewrite
+        # while the import survived - the seam existing is not the seam being called,
+        # happening to this repo's own work.
+        "source_class": (independence_classify(v.citation_url)[0]
+                         if v.citation_url else None),
+        "source_note": independence_note(v.citation_url) if v.citation_url else None,
+        "corpus_hit": corpus_hit,
+        "probe": "corpus_hit" if corpus_hit else v.reason.split("locator:")[-1].strip()
+        if "locator:" in v.reason else ("parallel:web_search" if not corpus_hit else "corpus_hit"),
+    }
+
+
+def clear_script(
+    script: str,
+    *,
+    subject: str = "default",
+    model: str = "gemini-3.5-flash-lite",
+    corpus_db: Optional[Path] = None,
+    offline: bool = False,
+) -> dict:
+    """Run the full pipeline; return JSON-serializable gap report."""
+    if offline:
+        return {"ok": False, "error": "offline mode is for controls only", "subject": subject}
+
+    db = corpus_db or corpus.DB
+    con = corpus.connect(db)
+    extractor = GeminiExtractor(model=model)
+    claims_raw = extractor.extract(script)
+    claims = [
+        Claim(f"C{i}", c.text, c.source_url, c.must_contain)
+        for i, c in enumerate(claims_raw, 1)
+    ]
+    locator = GeminiLocator(model=model)
+    rows: list[dict] = []
+    parallel_calls = 0
+    corpus_hits = 0
+
+    for c in claims:
+        key = _claim_key(c.text, subject)
+        use = _use(subject)
+        hit = corpus.recall(con, key, use)
+        if hit:
+            corpus_hits += 1
+            reason = f"corpus_hit — {hit.reason}"
+            v = Verdict(
+                subject_id=c.claim_id,
+                subject_title=c.text,
+                noun=hit.noun,
+                use=use,
+                verdict=hit.verdict,
+                reason=reason,
+                cause=hit.cause,
+                citation_url=hit.citation_url,
+                quoted_terms=hit.quoted_terms,
+            )
+            rows.append(_row(v, corpus_hit=True))
+            continue
+
+        parallel_calls += 1
+        v = judge_claim(c, locator=locator, live_search=True, fetch=True)
+        store = Verdict(
+            subject_id=key,
+            subject_title=c.text,
+            noun=v.noun,
+            use=use,
+            verdict=v.verdict,
+            reason=v.reason,
+            cause=v.cause,
+            citation_url=v.citation_url,
+            quoted_terms=v.quoted_terms,
+        )
+        corpus.remember(con, [store])
+        rows.append(_row(
+            Verdict(
+                subject_id=c.claim_id,
+                subject_title=c.text,
+                noun=v.noun,
+                use=use,
+                verdict=v.verdict,
+                reason=v.reason,
+                cause=v.cause,
+                citation_url=v.citation_url,
+                quoted_terms=v.quoted_terms,
+            ),
+            corpus_hit=False,
+        ))
+
+    sourced = sum(1 for r in rows if r["label"] == "SOURCED")
+    n = len(rows)
+    return {
+        "ok": True,
+        "subject": subject,
+        "extractor": extractor.name,
+        "locator": locator.name,
+        "claims_extracted": n,
+        "sourced": sourced,
+        "unsourced": n - sourced,
+        "parallel_calls": parallel_calls,
+        "corpus_hits": corpus_hits,
+        "rows": rows,
+        "markdown": _markdown(rows, subject=subject, n=n, sourced=sourced),
+    }
+
+
+def _markdown(rows: list[dict], *, subject: str, n: int, sourced: int) -> str:
+    gaps = n - sourced
+    out = [
+        f"# GAP REPORT — subject `{subject}`",
+        "",
+        f"| Claims | {n} |",
+        f"| SOURCED | {sourced} ({(sourced/n if n else 0):.0%}) |",
+        f"| UNSOURCED | {gaps} ({(gaps/n if n else 0):.0%}) |",
+        "",
+    ]
+    if gaps:
+        out += ["## Claims requiring action", ""]
+        for r in rows:
+            if r["label"] != "SOURCED":
+                out.append(f"- **{r['claim_id']}** — {r['label']} ({r['cause']})")
+                out.append(f"  {r['why']}")
+        out.append("")
+    derived = [r for r in rows
+               if r["label"] == "SOURCED" and r.get("source_class") == "derived"]
+    if derived:
+        out += [f"## Source independence — {len(derived)} of {sourced} sourced rows rest "
+                "on a DERIVED document", "",
+                "A source that is the claim's own origin is not evidence, and nothing at "
+                "the passage level can tell self-citation from corroboration: the text "
+                "matches perfectly, which is exactly the problem. The engine flags these; "
+                "it cannot resolve them. See docs/FINDING-circular-sourcing.md.", ""]
+        out += [f"- {r['claim_id']} — {r['citation_url']}" for r in derived]
+        out.append("")
+    for r in rows:
+        if r["label"] == "SOURCED":
+            out.append(f"### {r['claim_id']} — SOURCED")
+            if r["corpus_hit"]:
+                out.append("*Resolved from corpus — no Parallel call.*")
+            out.append(f"- {r['citation_url']}")
+            out.append(f'> "{(r["quoted_terms"] or "")[:200]}"')
+            if r.get("source_note"):
+                out.append(f"- {r['source_note']}")
+            out.append("")
+    return "\n".join(out)
+
+
+def run(path: Path, *, subject: str = "default", offline: bool = False,
+        model: str = "gemini-3.5-flash-lite"):
     script = path.read_text()
     print(f"# AGENT SCIENCE — {path.name}\n")
-
     if offline:
         print("MODE: offline. No claims are extracted and no sources are searched;\n"
               "      offline mode exists for the control suite, not for judging.\n")
         return
 
-    print("1. Gemini reads the script and extracts check-worthy assertions...")
-    extractor = GeminiExtractor(model=model)
-    claims = extractor.extract(script)
-    print(f"   {len(claims)} claim(s) extracted by {extractor.name}\n")
-    if not claims:
-        print("No checkable factual assertions found. That is a valid answer.")
+    result = clear_script(script, subject=subject, model=model, offline=offline)
+    if not result.get("ok"):
+        print(result.get("error", "failed"))
         return
 
-    locator = GeminiLocator(model=model)
-    results = []
-    for c in claims:
-        print(f"2. Parallel searches for a source: {c.text[:66]}")
-        v = judge_claim(c, locator=locator, live_search=True, fetch=True)
-        results.append(v)
-        if v.verdict == GREEN:
-            print(f"   SOURCED   {v.citation_url}")
-            print(f'   "{(v.quoted_terms or "")[:120]}"\n')
+    print(f"1. Gemini extracted {result['claims_extracted']} claim(s) [{result['extractor']}]\n")
+    for r in result["rows"]:
+        tag = r["label"]
+        hit = " (corpus_hit)" if r["corpus_hit"] else ""
+        print(f"2. {r['claim_id']} — {tag}{hit}")
+        if r["label"] == "SOURCED":
+            print(f"   {r['citation_url']}")
+            print(f'   "{(r["quoted_terms"] or "")[:120]}"')
         else:
-            print(f"   {LABEL.get(v.cause, 'UNSOURCED')}  ({WHY.get(v.cause, v.cause)})\n")
+            print(f"   {r['why']}")
+        print()
 
-    sourced = [v for v in results if v.verdict == GREEN]
-    gaps = [v for v in results if v.verdict != GREEN]
-    n = len(results)
     print("=" * 72)
-    print(f"# GAP REPORT — {path.name}\n")
-    print(f"| Claims extracted | {n} |")
-    print(f"| SOURCED          | {len(sourced)} ({len(sourced)/n:.0%}) |")
-    print(f"| UNSOURCED        | {len(gaps)} ({len(gaps)/n:.0%}) |\n")
-    if gaps:
-        print("## Cannot be sourced — every one with the reason\n")
-        for v in gaps:
-            print(f"- {v.subject_title}")
-            print(f"  {WHY.get(v.cause, v.cause)}")
-    print(f"\n**A human researcher would have had to chase {n} claim(s) by hand.**")
-    print(f"Every SOURCED row cites a document that was fetched and quoted verbatim; "
-          f"every UNSOURCED row says why. Locator: {locator.name}.")
+    print(result["markdown"])
+    print(f"\nParallel calls: {result['parallel_calls']} · Corpus hits: {result['corpus_hits']}")
 
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print(__doc__); sys.exit(2)
-    run(Path(sys.argv[1]), offline="--offline" in sys.argv)
+        print(__doc__)
+        sys.exit(2)
+    subj = "default"
+    args = sys.argv[1:]
+    if "--subject" in args:
+        i = args.index("--subject")
+        subj = args[i + 1]
+        del args[i : i + 2]
+    path = Path(args[0])
+    run(path, subject=subj, offline="--offline" in args)
