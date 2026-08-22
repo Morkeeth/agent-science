@@ -1,0 +1,11 @@
+{
+  "leg": 2,
+  "script": "documentary-orphan-works.txt",
+  "claims": 10,
+  "corpus_hits": 2,
+  "hit_rate": 0.2,
+  "parallel_calls": 6,
+  "seconds": 153.4,
+  "cost": 0.0309,
+  "sourced": 4
+}

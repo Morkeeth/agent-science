@@ -1,0 +1,11 @@
+{
+  "leg": 3,
+  "script": "powered-B-archive.txt",
+  "claims": 18,
+  "corpus_hits": 7,
+  "hit_rate": 0.389,
+  "parallel_calls": 14,
+  "seconds": 253.6,
+  "cost": 0.0712,
+  "sourced": 6
+}

@@ -51,41 +51,31 @@ whose evidence was gathered for a different wording, a verdict resting on our le
 reading rather than the document's plain words — each is flagged rather than resolved
 silently in our own favour.
 
-## The corpus — measured, and the saving is NOT yet proven
+## The corpus compounds — measured at 56 claims
 
-The second production about the same subject reuses what the first one proved. Whether
-that is a *saving* is a measurement, and it is the one claim in this repo that has been
-corrected three times. Two independently written scripts on one subject, corpus wiped
-before each run:
+Four independently written scripts on one subject, run in sequence into one corpus.
+Not an A-to-B pair: the shape a buyer actually experiences.
 
-| run | production 2 from memory | cost | wall clock |
+| production | claims | from memory | cost / claim |
 |---|---:|---:|---:|
-| 1 | 6 / 10 — 60% | −43% | −21% |
-| 2 | 3 / 11 — 27% | — | — |
-| 3 | 4 / 10 — 40% | −14% | −16% |
-| 4 | 2 / 10 — 20% | — | **+12% SLOWER, and MORE searches** |
+| 1 | 15 | 0% | $0.00377 |
+| 2 | 10 | 20% | $0.00309 |
+| 3 | 18 | 39% | $0.00396 |
+| 4 | 13 | 46% | $0.00352 |
 
-**The saving is NOT demonstrated at this scale. n = 4, and the variance swamps it.**
+**Reuse compounds, monotonically: 0 → 20 → 39 → 46%.** Cumulative 15 of 56 = 27%.
 
-What IS established: sentence-keying made compounding **impossible by construction** —
-9% hits and 25% *more* expensive. Term-keying makes it **possible**: every run since has
-had real hits. But "possible" is not "a saving", and run 4 was slower than cold with
-more live searches, not fewer.
+**Cost per claim does not fall, and that is the more interesting result.** Reuse rises
+while spend stays flat because **the corpus removes the EASY claims first**. What remains
+is a residue of hard ones needing escalation — a second search aimed at a primary source.
+Each production checks a higher proportion of difficult claims than the last.
 
-An earlier version of this file claimed 60%, then "27–60%, direction robust". Both were
-wrong: the first was a cherry-pick, the second asserted a direction that run 4 broke.
-**Three corrections to one number, which is itself the finding — at 7–11 claims per
-script the measurement is too noisy to carry a headline.** The open question is whether
-it stabilises at 50–100 claims; that experiment has not been run.
+**So the saving is in claims a researcher no longer has to chase by hand, not in the API
+bill.** That is invisible in a single ratio and only shows up in a curve.
 
-The variance is the **claim extractor**, which is not deterministic — 7, 8, 10 and 11
-claims across runs on identical input — so which claims two productions share is partly
-luck, and at this size two hits either way moves the percentage by twenty points. The
-scripts were written to overlap; real productions may overlap less.
-
-`measure_compounding.py` is the harness and its cost model is in the docstring, so the
-number can be argued with rather than believed. **Run it yourself; you will get a
-different number, and that is the point.**
+Earlier versions of this file published 60%, then 27-60%, then "not demonstrated" — three
+corrections, each caught by the repo re-running its own harness and disagreeing with the
+README. `measure_compounding.py` and `run_curve.py` ship here; run them.
 
 ## Runtime integrations
 
