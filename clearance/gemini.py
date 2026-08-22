@@ -16,8 +16,10 @@ logged, never included in an error message.
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import os
+import time
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -28,6 +30,30 @@ ENDPOINT = ("https://generativelanguage.googleapis.com/v1beta/models/"
             "{model}:generateContent")
 KEY_PATH = Path.home() / ".config" / "keys" / "gemini.key"
 MAX_DOC = 120_000   # characters of document sent; flash handles far more
+CACHE = Path(__file__).resolve().parent.parent / "cache" / "gemini.json"
+
+# The free tier returns HTTP 429 after roughly two to four consecutive calls. That is an
+# operational fact about the demo, not a code problem: a script with N claims WILL
+# rate-limit on camera. Backoff makes a batch finish; it does not make it fast.
+RETRIES = 5
+BACKOFF = (5, 15, 30, 45, 60)
+
+
+def _cache_key(model: str, claim: str, must: str, document: str) -> str:
+    h = hashlib.sha256()
+    for part in (model, claim, must, document[:MAX_DOC]):
+        h.update(part.encode()); h.update(b"\x00")
+    return h.hexdigest()
+
+
+def _cache_load() -> dict:
+    return json.loads(CACHE.read_text()) if CACHE.exists() else {}
+
+
+def _cache_put(k: str, v) -> None:
+    d = _cache_load(); d[k] = v
+    CACHE.parent.mkdir(parents=True, exist_ok=True)
+    CACHE.write_text(json.dumps(d))
 
 
 class NoKey(RuntimeError):
@@ -74,8 +100,14 @@ class GeminiLocator:
 
     name = "gemini-3.5-flash"
 
-    def __init__(self, model: str = MODEL, timeout: int = 60):
-        self.model, self.timeout = model, timeout
+    def __init__(self, model: str = MODEL, timeout: int = 60, cache: bool = False):
+        """cache=True replays a previous identical call instead of making a new one.
+
+        OFF by default. A cached run is not a live call, and this product's whole
+        argument is that the model is actually called — so the cache is for repeated
+        test runs and for pacing around the free tier, never the default path.
+        """
+        self.model, self.timeout, self.cache = model, timeout, cache
         self.name = model
 
     def propose(self, *, claim: str, must_contain: str,
@@ -91,22 +123,39 @@ class GeminiLocator:
                 f"verbatim):\n{must_contain}\n\nDOCUMENT:\n{document[:MAX_DOC]}"}]}],
             "generationConfig": {"temperature": 0, "responseMimeType": "application/json"},
         }).encode()
+        ck = _cache_key(self.model, claim, must_contain, document)
+        if self.cache:
+            hit = _cache_load().get(ck)
+            if hit is not None:
+                return hit or None
+
         req = urllib.request.Request(
             ENDPOINT.format(model=self.model), data=body, method="POST",
             headers={"Content-Type": "application/json",
                      "x-goog-api-key": load_key()})
-        try:
-            with urllib.request.urlopen(req, timeout=self.timeout) as r:
-                payload = json.load(r)
-        except urllib.error.HTTPError as e:
-            # Status and reason only. A key must never ride out in an exception.
-            raise RuntimeError(f"Gemini call failed: HTTP {e.code} {e.reason}") from None
+        payload = None
+        for attempt in range(RETRIES):
+            try:
+                with urllib.request.urlopen(req, timeout=self.timeout) as r:
+                    payload = json.load(r)
+                break
+            except urllib.error.HTTPError as e:
+                if e.code == 429 and attempt < RETRIES - 1:
+                    wait = e.headers.get("Retry-After")
+                    time.sleep(int(wait) if (wait or "").isdigit() else BACKOFF[attempt])
+                    continue
+                # Status and reason only. A key must never ride out in an exception.
+                raise RuntimeError(
+                    f"Gemini call failed: HTTP {e.code} {e.reason}") from None
+        if payload is None:
+            raise RuntimeError("Gemini call failed: exhausted retries on HTTP 429")
 
         try:
             text = payload["candidates"][0]["content"]["parts"][0]["text"]
             passage = json.loads(text).get("passage")
         except (KeyError, IndexError, ValueError, TypeError):
             return None
-        if not passage or not isinstance(passage, str):
-            return None
-        return passage.strip()
+        result = passage.strip() if (passage and isinstance(passage, str)) else None
+        if self.cache:
+            _cache_put(ck, result)
+        return result
