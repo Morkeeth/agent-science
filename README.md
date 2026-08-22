@@ -91,12 +91,13 @@ fails the build if any deploy surface passes a secret via `--set-env-vars`.
 ## Controls
 
 ```bash
-python3 tests/test_watch_it_go_red.py     # 56 passed, 0 failed
+python3 tests/test_watch_it_go_red.py     # 71 passed, 0 failed
 ```
 
 Every control is watched **going red** before it is trusted green. They include five
-adversarial proposers, a live-model forced-lie transcript, a network tripwire, and — the
-one that matters most — a check that a **refuse-everything** locator fails the suite.
+adversarial proposers, a live-model forced-lie transcript, a network tripwire, a scan
+that fails the build if any deploy surface passes a secret in the clear, and — the one
+that matters most — a check that a **refuse-everything** locator fails the suite.
 A guard that only watches one direction is not a guard.
 
 ## Known open, deliberately
