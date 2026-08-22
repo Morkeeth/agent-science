@@ -888,6 +888,48 @@ def t_independence_actually_demotes_a_real_claim():
         "independence demoted a claim with a genuine primary source"
 
 
+def t_the_corpus_can_compound_across_two_scripts():
+    """The pitch's own claim, tested on what it actually says.
+
+    'The second production about the same subject costs a fraction of the first.'
+    Keying on full claim text meant the corpus only compounded when the IDENTICAL
+    sentence recurred - a re-run of the same script, not a second production. Against a
+    genuinely different script the hit rate was zero BY CONSTRUCTION, and nothing said so.
+    """
+    import agent_science as A
+    subject = "orphan-works"
+    a = A._claim_key("The European Parliament adopted Directive 2012/28/EU in October 2012",
+                     subject, "Directive 2012/28/EU")
+    b = A._claim_key("Europe passed the Orphan Works Directive, 2012/28/EU, in 2012",
+                     subject, "Directive 2012/28/EU")
+    assert a == b, "the same fact in different prose still misses the corpus"
+
+
+def t_a_claim_with_no_distinctive_term_does_not_collide():
+    """A false cache hit is worse than a miss.
+
+    Keying everything to an empty identifier would make every term-less claim the same
+    claim, and the corpus would hand back a verdict about something else entirely.
+    """
+    import agent_science as A
+    x = A._claim_key("Something entirely unrelated", "s", "")
+    y = A._claim_key("Something else entirely unrelated", "s", "")
+    assert x != y, "two unrelated term-less claims share a corpus key"
+
+
+def t_a_reused_verdict_still_cites_the_same_document():
+    """A cache that returns a stale or wrong verdict is worse than a miss."""
+    con = corpus.connect(":memory:")
+    v = engine.judge(subject_id="k", subject_title="t", instrument_uri=REAL_INC,
+                     use=engine.AI_TRAINING)
+    corpus.remember(con, [v])
+    back = corpus.recall(con, "k", engine.AI_TRAINING)
+    assert back.verdict == v.verdict, "a reused verdict changed its answer"
+    assert back.citation_url == v.citation_url, "a reused verdict changed its document"
+    assert back.quoted_terms == v.quoted_terms, "a reused verdict changed its evidence"
+    assert back.cause == v.cause and back.interpretive == v.interpretive
+
+
 print("WATCH IT GO RED — control tests\n")
 for n, f in list(globals().items()):
     if n.startswith("t_"):

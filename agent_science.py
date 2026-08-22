@@ -44,8 +44,25 @@ WHY = {
 }
 
 
-def _claim_key(text: str, subject: str) -> str:
-    h = hashlib.sha256(f"{subject}\0{text.strip().lower()}".encode()).hexdigest()
+def _claim_key(text: str, subject: str, must_contain: str = "") -> str:
+    """What makes two claims THE SAME claim.
+
+    Keying on full claim text meant the corpus could only ever compound when the
+    identical sentence recurred - i.e. when the SAME script was re-run. Two productions
+    about the same event phrase the same fact differently, so the hit rate against a
+    genuinely different script was zero by construction, and the pitch's "the second
+    production costs a fraction of the first" was measuring a re-run, not a second
+    production.
+
+    The distinctive term is what identifies the fact: "Directive 2012/28/EU" is the
+    same fact whether the sentence around it says adopted, passed or came into force.
+    Fall back to the full text when a claim has no distinctive term, because keying
+    everything to an empty string would collide unrelated claims - a false cache hit,
+    which is worse than a miss.
+    """
+    ident = (must_contain or "").strip().lower()
+    basis = ident if len(ident) >= 6 else text.strip().lower()
+    h = hashlib.sha256(f"{subject}\0{basis}".encode()).hexdigest()
     return h[:20]
 
 
@@ -109,7 +126,7 @@ def clear_script(
     corpus_hits = 0
 
     for c in claims:
-        key = _claim_key(c.text, subject)
+        key = _claim_key(c.text, subject, c.must_contain)
         use = _use(subject)
         hit = corpus.recall(con, key, use)
         if hit:
