@@ -4,16 +4,36 @@ WHAT THIS IS, stated precisely so nobody overclaims it:
 
 The European Commission's AI Office published a **mandatory template** for the public
 summary of training content on 24 July 2025, implementing Article 53(1)(d) of Regulation
-(EU) 2024/1689. In force for new GPAI models since 2 August 2025; existing models must
-comply by 2 August 2027. It binds every provider, including free and open-source.
+(EU) 2024/1689. In force for new GPAI models since 2 August 2025; existing models must comply by
+2 August 2027; **enforcement begins 2 August 2026**. It binds every provider, including
+free and open-source.
 
-The template asks for a **public summary** — "generally comprehensive in its scope
-instead of technically detailed". **This module does NOT produce that filing.** It
-produces the **evidence annex underneath it**: the per-item rights determination a
-provider must actually possess before it can make Section 2 and Section 3 statements
-truthfully.
+**THE FILING IS NARRATIVE, NOT ITEM-BY-ITEM, AND THAT CUTS AGAINST A NAIVE VERSION OF
+THIS PRODUCT.** Verified at the Commission's own FAQ: the template "requires narrative
+summaries, not item-by-item listings", deliberately, to protect trade secrets. **A
+regulator will never read this annex.** Anyone selling "we generate your item-by-item AI
+Act disclosure" is selling something the regulation does not ask for.
 
-That distinction is the product. Anyone can write a summary. Nobody can substantiate one.
+**What the regulation DOES ask for is the thing that needs this.** Rightsholders are to
+be told *"to what extent the conditions for lawful text and data mining, as provided for
+in the Copyright in the Digital Single Market Directive, have been respected."*
+
+**You cannot state an EXTENT truthfully without having measured it.** The narrative
+sentence is one line; the measurement behind it is this annex. So this module does not
+produce the filing and never should — it produces the **record that the measurement was
+actually performed**, which is what makes the narrative statement true and what a
+provider has nothing else to fall back on if challenged.
+
+The stakes, verbatim from the Commission: *"Non-compliance may result in fines of up to
+3% of the provider's annual total worldwide turnover in the preceding financial year, or
+15 000 000 Euros, whichever is higher."* **Enforcement begins 2 August 2026.**
+
+And the summary *"should be updated at six-month intervals, or sooner if the new data
+used for further training requires a materially significant update"* — so the
+measurement is **recurring**, which is precisely the repeat customer the compounding
+curve measured.
+
+Anyone can write the summary. Nobody can substantiate one.
 
 Template sections, verbatim:
     1. "General Information"       — model, modalities, size, coverage
@@ -60,15 +80,22 @@ def annex(verdicts, *, dataset_name: str, provider: str, use: str) -> str:
         f"**Use assessed:** `{use}`  ",
         f"**Items assessed:** {n}",
         "",
-        "> This is **not** the public summary required by the template. It is the "
-        "per-item rights determination a provider must hold in order to make Section 2 "
-        "and Section 3 statements truthfully. Every line cites the instrument the "
+        "> **This is not the filing.** The Commission's template requires a NARRATIVE "
+        "summary, not an item-by-item listing, and no regulator will read this document. "
+        "It is the measurement behind one sentence of that filing: the extent to which "
+        "text-and-data-mining conditions were respected. An extent cannot be stated "
+        "truthfully without being measured. Every line cites the instrument the "
         "rights-holder published; none is inferred.",
+        "",
+        "> Non-compliance: fines up to **3% of worldwide turnover or EUR 15,000,000, "
+        "whichever is higher**. Enforcement begins **2 August 2026**. The summary must be "
+        "updated every **six months**.",
         "",
         "## Section 2 — List of Data Sources",
         "",
-        f"**Named dataset:** {dataset_name}, {n} items, individually assessed "
-        "(the template requires large datasets be identified individually).",
+        f"**Named dataset:** {dataset_name}, {n} items, individually assessed. "
+        "The template asks that large datasets be identified individually; the "
+        "per-item assessment below is the evidence, not the disclosure.",
         "",
         "**Rights instruments present, by count:**",
         "",

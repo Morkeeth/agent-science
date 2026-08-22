@@ -4,7 +4,9 @@
 **Use assessed:** `ai_training`  
 **Items assessed:** 600
 
-> This is **not** the public summary required by the template. It is the per-item rights determination a provider must hold in order to make Section 2 and Section 3 statements truthfully. Every line cites the instrument the rights-holder published; none is inferred.
+> **This is not the filing.** The Commission's template requires a NARRATIVE summary, not an item-by-item listing, and no regulator will read this document. It is the measurement behind one sentence of that filing: the extent to which text-and-data-mining conditions were respected. An extent cannot be stated truthfully without being measured. Every line cites the instrument the rights-holder published; none is inferred.
+
+> Non-compliance: fines up to **3% of worldwide turnover or EUR 15,000,000, whichever is higher**. Enforcement begins **2 August 2026**. The summary must be updated every **six months**.
 
 ## Section 2 — List of Data Sources
 
