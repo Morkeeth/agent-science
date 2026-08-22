@@ -19,6 +19,14 @@ UA = "CLEARED-probe/0.1 (hackathon; contact omorke@gmail.com)"
 # Sentences we look for in each instrument family, to quote the operative clause
 # rather than the page furniture. Purely a locator — the text quoted is the page's.
 _ANCHORS = (
+    # Most specific first. Ordering is load-bearing: "You are free to" appears in the
+    # boilerplate of several rightsstatements pages, so a looser anchor placed above a
+    # tighter one quotes the wrong clause from the right document — which is worse than
+    # no quote, because it looks cited.
+    "The copyright and related rights status of this Item has not been evaluated",
+    "The organization that has made the Item available believes that the Item is in the Public Domain",
+    "has dedicated the work to the public domain",
+    "This work has been identified as being free of known restrictions",
     "This Item is protected by copyright",
     "This Item is in copyright",
     "No known copyright",
@@ -26,6 +34,9 @@ _ANCHORS = (
     "You are free to",
     "NonCommercial",
     "NoDerivatives",
+    "Usted es libre de",      # es
+    "Vous êtes autorisé à",   # fr
+    "Sie dürfen",             # de
 )
 
 

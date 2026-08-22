@@ -20,6 +20,15 @@ VERDICTS = (GREEN, RED, UNKNOWN)
 ASSET = "asset"
 FACT = "fact"
 
+# Why an UNKNOWN is unknown. Rendering these as one undifferentiated blob was a
+# real defect: it billed OUR incompleteness to the archive. Kept as a closed set
+# so the gap report can separate "their gap" from "our backlog".
+NO_INSTRUMENT = "no_instrument"        # the holder published nothing
+UNRULED = "unruled_instrument"         # they published; WE have not ruled it yet
+UNREAD_TERMS = "terms_never_fetched"   # we have a rule but never read the instrument
+NOT_EVALUATED = "holder_not_evaluated" # the instrument itself says "not evaluated"
+CAUSES = (NO_INSTRUMENT, UNRULED, UNREAD_TERMS, NOT_EVALUATED)
+
 
 class UncitedVerdict(ValueError):
     """Raised when something tries to assert GREEN or RED without evidence."""
@@ -37,11 +46,20 @@ class Verdict:
     quoted_terms: Optional[str] = None    # VERBATIM text from that citation
     holder: Optional[str] = None
     interpretive: bool = False # True = our legal reading, not the text's plain words
+    cause: Optional[str] = None  # UNKNOWN only: which of CAUSES applies
+    published_instrument: Optional[str] = None
+    # What the archive actually published, when it differs from citation_url — e.g.
+    # it published CC BY-NC-ND 3.0/es and we read the 4.0 text. Quoting one URL while
+    # citing another is precisely the substitution this product exists to catch, so it
+    # is a field, printed, not a silent equivalence.
     observed_at: str = field(
         default_factory=lambda: datetime.now(timezone.utc).isoformat(timespec="seconds")
     )
 
     def __post_init__(self) -> None:
+        if self.verdict == GREEN or self.verdict == RED:
+            if self.cause is not None:
+                raise ValueError("cause is for UNKNOWN only")
         if self.verdict not in VERDICTS:
             raise ValueError(f"verdict must be one of {VERDICTS}, got {self.verdict!r}")
         if self.noun not in (ASSET, FACT):
@@ -61,13 +79,26 @@ class Verdict:
                     "but quotes no terms from it. Fetch the instrument before judging it."
                 )
         else:  # UNKNOWN
-            if self.citation_url or self.quoted_terms:
+            if self.cause not in CAUSES:
+                raise ValueError(
+                    f"UNKNOWN for {self.subject_id!r} must name a cause from {CAUSES}"
+                )
+            # NOT_EVALUATED is the one UNKNOWN that DOES have evidence: an instrument
+            # whose own text says the holder never assessed copyright. Refusing to cite
+            # it would throw away the most useful fact in the record.
+            if self.cause != NOT_EVALUATED and (self.citation_url or self.quoted_terms):
                 raise UncitedVerdict(
-                    "UNKNOWN must not carry a citation — if there is evidence, judge it."
+                    f"UNKNOWN/{self.cause} must not carry a citation — "
+                    "if there is evidence, judge it."
                 )
 
     def as_dict(self) -> dict:
         return asdict(self)
+
+    @property
+    def substituted(self) -> bool:
+        return bool(self.published_instrument
+                    and self.published_instrument != self.citation_url)
 
     def line(self) -> str:
         mark = {GREEN: "GREEN  ", RED: "RED    ", UNKNOWN: "UNKNOWN"}[self.verdict]

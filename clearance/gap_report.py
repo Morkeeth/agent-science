@@ -8,7 +8,8 @@ from __future__ import annotations
 from collections import Counter
 from typing import Sequence
 
-from .verdict import Verdict, GREEN, RED, UNKNOWN
+from .verdict import (Verdict, GREEN, RED, UNKNOWN,
+                      NO_INSTRUMENT, UNRULED, UNREAD_TERMS, NOT_EVALUATED)
 
 
 def render(verdicts: Sequence[Verdict], *, library: str, use: str) -> str:
@@ -30,7 +31,7 @@ def render(verdicts: Sequence[Verdict], *, library: str, use: str) -> str:
         "|---|---:|---:|",
         f"| CLEARED (GREEN) | {green} | {green / m:.0%} |",
         f"| BLOCKED (RED) | {red} | {red / m:.0%} |",
-        f"| UNKNOWN — no instrument on file | {unknown} | {unknown / m:.0%} |",
+        f"| UNKNOWN — did not resolve | {unknown} | {unknown / m:.0%} |",
         "",
         f"> **{blocked} of {m} ({blocked / m:.0%}) of this library is not sellable as-is.**",
         "",
@@ -47,14 +48,69 @@ def render(verdicts: Sequence[Verdict], *, library: str, use: str) -> str:
         out.append("")
 
     if unknown:
-        out += [
-            "## Unknown — the honest column",
-            "",
-            f"{unknown} item(s) carry no rights instrument we can read. These are printed "
-            "UNKNOWN, never assumed cleared. Each one is a question for the rights-holder, "
-            "and together they are the first page of the clearance backlog.",
-            "",
-        ]
+        # Splitting this was a real fix. Rendered as one blob it read "no rights
+        # instrument we can read", which billed OUR unruled backlog to the archive.
+        # Three different facts, three different owners, three different next actions.
+        by_cause = {c: [v for v in verdicts if v.verdict == UNKNOWN and v.cause == c]
+                    for c in (NO_INSTRUMENT, NOT_EVALUATED, UNRULED, UNREAD_TERMS)}
+        out += ["## Unknown — the honest column", "",
+                f"{unknown} of {m} items did not resolve. They are printed UNKNOWN and never "
+                "assumed cleared. They are not one problem:", "",
+                "| n | What is actually true | Whose move |", "|---:|---|---|"]
+        labels = {
+            NO_INSTRUMENT: ("the holder published no rights instrument at all",
+                            "the archive"),
+            NOT_EVALUATED: ("the holder states copyright was **never evaluated**",
+                            "the archive"),
+            UNRULED: ("the holder published an instrument **we have not ruled yet**",
+                      "**ours**"),
+            UNREAD_TERMS: ("we hold a rule but have **never read** the instrument",
+                           "**ours**"),
+        }
+        for c, group in by_cause.items():
+            if group:
+                what, whose = labels[c]
+                out.append(f"| {len(group)} | {what} | {whose} |")
+        out.append("")
+
+        ours = len(by_cause[UNRULED]) + len(by_cause[UNREAD_TERMS])
+        theirs = len(by_cause[NO_INSTRUMENT]) + len(by_cause[NOT_EVALUATED])
+        parts = []
+        if theirs:
+            parts.append(
+                f"**{theirs} are the archive's gap** — each is a question for the "
+                "rights-holder, and together they are page one of the clearance backlog.")
+        if ours:
+            parts.append(
+                f"**{ours} are ours** — coverage we close by ruling the instrument. "
+                "Reporting our own backlog as the archive's silence would be a lie the "
+                "reader cannot detect, so it is split out here.")
+        else:
+            parts.append("**None are ours**: every instrument these items published has "
+                         "been ruled and read.")
+        out += [" ".join(parts), ""]
+        if by_cause[UNRULED]:
+            seen = Counter(v.reason.split(": ", 1)[-1] for v in by_cause[UNRULED])
+            out += ["Instruments we owe a ruling on:", ""]
+            out += [f"- `{u}` — {n} item(s)" for u, n in seen.most_common()]
+            out.append("")
+        if by_cause[NOT_EVALUATED]:
+            ex = by_cause[NOT_EVALUATED][0]
+            if ex.citation_url:
+                out += ["The 'never evaluated' statement is itself cited, not assumed:", "",
+                        f"- instrument: {ex.citation_url}",
+                        f'- terms: "{(ex.quoted_terms or "")[:200]}…"', ""]
+
+    subs = [v for v in verdicts if v.substituted]
+    if subs:
+        out += ["## Terms read from a sibling document", "",
+                f"{len(subs)} verdict(s) quote a different URL than the archive published "
+                "(same licence, different version or language). Named here because quoting "
+                "one document while citing another is the exact substitution this product "
+                "exists to catch.", ""]
+        for v in subs[:5]:
+            out.append(f"- published `{v.published_instrument}` → read `{v.citation_url}`")
+        out.append("")
 
     interp = [v for v in verdicts if v.interpretive]
     if interp:
