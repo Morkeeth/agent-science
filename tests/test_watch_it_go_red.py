@@ -679,6 +679,37 @@ def t_cursor_proposers_ported():
         f"a passage missing the claim's terms was admitted: {r}"
 
 
+def t_corpus_round_trips_every_cause():
+    """The compounding claim, tested on the verdicts it had never seen.
+
+    'Run 2 reused 50 of 50' was measured on ASSET verdicts, which carry no cause. The
+    schema had no cause column at all, so a fact-leg UNKNOWN could be stored and then
+    fail to come back - the constructor refuses to rebuild an UNKNOWN without one.
+    The corpus was losing the fact that makes a refusal meaningful.
+    """
+    from clearance.verdict import CAUSES
+    con = corpus.connect(":memory:")
+    for i, cause in enumerate(CAUSES):
+        kw = {}
+        if cause in CITED_UNKNOWN_CAUSES:
+            kw = {"citation_url": "http://x/doc", "quoted_terms": "some real terms"}
+        v = Verdict(subject_id=f"s{i}", subject_title="t", noun=FACT,
+                    use="sourcing", verdict=UNKNOWN, reason="r", cause=cause, **kw)
+        corpus.remember(con, [v])
+        back = corpus.recall(con, f"s{i}", "sourcing")
+        assert back is not None, f"{cause}: not returned"
+        assert back.cause == cause, f"{cause}: came back as {back.cause}"
+        assert back.citation_url == v.citation_url
+    # and a GREEN with a substituted instrument must keep the substitution visible
+    g = engine.judge(subject_id="a", subject_title="t",
+                     instrument_uri="http://creativecommons.org/licenses/by-nc-nd/3.0/es/",
+                     use=engine.AI_TRAINING)
+    corpus.remember(con, [g])
+    gb = corpus.recall(con, "a", engine.AI_TRAINING)
+    assert gb.published_instrument == g.published_instrument, \
+        "the corpus dropped which instrument the archive actually published"
+
+
 print("WATCH IT GO RED — control tests\n")
 for n, f in list(globals().items()):
     if n.startswith("t_"):
