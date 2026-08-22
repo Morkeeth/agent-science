@@ -13,7 +13,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from clearance import corpus, engine, facts, instruments, search, verify as V
 from clearance.sources import europeana
-from clearance.verdict import (Verdict, UncitedVerdict, GREEN, RED, UNKNOWN, ASSET, FACT,
+from clearance.verdict import (Verdict, UncitedVerdict, GREEN, RED, UNKNOWN, DISPUTED,
+                               ASSET, FACT,
                                NO_INSTRUMENT, UNRULED, UNREAD_TERMS, NOT_EVALUATED,
                                NO_SOURCE, SOURCE_UNREAD, SOURCE_SILENT,
                                SEARCH_FOUND_NOTHING,
@@ -783,6 +784,54 @@ def t_the_secret_scanner_actually_catches_one():
         good.write_text('gcloud run deploy x --set-secrets="PARALLEL_API_KEY=sec:latest"\n')
         assert not secretish.search(good.read_text()), \
             "the scanner false-positives on --set-secrets, which is the safe form"
+
+
+def t_disputed_carries_the_same_citation_burden():
+    """The fourth verdict does not get a softer door than the other three."""
+    try:
+        Verdict(subject_id="d", subject_title="t", noun=FACT, use="sourcing",
+                verdict=DISPUTED, reason="a document says otherwise")
+    except UncitedVerdict:
+        pass
+    else:
+        raise AssertionError("DISPUTED was constructed with no document cited")
+    try:
+        Verdict(subject_id="d", subject_title="t", noun=FACT, use="sourcing",
+                verdict=DISPUTED, reason="r", citation_url="http://x", quoted_terms=" ")
+    except UncitedVerdict:
+        return
+    raise AssertionError("DISPUTED accepted a citation with no quoted passage")
+
+
+def t_a_supporting_document_is_never_asked_for_a_contradiction():
+    """Structural precondition, no model call.
+
+    If the document carries the claim's own terms it SUPPORTS the claim. Asking a model
+    whether it also contradicts it invites a confident wrong answer on a claim we can
+    already resolve without one.
+    """
+    from clearance.contradiction import find_contradiction
+    doc = "The Council adopted it on 25 October 2012 in Strasbourg."
+    assert find_contradiction(claim="adopted on 25 October 2012",
+                              must_contain="25 October 2012", document=doc,
+                              source_url="http://x") is None
+
+
+def t_a_short_complete_sentence_is_a_statement():
+    """The false refusal the first real contradiction exposed.
+
+    'Done at Strasbourg, 25 October 2012.' is six words, is the decisive line of an EU
+    directive, and was refused as a run of labels by the word floor. A run of labels has
+    no terminal punctuation; a sentence does.
+    """
+    doc = "…thing… Done at Strasbourg, 25 October 2012. …more…"
+    assert V.verify("Done at Strasbourg, 25 October 2012.", document=doc,
+                    must_contain="25 October 2012") is None, \
+        "a short complete sentence is still refused as decor"
+    # and the floor still does its original job
+    labels = "Home Log in Search Go Contact"
+    assert V.verify(labels, document=f"x {labels} x", must_contain="Log in") is not None, \
+        "the label-run rejection was lost while fixing the short-sentence case"
 
 
 print("WATCH IT GO RED — control tests\n")

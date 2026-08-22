@@ -16,6 +16,7 @@ from dataclasses import dataclass
 from typing import Optional
 
 MIN_WORDS = 7
+MIN_SENTENCE_WORDS = 4   # a short passage that ENDS as a sentence is still a statement
 MAX_CHARS = 400
 
 
@@ -51,9 +52,19 @@ def verify(passage: Optional[str], *, document: str, must_contain: str) -> Optio
     #    reads as evidence and is not.
     if not (p[0].isalnum() or p[0] in "\"'("):
         return Refusal("not_a_statement", f"starts mid-word or on punctuation: {p[:40]!r}")
-    if p.count(" ") < MIN_WORDS:
+    # The word floor exists to reject runs of link labels. It was rejecting SHORT
+    # COMPLETE SENTENCES too — "Done at Strasbourg, 25 October 2012." is six words, is
+    # the decisive line of an EU directive, and was refused as decor. That is the
+    # false-refusal direction this product is most likely to drift in, caught on the
+    # first real contradiction the engine ever found.
+    #
+    # A run of labels has no terminal punctuation. A sentence does. So: long enough,
+    # OR short but visibly a sentence.
+    words = p.count(" ") + 1
+    ends_as_sentence = p.rstrip().endswith((".", "!", "?", '."', ".'"))
+    if words < MIN_WORDS and not (ends_as_sentence and words >= MIN_SENTENCE_WORDS):
         return Refusal("not_a_statement",
-                       f"{p.count(' ') + 1} words — a run of labels, not a statement")
+                       f"{words} words and no sentence ending — a run of labels")
     if len(p) > MAX_CHARS:
         return Refusal("not_a_statement", f"{len(p)} characters — a page, not a passage")
 

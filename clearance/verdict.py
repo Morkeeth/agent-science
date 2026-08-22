@@ -15,7 +15,13 @@ from typing import Optional
 GREEN = "GREEN"
 RED = "RED"
 UNKNOWN = "UNKNOWN"
-VERDICTS = (GREEN, RED, UNKNOWN)
+# A fetched document states something INCOMPATIBLE with the claim. Deliberately not
+# added until the engine could actually establish it: a vocabulary must not be able to
+# say more than the engine can prove, and for most of this build there was no state
+# behind the word. There is now, and it carries the same citation burden as GREEN.
+DISPUTED = "DISPUTED"
+VERDICTS = (GREEN, RED, UNKNOWN, DISPUTED)
+ASSERTED = (GREEN, RED, DISPUTED)   # every verdict that makes a claim about the world
 
 ASSET = "asset"
 FACT = "fact"
@@ -78,7 +84,7 @@ class Verdict:
     )
 
     def __post_init__(self) -> None:
-        if self.verdict == GREEN or self.verdict == RED:
+        if self.verdict in ASSERTED:
             if self.cause is not None:
                 raise ValueError("cause is for UNKNOWN only")
         if self.verdict not in VERDICTS:
@@ -88,7 +94,7 @@ class Verdict:
         if not self.reason.strip():
             raise ValueError("every verdict must carry a reason, including UNKNOWN")
 
-        if self.verdict in (GREEN, RED):
+        if self.verdict in ASSERTED:
             if not self.citation_url:
                 raise UncitedVerdict(
                     f"{self.verdict} for {self.subject_id!r} has no citation_url. "
