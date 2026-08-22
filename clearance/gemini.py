@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import os
 import time
 import urllib.error
@@ -26,6 +27,15 @@ from pathlib import Path
 from typing import Optional
 
 MODEL = "gemini-3.5-flash"
+# The free tier caps GenerateRequestsPerDayPerProjectPerModel at TWENTY PER DAY, PER
+# MODEL. Measured, not guessed: the 429 body names quotaId
+# GenerateRequestsPerDayPerProjectPerModel-FreeTier, quotaValue 20.
+#
+# Because the cap is per MODEL, a ladder of sibling models multiplies the daily budget.
+# Every model here is Gemini 3.5 or later, so the submission requirement is satisfied
+# whichever one answers.
+LADDER = ("gemini-3.5-flash", "gemini-3.5-flash-lite", "gemini-3.6-flash",
+          "gemini-3.7-flash")
 ENDPOINT = ("https://generativelanguage.googleapis.com/v1beta/models/"
             "{model}:generateContent")
 KEY_PATH = Path.home() / ".config" / "keys" / "gemini.key"
@@ -95,34 +105,53 @@ Rules, all of them hard:
 Reply with JSON only: {"passage": "<exact text>"} or {"passage": null}"""
 
 
-def call(model: str, system: str, user: str, timeout: int = 90) -> dict:
+def call(model: str, system: str, user: str, timeout: int = 90) -> tuple[dict, str]:
     """THE single place this codebase talks to Gemini.
 
     Both callers - the locator and the claim extractor - go through here. The first
     version of the backoff lived inside GeminiLocator.propose() and the extractor,
     in another module, had none: it died on the first 429. A retry policy that
     protects one of two call sites is not a retry policy.
+
+    Returns (payload, model_that_answered). The second element is NOT bookkeeping: on
+    a per-day quota exhaustion this advances down LADDER to a sibling model, and the
+    verdict's reason records the locator that actually answered. A record naming the
+    model we ASKED for rather than the one that ANSWERED would be a citation lying
+    about its own provenance - the same class as quoting one document while citing
+    another.
     """
     body = json.dumps({
         "systemInstruction": {"parts": [{"text": system}]},
         "contents": [{"role": "user", "parts": [{"text": user}]}],
         "generationConfig": {"temperature": 0, "responseMimeType": "application/json"},
     }).encode()
-    req = urllib.request.Request(
-        ENDPOINT.format(model=model), data=body, method="POST",
-        headers={"Content-Type": "application/json", "x-goog-api-key": load_key()})
-    for attempt in range(RETRIES):
-        try:
-            with urllib.request.urlopen(req, timeout=timeout) as r:
-                return json.load(r)
-        except urllib.error.HTTPError as e:
-            if e.code == 429 and attempt < RETRIES - 1:
-                wait = e.headers.get("Retry-After")
-                time.sleep(int(wait) if (wait or "").isdigit() else BACKOFF[attempt])
-                continue
-            # Status and reason only. A key must never ride out in an exception.
-            raise RuntimeError(f"Gemini call failed: HTTP {e.code} {e.reason}") from None
-    raise RuntimeError("Gemini call failed: exhausted retries on HTTP 429")
+    tried, chain = [], [model] + [m for m in LADDER if m != model]
+    for candidate in chain:
+        req = urllib.request.Request(
+            ENDPOINT.format(model=candidate), data=body, method="POST",
+            headers={"Content-Type": "application/json", "x-goog-api-key": load_key()})
+        for attempt in range(RETRIES):
+            try:
+                with urllib.request.urlopen(req, timeout=timeout) as r:
+                    return json.load(r), candidate
+            except urllib.error.HTTPError as e:
+                raw = e.read().decode("utf-8", "ignore") if e.code == 429 else ""
+                daily = "PerDay" in (re.search(r'"quotaId"\s*:\s*"([^"]+)', raw) or
+                                     type("", (), {"group": lambda *_: ""})).group(1)
+                if e.code == 429 and daily:
+                    tried.append(candidate)
+                    break            # today's budget for THIS model is gone; next model
+                if e.code == 429 and attempt < RETRIES - 1:
+                    wait = e.headers.get("Retry-After")
+                    time.sleep(int(wait) if (wait or "").isdigit() else BACKOFF[attempt])
+                    continue
+                # Status and reason only. A key must never ride out in an exception.
+                raise RuntimeError(
+                    f"Gemini call failed: HTTP {e.code} {e.reason}") from None
+    raise RuntimeError(
+        "Gemini daily free-tier quota (20/model) exhausted on every model in the "
+        f"ladder: {tried}. This is a quota wall, not a code failure - it needs "
+        "billing enabled or a new day.")
 
 
 class GeminiLocator:
@@ -154,7 +183,8 @@ class GeminiLocator:
             if hit is not None:
                 return hit or None
 
-        payload = call(self.model, _INSTRUCTION, user, self.timeout)
+        payload, answered = call(self.model, _INSTRUCTION, user, self.timeout)
+        self.name = answered   # the record names the model that ANSWERED
 
         try:
             text = payload["candidates"][0]["content"]["parts"][0]["text"]

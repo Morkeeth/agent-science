@@ -50,8 +50,9 @@ class GeminiExtractor:
         self.model, self.timeout = model, timeout
 
     def extract(self, script: str) -> list[Claim]:
-        payload = call(self.model, _INSTRUCTION, f"SCRIPT:\n{script[:MAX_DOC]}",
-                       self.timeout)
+        payload, answered = call(self.model, _INSTRUCTION,
+                                 f"SCRIPT:\n{script[:MAX_DOC]}", self.timeout)
+        self.name = answered
 
         try:
             raw = json.loads(payload["candidates"][0]["content"]["parts"][0]["text"])
