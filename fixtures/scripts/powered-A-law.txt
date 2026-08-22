@@ -1,0 +1,37 @@
+NARRATOR (V.O.)
+
+The law came late, and it came from Brussels.
+
+In 2012 the European Union passed Directive 2012/28/EU, the Orphan Works Directive.
+Member states were required to transpose it into national law by 29 October 2014. Its
+core mechanism is the diligent search: if a rightsholder cannot be found after a
+recorded, good-faith search, a cultural institution may digitise and publish the work.
+The directive covers libraries, museums, archives, film heritage institutions and public
+service broadcasters. Works cleared under it are entered in a single EU register
+maintained by the European Union Intellectual Property Office in Alicante.
+
+The United Kingdom went further and faster. The Intellectual Property Office opened an
+orphan works licensing scheme in October 2014, the first national scheme of its kind in
+Europe, and it issues licences for up to seven years, renewable. The UK scheme charges an
+application fee and a licence fee, and the money is held in case a rightsholder appears.
+In its first year the scheme granted fewer than one hundred licences.
+
+The United States took the opposite path. The Copyright Office published Orphan Works and
+Mass Digitization in June 2015, recommending a limitation on remedies rather than a
+licensing body. Congress did not act on it. Earlier, the Shawn Bentley Orphan Works Act
+passed the Senate in 2008 and died in the House. Section 108 of the US Copyright Act
+still governs library and archive reproduction, and it was written in 1976.
+
+Canada is the quiet exception. Under Section 77 of its Copyright Act the Copyright Board
+of Canada can issue a licence for a published work whose owner cannot be located. By June
+2023 the Board had issued 321 such licences and denied 36 applications.
+
+The private sector tried first and failed. The Google Books settlement would have created
+a Book Rights Registry covering orphan works; Judge Denny Chin rejected it in March 2011.
+The Authors Guild litigation that followed ended in 2016 when the Supreme Court declined
+to hear the case, leaving the Second Circuit's fair use ruling standing.
+
+Before any of it, on 4 June 2008, European representatives of libraries, archives,
+museums and rightsholders signed a Memorandum of Understanding on Diligent Search
+Guidelines for Orphan Works. It was voluntary. It was also the moment the problem was
+first written down by the people who had it.

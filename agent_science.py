@@ -30,13 +30,21 @@ from clearance.independence import (classify as independence_classify,
                                     note as independence_note)
 from clearance.verdict import GREEN, Verdict
 
+# "Nothing states this" and "documents state it, but every one traces to a derived or
+# unclassified origin" are DIFFERENT FACTS, and collapsing them to one label is the same
+# flattening refused for causes. A production can act on the second - a researcher spends
+# two minutes on a flagged source - and cannot act on the first. Neither is CLEARED.
 LABEL = {
+    "no_independent_source": "UNVERIFIED INDEPENDENCE",
     "no_source_offered": "UNSOURCED",
     "search_found_no_admissible_source": "UNSOURCED",
     "source_does_not_state_it": "UNSOURCED",
     "source_never_fetched": "UNSOURCED",
 }
 WHY = {
+    "no_independent_source": ("documents state this, and every one traces to a derived "
+                              "or unclassified origin — a human must judge whether that "
+                              "is independent support"),
     "no_source_offered": "no source was offered and none was sought",
     "search_found_no_admissible_source": "we searched and no document we read states it",
     "source_does_not_state_it": "we read the named source; it does not say this",

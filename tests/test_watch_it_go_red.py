@@ -951,6 +951,21 @@ def t_a_reused_verdict_from_a_different_wording_is_flagged():
         "reused evidence gathered for a DIFFERENT assertion was passed off silently"
 
 
+def t_no_source_and_no_independence_are_different_labels():
+    """Collapsing them is the flattening this product refuses everywhere else.
+
+    Measured on the powered run: 7 of 10 claims found VERIFIED documents and were
+    demoted for non-independence, while 3 found nothing at all. Reporting both as
+    UNSOURCED tells a researcher the same thing about two situations that need
+    completely different work.
+    """
+    import agent_science as A
+    assert A.LABEL["no_independent_source"] != A.LABEL["no_source_offered"], \
+        "a claim with verified sources reads identically to one with none"
+    assert A.LABEL["no_independent_source"] != "SOURCED", \
+        "unverified independence must not read as cleared"
+
+
 print("WATCH IT GO RED — control tests\n")
 for n, f in list(globals().items()):
     if n.startswith("t_"):

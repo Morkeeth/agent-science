@@ -47,9 +47,17 @@ if __name__ == "__main__":
         if db.exists():
             db.unlink()
             print(f"corpus cleared: {db}")
-    a = run("PRODUCTION 1", "fixtures/scripts/documentary-orphan-works.txt")
-    b = run("PRODUCTION 2 (same subject, different script)",
-            "fixtures/scripts/documentary-orphan-works-B.txt")
+    if "--powered" in sys.argv:
+        # The experiment as originally specified: enough claims that two hits either
+        # way cannot swing the result twenty points. The small-subject version was
+        # under-powered before it was ever wrong, and three corrections came out of it.
+        pa = "fixtures/scripts/powered-A-law.txt"
+        pb = "fixtures/scripts/powered-B-archive.txt"
+    else:
+        pa = "fixtures/scripts/documentary-orphan-works.txt"
+        pb = "fixtures/scripts/documentary-orphan-works-B.txt"
+    a = run("PRODUCTION 1", pa)
+    b = run("PRODUCTION 2 (same subject, different script)", pb)
     print("\n" + "=" * 62)
     print("# COMPOUNDING")
     print(f"  production 1  ${a['cost']:.4f}  {a['secs']:.0f}s  {a['hits']}/{a['claims']} from memory")

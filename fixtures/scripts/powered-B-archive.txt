@@ -1,0 +1,34 @@
+NARRATOR (V.O.)
+
+Ask an archivist what they hold and they will tell you a number. Ask what they can use
+and the number collapses.
+
+The British Library has estimated that forty percent of its copyrighted collection is
+orphaned. A study in April 2009 put the collections of UK public sector organisations at
+roughly 25 million orphan works. The BFI National Archive holds more than 275,000 titles,
+including around 210,000 television programmes, with material dating from 1894.
+
+Europeana, the EU's aggregated cultural platform, carries over 50 million items from
+more than 3,000 institutions, and every item must carry a rights statement drawn from a
+fixed vocabulary. That vocabulary is rightsstatements.org, developed jointly by Europeana
+and the Digital Public Library of America, and it defines twelve standardised statements.
+One of them, In Copyright — EU Orphan Work, exists specifically for works cleared under
+Directive 2012/28/EU. Another, Copyright Not Evaluated, means the holding institution has
+never assessed the item's status at all.
+
+The mechanism those institutions rely on is the diligent search, defined by the Orphan
+Works Directive, which member states had to implement by 29 October 2014. Cleared works
+are recorded in the EU orphan works register held by the European Union Intellectual
+Property Office.
+
+In Britain the practical route is the Intellectual Property Office scheme, opened in
+October 2014, which grants licences of up to seven years. Fewer than one hundred were
+granted in its first year, against a national estimate of 25 million orphans — which is
+the whole problem in one ratio.
+
+Across the Atlantic the archives have no scheme to use. The Copyright Office published
+Orphan Works and Mass Digitization in June 2015 and nothing followed it. The Google Books
+settlement, which would have built a registry, was rejected by a federal judge in 2011.
+The Internet Archive holds millions of moving image files, many with no traceable owner.
+Canada's Copyright Board, working under Section 77, had issued 321 orphan work licences
+by June 2023 — the only body anywhere issuing them at volume.
