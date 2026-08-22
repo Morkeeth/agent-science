@@ -20,11 +20,11 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional
 
-from . import instruments
+from . import instruments, search as _search
 from .locate import DEFAULT, Locator
 from .verify import verify
 from .verdict import (Verdict, GREEN, UNKNOWN, FACT,
-                      NO_SOURCE, SOURCE_UNREAD, SOURCE_SILENT)
+                      NO_SOURCE, SOURCE_UNREAD, SOURCE_SILENT, SEARCH_FOUND_NOTHING)
 
 SOURCING = "sourcing"  # the "use" a fact is judged for
 
@@ -38,14 +38,48 @@ class Claim:
 
 
 def judge_claim(claim: Claim, *, fetch: bool = False,
-                locator: Locator = DEFAULT) -> Verdict:
+                locator: Locator = DEFAULT, live_search: bool = False,
+                search_candidates: int = 5) -> Verdict:
     def unknown(reason: str, cause: str, **kw) -> Verdict:
         return Verdict(subject_id=claim.claim_id, subject_title=claim.text,
                        noun=FACT, use=SOURCING, verdict=UNKNOWN,
                        reason=reason, cause=cause, **kw)
 
     if not claim.source_url:
-        return unknown("no source offered for this claim", NO_SOURCE)
+        # THE STEP THAT USED TO BE DONE BY A HUMAN OFF-CAMERA. Parallel proposes
+        # candidate documents; each one still has to survive fetch -> locate -> verify.
+        # A search result is a lead, never evidence.
+        queries = [claim.text, claim.must_contain]
+        cands = _search.find_sources(
+            objective=f"Find a primary source that states verbatim: {claim.text}",
+            queries=queries, live=live_search, max_results=search_candidates)
+        if cands is None:
+            return unknown(
+                "no source offered for this claim, and no search was performed "
+                "(pass live_search=True to look for one)", NO_SOURCE)
+        if not cands:
+            return unknown(
+                f"searched and the search returned nothing: probe was {queries!r}",
+                SEARCH_FOUND_NOTHING)
+        read = 0
+        for c in cands:
+            body = instruments.document(c.url, fetch=fetch)
+            if body is None:
+                continue
+            read += 1
+            proposed = locator.propose(claim=claim.text,
+                                       must_contain=claim.must_contain, document=body)
+            if verify(proposed, document=body, must_contain=claim.must_contain) is None:
+                return Verdict(
+                    subject_id=claim.claim_id, subject_title=claim.text, noun=FACT,
+                    use=SOURCING, verdict=GREEN,
+                    reason=f"source found by search, passage verified verbatim "
+                           f"(locator: {locator.name})",
+                    citation_url=c.url, quoted_terms=proposed.strip())
+        return unknown(
+            f"searched, read {read} of {len(cands)} candidate document(s), "
+            f"none states this claim; probe was {queries!r}",
+            SEARCH_FOUND_NOTHING)
 
     body = instruments.document(claim.source_url, fetch=fetch)
     if body is None:

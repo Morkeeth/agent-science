@@ -10,11 +10,12 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from clearance import corpus, engine, facts, instruments, verify as V
+from clearance import corpus, engine, facts, instruments, search, verify as V
 from clearance.sources import europeana
 from clearance.verdict import (Verdict, UncitedVerdict, GREEN, RED, UNKNOWN, ASSET, FACT,
                                NO_INSTRUMENT, UNRULED, UNREAD_TERMS, NOT_EVALUATED,
                                NO_SOURCE, SOURCE_UNREAD, SOURCE_SILENT,
+                               SEARCH_FOUND_NOTHING,
                                CITED_UNKNOWN_CAUSES)
 
 REAL_INC = "http://rightsstatements.org/vocab/InC/1.0/"
@@ -277,10 +278,13 @@ def t_fact_leg_did_not_get_its_own_softer_guard():
 
 
 def t_unsourced_claim_is_unknown_with_the_right_cause():
-    v = facts.judge_claim(facts.Claim("f", "94% of film archives are unclearable",
-                                      None, "94%"))
+    """No source AND no search performed is NOT the same fact as searched-and-empty."""
+    v = facts.judge_claim(facts.Claim("f", "an unsearched claim about nothing",
+                                      None, "zzqq-no-such-string"))
     assert v.verdict == UNKNOWN and v.cause == NO_SOURCE, \
-        f"an unsourced claim must be UNKNOWN/no_source, got {v.verdict}/{v.cause}"
+        f"unsourced + unsearched must be UNKNOWN/no_source, got {v.verdict}/{v.cause}"
+    assert "no search was performed" in v.reason, \
+        "the engine must not imply it looked when it did not"
     assert not v.citation_url
 
 
@@ -437,6 +441,73 @@ def t_verifier_carries_no_site_specific_chrome_list():
         assert leaked not in src, \
             f"{leaked!r} leaked into the verifier — it is overfitted to specific pages"
     assert len(locate._CHROME) >= 5, "the live chrome list vanished; this control is hollow"
+
+
+def t_search_result_is_a_lead_not_evidence():
+    """A document Parallel found still has to survive the verifier.
+
+    The search path is a second door into GREEN. If it skipped verification, every
+    control written for the hand-sourced path would be bypassed by the new one.
+    """
+    liar = _Loc("liar", lambda doc, mc: "A sentence that is nowhere in any document.")
+    c = facts.Claim("S1", "The EU Orphan Works Directive is Directive 2012/28/EU",
+                    None, "2012/28/EU")
+    v = facts.judge_claim(c, locator=liar)   # cached search, no network
+    assert v.verdict == UNKNOWN, "the search path let an unverified passage become GREEN"
+
+
+def t_empty_search_is_an_honest_no_source_not_a_guess():
+    c = facts.Claim("S2", "94% of film archives are unclearable for AI training",
+                    None, "94% of film archives")
+    v = facts.judge_claim(c)
+    assert v.verdict == UNKNOWN and v.cause == SEARCH_FOUND_NOTHING, \
+        f"an unfindable claim came back {v.verdict}/{v.cause}"
+    assert not v.citation_url, "a claim about a SEARCH must not cite a document"
+    assert "probe was" in v.reason, "a refusal must name the probe that produced it"
+
+
+def t_missing_key_raises_and_is_never_stubbed():
+    """No key must be an error, never a fabricated result."""
+    import os
+    saved_env = os.environ.pop("PARALLEL_API_KEY", None)
+    saved_path = search.KEY_PATH
+    try:
+        search.KEY_PATH = Path("/nonexistent/parallel.key")
+        try:
+            search.load_key()
+        except search.NoKey:
+            return
+        raise AssertionError("load_key returned something with no key present")
+    finally:
+        search.KEY_PATH = saved_path
+        if saved_env is not None:
+            os.environ["PARALLEL_API_KEY"] = saved_env
+
+
+def t_the_key_is_nowhere_in_the_tree():
+    """Reads the secret, greps for it, and never prints it.
+
+    A key in a repo is unrecoverable once pushed, so this is checked mechanically
+    rather than by remembering not to paste it.
+    """
+    import subprocess
+    try:
+        key = search.load_key()
+    except search.NoKey:
+        return
+    root = Path(__file__).resolve().parents[1]
+    hits = []
+    for f in root.rglob("*"):
+        if f.is_file() and ".git/" not in str(f):
+            try:
+                if key in f.read_text(errors="ignore"):
+                    hits.append(str(f.relative_to(root)))
+            except Exception:
+                pass
+    assert not hits, f"the Parallel key appears in {hits} — it must never enter the tree"
+    log = subprocess.run(["git", "-C", str(root), "log", "-p", "--all"],
+                         capture_output=True, text=True).stdout
+    assert key not in log, "the Parallel key appears in git history"
 
 
 print("WATCH IT GO RED — control tests\n")

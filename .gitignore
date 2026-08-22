@@ -2,3 +2,6 @@ cache/corpus.db
 cache/documents.json
 __pycache__/
 *.pyc
+cache/searches.json
+*.key
+.env

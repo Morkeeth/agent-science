@@ -37,8 +37,12 @@ NOT_EVALUATED = "holder_states_not_evaluated"
 NO_SOURCE = "no_source_offered"       # nothing was proposed to support the claim
 SOURCE_UNREAD = "source_never_fetched"  # a source was named but never opened
 SOURCE_SILENT = "source_does_not_state_it"  # we read it; it does not say this
+SEARCH_FOUND_NOTHING = "search_found_no_admissible_source"
+# ^ we went and LOOKED and came back empty. Distinct from no_source_offered, which
+# means nobody ever proposed one. Carries no citation: it is a statement about a
+# search, not about a document, and the probe belongs in the reason.
 CAUSES = (NO_INSTRUMENT, UNRULED, UNREAD_TERMS, NOT_EVALUATED,
-          NO_SOURCE, SOURCE_UNREAD, SOURCE_SILENT)
+          NO_SOURCE, SOURCE_UNREAD, SOURCE_SILENT, SEARCH_FOUND_NOTHING)
 
 # The causes where a citation is REQUIRED rather than forbidden. Both are the same
 # fact about the world: we opened a document and it documented an absence. That is
