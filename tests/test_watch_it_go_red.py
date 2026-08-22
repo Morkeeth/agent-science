@@ -710,6 +710,30 @@ def t_corpus_round_trips_every_cause():
         "the corpus dropped which instrument the archive actually published"
 
 
+def t_corpus_path_honours_its_deployment_env():
+    """An env var set in the Dockerfile and read by nothing is not configuration.
+
+    Cloud Run's filesystem is read-only except /tmp. CORPUS_DB was set in two deploy
+    surfaces and consumed by neither, so the container would have written to
+    /app/cache/corpus.db and failed on the first stored verdict - on camera, with every
+    local test green.
+    """
+    import importlib, os
+    from clearance import corpus as _c
+    saved = os.environ.get("CORPUS_DB")
+    try:
+        os.environ["CORPUS_DB"] = "/tmp/probe-corpus.db"
+        importlib.reload(_c)
+        assert str(_c.DB) == "/tmp/probe-corpus.db", \
+            f"CORPUS_DB is set by the deployment and ignored by the code: DB={_c.DB}"
+    finally:
+        if saved is None:
+            os.environ.pop("CORPUS_DB", None)
+        else:
+            os.environ["CORPUS_DB"] = saved
+        importlib.reload(_c)
+
+
 print("WATCH IT GO RED — control tests\n")
 for n, f in list(globals().items()):
     if n.startswith("t_"):

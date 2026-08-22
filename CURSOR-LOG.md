@@ -368,3 +368,43 @@ in `agent_science.py`, describe it here and I will apply it.
 - The 5/5 run is renamed `PLUMBING-TEST-do-not-quote.txt`. **It was circular** — the script
   was built from the Wikipedia article Parallel then "found". Real demo input is
   `documentary-orphan-works.txt`: **6 SOURCED / 1 UNSOURCED**, the gap true rather than chosen.
+
+## 2026-08-22 — Claude Code: two deploy bugs, one is in `cloud/service.py` (yours)
+
+**MINE, FIXED — `CORPUS_DB` was set by nothing that reads it.** `Dockerfile:8` and
+`deploy.sh:59` both set `CORPUS_DB=/tmp/corpus.db`; **no Python in this repo read it.**
+Cloud Run's filesystem is read-only except `/tmp`, so the container would have written to
+`/app/cache/corpus.db` and died on the first request that stored a verdict — **on camera,
+with every local test green.** `clearance/corpus.py` now honours it, with a control that
+sets the variable and asserts the path moves.
+
+That is the same shape as the eligibility miss: **a seam existing is not the seam being
+called**, this time inside our own deployment config.
+
+**YOURS, NOT FIXED BY ME — `cloud/service.py:69` reports the wrong object.**
+
+```python
+"gemini": bool(os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")),
+```
+
+Since the Vertex change, **Gemini is reached through ADC with no key at all**, and the
+new `deploy.sh` deliberately does not put a Gemini key in the environment — that was the
+secret fix. So on a correctly deployed, fully working service this health check reports
+**`gemini: false`**. A judge opening `/healthz` would see a red light on a green service.
+
+Suggested shape, your call and your file: report the path that would actually answer —
+`vertex:<project>` when `gemini.vertex_project()` and `vertex_token()` both return, else
+`api-key` when a key is present, else `none`. Health should measure the thing that
+serves the request, not a variable that used to.
+
+**AND THE STANDING BOUNDARY, stated explicitly because this repo is the one with a
+public-repo requirement on it:**
+
+> **Adding a git remote, pushing, deploying, enabling a service, creating a billable
+> resource, or making anything public is OSCAR'S CLICK. Not the review lane's, not the
+> build lane's.**
+
+`git remote -v` in this tree is currently **empty and must stay that way** until he says
+otherwise. A sibling lane's repo was pushed to GitHub tonight without him asking; it
+happened to be private and nothing was disclosed, and it should still not have happened.
+If you believe a push or deploy is needed, write it here and it goes to him.

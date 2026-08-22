@@ -5,13 +5,20 @@ pitch is only true if it exists from day one.
 """
 from __future__ import annotations
 
+import os
 import sqlite3
 from pathlib import Path
 from typing import Iterable, Optional
 
 from .verdict import Verdict
 
-DB = Path(__file__).resolve().parent.parent / "cache" / "corpus.db"
+# CORPUS_DB was set in the Dockerfile and in deploy.sh and read by NOTHING - the seam
+# existing without the service being called, this time in our own deployment config. On
+# Cloud Run the filesystem is read-only except /tmp, so the container would have tried to
+# write to /app/cache/corpus.db and died on the first request that stored a verdict. The
+# hosted demo would have failed on camera, with every local test green.
+DB = Path(os.environ.get("CORPUS_DB")
+          or Path(__file__).resolve().parent.parent / "cache" / "corpus.db")
 
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS verdicts (
