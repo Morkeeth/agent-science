@@ -76,8 +76,17 @@ def _present(v: Verdict) -> str:
     return LABEL.get(v.cause or "", "UNSOURCED")
 
 
-def _row(v: Verdict, *, corpus_hit: bool = False) -> dict:
+def _row(v: Verdict, *, corpus_hit: bool = False, asked_as: str = "") -> dict:
+    # A corpus hit keyed on the distinctive term is LOOSER than one keyed on the whole
+    # sentence: two different assertions sharing a term - "2012/28/EU was passed in
+    # 2012" and "2012/28/EU was known as the Orphan Works Directive" - can key the same.
+    # We cannot decide structurally whether that is the same fact, so the substitution
+    # is PRINTED. The reader sees which claim the reused evidence was originally about.
+    reused_from = (v.subject_title if corpus_hit and asked_as
+                   and asked_as.strip().lower() != v.subject_title.strip().lower()
+                   else None)
     return {
+        "reused_from": reused_from,
         "claim_id": v.subject_id,
         "text": v.subject_title,
         "label": _present(v),
@@ -143,7 +152,7 @@ def clear_script(
                 citation_url=hit.citation_url,
                 quoted_terms=hit.quoted_terms,
             )
-            rows.append(_row(v, corpus_hit=True))
+            rows.append(_row(v, corpus_hit=True, asked_as=c.text))
             continue
 
         parallel_calls += 1
@@ -225,6 +234,10 @@ def _markdown(rows: list[dict], *, subject: str, n: int, sourced: int) -> str:
             out.append(f"### {r['claim_id']} — SOURCED")
             if r["corpus_hit"]:
                 out.append("*Resolved from corpus — no Parallel call.*")
+                if r.get("reused_from"):
+                    out.append(f'> ⚠ the reused evidence was gathered for a DIFFERENT '
+                               f'wording: "{r["reused_from"][:120]}". Same distinctive '
+                               f'term, possibly not the same assertion — a human should look.')
             out.append(f"- {r['citation_url']}")
             out.append(f'> "{(r["quoted_terms"] or "")[:200]}"')
             if r.get("source_note"):

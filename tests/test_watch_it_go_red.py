@@ -930,6 +930,27 @@ def t_a_reused_verdict_still_cites_the_same_document():
     assert back.cause == v.cause and back.interpretive == v.interpretive
 
 
+def t_a_reused_verdict_from_a_different_wording_is_flagged():
+    """Term keying buys a 60% hit rate by being LOOSER. Looser can collide.
+
+    "Directive 2012/28/EU was passed in 2012" and "Directive 2012/28/EU was known as
+    the Orphan Works Directive" share a distinctive term and are different assertions.
+    Nothing structural can tell whether a hit is the same fact, so the substitution is
+    printed rather than hidden - the same move as flagging a derived source.
+    """
+    import agent_science as A
+    v = Verdict(subject_id="k", subject_title="Directive 2012/28/EU was passed in 2012",
+                noun=FACT, use="sourcing", verdict=GREEN, reason="r",
+                citation_url="http://x", quoted_terms="passed in 2012, verbatim text")
+    same = A._row(v, corpus_hit=True,
+                  asked_as="Directive 2012/28/EU was passed in 2012")
+    assert same["reused_from"] is None, "flagged a hit that was the same wording"
+    other = A._row(v, corpus_hit=True,
+                   asked_as="Directive 2012/28/EU was known as the Orphan Works Directive")
+    assert other["reused_from"], \
+        "reused evidence gathered for a DIFFERENT assertion was passed off silently"
+
+
 print("WATCH IT GO RED — control tests\n")
 for n, f in list(globals().items()):
     if n.startswith("t_"):
