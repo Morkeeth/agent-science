@@ -121,15 +121,24 @@ def judge_claim(claim: Claim, *, fetch: bool = False,
                     f"{ind['origins']} non-independent origin(s) [{origins}]; "
                     "derived or unclassified sources are not independent support",
                     NO_INDEPENDENT_SOURCE)
-            url, proposed = next((u, p) for u, p in verified
-                                 if u.split("/")[2:3] and
-                                 assess_independence([u])["has_independent_support"])
+            # WHICH URL TO CITE. Prefer a primary origin - best evidence. When the
+            # claim clears on CORROBORATION no single source is sufficient on its own,
+            # which is the whole point of corroboration; the first verified document is
+            # cited and the reason records how many origins carried it.
+            #
+            # The previous version looked for a URL that was independently sufficient
+            # and crashed with StopIteration when none was, because under corroboration
+            # none ever is. The bug only became reachable once corroboration existed.
+            primary = [(u, p) for u, p in verified
+                       if assess_independence([u])["basis"] == "primary"]
+            url, proposed = (primary or verified)[0]
             return Verdict(
                 subject_id=claim.claim_id, subject_title=claim.text, noun=FACT,
                 use=SOURCING, verdict=GREEN,
-                reason=(f"source found by search, passage verified verbatim, "
-                        f"{len(ind['independent'])} independent origin(s) "
-                        f"of {ind['origins']} (locator: {locator.name})"),
+                reason=(f"passage verified verbatim; basis: {ind['basis'].upper()} "
+                        f"({len(ind['independent'])} primary, "
+                        f"{len(ind['corroborating'])} non-derived origin(s) "
+                        f"of {ind['origins']}) (locator: {locator.name})"),
                 citation_url=url, quoted_terms=proposed.strip())
 
         return unknown(

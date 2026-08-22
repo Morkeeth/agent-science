@@ -96,3 +96,10 @@ def recall(con: sqlite3.Connection, subject_id: str, use: str) -> Optional[Verdi
 
 def size(con: sqlite3.Connection) -> int:
     return con.execute("SELECT COUNT(*) FROM verdicts").fetchone()[0]
+
+
+def size_for_use(con: sqlite3.Connection, use: str) -> int:
+    """How many remembered verdicts sit under one subject-use shelf."""
+    return con.execute(
+        "SELECT COUNT(*) FROM verdicts WHERE use=?", (use,)
+    ).fetchone()[0]

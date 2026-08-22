@@ -966,6 +966,42 @@ def t_no_source_and_no_independence_are_different_labels():
         "unverified independence must not read as cleared"
 
 
+def t_independent_is_not_the_same_property_as_primary():
+    """The category error that made a real script clear 0 of 10.
+
+    Four unrelated outlets reporting a court ruling - LA Times, Columbia, and two more -
+    are INDEPENDENT without any of them being PRIMARY. Counting only primary origins as
+    independent support demoted that as "no independent source", which is not strictness
+    but a conflation of two different properties.
+    """
+    from clearance.independence import assess
+    outlets = ["https://allthingsd.com/a", "https://www.columbia.edu/b",
+               "https://comicmix.com/c", "https://www.latimes.com/d"]
+    a = assess(outlets)
+    assert a["has_independent_support"], "four separate origins read as no support"
+    assert a["basis"] == "corroborated", \
+        "corroboration must never be reported as primary evidence"
+    one_primary = assess(["https://eur-lex.europa.eu/x"])
+    assert one_primary["basis"] == "primary", "best evidence lost its label"
+
+
+def t_one_unclassified_source_still_does_not_clear():
+    """The asymmetry that made strictness right is untouched: one blog is one blog."""
+    from clearance.independence import assess
+    a = assess(["https://some-legal-blog.example/post"])
+    assert not a["has_independent_support"] and a["basis"] == "insufficient"
+
+
+def t_mirrors_never_corroborate_each_other():
+    """Three copies of one page are one origin, however many URLs they present."""
+    from clearance.independence import assess
+    a = assess(["https://en.wikipedia.org/wiki/X",
+                "https://bafy.ipfs.dweb.link/wiki/X",
+                "https://dbpedia.org/page/X"])
+    assert not a["has_independent_support"], \
+        "mirrors corroborated each other - a copy is not a witness"
+
+
 print("WATCH IT GO RED — control tests\n")
 for n, f in list(globals().items()):
     if n.startswith("t_"):

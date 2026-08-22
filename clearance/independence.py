@@ -105,11 +105,28 @@ def origin_key(url: str) -> str:
     return ".".join(parts[-2:]) if len(parts) >= 2 else host
 
 
+# Two independent origins is the newsroom standard, and it is the standard here.
+CORROBORATION = 2
+
+
 def assess(urls) -> dict:
     """Independence of a SET of candidate sources for one claim.
 
-    Only PRIMARY origins count as independent support. Unclassified is a question, not
-    a yes, and is never silently promoted.
+    THE MODELLING ERROR THIS FIXES. The first version counted only PRIMARY origins as
+    independent support, which conflated two different properties:
+
+        PRIMARY     the document IS the thing - the statute, the register, the ruling
+        INDEPENDENT several origins that do not derive from one another
+
+    Four unrelated outlets reporting a court ruling are INDEPENDENT without any of them
+    being PRIMARY. Conflating the two demoted a claim carried by the LA Times, Columbia
+    University and two other separate origins as "no independent source", and it is why
+    a real script cleared 0 of 10. That is not strictness, it is a category error.
+
+    So: one primary origin clears on best evidence. Two or more distinct non-derived
+    origins clear on corroboration. A single unclassified origin still does not clear -
+    the asymmetry that made strictness right is untouched, because one blog is still one
+    blog.
     """
     groups = {}
     for u in urls:
@@ -122,11 +139,17 @@ def assess(urls) -> dict:
          else derived if cls == "derived"
          else unclassified).append(key)
 
+    corroborating = independent + unclassified   # everything that is not a copy
     return {
         "groups": groups,
         "origins": len(groups),
         "independent": independent,
         "derived": derived,
         "unclassified": unclassified,
-        "has_independent_support": bool(independent),
+        "corroborating": corroborating,
+        # best evidence, or corroboration by genuinely separate origins
+        "has_independent_support": bool(independent) or len(corroborating) >= CORROBORATION,
+        "basis": ("primary" if independent
+                  else "corroborated" if len(corroborating) >= CORROBORATION
+                  else "insufficient"),
     }
