@@ -11,6 +11,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from clearance import corpus, engine, facts, instruments, verify as V
+from clearance.sources import europeana
 from clearance.verdict import (Verdict, UncitedVerdict, GREEN, RED, UNKNOWN, ASSET, FACT,
                                NO_INSTRUMENT, UNRULED, UNREAD_TERMS, NOT_EVALUATED,
                                NO_SOURCE, SOURCE_UNREAD, SOURCE_SILENT,
@@ -109,9 +110,7 @@ def t_corpus_compounds():
 
 
 def t_every_real_item_gets_a_cited_or_unknown_verdict():
-    items = json.loads(
-        (Path(__file__).resolve().parents[1] / "fixtures" /
-         "europeana-film-archive.json").read_text())
+    items = europeana.load_fixture("europeana-film-archive.json")
     for it in items:
         v = engine.judge(subject_id=it["subject_id"], subject_title=it["subject_title"],
                          instrument_uri=it["instrument_uri"], use=engine.AI_TRAINING)
@@ -191,9 +190,7 @@ def t_nc_nd_keeps_both_terms():
 
 def t_no_verdict_quotes_a_document_it_did_not_read():
     """Across the whole real corpus: citation_url is always where the terms came from."""
-    items = json.loads(
-        (Path(__file__).resolve().parents[1] / "fixtures" /
-         "europeana-broad.json").read_text())
+    items = europeana.load_fixture("europeana-broad.json")
     bad = []
     for it in items:
         v = engine.judge(subject_id=it["subject_id"], subject_title=it["subject_title"],
@@ -212,9 +209,7 @@ def t_second_question_touches_no_network():
     """
     import urllib.request
 
-    items = json.loads(
-        (Path(__file__).resolve().parents[1] / "fixtures" /
-         "europeana-broad.json").read_text())
+    items = europeana.load_fixture("europeana-broad.json")
 
     calls = []
     real_urlopen = urllib.request.urlopen
@@ -237,9 +232,7 @@ def t_second_question_touches_no_network():
 
 def t_the_second_question_actually_splits_the_library():
     """A second use case that changes nothing is not a second use case."""
-    items = json.loads(
-        (Path(__file__).resolve().parents[1] / "fixtures" /
-         "europeana-broad.json").read_text())
+    items = europeana.load_fixture("europeana-broad.json")
     a = {}
     b = {}
     for it in items:
@@ -324,8 +317,10 @@ def t_green_evidence_carries_the_claim():
     source it.
     """
     from check_pitch import CLAIMS
-    chrome = ("consolidated versions", "Skip to main content", "table of contents",
-              "Hrvatski", "Log in", "My EUR-Lex")
+    # Bound to the LIVE list, not a hand-copied one. A test carrying its own copy of
+    # a shipping constant grades a frozen snapshot: add a string to locate._CHROME
+    # tomorrow, let it leak into a quote, and this stays green.
+    from clearance.locate import _CHROME as chrome
     checked = 0
     for c in CLAIMS:
         v = facts.judge_claim(c)
@@ -434,10 +429,14 @@ def t_a_good_locator_still_passes():
 
 def t_verifier_carries_no_site_specific_chrome_list():
     """The guard must hold on the third website, not just the two we fetched."""
-    src = (Path(__file__).resolve().parents[1] / "clearance" / "verify.py").read_text()
-    for leaked in ("Hrvatski", "EUR-Lex", "consolidated versions", "Skip to main"):
+    from clearance import locate, verify as _v
+    src = Path(_v.__file__).read_text()
+    # Every string the locator overfits to, read from the locator itself. Hardcoding
+    # the list here would let a NEW chrome string leak into the guard unnoticed.
+    for leaked in locate._CHROME:
         assert leaked not in src, \
-            f"{leaked!r} leaked into the verifier — it is overfitted to two pages"
+            f"{leaked!r} leaked into the verifier — it is overfitted to specific pages"
+    assert len(locate._CHROME) >= 5, "the live chrome list vanished; this control is hollow"
 
 
 print("WATCH IT GO RED — control tests\n")
