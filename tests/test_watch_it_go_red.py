@@ -5,6 +5,7 @@ strips something and confirms the engine refuses, rather than passes quietly.
 Run: python3 tests/test_watch_it_go_red.py
 """
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -732,6 +733,56 @@ def t_corpus_path_honours_its_deployment_env():
         else:
             os.environ["CORPUS_DB"] = saved
         importlib.reload(_c)
+
+
+def t_no_deploy_surface_passes_a_secret_in_the_clear():
+    """The control that should have existed before tonight.
+
+    A rewritten, safe deploy.sh sat in the repo and the OLD one was run anyway, putting
+    both API keys into a live Cloud Run service, its revisions and its build logs -
+    places that cannot be un-written. Rotation was the only fix.
+
+    A rule that lives in a file gets bypassed. A rule that lives in a test gets caught.
+    This scans every deploy surface for a secret being handed over in the clear.
+    """
+    root = Path(__file__).resolve().parents[1]
+    surfaces = [f for f in root.rglob("*")
+                if f.is_file() and "/.git/" not in str(f)
+                and (f.suffix in (".sh", ".yaml", ".yml", ".tf")
+                     or f.name in ("Dockerfile", "cloudbuild.yaml", "Procfile"))]
+    assert surfaces, "UNMEASURABLE: no deploy surface found to scan"
+
+    # An env-var assignment whose NAME looks like a secret. --set-secrets is the safe
+    # form and is deliberately not matched.
+    secretish = re.compile(
+        r"(--set-env-vars|ENV|export)[^\n]*?\b([A-Z0-9_]*(KEY|TOKEN|SECRET|PASSWORD|CREDENTIAL)[A-Z0-9_]*)\s*[=:]",
+        re.I)
+    offences = []
+    for f in surfaces:
+        text = f.read_text(errors="ignore")
+        for m in secretish.finditer(text):
+            line = text[:m.start()].count("\n") + 1
+            offences.append(f"{f.relative_to(root)}:{line} passes {m.group(2)} in the clear")
+    assert not offences, (
+        "a deploy surface hands a secret over in the clear; use --set-secrets or ADC:\n  "
+        + "\n  ".join(offences))
+
+
+def t_the_secret_scanner_actually_catches_one():
+    """The control's own control. A scanner that cannot find a planted secret is décor."""
+    import tempfile
+    with tempfile.TemporaryDirectory() as d:
+        bad = Path(d) / "deploy.sh"
+        bad.write_text('gcloud run deploy x --set-env-vars="GEMINI_API_KEY=${K}"\n')
+        secretish = re.compile(
+            r"(--set-env-vars|ENV|export)[^\n]*?\b([A-Z0-9_]*(KEY|TOKEN|SECRET|PASSWORD|CREDENTIAL)[A-Z0-9_]*)\s*[=:]",
+            re.I)
+        assert secretish.search(bad.read_text()), \
+            "the scanner does not catch the exact line that leaked tonight"
+        good = Path(d) / "safe.sh"
+        good.write_text('gcloud run deploy x --set-secrets="PARALLEL_API_KEY=sec:latest"\n')
+        assert not secretish.search(good.read_text()), \
+            "the scanner false-positives on --set-secrets, which is the safe form"
 
 
 print("WATCH IT GO RED — control tests\n")
