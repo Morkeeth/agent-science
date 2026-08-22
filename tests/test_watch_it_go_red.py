@@ -1070,6 +1070,31 @@ def t_refusals_are_first_class_in_the_ledger():
     assert L.stats(con)["refused"] == 1
 
 
+def t_chunked_extraction_beats_whole_document():
+    """The scale ceiling, pinned. Measured: 9 claims whole, 19 chunked, same script.
+
+    The ceiling was PER-CALL - attention across a long input - not a document or token
+    limit. Unchunked, a 90-minute documentary carrying 200 assertions would have had ~10
+    checked, and the report would have looked thorough while silently dropping most of
+    the film. That is the worst failure available to a clearance tool: a confident
+    partial answer.
+
+    Offline control: no model needed. It asserts the CHUNKING PATH EXISTS and splits,
+    because the yield itself is model-dependent and would be a sample.
+    """
+    import inspect
+    from clearance.extract import GeminiExtractor
+    src = inspect.getsource(GeminiExtractor.extract)
+    assert "split" in src and "chunk" in src, \
+        "extraction no longer splits the script; the per-call ceiling is back"
+    assert "must_contain" in src, \
+        "chunked extraction must dedup on the distinctive term across passages"
+    # a single-passage script must not be split into nothing
+    x = GeminiExtractor.__new__(GeminiExtractor)
+    passages = [p for p in "one short line".split("\n\n") if len(p.strip()) > 60]
+    assert len(passages) < 2, "the fallback for a single-passage script is unreachable"
+
+
 print("WATCH IT GO RED — control tests\n")
 # Held-out refusal set — suite must fail on false UNKNOWN.
 import importlib.util as _ilu

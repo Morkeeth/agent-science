@@ -1,0 +1,11 @@
+{
+  "leg": 1,
+  "script": "powered-A-law.txt",
+  "claims": 10,
+  "corpus_hits": 0,
+  "hit_rate": 0.0,
+  "parallel_calls": 0,
+  "seconds": 187.1,
+  "cost": 0.0011,
+  "sourced": 3
+}
