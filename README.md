@@ -51,36 +51,41 @@ whose evidence was gathered for a different wording, a verdict resting on our le
 reading rather than the document's plain words — each is flagged rather than resolved
 silently in our own favour.
 
-## The corpus compounds — measured, not asserted
+## The corpus — measured, and the saving is NOT yet proven
 
-The second production about the same subject reuses what the first one proved.
-Two independently written scripts on one subject, corpus wiped first:
+The second production about the same subject reuses what the first one proved. Whether
+that is a *saving* is a measurement, and it is the one claim in this repo that has been
+corrected three times. Two independently written scripts on one subject, corpus wiped
+before each run:
 
-Three runs of the same experiment, corpus wiped before each:
+| run | production 2 from memory | cost | wall clock |
+|---|---:|---:|---:|
+| 1 | 6 / 10 — 60% | −43% | −21% |
+| 2 | 3 / 11 — 27% | — | — |
+| 3 | 4 / 10 — 40% | −14% | −16% |
+| 4 | 2 / 10 — 20% | — | **+12% SLOWER, and MORE searches** |
 
-| run | production 2 from memory | cost saving |
-|---|---:|---:|
-| 1 | 6 / 10 — 60% | −43% |
-| 2 | 3 / 11 — 27% | — |
-| 3 | 4 / 10 — 40% | −14% |
+**The saving is NOT demonstrated at this scale. n = 4, and the variance swamps it.**
 
-**The direction is robust; the magnitude is not.** Stated honestly: **27–60% of a second
-production's claims resolve from memory, saving 14–43% of cost. n = 3.**
+What IS established: sentence-keying made compounding **impossible by construction** —
+9% hits and 25% *more* expensive. Term-keying makes it **possible**: every run since has
+had real hits. But "possible" is not "a saving", and run 4 was slower than cold with
+more live searches, not fewer.
 
-The first number measured was 60%, and publishing that alone would have been a
-cherry-pick a judge could break by re-running the harness that ships in this repo.
+An earlier version of this file claimed 60%, then "27–60%, direction robust". Both were
+wrong: the first was a cherry-pick, the second asserted a direction that run 4 broke.
+**Three corrections to one number, which is itself the finding — at 7–11 claims per
+script the measurement is too noisy to carry a headline.** The open question is whether
+it stabilises at 50–100 claims; that experiment has not been run.
 
-The variance is the **claim extractor**, which is not deterministic — 7, 8 and 11 claims
-across runs on identical input — so which claims two productions share moves run to run,
-and every figure downstream of it is a sample. The scripts were written to overlap; real
-productions may overlap less.
+The variance is the **claim extractor**, which is not deterministic — 7, 8, 10 and 11
+claims across runs on identical input — so which claims two productions share is partly
+luck, and at this size two hits either way moves the percentage by twenty points. The
+scripts were written to overlap; real productions may overlap less.
 
-Before this was measured the same claim was **false**: the corpus keyed on the whole
-claim sentence, so it only compounded when the identical script was re-run — a thing
-nobody would ever do. That version scored **9%, and cost 25% MORE**. Every run since has
-beaten it, which is why the architectural claim stands even where the number is noisy.
-`measure_compounding.py` is the harness, and its cost model is in the docstring so the
-number can be argued with rather than believed.
+`measure_compounding.py` is the harness and its cost model is in the docstring, so the
+number can be argued with rather than believed. **Run it yourself; you will get a
+different number, and that is the point.**
 
 ## Runtime integrations
 

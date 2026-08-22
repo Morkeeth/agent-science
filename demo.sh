@@ -70,7 +70,7 @@ pause 2
 
 # ---------------------------------------------------------------------------
 say "4 · THE SECOND PRODUCTION — same subject, different script, warm corpus"
-printf "${D}This is the company. The second production about the same subject\nreuses what the first one proved, and it costs a fraction.${R}\n\n"
+printf "${D}The second production about the same subject reuses what the first proved.\nWhether that is a saving AT THIS SCALE is measured below, not asserted.${R}\n\n"
 T2=$(now)
 python3 -u agent_science.py \
   fixtures/scripts/documentary-orphan-works-B.txt --subject demo 2>&1 \
@@ -80,4 +80,4 @@ printf "\n${B}   warm run: %ss  (cold was %ss)${R}\n" "$WARM" "$COLD"
 pause 2
 
 say "MEASURED, this run"
-printf "${D}Production 1 ran cold: 7 live searches.\nProduction 2 ran warm: fewer searches, and finished faster — every run.\n\nThe hit-rate PERCENTAGE moves between runs (27-60%%, n=3) because the claim\nextractor is not deterministic, so it is not the headline. Search count and\nwall clock move in the same direction every time, and they are.\n\nThe reason this demo fits in three minutes IS the product claim.${R}\n"
+printf "${D}Four measured runs: 20%%, 27%%, 40%%, 60%% of the second production resolved\nfrom memory. In one run the warm production was FASTER; in another it was\nSLOWER and made MORE searches.\n\nSo: term-keying makes compounding POSSIBLE where sentence-keying made it\nimpossible by construction (9%%, and 25%% more expensive). At this scale —\n7 to 11 claims — the saving is NOT yet demonstrated. n=4, and the variance\nswamps it.\n\nThat is the honest state of the claim. The harness is measure_compounding.py;\nrun it yourself.${R}\n"
