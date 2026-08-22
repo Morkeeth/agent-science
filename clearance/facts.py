@@ -78,6 +78,36 @@ def judge_claim(claim: Claim, *, fetch: bool = False,
             if verify(proposed, document=body, must_contain=claim.must_contain) is None:
                 verified.append((c.url, proposed))
 
+        # ESCALATION. A researcher who finds only blogs does not stop; they go looking
+        # for the statute, the register, the official publication. The first version of
+        # this refused instead, and cleared 0 of 10 on a real script - which is not
+        # rigour, it is the refuse-everything failure this repo has a control against.
+        #
+        # The allowlist stays strict. The EFFORT goes up.
+        if verified and not assess_independence([u for u, _ in verified])[
+                "has_independent_support"]:
+            more = _search.find_sources(
+                objective=(f"Find the PRIMARY source that states verbatim: {claim.text}. "
+                           "Prefer the official publisher: legislation, an official "
+                           "register, a government or institutional publication, a court "
+                           "record. Not encyclopaedias, blogs or aggregators."),
+                queries=[f"{claim.must_contain} official text",
+                         f"{claim.must_contain} legislation register"],
+                live=live_search, max_results=search_candidates)
+            for c in (more or []):
+                if any(c.url == u for u, _ in verified):
+                    continue
+                body = instruments.document(c.url, fetch=fetch)
+                if body is None:
+                    continue
+                read += 1
+                proposed = locator.propose(claim=claim.text,
+                                           must_contain=claim.must_contain,
+                                           document=body)
+                if verify(proposed, document=body,
+                          must_contain=claim.must_contain) is None:
+                    verified.append((c.url, proposed))
+
         if verified:
             ind = assess_independence([u for u, _ in verified])
             if not ind["has_independent_support"]:

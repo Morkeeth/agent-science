@@ -9,7 +9,7 @@
 | BLOCKED (RED) | 524 | 87% |
 | UNKNOWN — did not resolve | 37 | 6% |
 
-> **561 of 600 (94%) of this library is not sellable as-is.**
+> **561 of 600 (94%) of this library CANNOT LEGALLY BE USED TO TRAIN A MODEL.**
 
 ## Blocked, with the instrument that blocks it
 

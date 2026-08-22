@@ -12,6 +12,23 @@ from .verdict import (Verdict, GREEN, RED, UNKNOWN,
                       NO_INSTRUMENT, UNRULED, UNREAD_TERMS, NOT_EVALUATED)
 
 
+# The number was always right and the SENTENCE was generic. "Not sellable as-is" is a
+# stock-library phrase; the question actually asked is which use is blocked, and for
+# ai_training the answer is the one that matters commercially right now - a licence to
+# put a clip in a film is not permission to put it in a model, and that distinction is
+# months old in the industry and unautomated.
+_HEADLINE = {
+    "ai_training": "of this library CANNOT LEGALLY BE USED TO TRAIN A MODEL.",
+    "commercial_license": "of this library cannot be commercially licensed as-is.",
+    "broadcast": "of this library cannot be broadcast or reused as-is.",
+    "noncommercial_reuse": "of this library is closed even to non-commercial reuse.",
+}
+
+
+def _headline(use: str) -> str:
+    return _HEADLINE.get(use, "of this library is not clearable as-is.")
+
+
 def render(verdicts: Sequence[Verdict], *, library: str, use: str) -> str:
     m = len(verdicts)
     if m == 0:
@@ -33,7 +50,7 @@ def render(verdicts: Sequence[Verdict], *, library: str, use: str) -> str:
         f"| BLOCKED (RED) | {red} | {red / m:.0%} |",
         f"| UNKNOWN — did not resolve | {unknown} | {unknown / m:.0%} |",
         "",
-        f"> **{blocked} of {m} ({blocked / m:.0%}) of this library is not sellable as-is.**",
+        f"> **{blocked} of {m} ({blocked / m:.0%}) {_headline(use)}**",
         "",
     ]
 
