@@ -6,7 +6,10 @@
   GET  /corpus?subject=  remembered count for a subject shelf
   POST /clear           {"script","subject"} -> gap report JSON or HTML memo
 
-Stdlib only in the serving path.
+Stdlib in the serving path, except the ADK agent that /clear runs through: Agent
+Builder is a submission requirement and a requirement is not met by a module nobody
+imports. Every gap report names the engine that produced it (`adk` or `direct`), so
+"the agent ran" is a field a judge can read rather than a claim in a README.
 """
 from __future__ import annotations
 
@@ -22,6 +25,14 @@ from http.server import BaseHTTPRequestHandler, HTTPServer  # noqa: E402
 
 import agent_science  # noqa: E402
 from clearance import corpus  # noqa: E402
+from cloud import agent as adk_agent  # noqa: E402
+
+# ADK is the default path. Setting this to "0" serves the direct pipeline instead and
+# is for controls only — a run with the agent switched off is a different product and
+# every report says which one answered.
+ADK_DEFAULT = os.environ.get("AGENT_BUILDER", "1").strip().lower() not in (
+    "0", "false", "off", "no",
+)
 
 # Direction: cool archival paper + ink + stamp red for action only.
 # Signature device: the COMPOUND strip (Parallel A-vs-memory numbers).
@@ -253,6 +264,29 @@ article{{padding:1rem 0;border-bottom:1px solid var(--line)}}
 </body></html>"""
 
 
+def _run_clearance(script: str, subject: str, model: str) -> dict:
+    """Clear through the ADK agent, and say so in the report.
+
+    A fallback that quietly serves the direct pipeline would let the submission
+    claim Agent Builder on a path that had stopped using it. So the fallback keeps
+    running (a judge still gets a clearance) but stamps `engine: "direct"` and
+    carries the ADK failure in `adk_error`. The claim and the evidence move together.
+    """
+    if ADK_DEFAULT and adk_agent.adk_available():
+        try:
+            return adk_agent.run_clearance(script, subject=subject)
+        except Exception as e:
+            out = agent_science.clear_script(script, subject=subject, model=model)
+            out["engine"] = "direct"
+            out["adk_error"] = f"{type(e).__name__}: {e}"
+            return out
+    out = agent_science.clear_script(script, subject=subject, model=model)
+    out["engine"] = "direct"
+    if ADK_DEFAULT:
+        out["adk_error"] = "google-adk not importable in this image"
+    return out
+
+
 class Handler(BaseHTTPRequestHandler):
     protocol_version = "HTTP/1.1"
 
@@ -311,12 +345,18 @@ class Handler(BaseHTTPRequestHandler):
                             gemini_path = f"vertex:{p}"
                     except Exception:
                         pass
+            adk_ok = adk_agent.adk_available()
             return self._json(200, {
                 "ok": True,
                 "service": "agent-science",
                 "gemini": gemini_path != "none",
                 "gemini_path": gemini_path,
                 "parallel": bool(os.environ.get("PARALLEL_API_KEY")),
+                # Importable is not the same as used. `engine_default` is what a
+                # /clear on this revision will actually run.
+                "agent_builder": adk_ok,
+                "adk_version": adk_agent.adk_version(),
+                "engine_default": "adk" if (ADK_DEFAULT and adk_ok) else "direct",
             })
 
         if path == "/corpus":
@@ -356,7 +396,7 @@ class Handler(BaseHTTPRequestHandler):
                 return self._json(400, {"error": "field 'script' is required"})
             model = os.environ.get("GEMINI_MODEL", "gemini-3.5-flash-lite")
             try:
-                out = agent_science.clear_script(script, subject=subject, model=model)
+                out = _run_clearance(script, subject, model)
             except RuntimeError as e:
                 return self._json(503, {"error": str(e)})
             code = 200 if out.get("ok") else 422

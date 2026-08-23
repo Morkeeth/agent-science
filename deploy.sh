@@ -61,7 +61,7 @@ fi
   --memory=512Mi \
   --timeout=300 \
   --service-account="$RUNTIME_SA" \
-  --set-env-vars="GEMINI_MODEL=gemini-3.5-flash-lite,GCP_PROJECT=${PROJECT},CORPUS_DB=/tmp/corpus.db,CORPUS_GCS_URI=gs://${BUCKET}/${CORPUS_OBJECT}" \
+  --set-env-vars="GEMINI_MODEL=gemini-3.5-flash,GCP_PROJECT=${PROJECT},CORPUS_DB=/tmp/corpus.db,CORPUS_GCS_URI=gs://${BUCKET}/${CORPUS_OBJECT},AGENT_BUILDER=1,GOOGLE_CLOUD_LOCATION=global" \
   --set-secrets="PARALLEL_API_KEY=${SECRET}:latest"
 
 URL="$("$GCLOUD" run services describe "$SERVICE" --project="$PROJECT" --region="$REGION" \

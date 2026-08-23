@@ -26,3 +26,24 @@
 | 7 | Asset leg in production path | Second noun / second buyer |
 
 Video / Devpost / public — parked.
+
+---
+
+## 2026-08-23 — Agent Builder wired onto the default path (GM run, Oscar away)
+
+**The board's #1 "ONLY YOU" item was stale.** SLASK/ACTIONS/PITCH/BUILD-PLAN all said
+Agent Builder was blocked on "Oscar provisions GCP + billing". Verified live this
+morning: project `hack-fleet`, `billingEnabled: true`, `aiplatform` + `agentregistry`
+enabled, ADC on disk. Nothing was blocked. The slice was executable and is now done,
+minus the deploy.
+
+- ADK now runs `/clear` by default; every gap report stamps `engine: adk|direct`.
+- Proved with keys stripped, not merely absent. Receipt: `docs/RECEIPT-agent-builder.md`.
+- 72 controls still pass.
+- Defect found: the ADK client 404s on any regional Vertex endpoint. Only `global`
+  publishes these models — `clearance/gemini.py:51` already knew, `deploy.sh` now sets it.
+
+**LEFT FOR OSCAR (one command):** `bash deploy.sh` in `~/CODE/cleared`. It writes a
+Secret Manager version, edits IAM and ships a billed public revision, so it is his click
+by the script's own header. Rotate the Parallel/Gemini keys first if that is still open.
+Then: `curl -s <hosted>/health | grep '"engine_default": "adk"'` → 3/3.

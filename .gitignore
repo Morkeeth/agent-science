@@ -6,3 +6,6 @@ cache/searches.json
 *.key
 .env
 cache/gemini.json
+
+# local venv for the ADK receipt — never shipped
+.venv-adk/

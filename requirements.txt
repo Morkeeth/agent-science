@@ -1,0 +1,5 @@
+# The serving path is stdlib except for one thing: Agent Builder.
+# The submission requires it, and a requirement is met by an agent that RUNS,
+# not by a module sitting in the tree. Pinned so the deployed revision and the
+# `env -u` receipt are the same software.
+google-adk==2.7.1

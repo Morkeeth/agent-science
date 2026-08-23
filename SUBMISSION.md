@@ -21,7 +21,7 @@
 | Gemini (extract + locate) | ✅ | live default path |
 | Parallel Search | ✅ | live default path |
 | Google Cloud (Cloud Run) | ✅ | URL above · project `hack-fleet` |
-| Agent Builder (ADK) | ⬜ code in `cloud/agent.py` — **not proved on default hosted path** |
+| Agent Builder (ADK) | ⬜ **wired as the default `/clear` path and proved LOCALLY** under `env -u GEMINI_API_KEY` (`engine: adk`, `adk_tool_calls: [clear_script_tool]`, `vertex:hack-fleet`) — receipt in `docs/RECEIPT-agent-builder.md`. Stays ⬜ until the hosted URL returns `"engine_default": "adk"`; that needs `deploy.sh`, which is Oscar's click |
 | Corpus compounding | ✅ local full orphan A/B **43% search avoided** · GCS shelf in `deploy.sh` |
 
 ## Checklist
