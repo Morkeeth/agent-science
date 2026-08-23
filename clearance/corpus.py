@@ -2,6 +2,10 @@
 
 This is not a cache. It is the product's memory, and the compounding claim in the
 pitch is only true if it exists from day one.
+
+When CORPUS_GCS_URI=gs://bucket/object is set, the sqlite file is pulled from GCS on
+connect (if missing locally) and pushed after every remember — so Cloud Run instances
+can share one shelf. /tmp alone is not a product.
 """
 from __future__ import annotations
 
@@ -10,6 +14,7 @@ import sqlite3
 from pathlib import Path
 from typing import Iterable, Optional
 
+from . import corpus_gcs
 from .verdict import Verdict
 
 # CORPUS_DB was set in the Dockerfile and in deploy.sh and read by NOTHING - the seam
@@ -32,11 +37,6 @@ CREATE TABLE IF NOT EXISTS verdicts (
     quoted_terms  TEXT,
     holder        TEXT,
     interpretive  INTEGER NOT NULL DEFAULT 0,
-    -- cause and published_instrument were MISSING and it was not cosmetic: an UNKNOWN
-    -- without its cause cannot be reconstructed at all, because the constructor refuses
-    -- to build one. So the corpus could store a fact-leg refusal and then fail to hand
-    -- it back. The compounding claim in the pitch had only ever been exercised on asset
-    -- verdicts, which carry no cause; the fact leg's UNKNOWNs had never round-tripped.
     cause         TEXT,
     published_instrument TEXT,
     observed_at   TEXT NOT NULL,
@@ -46,7 +46,6 @@ CREATE TABLE IF NOT EXISTS verdicts (
 
 
 def _migrate(con: sqlite3.Connection) -> None:
-    """Add columns to a store written before causes existed, without losing rows."""
     have = {r[1] for r in con.execute("PRAGMA table_info(verdicts)")}
     for col in ("cause", "published_instrument"):
         if col not in have:
@@ -54,13 +53,30 @@ def _migrate(con: sqlite3.Connection) -> None:
     con.commit()
 
 
+_PATHS: dict[int, Path] = {}
+
+
 def connect(path: Path | str = DB) -> sqlite3.Connection:
+    # In-memory DBs are for controls; never sync them to GCS.
+    if path == ":memory:":
+        con = sqlite3.connect(":memory:")
+        con.row_factory = sqlite3.Row
+        con.executescript(_SCHEMA)
+        _migrate(con)
+        return con
     p = Path(path)
     p.parent.mkdir(parents=True, exist_ok=True)
+    uri = corpus_gcs.gcs_uri()
+    if uri and not p.exists():
+        try:
+            corpus_gcs.pull(uri, p)
+        except Exception:
+            pass  # empty shelf on first boot
     con = sqlite3.connect(p)
     con.row_factory = sqlite3.Row
     con.executescript(_SCHEMA)
     _migrate(con)
+    _PATHS[id(con)] = p
     return con
 
 
@@ -75,6 +91,10 @@ def remember(con: sqlite3.Connection, verdicts: Iterable[Verdict]) -> int:
         "INSERT OR REPLACE INTO verdicts VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)", rows
     )
     con.commit()
+    uri = corpus_gcs.gcs_uri()
+    path = _PATHS.get(id(con))
+    if uri and path is not None:
+        corpus_gcs.push(uri, path)
     return len(rows)
 
 
@@ -99,7 +119,6 @@ def size(con: sqlite3.Connection) -> int:
 
 
 def size_for_use(con: sqlite3.Connection, use: str) -> int:
-    """How many remembered verdicts sit under one subject-use shelf."""
     return con.execute(
         "SELECT COUNT(*) FROM verdicts WHERE use=?", (use,)
     ).fetchone()[0]

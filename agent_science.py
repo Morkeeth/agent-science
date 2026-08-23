@@ -194,6 +194,7 @@ def clear_script(
 
     sourced = sum(1 for r in rows if r["label"] == "SOURCED")
     n = len(rows)
+    remembered = corpus.size_for_use(con, _use(subject))
     return {
         "ok": True,
         "subject": subject,
@@ -204,12 +205,19 @@ def clear_script(
         "unsourced": n - sourced,
         "parallel_calls": parallel_calls,
         "corpus_hits": corpus_hits,
+        "corpus_remembered": remembered,
         "rows": rows,
-        "markdown": _markdown(rows, subject=subject, n=n, sourced=sourced),
+        "markdown": _markdown(
+            rows, subject=subject, n=n, sourced=sourced,
+            parallel_calls=parallel_calls, corpus_hits=corpus_hits,
+            corpus_remembered=remembered,
+        ),
     }
 
 
-def _markdown(rows: list[dict], *, subject: str, n: int, sourced: int) -> str:
+def _markdown(rows: list[dict], *, subject: str, n: int, sourced: int,
+              parallel_calls: int = 0, corpus_hits: int = 0,
+              corpus_remembered: int = 0) -> str:
     gaps = n - sourced
     out = [
         f"# GAP REPORT — subject `{subject}`",
@@ -217,8 +225,17 @@ def _markdown(rows: list[dict], *, subject: str, n: int, sourced: int) -> str:
         f"| Claims | {n} |",
         f"| SOURCED | {sourced} ({(sourced/n if n else 0):.0%}) |",
         f"| UNSOURCED | {gaps} ({(gaps/n if n else 0):.0%}) |",
+        f"| Parallel calls this run | {parallel_calls} |",
+        f"| Corpus hits this run | {corpus_hits} |",
+        f"| Remembered on this subject | {corpus_remembered} |",
         "",
     ]
+    if corpus_hits:
+        out += [
+            f"**{corpus_hits} claim(s) resolved from corpus — no Parallel call.** "
+            "That is the second-production cost collapse.",
+            "",
+        ]
     if gaps:
         out += ["## Claims requiring action", ""]
         for r in rows:

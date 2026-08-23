@@ -1,16 +1,22 @@
 ---
 date: 2026-08-22
+updated: 2026-08-23
 horizon: 30 days · Aug 22 → Sep 21
 deadline: Agentic Cinema · Sep 9 2026 14:00 PT (day 18) — checkpoint, not "done"
-rule: over-build the product; Oscar cuts scope. Never assess as near-ship. Video/Devpost late.
-oscar: 2026-08-22 — "you can fix me 30 more days of building… over build and ill stop you"
+rule: over-build; Oscar cuts. Video/Devpost late.
+ambition_ceiling: BUILD-PLAN-STARTUP.md — full production clearance platform
+oscar: 2026-08-22 — "over build and ill stop you" · 2026-08-23 — startup / full production app
 ---
 
-# 30 DAYS
+# 30 DAYS (wedge calendar)
 
-**Default stance: over-build.** Prefer depth (corpus, refusal, independence, second subject,
-asset leg) over packaging urgency. Sep 9 is a **checkpoint**. Days 19–30 are the company
-whether or not we place. Oscar stops over-scope — do not self-thin into a demo.
+**Ambition ceiling lives in `BUILD-PLAN-STARTUP.md`.** This file is only the near
+calendar and hygiene. When they conflict, the startup plan wins on scope; this file
+wins on “what voids the Sep 9 entry.”
+
+**Default stance: over-build.** Prefer depth toward the production app. Sep 9 is a
+**checkpoint**. Days 19–30 start H1 of the startup plan, not “wrap the hack.”
+
 
 `🔴` = blocked on Oscar. `🤖` = build. `👁` = Cursor review.
 `⛔` = **a missing one makes the entry inadmissible, however good the build is.**

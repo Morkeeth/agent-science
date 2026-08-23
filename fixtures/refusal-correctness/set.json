@@ -1,0 +1,61 @@
+{
+  "labelled_by": "cursor",
+  "labelled_at": "2026-08-22T21:30:00Z",
+  "note": "Labels written BEFORE any engine run on these items. Each item cites the passage a careful reader would accept, or asserts NOT_SUPPORTED.",
+  "items": [
+    {
+      "id": "RC1",
+      "expected": "SUPPORTED",
+      "claim": "Member States shall bring into force the laws necessary to comply with this Directive by 29 October 2014.",
+      "must_contain": "29 October 2014",
+      "document": "fixtures/refusal-correctness/docs/eur-lex-orphan-snippet.html",
+      "accepted_passage": "Member States shall bring into force the laws, regulations and administrative provisions necessary to comply with this Directive by 29 October 2014.",
+      "why": "Supporting sentence sits AFTER a navigation occurrence of the same date string — the false-UNKNOWN seed from FINDING-refusal-correctness."
+    },
+    {
+      "id": "RC2",
+      "expected": "SUPPORTED",
+      "claim": "Done at Strasbourg, 25 October 2012.",
+      "must_contain": "25 October 2012",
+      "document": "fixtures/refusal-correctness/docs/eur-lex-orphan-snippet.html",
+      "accepted_passage": "Done at Strasbourg, 25 October 2012.",
+      "why": "Short complete sentence — previously refused by word floor as chrome."
+    },
+    {
+      "id": "RC3",
+      "expected": "NOT_SUPPORTED",
+      "claim": "Member States shall bring into force the laws necessary to comply with this Directive by 29 October 2020.",
+      "must_contain": "29 October 2020",
+      "document": "fixtures/refusal-correctness/docs/eur-lex-orphan-snippet.html",
+      "accepted_passage": null,
+      "why": "Near-miss date — model-confident wrong. Document has 2014, not 2020."
+    },
+    {
+      "id": "RC4",
+      "expected": "NOT_SUPPORTED",
+      "claim": "The copyright and related rights status of this Item has not been evaluated.",
+      "must_contain": "has not been evaluated",
+      "document": "fixtures/refusal-correctness/docs/wrong-doc-no-cne.html",
+      "accepted_passage": null,
+      "why": "Wrong document — terms absent entirely."
+    },
+    {
+      "id": "RC5",
+      "expected": "NOT_SUPPORTED",
+      "claim": "This Item is free of known copyright restrictions worldwide.",
+      "must_contain": "free of known copyright restrictions",
+      "document": "fixtures/refusal-correctness/docs/cne-status-only.html",
+      "accepted_passage": null,
+      "why": "Substring trap — document says status has NOT been evaluated; terms for a different claim appear nearby. See FINDING-substring-is-not-a-statement."
+    },
+    {
+      "id": "RC6",
+      "expected": "SUPPORTED",
+      "claim": "The copyright and related rights status of this Item has not been evaluated.",
+      "must_contain": "has not been evaluated",
+      "document": "fixtures/refusal-correctness/docs/cne-status-only.html",
+      "accepted_passage": "The copyright and related rights status of this Item has not been evaluated.",
+      "why": "Awkward placement after language chrome — known-resolvable CNE case."
+    }
+  ]
+}

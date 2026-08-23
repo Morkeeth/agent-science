@@ -1,32 +1,28 @@
 # NEXT STEPS — read this first, every session
 
-**PRODUCT:** Agent Science · **Agentic Cinema, Sep 9 14:00 PDT · Parallel track**
+**PRODUCT:** Agent Science — clearance audit platform (startup ceiling)  
+**Checkpoint:** Agentic Cinema Sep 9 · Parallel track
 
-## State @ deploy
-- **Hosted URL:** https://agent-science-568004190078.us-central1.run.app
-- **GCP project:** `hack-fleet` · Cloud Run service `agent-science`
-- **Entry point:** `agent_science.py` + `cloud/service.py` + `cloud/agent.py` (ADK)
-- **Runtime:** Gemini ✅ · Parallel ✅ · Cloud Run ✅
-- **Controls:** `python3 tests/test_watch_it_go_red.py` → **41 passed**
-- **License:** MIT
+## Ambition
 
-## Queue — what remains
+> Over-build toward the **production company**. Hackathon is a wedge, not the product.
+> Ceiling: `BUILD-PLAN-STARTUP.md`. Near calendar: `PLAN-30.md`. Oscar cuts.
 
-| # | Slice | Owner | Status |
-|---|-------|-------|--------|
-| 1 | End-to-end + corpus in `clear_script()` | Build | ✅ |
-| 2 | Cloud Run hosted URL | Deploy | ✅ |
-| 3 | ≤3min video on hosted URL | Oscar | ⬜ |
-| 4 | GitHub push (both repos) | Oscar | ⬜ |
-| 5 | Devpost submit + sealed prediction dated | Oscar | ⬜ |
-| 6 | Phase 0 hours in hack-agent-science/PHASE-0.md | Oscar | ⬜ |
+## State
+- Hosted Desk + Vertex ADC + GCS corpus + live compounding ✅  
+- Orphan A/B 43% search avoided · 70 controls · refusal set ✅  
+- **Not yet a startup app:** no tenants, async jobs, dossier PDF, design partner
 
-## Redeploy
+## This session’s head of queue (from STARTUP §5)
 
-```bash
-cd ~/CODE/cleared && ./deploy.sh
-```
+| # | Slice | Why |
+|---|-------|-----|
+| **1** | Independence workbench on the Desk | Dust Bowl failed primary; corroboration must be visible |
+| 2 | Async runs + job status | Production scripts ≠ sync HTTP |
+| 3 | Dossier PDF/JSON export | The paid artifact |
+| 4 | Org + subject shelves (multi-tenant skeleton) | Two customers |
+| 5 | Agent Builder proved as client | Platform requirement + real agent path |
+| 6 | Design partner on their material | Day-two user ≠ judge |
+| 7 | Asset leg in production path | Second noun / second buyer |
 
-## Review lane
-
-`FOR-CURSOR.md` + `CURSOR-LOG.md` · append-only · never `git add -A`
+Video / Devpost / public — parked.

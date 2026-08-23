@@ -422,3 +422,53 @@ that path is not `none`. Matches Vertex-primary deploy (no key in env).
 **Still open (not this commit):** live Cloud Run still has plaintext `GEMINI_API_KEY` /
 `PARALLEL_API_KEY` env (pre–Secret-Manager revision). Redeploy via current `deploy.sh`
 to clear them; rotate Parallel key after. Health fix needs that redeploy to land on URL.
+
+## 2026-08-22 19:47 — Oscar: do not nag video
+
+Queue docs rewritten. Video / Devpost / public-repo are **PARKED** until build is
+exhibit-ready. Next build focus: corpus compounding (script B) + redeploy secrets.
+
+## 2026-08-22 19:48 — Oscar: over-build; ~30 days; stop packaging pressure
+
+Verbatim: *"you can fix me 30 more days of building, you're impossible to assess these
+things, over build and ill stop you"*
+
+**Ruling for every session:** assume a full `PLAN-30` horizon. Prefer product depth over
+"almost submittable." He cuts scope — review/build lanes do not thin the plan preemptively.
+Video/Devpost stay late and un-nagged. Assessment failure acknowledged: hosted URL + green
+tests ≠ near-done.
+
+## 2026-08-22 21:15 — Ambition audit → Compounding Desk built
+
+**Audit:** `docs/AMBITION-AUDIT.md` — plan had depth; product still sold search.
+Judge/user/VC all fail the 60s test without a visible A→B fraction.
+
+**Built:**
+- `scripts/compound_exhibit.py` — Production A then B → compound receipt (exit 3 if no save)
+- Mini fixtures `compound-mini-A/B.txt` — live exhibit green
+- `cloud/service.py` — Compounding Desk UI + clearance-memo HTML (action first, compound strip)
+- `corpus.size_for_use` + gap report remembers Parallel/corpus/shelf counts
+
+**Next depth:** redeploy Desk to URL · Firestore shelf · full orphan A/B · refusal set
+
+## 2026-08-22 21:55 — Deep execute: exhibit + refusal set + durable corpus + live Vertex
+
+**Validated (web):** Directive 2012/28/EU Art.9 deadline 29 Oct 2014 (EUR-Lex);
+BL ~40% orphan estimate (estimate, not universal); Plow facts via UNL Great Plains
+encyclopedia. Receipt: `docs/VALIDATION-2026-08-22.md`.
+
+**Full orphan A/B (live pipeline):** Parallel 7→4 (**43% avoided**), corpus_hits 6 on B.
+
+**Built:**
+- Refusal-correctness held-out set + 6 controls (suite must fail false UNKNOWN)
+- GCS corpus sync (`corpus_gcs.py`) · bucket `hack-fleet-agent-science-corpus`
+- Vertex on Cloud Run via **metadata ADC** (gcloud was missing in container — health
+  lied green; `/clear` 503'd until fixed)
+- Deploy clears plaintext key env; Parallel via Secret Manager
+- Dust-bowl A/B fixtures (second subject)
+- SUBMISSION.md honesty pass (Agent Builder not claimed ✅)
+
+**Live URL proof:** subject `live-smoke` run1 parallel=2; run2 parallel=1 corpus=1.
+`GET /health` → `gemini_path: vertex:hack-fleet`. Desk UI live.
+
+**Oscar still:** rotate Parallel/Gemini keys that were once in plaintext env.

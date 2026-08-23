@@ -54,30 +54,51 @@ GCLOUD = Path.home() / "google-cloud-sdk" / "bin" / "gcloud"
 
 
 def vertex_project() -> Optional[str]:
-    """The active gcloud project, or None if gcloud/ADC is not configured."""
-    import subprocess
-    if not GCLOUD.exists():
-        return None
+    """GCP project for Vertex — env, metadata server, then local gcloud."""
+    for k in ("GCP_PROJECT", "GOOGLE_CLOUD_PROJECT", "GCLOUD_PROJECT"):
+        v = (os.environ.get(k) or "").strip()
+        if v:
+            return v
     try:
-        p = subprocess.run([str(GCLOUD), "config", "get-value", "project"],
-                           capture_output=True, text=True, timeout=20)
-        proj = p.stdout.strip()
-        return proj or None
+        req = urllib.request.Request(
+            "http://metadata.google.internal/computeMetadata/v1/project/project-id",
+            headers={"Metadata-Flavor": "Google"})
+        with urllib.request.urlopen(req, timeout=2) as r:
+            return r.read().decode().strip() or None
     except Exception:
-        return None
+        pass
+    if GCLOUD.exists():
+        import subprocess
+        try:
+            p = subprocess.run([str(GCLOUD), "config", "get-value", "project"],
+                               capture_output=True, text=True, timeout=20)
+            return p.stdout.strip() or None
+        except Exception:
+            return None
+    return None
 
 
 def vertex_token() -> Optional[str]:
-    import subprocess
-    if not GCLOUD.exists():
-        return None
+    """ADC access token — metadata server on Cloud Run, else local gcloud ADC."""
     try:
-        p = subprocess.run(
-            [str(GCLOUD), "auth", "application-default", "print-access-token"],
-            capture_output=True, text=True, timeout=30)
-        return p.stdout.strip() or None
+        req = urllib.request.Request(
+            "http://metadata.google.internal/computeMetadata/v1/instance/"
+            "service-accounts/default/token",
+            headers={"Metadata-Flavor": "Google"})
+        with urllib.request.urlopen(req, timeout=3) as r:
+            return json.load(r).get("access_token") or None
     except Exception:
-        return None
+        pass
+    if GCLOUD.exists():
+        import subprocess
+        try:
+            p = subprocess.run(
+                [str(GCLOUD), "auth", "application-default", "print-access-token"],
+                capture_output=True, text=True, timeout=30)
+            return p.stdout.strip() or None
+        except Exception:
+            return None
+    return None
 MAX_DOC = 120_000   # characters of document sent; flash handles far more
 CACHE = Path(__file__).resolve().parent.parent / "cache" / "gemini.json"
 

@@ -1,20 +1,11 @@
 #!/usr/bin/env bash
 # Deploy Agent Science to Cloud Run. OSCAR'S CLICK — this script does not run itself.
 #
-# SECRET HANDLING, and why this version looks different from the obvious one:
-#
-#   The first draft passed both API keys through --set-env-vars. That writes them into
-#   the Cloud Run service config (readable by any project viewer), into this shell's
-#   history, and into Cloud Build logs — three destinations we do not control and
-#   cannot un-write once the command has run. A deploy flag is a destination.
-#
-#   Gemini needs NO KEY HERE AT ALL. Vertex is the primary path and Cloud Run's service
-#   account provides Application Default Credentials, so the service authenticates as
-#   itself. The fix is to remove the secret, not to protect it.
-#
-#   Parallel has no ADC equivalent, so it goes in Secret Manager and is referenced with
-#   --set-secrets. The value is mounted at runtime; it never appears in config, in a
-#   command line, or in a build log.
+# SECRET HANDLING:
+#   Gemini needs NO KEY HERE. Vertex + Cloud Run SA = ADC.
+#   Parallel goes in Secret Manager via --set-secrets.
+#   Prior revisions leaked keys through --set-env-vars; this script REMOVES those
+#   env vars on every deploy so a clean revision cannot keep the wound open.
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")" && pwd)"
 GCLOUD="${GCLOUD:-$HOME/google-cloud-sdk/bin/gcloud}"
@@ -22,31 +13,45 @@ PROJECT="${GCP_PROJECT:-hack-fleet}"
 REGION="${GCP_REGION:-us-central1}"
 SERVICE="${GCP_SERVICE:-agent-science}"
 SECRET="${PARALLEL_SECRET:-parallel-api-key}"
+BUCKET="${CORPUS_BUCKET:-hack-fleet-agent-science-corpus}"
+CORPUS_OBJECT="${CORPUS_OBJECT:-corpus.db}"
 
 cd "$ROOT"
 
 echo "1. Enabling services..."
 "$GCLOUD" services enable run.googleapis.com cloudbuild.googleapis.com \
-  artifactregistry.googleapis.com secretmanager.googleapis.com \
+  artifactregistry.googleapis.com secretmanager.googleapis.com storage.googleapis.com \
+  aiplatform.googleapis.com \
   --project="$PROJECT" --quiet
 
-echo "2. Putting the Parallel key in Secret Manager (from the 0600 file, once)..."
+echo "2. Parallel key → Secret Manager (stdin/file only)..."
 if ! "$GCLOUD" secrets describe "$SECRET" --project="$PROJECT" >/dev/null 2>&1; then
   "$GCLOUD" secrets create "$SECRET" --project="$PROJECT" --replication-policy=automatic
 fi
-# The value is piped on stdin, never as an argument, so it cannot land in shell history
-# or a process list.
 "$GCLOUD" secrets versions add "$SECRET" --project="$PROJECT" \
   --data-file="$HOME/.config/keys/parallel.key"
 
 RUNTIME_SA="$("$GCLOUD" projects describe "$PROJECT" --format='value(projectNumber)')-compute@developer.gserviceaccount.com"
 "$GCLOUD" secrets add-iam-policy-binding "$SECRET" --project="$PROJECT" \
   --member="serviceAccount:${RUNTIME_SA}" --role=roles/secretmanager.secretAccessor --quiet
-# The runtime service account also needs Vertex, which is how Gemini is reached with no key.
 "$GCLOUD" projects add-iam-policy-binding "$PROJECT" \
   --member="serviceAccount:${RUNTIME_SA}" --role=roles/aiplatform.user --quiet
 
-echo "3. Deploying from source (Cloud Build — no local container, no local daemon)..."
+echo "3. Corpus bucket (shared shelf across Cloud Run instances)..."
+if ! "$GCLOUD" storage buckets describe "gs://${BUCKET}" --project="$PROJECT" >/dev/null 2>&1; then
+  "$GCLOUD" storage buckets create "gs://${BUCKET}" --project="$PROJECT" --location="$REGION"
+fi
+"$GCLOUD" storage buckets add-iam-policy-binding "gs://${BUCKET}" \
+  --member="serviceAccount:${RUNTIME_SA}" --role=roles/storage.objectAdmin --quiet
+
+echo "4. Deploy (replace env — no API keys in the clear; Parallel via secret; corpus via GCS)..."
+# --set-env-vars and --remove-env-vars cannot be combined. Clear first so leaked
+# GEMINI_API_KEY / PARALLEL_API_KEY plaintext cannot survive into the new revision.
+if "$GCLOUD" run services describe "$SERVICE" --project="$PROJECT" --region="$REGION" >/dev/null 2>&1; then
+  "$GCLOUD" run services update "$SERVICE" \
+    --project="$PROJECT" --region="$REGION" \
+    --clear-env-vars --quiet || true
+fi
 "$GCLOUD" run deploy "$SERVICE" \
   --source . \
   --project="$PROJECT" \
@@ -56,10 +61,12 @@ echo "3. Deploying from source (Cloud Build — no local container, no local dae
   --memory=512Mi \
   --timeout=300 \
   --service-account="$RUNTIME_SA" \
-  --set-env-vars="GEMINI_MODEL=gemini-3.5-flash-lite,GCP_PROJECT=${PROJECT},CORPUS_DB=/tmp/corpus.db" \
+  --set-env-vars="GEMINI_MODEL=gemini-3.5-flash-lite,GCP_PROJECT=${PROJECT},CORPUS_DB=/tmp/corpus.db,CORPUS_GCS_URI=gs://${BUCKET}/${CORPUS_OBJECT}" \
   --set-secrets="PARALLEL_API_KEY=${SECRET}:latest"
 
+URL="$("$GCLOUD" run services describe "$SERVICE" --project="$PROJECT" --region="$REGION" \
+  --format='value(status.url)')"
+echo "HOSTED_URL=$URL"
+curl -sf "$URL/health" | head -c 400
 echo
-echo "NOTE: --allow-unauthenticated makes this PUBLIC. The submission requires a hosted"
-echo "URL a judge can open, so it is correct here — but it is an outward act and it is"
-echo "Oscar's decision, not this script's."
+echo "NOTE: rotate Parallel/Gemini keys if they were ever in plaintext env (Oscar)."
