@@ -73,9 +73,15 @@ failed**.
 ## What is still NOT proved
 
 - **The hosted URL.** `deploy.sh` writes a Secret Manager version, edits IAM and ships a
-  billed public revision. Its own header says it is Oscar's click. Until it runs,
-  `https://agent-science-568004190078.us-central1.run.app` serves the OLD revision,
-  where `engine_default` is absent and Agent Builder is not on the path.
+  billed public revision. Its own header says it is Oscar's click. The live service was
+  probed at 2026-08-23 12:2x, so this is the measured before-state, not an assumption:
+
+      $ curl -s https://agent-science-568004190078.us-central1.run.app/health
+      {"ok": true, "service": "agent-science", "gemini": true,
+       "gemini_path": "vertex:hack-fleet", "parallel": true}
+
+  No `agent_builder`, no `adk_version`, no `engine_default` — that revision predates all
+  of this, and Agent Builder is not on its path.
 - **The `⬜` in `SUBMISSION.md` stays `⬜`** until `curl <hosted>/health` returns
   `"engine_default": "adk"`. Local is not hosted, and the requirement names the hosted
   path.
