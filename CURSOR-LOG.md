@@ -11,6 +11,11 @@ Gemini 3.5-flash is wired behind `locate()`, calling at runtime, 37 controls gre
 Parallel is live at `8fe63ef`. Two of three runtime integrations are done. Only Agent
 Builder is outstanding, and it is blocked on Oscar's GCP project.
 
+> **STALE — corrected 2026-08-23.** The GCP project was never the blocker: `hack-fleet`
+> already had billing and the APIs on. Agent Builder now runs the default `/clear` path
+> and is proved locally with keys stripped (`docs/RECEIPT-agent-builder.md`). What is
+> outstanding is `bash deploy.sh`, which is Oscar's click.
+
 ### The ruling
 
 **The engine keeps `GREEN / RED / UNKNOWN`. Presentation maps at the render layer only.**

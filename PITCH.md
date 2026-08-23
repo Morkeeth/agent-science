@@ -76,17 +76,25 @@ C5: **"94% of film archives"** generalised from one library returned
 
 ## 4 · HONEST VERDICT — read this first, not last
 
-**Not yet submittable.** Runtime today: **Gemini ✅ · Parallel ✅ · Agent Builder ❌**.
-`agent_science.py` calls the first two on the default path; the hackathon also requires a
-**hosted Agent Builder URL**, which needs Oscar's GCP project.
+**Not yet submittable.** Runtime today: **Gemini ✅ · Parallel ✅ · Agent Builder 🟡**.
+All three run on the default `/clear` path and are proved LOCALLY with the API keys
+stripped (`docs/RECEIPT-agent-builder.md`). The hackathon requires them on the **hosted**
+URL, and the hosted service still serves the pre-ADK revision.
 
-What remains is one slice, not a rebuild: wrap the pipeline in Agent Builder + Cloud Run.
-41 controls green. Forced-lie transcript replayed against the live verifier (six for six).
+What remains is one command, not a slice: `bash deploy.sh`. It writes a Secret Manager
+version, edits IAM and ships a billed public revision, so it is Oscar's click by the
+script's own header. Then `curl <hosted>/health` returns `"engine_default": "adk"` and
+this line becomes ✅. 72 controls green. Forced-lie transcript replayed against the live
+verifier (six for six).
 
-**GCP access is the blocker where delay compounds.** The fork costs design time. Hours can
-be estimated late. But Agent Builder is a hosted service nobody here has provisioned, and
-the first thing you learn provisioning one is what it refuses to do. Failing on Sep 8 is
-not a delay — it is the entry.
+**CORRECTED 2026-08-23 — "GCP access is the blocker where delay compounds" was false, and
+it had been false for a while.** It ranked #1 on the board as an Oscar-only item while
+project `hack-fleet` already had `billingEnabled: true`, `aiplatform` and
+`agentregistry` enabled, and ADC on disk. Nobody probed it; the sentence was carried
+forward instead. The genuine unknown it predicted did exist, and it was found in fifteen
+minutes of actually running the thing: the ADK client 404s on every regional Vertex
+endpoint, because only the `global` location publishes these models — a fact
+`clearance/gemini.py:51` had already written down.
 
 ## IF THE FORK GOES THE OTHER WAY
 

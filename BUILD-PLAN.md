@@ -39,7 +39,7 @@ question, it is two signups.
 |---|---|---|---|
 | **1** | **Gemini API key** — aistudio.google.com → Get API key. No billing needed. | Slice A: the whole `locate()` seam, the largest single piece of work | ~2 min |
 | **2** | **Parallel Search API key** — parallel.ai signup | Slice B: the track's own requirement. Without it the entry cannot score on its track at all | ~5 min |
-| **3** | **GCP project + billing enabled** | Slice C: Agent Builder, which is hosted. Unknown unknowns live here — provision early | ~15 min |
+| ~~**3**~~ | ~~**GCP project + billing enabled**~~ **DONE, and had been for a while** (verified 2026-08-23: project `hack-fleet`, `billingEnabled: true`, `aiplatform` + `agentregistry` enabled, ADC on disk). It sat at #1 on the board as an Oscar-only blocker because nobody ran the probe. **Replaced by:** `bash deploy.sh` — one command, ships the billed public revision | ~3 min |
 
 Nothing else on this lane is blocked on a human. #1 and #2 are the cheap ones and unblock
 two of the three runtime integrations.
@@ -64,7 +64,8 @@ Parallel is what fills it.
 DONE WHEN: a claim with `source_url=None` returns candidate documents, each fetched and
 run through the existing verifier; unfound claims still print UNSOURCED with the probe named.
 
-**C · Agent Builder deployment** *(needs #3 — provision FIRST, design after)*
+**C · Agent Builder deployment** *(built 2026-08-23; the code path is done and proved
+locally — `docs/RECEIPT-agent-builder.md`. Only `deploy.sh` is left, and it is Oscar's click.)*
 The orchestration: extract claims → search → fetch → locate → verify → gap report.
 DONE WHEN: a hosted URL a stranger can paste a script into.
 
