@@ -1095,6 +1095,28 @@ def t_chunked_extraction_beats_whole_document():
     assert len(passages) < 2, "the fallback for a single-passage script is unreachable"
 
 
+def t_one_key_per_document_not_per_url_spelling():
+    """The two legs were fetching the same document twice.
+
+    Measured on the real caches: the fact leg held
+    `https://rightsstatements.org/vocab/InC/1.0/` and the asset leg held
+    `http://.../InC/1.0/` — one document, two fetches, two keys, in a system whose whole
+    thesis is that a document is the unit of evidence. Two stores disagreeing about what
+    one document is called is the wrong-object failure inside the store itself.
+    """
+    from clearance.instruments import canonical
+    a = canonical("https://rightsstatements.org/vocab/InC/1.0/")
+    b = canonical("http://rightsstatements.org/vocab/InC/1.0")
+    assert a == b, f"the same document still has two keys: {a!r} vs {b!r}"
+    # and it must NOT flatten URLs where the query string selects the document
+    eur = "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32012L0028"
+    other = "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32019L0790"
+    assert canonical(eur) != canonical(other), \
+        "canonicalisation collapsed two different EUR-Lex documents into one key"
+    assert canonical(eur).endswith("32012L0028"), \
+        "a query string was stripped; that changes which document is cited"
+
+
 print("WATCH IT GO RED — control tests\n")
 # Held-out refusal set — suite must fail on false UNKNOWN.
 import importlib.util as _ilu

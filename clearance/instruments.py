@@ -40,6 +40,25 @@ _ANCHORS = (
 )
 
 
+def canonical(url: str) -> str:
+    """One key per DOCUMENT, not per URL spelling.
+
+    Measured, not assumed: the fact leg fetched `https://rightsstatements.org/vocab/
+    InC/1.0/` and the asset leg fetched `http://.../InC/1.0/` — the SAME document,
+    fetched twice, cached under two keys, in a system whose entire thesis is that a
+    document is the unit of evidence. Two caches disagreeing about what one document is
+    called is the wrong-object failure inside the store itself.
+
+    Deliberately conservative: scheme and one trailing slash only. Query strings and
+    fragments can change what a page IS (EUR-Lex serves different documents off `?uri=`),
+    so they are left alone.
+    """
+    u = (url or "").strip()
+    if u.startswith("https://"):
+        u = "http://" + u[len("https://"):]
+    return u[:-1] if u.endswith("/") and "?" not in u else u
+
+
 def _load() -> dict:
     if CACHE.exists():
         return json.loads(CACHE.read_text())
@@ -78,14 +97,15 @@ def fetch(uri: str, timeout: int = 25) -> Optional[str]:
         return None
 
     cache = _load()
-    cache[uri] = {"fetched_from": final, "terms": clause}
+    cache[canonical(uri)] = {"fetched_from": final, "terms": clause}
     _save(cache)
     return clause
 
 
 def terms(uri: str) -> Optional[str]:
     """The cached verbatim terms for an instrument, or None if never fetched."""
-    entry = _load().get(uri)
+    cache = _load()
+    entry = cache.get(uri) or cache.get(canonical(uri))
     return entry["terms"] if entry else None
 
 
@@ -109,8 +129,9 @@ def _load_docs() -> dict:
 def document(url: str, *, fetch: bool = False, timeout: int = 30):
     """Full visible text of a source document, or None if never fetched."""
     docs = _load_docs()
-    if url in docs:
-        return docs[url]["text"]
+    hit = docs.get(url) or docs.get(canonical(url))
+    if hit:
+        return hit["text"]
     if not fetch:
         return None
     req = urllib.request.Request(url, headers={"User-Agent": UA})
@@ -119,7 +140,7 @@ def document(url: str, *, fetch: bool = False, timeout: int = 30):
             text = _visible_text(r.read().decode("utf-8", errors="ignore"))
     except Exception:
         return None
-    docs[url] = {"text": text, "fetched_from": url}
+    docs[canonical(url)] = {"text": text, "fetched_from": url}
     DOCS.parent.mkdir(parents=True, exist_ok=True)
     DOCS.write_text(json.dumps(docs))
     return text
