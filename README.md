@@ -77,6 +77,46 @@ Earlier versions of this file published 60%, then 27-60%, then "not demonstrated
 corrections, each caught by the repo re-running its own harness and disagreeing with the
 README. `measure_compounding.py` and `run_curve.py` ship here; run them.
 
+## Why this is a company, not a fact-checker
+
+**The EU AI Act made this filing mandatory, and it has a date and a penalty.**
+
+The Commission's AI Office published a mandatory template on 24 July 2025 implementing
+Article 53(1)(d) of Regulation (EU) 2024/1689. Every provider of a general-purpose AI
+model must publish a summary of its training content — including free and open-source.
+
+| | |
+|---|---|
+| **Enforcement begins** | **2 August 2026** |
+| **Penalty** | up to 3% of worldwide turnover **or €15,000,000, whichever is higher** |
+| **Cadence** | updated **every six months**, or sooner on material change |
+
+**What we do NOT do.** The filing is a *narrative* summary — deliberately not
+item-by-item, to protect trade secrets. **No regulator reads a per-item annex.** Anyone
+selling "we generate your AI Act disclosure" is selling a paragraph.
+
+**What we do.** The regulation requires telling rightsholders *"to what extent the
+conditions for lawful text and data mining ... have been respected."* **An extent cannot
+be stated truthfully without being measured.** `clearance/article53.py` produces the
+record that the measurement was performed — see `fixtures/ARTICLE-53-ANNEX.md`, where
+**524 of 600 items (87%) carry an instrument in which the rights-holder reserved the
+rights this use would require**, each instrument named.
+
+**The recurring case, measured on the real corpus:**
+
+    undetermined at filing 1        37 of 600
+    without a ledger, re-opened at every 6-month filing
+    over four filings (two years):  148 human enquiries  →  37
+
+All 37 are the same cause: *the holder states copyright was never evaluated.* Those are
+the archive's permanent gaps, not ours — they will still be undetermined at filing 8.
+**The ledger's value is not that it resolves them. It remembers that you already tried,
+and what you tried.**
+
+Marketplaces sell pre-cleared data. Nobody proves clearance on material you already hold,
+and **nobody else can tell you a claim is unsourceable** — absence is not something you
+find by searching harder.
+
 ## Runtime integrations
 
 | | How |
