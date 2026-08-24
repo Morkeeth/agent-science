@@ -17,18 +17,19 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import sys
 from dataclasses import asdict
 from pathlib import Path
 from typing import Optional
 
-from clearance import corpus
+from clearance import corpus, refusal_log
 from clearance.extract import GeminiExtractor
 from clearance.facts import Claim, judge_claim
 from clearance.gemini import GeminiLocator
 from clearance.independence import (classify as independence_classify,
                                     note as independence_note)
-from clearance.verdict import GREEN, Verdict
+from clearance.verdict import FACT, GREEN, Verdict
 
 # "Nothing states this" and "documents state it, but every one traces to a derived or
 # unclassified origin" are DIFFERENT FACTS, and collapsing them to one label is the same
@@ -78,6 +79,53 @@ def _use(subject: str) -> str:
     return f"sourcing:{subject}"
 
 
+def _log_db() -> Path:
+    """Where the cross-production refusal log lives.
+
+    Cloud Run's filesystem is read-only except /tmp, and the Dockerfile already learned
+    this for the corpus (CORPUS_DB=/tmp/corpus.db). Default the log to a SIBLING of the
+    corpus DB so it inherits that writable directory; a container that can write the
+    corpus can write the log. REFUSAL_LOG_DB overrides outright.
+    """
+    override = os.environ.get("REFUSAL_LOG_DB")
+    if override:
+        return Path(override)
+    corpus_db = os.environ.get("CORPUS_DB")
+    if corpus_db:
+        return Path(corpus_db).parent / "refusal_log.db"
+    return refusal_log.DB
+
+
+def _term_of(claim: Claim) -> str:
+    """The distinctive term a cross-production reuse keys on.
+
+    Mirror _claim_key: use the must-contain span when it is substantial, else fall back
+    to the full assertion. Keying an empty/short term would collide unrelated claims —
+    a false cross-subject hit, which is worse than a miss.
+    """
+    ident = (claim.must_contain or "").strip()
+    return ident if len(ident) >= 6 else claim.text
+
+
+def _log_record(logcon, *, term: str, claim: Claim, v: Verdict, production: str) -> None:
+    """Establish this claim in the cross-production log — clears AND refusals.
+
+    A refusal carries what WOULD settle it (resolves_with); that is the negative-space
+    asset no competitor accumulates. INSERT-OR-IGNORE inside record() means the first
+    production to establish a (term, slot) wins forever, so this is free for the next.
+    """
+    is_green = v.verdict == GREEN
+    basis = None
+    if is_green:
+        basis = "primary" if "PRIMARY" in (v.reason or "") else "corroborated"
+    resolves_with = None if is_green else WHY.get(v.cause or "", None)
+    refusal_log.record(
+        logcon, term=term, assertion=claim.text, verdict=v.verdict,
+        production=production, basis=basis, cause=v.cause,
+        citation_url=v.citation_url, quoted_terms=v.quoted_terms,
+        origins=[production], resolves_with=resolves_with)
+
+
 def _present(v: Verdict) -> str:
     if v.verdict == GREEN:
         return "SOURCED"
@@ -123,6 +171,7 @@ def clear_script(
     subject: str = "default",
     model: str = "gemini-3.5-flash-lite",
     corpus_db: Optional[Path] = None,
+    log_db: Optional[Path] = None,
     offline: bool = False,
 ) -> dict:
     """Run the full pipeline; return JSON-serializable gap report."""
@@ -131,6 +180,11 @@ def clear_script(
 
     db = corpus_db or corpus.DB
     con = corpus.connect(db)
+    # The cross-production log: the per-subject corpus compounds within ONE subject; this
+    # compounds across EVERY subject that ever ran. A claim proven (or proven-unprovable)
+    # on one subject is reused on the next, keyed on its distinctive term. This is the
+    # moat that was built (clearance/refusal_log.py) but imported nowhere until now.
+    logcon = refusal_log.connect(log_db or _log_db())
     extractor = GeminiExtractor(model=model)
     claims_raw = extractor.extract(script)
     claims = [
@@ -141,6 +195,7 @@ def clear_script(
     rows: list[dict] = []
     parallel_calls = 0
     corpus_hits = 0
+    log_hits = 0
 
     for c in claims:
         key = _claim_key(c.text, subject, c.must_contain)
@@ -163,6 +218,43 @@ def clear_script(
             rows.append(_row(v, corpus_hit=True, asked_as=c.text))
             continue
 
+        # CROSS-SUBJECT REUSE. The per-subject corpus missed. Before spending a Parallel
+        # search, ask the cross-production log — keyed on the distinctive TERM, so a
+        # differently-worded assertion about the same fact still hits, and a
+        # proven-unprovable claim stays refused without re-searching. This is what makes
+        # a refusal on subject A free on subject B.
+        term = _term_of(c)
+        log_row = refusal_log.lookup(logcon, term=term, assertion=c.text)
+        if log_row:
+            log_hits += 1
+            green = log_row["verdict"] == GREEN
+            v = Verdict(
+                subject_id=c.claim_id,
+                subject_title=c.text,
+                noun=FACT,
+                use=use,
+                verdict=log_row["verdict"],
+                reason=(f"log_hit (cross-subject) — established in production "
+                        f"'{log_row['first_seen_in']}'"),
+                cause=None if green else log_row["cause"],
+                citation_url=log_row["citation_url"],
+                quoted_terms=log_row["quoted_terms"],
+            )
+            # Seed the per-subject corpus so a same-subject re-run resolves locally too.
+            corpus.remember(con, [Verdict(
+                subject_id=key, subject_title=c.text, noun=FACT, use=use,
+                verdict=v.verdict, reason=v.reason, cause=v.cause,
+                citation_url=v.citation_url, quoted_terms=v.quoted_terms)])
+            row = _row(v, corpus_hit=True, asked_as=c.text)
+            row["cross_subject"] = True
+            row["probe"] = "log_hit"
+            # "flagged, never silently served": if the reused evidence was established
+            # under DIFFERENT wording, print which assertion it was originally about.
+            if log_row.get("reused_from_wording"):
+                row["reused_from"] = log_row["reused_from_wording"]
+            rows.append(row)
+            continue
+
         parallel_calls += 1
         v = judge_claim(c, locator=locator, live_search=True, fetch=True)
         store = Verdict(
@@ -177,6 +269,9 @@ def clear_script(
             quoted_terms=v.quoted_terms,
         )
         corpus.remember(con, [store])
+        # Establish it in the cross-production log too, so the NEXT subject that shares
+        # this distinctive term reuses it — the compounding that crosses subjects.
+        _log_record(logcon, term=term, claim=c, v=v, production=subject)
         rows.append(_row(
             Verdict(
                 subject_id=c.claim_id,
@@ -195,6 +290,7 @@ def clear_script(
     sourced = sum(1 for r in rows if r["label"] == "SOURCED")
     n = len(rows)
     remembered = corpus.size_for_use(con, _use(subject))
+    log_size = refusal_log.stats(logcon)["n"]
     return {
         "ok": True,
         "subject": subject,
@@ -205,19 +301,24 @@ def clear_script(
         "unsourced": n - sourced,
         "parallel_calls": parallel_calls,
         "corpus_hits": corpus_hits,
+        # Cross-subject reuse is a DIFFERENT economic object from same-subject reuse, so
+        # it is counted separately, never folded into corpus_hits.
+        "log_hits": log_hits,
+        "log_size": log_size,
         "corpus_remembered": remembered,
         "rows": rows,
         "markdown": _markdown(
             rows, subject=subject, n=n, sourced=sourced,
             parallel_calls=parallel_calls, corpus_hits=corpus_hits,
-            corpus_remembered=remembered,
+            corpus_remembered=remembered, log_hits=log_hits, log_size=log_size,
         ),
     }
 
 
 def _markdown(rows: list[dict], *, subject: str, n: int, sourced: int,
               parallel_calls: int = 0, corpus_hits: int = 0,
-              corpus_remembered: int = 0) -> str:
+              corpus_remembered: int = 0, log_hits: int = 0,
+              log_size: int = 0) -> str:
     gaps = n - sourced
     out = [
         f"# GAP REPORT — subject `{subject}`",
@@ -226,14 +327,23 @@ def _markdown(rows: list[dict], *, subject: str, n: int, sourced: int,
         f"| SOURCED | {sourced} ({(sourced/n if n else 0):.0%}) |",
         f"| UNSOURCED | {gaps} ({(gaps/n if n else 0):.0%}) |",
         f"| Parallel calls this run | {parallel_calls} |",
-        f"| Corpus hits this run | {corpus_hits} |",
+        f"| Corpus hits (same subject) | {corpus_hits} |",
+        f"| Log hits (cross subject) | {log_hits} |",
         f"| Remembered on this subject | {corpus_remembered} |",
+        f"| Claims established across all subjects | {log_size} |",
         "",
     ]
     if corpus_hits:
         out += [
             f"**{corpus_hits} claim(s) resolved from corpus — no Parallel call.** "
             "That is the second-production cost collapse.",
+            "",
+        ]
+    if log_hits:
+        out += [
+            f"**{log_hits} claim(s) reused from ANOTHER subject's clearance — no Parallel "
+            "call.** A claim proven (or proven-unprovable) once is free for every subject "
+            "afterward; that is the cross-production moat.",
             "",
         ]
     if gaps:
@@ -299,7 +409,8 @@ def run(path: Path, *, subject: str = "default", offline: bool = False,
 
     print("=" * 72)
     print(result["markdown"])
-    print(f"\nParallel calls: {result['parallel_calls']} · Corpus hits: {result['corpus_hits']}")
+    print(f"\nParallel calls: {result['parallel_calls']} · Corpus hits: {result['corpus_hits']}"
+          f" · Cross-subject log hits: {result.get('log_hits', 0)}")
 
 
 if __name__ == "__main__":
