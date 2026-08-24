@@ -105,12 +105,12 @@ rights this use would require**, each instrument named.
 **The recurring case, measured on the real corpus:**
 
     undetermined at filing 1        37 of 600
-    without a ledger, re-opened at every 6-month filing
+    without a log, re-opened at every 6-month filing
     over four filings (two years):  148 human enquiries  →  37
 
 All 37 are the same cause: *the holder states copyright was never evaluated.* Those are
 the archive's permanent gaps, not ours — they will still be undetermined at filing 8.
-**The ledger's value is not that it resolves them. It remembers that you already tried,
+**The log's value is not that it resolves them. It remembers that you already tried,
 and what you tried.**
 
 Marketplaces sell pre-cleared data. Nobody proves clearance on material you already hold,

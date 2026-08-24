@@ -5,10 +5,10 @@ method: web search against the object, not reasoning from the product outward
 
 # What the market actually says
 
-## The thing that could have killed the "shared claim ledger" idea
+## The thing that could have killed the "shared claim log" idea
 
 **ClaimReview exists.** A schema.org standard for fact-check markup, in use across
-1K–10K domains — PolitiFact, Full Fact, Maldita, Chequeado. A shared claim ledger is
+1K–10K domains — PolitiFact, Full Fact, Maldita, Chequeado. A shared claim log is
 not a new idea.
 
 **It does not kill ours, and the difference is the whole product.** ClaimReview records
@@ -17,7 +17,7 @@ It is a *publishing* format for fact-check articles. It does not carry the verba
 passage, the source's independence basis, or — decisively — **the refusals**. There is
 no ClaimReview for *"this cannot be sourced, and here is what would resolve it."*
 
-**So it is an export target, not a competitor.** Emitting ClaimReview from our ledger is
+**So it is an export target, not a competitor.** Emitting ClaimReview from our log is
 interoperability; it costs little and it means our records travel into a standard other
 tools already read.
 

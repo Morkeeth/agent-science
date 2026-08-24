@@ -20,6 +20,7 @@ from __future__ import annotations
 import os
 import re
 from dataclasses import dataclass
+from typing import Optional
 
 _URL = re.compile(r"https?://[^\s)\]]+")
 _CLAIM_TAG = re.compile(r"^\s*\[CLAIM\]\s*(.+)$", re.I)
@@ -98,18 +99,46 @@ def _line_claim(line: str) -> str | None:
     return text if len(text) >= 20 and " " in text else None
 
 
-def verify_corpus(corpus_dir: str, *, fetch: bool = True, live_search: bool = False) -> dict:
+def stage_corpus(corpus_dir: str) -> dict:
+    """OFFLINE structural stage — parse every claim and report how many carry a fetchable
+    source, with ZERO network. This is the dogfood's cheap half: it proves the whole
+    corpus reaches the clearance engine's front door before any quota is spent.
+
+    "Fetchable" here is structural, not a live HEAD: an http(s) URL the engine's fetch
+    path (urllib) can attempt. A claim with no such URL never entered `parse_corpus`, so
+    the honest number is claims-with-a-source over claims-parsed.
+    """
+    claims = parse_corpus(corpus_dir)
+    fetchable = [c for c in claims if c.url.startswith(("http://", "https://"))]
+    return {
+        "claims": len(claims),
+        "fetchable": len(fetchable),
+        "distinct_urls": len({c.url for c in claims}),
+        "files": len({c.file for c in claims}),
+        "rows": [{"file": c.file, "line": c.line, "url": c.url,
+                  "must_contain": _must_contain(c.text)} for c in claims],
+    }
+
+
+def verify_corpus(corpus_dir: str, *, fetch: bool = True, live_search: bool = False,
+                  limit: Optional[int] = None) -> dict:
     """Run each corpus claim through the clearance engine against its cited URL.
 
-    Returns {sourced, refused, unknown, rows}. NETWORK: fetch+locate. Import is local so
-    parse_corpus stays usable with zero dependencies.
+    Returns {sourced, refused, unknown, rows}. NETWORK: fetch (urllib) + locate (the
+    DEFAULT string locator, no model). It does NOT search Parallel and does NOT call
+    Gemini — the source is named, so the only cost is HTTP fetches. `limit` runs only the
+    first N claims, so a small sample proves the path without a full red-build run.
+    Import is local so parse_corpus / stage_corpus stay usable with zero dependencies.
     """
     from clearance.facts import Claim, judge_claim
     from clearance.verdict import GREEN
 
     rows = []
     sourced = refused = unknown = 0
-    for i, c in enumerate(parse_corpus(corpus_dir), 1):
+    staged = parse_corpus(corpus_dir)
+    if limit is not None:
+        staged = staged[:limit]
+    for i, c in enumerate(staged, 1):
         claim = Claim(claim_id=f"K{i}", text=c.text, source_url=c.url,
                       must_contain=_must_contain(c.text))
         try:
@@ -132,13 +161,42 @@ def verify_corpus(corpus_dir: str, *, fetch: bool = True, live_search: bool = Fa
 
 
 def main(argv=None) -> int:
+    """Dogfood CLI.
+
+      clear_corpus.py [dir]                 offline stage: parse + fetchable-source count
+      clear_corpus.py [dir] --verify N      LIVE verify the first N claims (urllib fetch;
+                                            no Parallel, no Gemini). --verify all = full
+                                            red-build run (heavy: one fetch+locate each).
+    """
     import sys
-    args = argv if argv is not None else sys.argv[1:]
+    args = list(argv if argv is not None else sys.argv[1:])
+    limit: Optional[int] = 0  # 0 => stage only (offline)
+    if "--verify" in args:
+        i = args.index("--verify")
+        val = args[i + 1] if i + 1 < len(args) else "3"
+        limit = None if val == "all" else int(val)
+        del args[i:i + 2]
     corpus = args[0] if args else os.path.join(os.path.dirname(__file__), "research-corpus")
-    claims = parse_corpus(corpus)
-    print(f"{len(claims)} claim(s) parsed from {corpus}")
-    for c in claims[:20]:
-        print(f"  {c.file}:{c.line}  {c.text[:70]!r}  <- {c.url[:50]}")
+
+    stage = stage_corpus(corpus)
+    print(f"STAGE (offline): {stage['claims']} claim(s) parsed from {corpus}")
+    print(f"  fetchable source (http/https): {stage['fetchable']}/{stage['claims']}"
+          f"  ·  {stage['distinct_urls']} distinct URL(s)  ·  {stage['files']} file(s)")
+    for c in stage["rows"][:10]:
+        print(f"  {c['file']}:{c['line']}  <- {c['url'][:60]}")
+
+    if limit == 0:
+        print("\n(stage only. Pass --verify N to LIVE-verify a sample, "
+              "--verify all for the full red-build run.)")
+        return 0
+
+    scope = "ALL" if limit is None else f"first {limit}"
+    print(f"\nLIVE VERIFY ({scope}) — urllib fetch + string locator, no paid quota:")
+    res = verify_corpus(corpus, limit=limit)
+    print(f"  SOURCED {res['sourced']}  ·  UNSOURCED {res['refused']}  ·  "
+          f"UNKNOWN/error {res['unknown']}  of {res['total']}")
+    for r in res["rows"]:
+        print(f"  {r['verdict']:9} {r.get('cause') or '':30} {r['url'][:55]}")
     return 0
 
 
