@@ -11,6 +11,7 @@ Scope note: two angles are pre-killed and NOT re-proposed — composition-honest
 ## DISCLOSURE STATUS (bears on DEFENSIBLE — public disclosure is prior art against Oscar himself)
 - [DISCLOSURE] hack-fleet-ata, cleared (agent-science), agent-attack, helicon (mount-helicon) all have PUBLIC GitHub remotes (`git remote -v`, 2026-08-24). Several were hackathon submissions.
 - [RULE] EPO/most-of-world: any public disclosure before filing = novelty DEAD (absolute novelty). US: 12-month grace window from first inventor disclosure (35 USC §102(b)(1)). So every angle below is at best US-filable with a clock already running from the repo's first public commit. https://www.uspto.gov/web/offices/pac/mpep/s2153.html (unverified — standard grace-period rule)
+- [DATE] ANGLE 1 disclosure clock is FRESH: `contract/deterministic.py` first commit 2026-08-24 (today); hack-fleet-ata repo first commit 2026-08-22 (`git log`). The US grace clock is days old, not months — the weak flank of "worth an attorney's hour" is a live opportunity THIS MONTH, not a lapsed one. (Push date is the true §102(b)(1) trigger and bounds ≤ commit+2d.)
 
 ---
 
@@ -22,6 +23,7 @@ Most-novel element: the deferral region is a NAMED, closed-form lexical-structur
 - [PRIOR-ART] UCCI — calibrated uncertainty for cost-optimal LLM cascade routing; deferral by calibrated uncertainty threshold. https://arxiv.org/html/2605.18796
 - [PRIOR-ART] Learning-to-Defer generalizes selective prediction: abstain/defer on uncertain inputs to an expert. https://arxiv.org/pdf/2502.01459 (Learning to Partially Defer for Sequences)
 - [PRIOR-ART] repo cites the escalate-the-low-confidence-tail result itself (arXiv:2502.09054) — self-disclosed art.
+- [PRIOR-ART] Known weak flank (likely the examiner's actual §103 citation, NOT the LLM-cascade papers): the decades-old rule-first / ML-fallback hybrid NLU pattern — deterministic rules answer, the statistical model handles what the rules do not fire on (POS-tagging, NER). The surviving element is that hybrids do NOT articulate the fallback region as a closed-form, provably-sole undecidable cell; they fall back on "no rule matched," not on a proven-unique ambiguity cell.
 - [DIFF] All prior art defers on a SCORE (learned/calibrated threshold). This method defers on a deterministic structural predicate that is closed-form and needs no calibration; the confident set is provably error-free on the test set (test_confidence.py 5/5). I found NO patent/paper framing deferral as "escalate exactly the one lexically-undecidable cell, threshold-free."
 - [VERDICT] NOVEL (marginal). Obviousness risk is real — "defer when the deterministic rule cannot decide" reads as an obvious species of selective prediction. But the specific mechanism (structural predicate = provably-sole undecidable region → threshold-free confident set) is not literally shown anywhere I found. STRONGEST candidate.
 
