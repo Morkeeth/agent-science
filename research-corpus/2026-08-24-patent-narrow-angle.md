@@ -28,12 +28,13 @@ Deterministic/LLM-free method that inspects an autonomous AI agent's OWN generat
 [URL] https://patents.google.com/patent/EP1852811A2/en
 [DIFF] These check documents/configs, not an agent self-report; but the ARITHMETIC (count == len(list); denominator ⊇ named failures; %>0 vs 0-count item) is basic set/arithmetic logic a POSITA applies obviously once the object is chosen.
 
-### The very CONCEPT ("treat every agent 'done' as a falsifiable claim a script verifies before trusting") is already PUBLIC.
-[CLAIM] Patent-firm blog (2026): "AI agents report work as done that they never did, so every completion should be treated as a falsifiable claim that a script can verify before trusting it." Exact motivation, published.
+### The very CONCEPT ("treat every agent 'done' as a falsifiable claim a DETERMINISTIC script verifies before trusting") is already PUBLIC (VERIFIED by direct fetch 2026-08-24).
+[CLAIM-VERIFIED] Patent-firm blog (2026), exact quotes from the page: "AI agents routinely report tasks as complete that were never actually done." / "The fix is to treat every reported completion as a falsifiable claim, then run a deterministic checker that verifies each claim against the real file." / "A falsifiable claim is a completion report written so a script can prove it false." Ships five deterministic non-LLM claim types incl. `glob_count` (a COUNT check). This anticipates deterministic + non-LLM + agent-completion-claim + verify-before-trust at both concept AND mechanism level.
 [URL] https://bmdpat.com/blog/ai-agent-claims-done-verify-2026
+[DIFF] bmdpat's checker verifies each claim against the REAL FILE / external ground truth (`file_contains`, `path_moved`, `glob_count` vs the filesystem). It does NOT do SELF-referential checking (numeric claim vs the report's OWN enumerated items, no ground truth). That single nuance is the ONLY thing it leaves standing — see "tightest surviving differentiator" below.
 [CLAIM] VLAA-GUI "Completion Gate" — a completion-verification gate that emits accept/reject on an agent's DONE claim before it is trusted (but LLM/MLLM-judge based, not deterministic).
 [URL] https://arxiv.org/pdf/2604.21375
-[DIFF] bmdpat says "a script can verify" — anticipates the deterministic-script framing at the concept level. VLAA-GUI's gate is LLM-based (our deterministic angle differs) but shows the gate-on-completion-claim architecture is known.
+[DIFF] VLAA-GUI's gate is LLM-based (our deterministic angle differs) but shows the gate-on-completion-claim architecture is known.
 
 ### Broad idea already dead (recap from prior file)
 [CLAIM] "Aggregate misleads though parts true" = Simpson's paradox / aggregation bias — decades old.
