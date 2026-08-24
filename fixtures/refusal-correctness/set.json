@@ -46,7 +46,9 @@
       "must_contain": "free of known copyright restrictions",
       "document": "fixtures/refusal-correctness/docs/cne-status-only.html",
       "accepted_passage": null,
-      "why": "Substring trap — document says status has NOT been evaluated; terms for a different claim appear nearby. See FINDING-substring-is-not-a-statement."
+      "engine_limit": "substring_not_a_statement",
+      "engine_verdict_today": "GREEN",
+      "why": "Substring trap — document says status has NOT been evaluated; terms for a different claim appear nearby. See FINDING-substring-is-not-a-statement. GOLD is NOT_SUPPORTED (a careful human refuses this). The shipping StringLocator CANNOT catch it: `must_contain` appears verbatim in a passage that negates the claim, and nothing in this system reads meaning. `engine_limit` records that documented gap so the false GREEN is pinned AS A DEFECT, not hidden — when a locator finally refuses this, the pin fails and says so."
     },
     {
       "id": "RC6",

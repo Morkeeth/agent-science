@@ -3,6 +3,13 @@
 Labels in fixtures/refusal-correctness/set.json were written before these controls
 run against them. A refuse-everything locator must fail SUPPORTED items. A greedy
 locator must fail NOT_SUPPORTED items that nearly match.
+
+The load-bearing control is `t_shipping_locator_binds_both_poles_on_held_out_set`:
+it runs the ACTUAL product locator (`DEFAULT`) over the set and fails on a false
+UNKNOWN (a supported claim abstained on — the finding's own RC1 seed) as well as a
+false GREEN, and cannot be satisfied by a stuck all-GREEN or all-UNKNOWN locator.
+This mirrors the answerable/unanswerable split used by grounded-refusal benchmarks
+(RefusalBench, AbstentionBench), which score over-abstention, not only hallucination.
 """
 from __future__ import annotations
 
@@ -114,6 +121,12 @@ def t_near_miss_and_wrong_doc_must_stay_unknown():
     for it in SET["items"]:
         if it["expected"] != "NOT_SUPPORTED":
             continue
+        # Skip items the engine provably CANNOT catch (substring-is-not-a-statement):
+        # a greedy stand-in on those tests behaviour the system never promised, and this
+        # loop used to "pass" RC5 only because the greedy slice happened to start
+        # mid-word. The shipping-locator pole test below pins RC5 as the documented gap.
+        if it.get("engine_limit"):
+            continue
 
         def greedy(doc, mc):
             if "2020" in mc:
@@ -133,20 +146,68 @@ def t_near_miss_and_wrong_doc_must_stay_unknown():
     assert not bad, "false GREEN on labelled-NOT_SUPPORTED:\n  " + "\n  ".join(bad)
 
 
-def t_shipping_locator_resolves_short_sentence_and_cne():
-    """Pin known-resolvable awkward cases on the real StringLocator."""
+def t_shipping_locator_binds_both_poles_on_held_out_set():
+    """The whole point of the finding, on the ACTUAL product locator.
+
+    Runs the shipping StringLocator (`DEFAULT`) over every item and binds both
+    directions, so the suite fails when the product itself drifts — not only when a
+    hand-made oracle or greedy stand-in does:
+
+      * a catchable SUPPORTED item that abstains  -> FALSE UNKNOWN  -> RED here
+      * a catchable NOT_SUPPORTED item that greens -> FALSE GREEN   -> RED here
+
+    `engine_limit` items are exempted from the gold expectation and pinned separately
+    below, because the system provably cannot read meaning (FINDING-substring-is-not-
+    a-statement); pretending it can would be the very over-fitting this repo refuses.
+    """
     results = {}
     for it in SET["items"]:
-        if it["expected"] != "SUPPORTED":
-            continue
         url = f"fixture://ship-{it['id']}"
         v = _with_doc(url, _doc(it["document"]),
                       Claim(it["id"], it["claim"], url, it["must_contain"]), DEFAULT)
         results[it["id"]] = (v.verdict, v.cause)
-    assert results["RC2"][0] == GREEN, f"RC2 short sentence: {results['RC2']}"
-    assert results["RC6"][0] == GREEN, f"RC6 CNE: {results['RC6']}"
-    # RC1 nav-first: pin outcome so drift is visible (may be GREEN or UNKNOWN).
-    assert "RC1" in results
+
+    false_unknown, false_green = [], []
+    for it in SET["items"]:
+        if it.get("engine_limit"):
+            continue
+        verdict = results[it["id"]][0]
+        if it["expected"] == "SUPPORTED" and verdict != GREEN:
+            # RC1 lives here: the nav occurrence of "29 October 2014" precedes the real
+            # sentence. A first-occurrence-only locator abstains — the exact defect the
+            # finding was written about. This line turns that from "drift visible" into
+            # "suite fails."
+            false_unknown.append(f"{it['id']}: {results[it['id']]}")
+        if it["expected"] == "NOT_SUPPORTED" and verdict == GREEN:
+            false_green.append(f"{it['id']}: {results[it['id']]}")
+    assert not false_unknown, \
+        "FALSE UNKNOWN — shipping locator abstained on a supported claim:\n  " \
+        + "\n  ".join(false_unknown)
+    assert not false_green, \
+        "FALSE GREEN — shipping locator cleared an unsupported claim:\n  " \
+        + "\n  ".join(false_green)
+
+    # Neither pole is satisfiable by a stuck locator: SUPPORTED greens and
+    # NOT_SUPPORTED abstains on the SAME engine in the SAME run.
+    catchable = [it for it in SET["items"] if not it.get("engine_limit")]
+    greens = sum(results[it["id"]][0] == GREEN for it in catchable
+                 if it["expected"] == "SUPPORTED")
+    unknowns = sum(results[it["id"]][0] == UNKNOWN for it in catchable
+                   if it["expected"] == "NOT_SUPPORTED")
+    assert greens > 0 and unknowns > 0, \
+        "an all-GREEN or all-UNKNOWN locator would be caught by one of these poles"
+
+    # RC5: the documented, uncloseable gap. Pinned AS A DEFECT so a future locator that
+    # closes it fails HERE with an instruction, rather than the win passing unnoticed.
+    limits = [it for it in SET["items"] if it.get("engine_limit")]
+    assert limits, "RC5 marks the substring-is-not-a-statement gap; it must stay in the set"
+    for it in limits:
+        got = results[it["id"]][0]
+        assert got == it["engine_verdict_today"], (
+            f"{it['id']}: shipping locator now returns {got}, fixture records "
+            f"{it['engine_verdict_today']} for engine_limit={it['engine_limit']!r}. "
+            "If a locator finally REFUSES this negated-claim substring, that is an "
+            "IMPROVEMENT — move RC5's gold into the enforced pole and drop engine_limit.")
 
 
 if __name__ == "__main__":

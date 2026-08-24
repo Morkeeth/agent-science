@@ -93,3 +93,43 @@ GENUINE — real, verbatim, chrome-free. Nothing watched whether a genuine quote
 So the incentive table stands, but the score does not. **A false GREEN was live in the
 product all day**, produced by the string matcher and invisible to 31 green controls.
 Both directions were unwatched; I only knew about one of them.
+
+
+---
+
+## Update, 2026-08-24: the held-out set is built, and it now binds the SHIPPING locator
+
+Two things this file still asserted are now false. It said the set was "still unbuilt":
+it was built and committed by the Cursor lane on 2026-08-22
+(`fixtures/refusal-correctness/set.json`, `tests/test_refusal_correctness.py`, six
+items RC1–RC6, wired into `tests/test_watch_it_go_red.py`). Verifying at the object
+found the set real but its teeth loose in exactly the two directions this finding is
+about:
+
+- **The false-UNKNOWN seed was not enforced.** RC1 — the supporting sentence that sits
+  after a nav occurrence of the same date — was pinned only as "may be GREEN or
+  UNKNOWN." The suite could not fail on the one defect the finding was written about.
+- **The false GREEN was invisible.** RC5 (the substring-is-not-a-statement trap) is a
+  live false GREEN on the shipping `StringLocator`, but the NOT_SUPPORTED pole was
+  tested with a *greedy stand-in* that passed RC5 only by structural accident (its slice
+  started mid-word). Nothing ran the actual product locator against the set.
+
+Fix (this session): `t_shipping_locator_binds_both_poles_on_held_out_set` runs the real
+`DEFAULT` locator over the whole set and fails on a false UNKNOWN (RC1/RC2/RC6 must
+GREEN) and on a false GREEN, and cannot be satisfied by a stuck all-GREEN or all-UNKNOWN
+locator (SUPPORTED greens and NOT_SUPPORTED abstains on the same engine in the same run).
+Demonstrated red by re-injecting the historical first-occurrence/nav defect: RC1 flips to
+`UNKNOWN/source_does_not_state_it` and the assertion fires. Reverted, 72 green.
+
+RC5 is carried as a **documented limitation**, not relabelled. Its gold stays
+NOT_SUPPORTED (a careful human refuses it); a new `engine_limit:
+"substring_not_a_statement"` field records that the shipping engine returns GREEN today
+and pins that AS A DEFECT — when a locator finally refuses the negated-claim substring,
+the pin fails with an instruction to promote RC5 into the enforced pole. This mirrors the
+answerable/unanswerable split that grounded-refusal benchmarks (RefusalBench,
+arXiv:2510.10390; AbstentionBench, arXiv:2506.09038) use to score over-abstention rather
+than only hallucination.
+
+**Open for Oscar:** accepting `engine_limit` on RC5 ratifies a standing product
+limitation — "the engine cannot catch a negated claim whose `must_contain` terms appear
+verbatim." That is a ruling, not a bug to be quietly fixed.
