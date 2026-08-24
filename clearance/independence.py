@@ -34,7 +34,18 @@ _DERIVED = (
 )
 
 # Hosts that are the thing itself.
+#
+# An official gazette is primary by the strongest definition there is: in a
+# civil-law country it is the SOLE authoritative text of a law, and the law enters
+# force on the date it is published there (Law Library of Congress, foreign legal
+# gazette collection). So a national gazette outranks any codification or summary.
+#
+# Short international fragments (".un.org", ".who.int") carry a LEADING DOT on
+# purpose: `frag in host` on a bare "un.org" would also fire on "fun.org", and a
+# FALSE primary is the one error this product must never make (it is rounding a
+# derived source up to a source of truth). The dot forces a subdomain boundary.
 _PRIMARY = (
+    # EU / UK / US — the original set.
     ("eur-lex.europa.eu", "EU primary law"),
     ("legislation.gov.uk", "UK primary legislation"),
     ("gov.uk", "UK government"),
@@ -45,6 +56,25 @@ _PRIMARY = (
     ("courtlistener.com", "court records"),
     ("rightsstatements.org", "the rights vocabulary itself"),
     ("creativecommons.org", "the licence text itself"),
+    # National official gazettes / legal publishers (the authoritative text).
+    ("legifrance.gouv.fr", "France — official legal publisher"),
+    ("gesetze-im-internet.de", "Germany — federal law, official"),
+    ("boe.es", "Spain — Boletín Oficial del Estado (official gazette)"),
+    ("gazzettaufficiale.it", "Italy — Gazzetta Ufficiale (official gazette)"),
+    ("officielebekendmakingen.nl", "Netherlands — official publications"),
+    ("canada.ca", "Government of Canada"),
+    ("gc.ca", "Government of Canada"),
+    ("australia.gov.au", "Australian Government"),
+    (".gov.au", "Australian government publisher"),
+    # International institutions publishing their own instruments / statistics.
+    (".un.org", "United Nations"),
+    (".who.int", "World Health Organization"),
+    (".oecd.org", "OECD — the publisher of the statistic"),
+    (".worldbank.org", "World Bank — the publisher of the data"),
+    # Standards bodies — the specification IS the standard.
+    (".ietf.org", "IETF — the RFC standard itself"),
+    (".iso.org", "ISO — the standard itself"),
+    (".w3.org", "W3C — the specification itself"),
 )
 
 
