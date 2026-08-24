@@ -1021,7 +1021,7 @@ def t_the_meter_counts_every_call_site():
     assert S.calls() == 0 and isinstance(before, int)
 
 
-def t_ledger_write_and_read_agree_on_the_slot():
+def t_refusal_log_write_and_read_agree_on_the_slot():
     """The write path and the read path must classify a claim the same way.
 
     They did not: slot_of() was patched on the read side and missed on the write side,
@@ -1030,7 +1030,7 @@ def t_ledger_write_and_read_agree_on_the_slot():
     assertions silently merged on one primary key - the collision the per-subject corpus
     could only flag would have been MERGED here, which is strictly worse.
     """
-    from clearance import ledger as L
+    from clearance import refusal_log as L
     con = L.connect(":memory:")
     T = "Directive 2012/28/EU"
     L.record(con, term=T, assertion=f"{T} was adopted in 2012", verdict=GREEN,
@@ -1038,16 +1038,16 @@ def t_ledger_write_and_read_agree_on_the_slot():
     L.record(con, term=T, assertion=f"{T} was known as the Orphan Works Directive",
              verdict=UNKNOWN, production="A", cause="no_independent_source")
     assert L.stats(con)["n"] == 2, \
-        "two different assertions about one term merged into a single ledger row"
+        "two different assertions about one term merged into a single log row"
     date_claim = L.lookup(con, term=T, assertion=f"{T} passed in 2012")
     ident = L.lookup(con, term=T, assertion=f"{T} is called the Orphan Works Directive")
     assert date_claim["verdict"] == GREEN and ident["verdict"] == UNKNOWN, \
-        "the ledger served a verdict about a different assertion"
+        "the log served a verdict about a different assertion"
 
 
 def t_the_term_is_stripped_before_classifying():
     """The term carries digits; classifying the raw sentence makes everything a date."""
-    from clearance.ledger import slot_of
+    from clearance.refusal_log import slot_of
     T = "Directive 2012/28/EU"
     assert slot_of(f"{T} was adopted in 2012", T) == "date"
     assert slot_of(f"{T} was known as the Orphan Works Directive", T) == "identity"
@@ -1057,9 +1057,9 @@ def t_the_term_is_stripped_before_classifying():
         "this test is stale: the raw-sentence failure it guards no longer reproduces"
 
 
-def t_refusals_are_first_class_in_the_ledger():
+def t_refusals_are_first_class_in_the_log():
     """The negative space is the asset. A refusal must persist with what would fix it."""
-    from clearance import ledger as L
+    from clearance import refusal_log as L
     con = L.connect(":memory:")
     L.record(con, term="Some Statute", assertion="Some Statute says X", verdict=UNKNOWN,
              production="A", cause="search_found_no_admissible_source",

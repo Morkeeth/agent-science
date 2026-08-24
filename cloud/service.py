@@ -207,11 +207,11 @@ a{{color:var(--ink)}}
   text-transform:uppercase;color:var(--mute);text-decoration:none}}
 h1{{font-size:clamp(1.8rem,4vw,2.6rem);margin:.8rem 0 .3rem;letter-spacing:-.02em}}
 .meta{{font-family:"IBM Plex Mono",monospace;font-size:.78rem;color:var(--mute);margin:0 0 1.5rem}}
-.ledger{{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);
+.tally{{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);
   border:1px solid var(--line);margin:0 0 1.5rem}}
-.ledger div{{background:var(--paper);padding:.85rem .7rem}}
-.ledger .n{{display:block;font-family:"IBM Plex Mono",monospace;font-size:1.6rem;font-weight:600}}
-.ledger .k{{font-family:"IBM Plex Mono",monospace;font-size:.65rem;letter-spacing:.06em;
+.tally div{{background:var(--paper);padding:.85rem .7rem}}
+.tally .n{{display:block;font-family:"IBM Plex Mono",monospace;font-size:1.6rem;font-weight:600}}
+.tally .k{{font-family:"IBM Plex Mono",monospace;font-size:.65rem;letter-spacing:.06em;
   text-transform:uppercase;color:var(--mute)}}
 .compound{{background:var(--band);padding:1.1rem 1rem;margin:0 0 1.75rem;border-left:4px solid var(--ink)}}
 .compound.cold{{border-left-color:var(--line)}}
@@ -240,13 +240,13 @@ article{{padding:1rem 0;border-bottom:1px solid var(--line)}}
 .next a.button{{display:inline-block;font-family:"IBM Plex Mono",monospace;font-size:.75rem;
   letter-spacing:.04em;text-transform:uppercase;background:var(--ink);color:var(--paper);
   text-decoration:none;padding:.75rem 1.2rem;margin-top:.5rem}}
-@media(max-width:640px){{.ledger,.nums{{grid-template-columns:1fr 1fr}}}}
+@media(max-width:640px){{.tally,.nums{{grid-template-columns:1fr 1fr}}}}
 </style></head><body>
 <div class="wrap">
   <a class="back" href="/?subject={subject}">← desk</a>
   <h1>Gap report</h1>
   <p class="meta">subject {subject} · clearance memo</p>
-  <div class="ledger">
+  <div class="tally">
     <div><span class="n">{_esc(n)}</span><span class="k">Claims</span></div>
     <div><span class="n">{_esc(sourced)}</span><span class="k">Sourced</span></div>
     <div><span class="n">{_esc(unsourced)}</span><span class="k">Unsourced</span></div>

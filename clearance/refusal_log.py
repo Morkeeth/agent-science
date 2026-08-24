@@ -1,4 +1,4 @@
-"""The cross-production claim ledger — and the refusal ledger inside it.
+"""The cross-production claim log — and the refusal log inside it.
 
 The corpus compounds inside ONE production's subject. This compounds across every
 production that ever ran, which is a different economic object: a claim established
@@ -23,7 +23,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
-DB = Path(__file__).resolve().parent.parent / "cache" / "ledger.db"
+DB = Path(__file__).resolve().parent.parent / "cache" / "refusal_log.db"
 
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS claims (
