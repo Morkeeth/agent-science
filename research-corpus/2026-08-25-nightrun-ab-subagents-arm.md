@@ -51,5 +51,48 @@ but got one in front of a stranger would win the A/B on the only axis that count
 - **Failure mode to watch:** no lane self-verified against a stranger. The subagent arm is
   as blind to outward reach as the fleet arm; neither method fixes the click gap.
 
-*A/B verdict (this arm vs the fleet arm, per-token and per-stranger) is computed in the
-2026-08-25 morning wrap-up email from these numbers + the latest fleet SNAPSHOT.*
+## THE A/B VERDICT — subagents-in-one-terminal vs the fleet
+
+The comparison arm is the fleet's OWN measured 3-day scoreboard, lifted from
+`~/CODE/fleet-ops/runs/SNAPSHOT-2026-08-13.md` (its honest self-report, not my relay).
+
+| axis | FLEET arm (3-day, measured) | SUBAGENTS arm (this session, ~10h) |
+|---|---|---|
+| output tokens | **19,027,962** (~6.3M/day) | ≥**476,437** measured across 4 named agents (partial — coordinator turns + pre-compaction agents uncounted) |
+| commits | **389** (~130/day) | **59** (one evening+night, across 4 repos) |
+| **strangers reached** | **1** (verified floor; a 2nd DM unverifiable) | **0** |
+| coordination overhead | socket protocol, N terminals, broadcast-storm risk, peer-to-peer confusion | none — one process, parent holds the gate by construction |
+| the fleet's own verdict | *"narrowly worth it on error-containment, NOT throughput. No control arm was run, so 'fleet beats solo' is unproven."* | — |
+
+**What the A/B actually shows (three honest reads):**
+
+1. **The bottleneck is not the build engine — it is the outward click.** Both arms shipped
+   real code at volume; both reached ~0–1 strangers. The fleet spent 19M tokens over 3 days
+   to reach ONE verified stranger; the subagent arm reached zero in a night. Neither method
+   fixes the click gap because the click is Oscar's, by design. **No orchestration topology
+   moves the only number that counts.** That is the finding, and it indicts both arms equally.
+
+2. **On internal throughput per token, the subagent arm looks cheaper — but the measurement
+   is not clean enough to declare a winner.** 59 commits at a measured floor of ~0.48M tokens
+   is a far better commits-per-token ratio than 389 at 19M, but (a) my token count is partial,
+   (b) commit counts are not outcome counts (a commit is not a shipped feature), and (c) this
+   was NOT pre-registered with a matched board and wall-clock. It is a second data point, not
+   the controlled experiment. The fleet study asked for exactly that control arm and never ran
+   it; this night is a partial, imperfect version of it.
+
+3. **The subagent arm's real, defensible advantage is structural, not numeric:** the parent
+   keeps conclusions and sheds tool-spam (each lane returned ≤10 lines while ~0.48M tokens of
+   tool churn stayed out of the coordinator's context), and there is no cross-peer protocol to
+   go wrong (no broadcast storm, no peers-messaging-peers, the gate is the parent by
+   construction). The fleet's failure modes this replaces are documented, not hypothetical.
+
+**Bottom line for the morning:** if the goal is internal throughput and error-containment,
+the single-terminal subagent arm delivers it at a fraction of the coordination cost and looks
+cheaper per token — but "cheaper" is unproven without a pre-registered, matched control. If
+the goal is OUTWARD (it is), **both arms score ~0 and the experiment's real result is that the
+build method was never the constraint.** The next experiment worth running is not fleet-vs-
+subagents; it is *anything that reaches a stranger* vs the current zero.
+
+*To turn this into the clean experiment: pre-register one matched board, same wall-clock, same
+five metrics, denominator written before the first token — the control arm the fleet study
+named and never ran.*
