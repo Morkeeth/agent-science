@@ -154,7 +154,9 @@ def verify_corpus(corpus_dir: str, *, fetch: bool = True, live_search: bool = Fa
             v = judge_claim(claim, fetch=fetch, live_search=live_search)
         except Exception as e:  # a dead URL / fetch failure is UNKNOWN, never SOURCED
             rows.append({"file": c.file, "line": c.line, "verdict": "UNKNOWN",
-                         "cause": f"error: {type(e).__name__}", "url": c.url})
+                         "cause": f"error: {type(e).__name__}", "url": c.url,
+                         "text": c.text, "must_contain": _must_contain(c.text),
+                         "quoted_terms": None, "basis": None})
             unknown += 1
             continue
         cause = getattr(v, "cause", "") or ""
@@ -164,8 +166,17 @@ def verify_corpus(corpus_dir: str, *, fetch: bool = True, live_search: bool = Fa
             verdict, bucket = "UNKNOWN", "unknown"
         else:  # read it, and it does not carry the claim — the real red-build failure
             verdict, bucket = "UNSOURCED", "refused"
+        # Carry enough of the verdict for the back-fill to establish a REPLAYABLE row in
+        # the cross-production log: a GREEN needs citation_url + quoted_terms and an
+        # UNKNOWN/source_does_not_state_it needs them too (both survive the Verdict
+        # constructor only if cited). getattr keeps the offline weather test's FakeV —
+        # which carries only .verdict/.cause — working unchanged.
         rows.append({"file": c.file, "line": c.line, "verdict": verdict,
-                     "cause": cause, "url": c.url})
+                     "cause": cause, "url": c.url,
+                     "text": c.text, "must_contain": _must_contain(c.text),
+                     "quoted_terms": getattr(v, "quoted_terms", None),
+                     "basis": ("primary" if "PRIMARY" in (getattr(v, "reason", "") or "")
+                               else "corroborated") if bucket == "sourced" else None})
         if bucket == "sourced":
             sourced += 1
         elif bucket == "unknown":
@@ -176,6 +187,65 @@ def verify_corpus(corpus_dir: str, *, fetch: bool = True, live_search: bool = Fa
             "total": sourced + refused + unknown, "rows": rows}
 
 
+def backfill_log(corpus_dir: str, *, log_db=None, fetch: bool = True,
+                 live_search: bool = False, include_unsourced: bool = True,
+                 production: str = "corpus-backfill") -> dict:
+    """Seed the cross-production log with the verdicts the corpus dogfood already proved.
+
+    The log (clearance/refusal_log.py) is wired into the live path but starts EMPTY: it
+    only ever compounds from NEW runs, so nothing carries forward what the full-corpus
+    dogfood established (28 SOURCED / 133 UNSOURCED / 9 UNKNOWN). This runs verify_corpus
+    and writes each cleared verdict into the log, keyed on the SAME distinctive term the
+    live path (agent_science._term_of) looks up, so the next production on ANY subject
+    that shares that term reuses it and spends no Parallel call — a cold-start baseline.
+
+    - GREEN claims are established as SOURCED, carrying citation_url + quoted_terms so the
+      log-hit branch can rebuild a real Verdict.
+    - Confidently-UNSOURCED claims — and ONLY cause == source_does_not_state_it, the one
+      refusal that carries the document it read — are established as proven-unprovable
+      (UNKNOWN). That negative space is the asset no competitor accumulates. Fetch-weather
+      (a dead URL) is never seeded: it is not a verdict on the claim.
+
+    Idempotent: refusal_log.record is INSERT OR IGNORE on (term, slot), so a second run
+    adds nothing. The honest count is the row delta in the log, not the loop length —
+    real corpus claims can collapse onto one (term, slot).
+    """
+    from clearance import refusal_log
+    from clearance.verdict import GREEN as _GREEN, SOURCE_SILENT as _SILENT
+
+    con = refusal_log.connect(log_db or refusal_log.DB)
+    before = refusal_log.stats(con)["n"]
+    res = verify_corpus(corpus_dir, fetch=fetch, live_search=live_search)
+
+    green = unsourced = 0
+    for r in res["rows"]:
+        # Mirror agent_science._term_of EXACTLY: the distinctive span when substantial,
+        # else the whole assertion. A short/empty term would collide unrelated claims.
+        mc = (r.get("must_contain") or "").strip()
+        term = mc if len(mc) >= 6 else (r.get("text") or "")
+        assertion = r.get("text") or ""
+        if r["verdict"] == "SOURCED":
+            refusal_log.record(
+                con, term=term, assertion=assertion, verdict=_GREEN,
+                production=production, basis=r.get("basis"),
+                citation_url=r.get("url"), quoted_terms=r.get("quoted_terms"),
+                origins=[production])
+            green += 1
+        elif include_unsourced and r["verdict"] == "UNSOURCED" and r.get("cause") == _SILENT:
+            refusal_log.record(
+                con, term=term, assertion=assertion, verdict="UNKNOWN",
+                production=production, cause=_SILENT,
+                citation_url=r.get("url"), quoted_terms=r.get("quoted_terms"),
+                origins=[production])
+            unsourced += 1
+
+    after = refusal_log.stats(con)["n"]
+    return {"seeded_green": green, "seeded_unsourced": unsourced,
+            "seeded_rows": after - before, "considered": green + unsourced,
+            "log_size": after, "verified": {k: res[k] for k in
+                                            ("sourced", "refused", "unknown", "total")}}
+
+
 def main(argv=None) -> int:
     """Dogfood CLI.
 
@@ -183,9 +253,16 @@ def main(argv=None) -> int:
       clear_corpus.py [dir] --verify N      LIVE verify the first N claims (urllib fetch;
                                             no Parallel, no Gemini). --verify all = full
                                             red-build run (heavy: one fetch+locate each).
+      clear_corpus.py [dir] --backfill      seed the cross-production log from the proven
+                                            corpus (a cold-start baseline for the moat).
+                                            REFUSAL_LOG_DB overrides where it is written.
     """
     import sys
     args = list(argv if argv is not None else sys.argv[1:])
+    do_backfill = False
+    if "--backfill" in args:
+        do_backfill = True
+        args.remove("--backfill")
     limit: Optional[int] = 0  # 0 => stage only (offline)
     if "--verify" in args:
         i = args.index("--verify")
@@ -193,6 +270,20 @@ def main(argv=None) -> int:
         limit = None if val == "all" else int(val)
         del args[i:i + 2]
     corpus = args[0] if args else os.path.join(os.path.dirname(__file__), "research-corpus")
+
+    if do_backfill:
+        print(f"BACKFILL — seeding the cross-production log from {corpus}")
+        print("  (runs the corpus verifier, then writes every SOURCED claim and every\n"
+              "   source_does_not_state_it refusal into the log, idempotently.)")
+        res = backfill_log(corpus)
+        v = res["verified"]
+        print(f"\n  verified: SOURCED {v['sourced']} · UNSOURCED {v['refused']} · "
+              f"UNKNOWN {v['unknown']} of {v['total']}")
+        print(f"  seeded this run: {res['seeded_rows']} new row(s) "
+              f"({res['seeded_green']} SOURCED + {res['seeded_unsourced']} "
+              f"proven-unprovable considered)")
+        print(f"  log now holds: {res['log_size']} claim(s) across all subjects")
+        return 0
 
     stage = stage_corpus(corpus)
     print(f"STAGE (offline): {stage['claims']} claim(s) parsed from {corpus}")
