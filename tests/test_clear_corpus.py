@@ -49,3 +49,39 @@ if __name__ == "__main__":
         try: fn(); print("PASS", fn.__name__)
         except AssertionError as e: bad+=1; print("FAIL", fn.__name__, e)
     print(f"\n{len(fns)-bad}/{len(fns)} passed"); sys.exit(1 if bad else 0)
+
+
+def test_verify_corpus_buckets_fetch_weather_apart_from_real_unsourced():
+    """The dogfood's own gate: a dead URL (source_never_fetched) is UNKNOWN weather,
+    never UNSOURCED. Only 'read it, does not state it' counts as UNSOURCED — the one
+    cause a CI red-build can stand on without flapping. Pins the mis-bucket the full
+    corpus run surfaced (9 dead URLs had been folded into 'refused')."""
+    import clearance.facts as facts
+    from clearance import verdict as V
+
+    class FakeV:
+        def __init__(self, vd, cause): self.verdict, self.cause = vd, cause
+
+    # three claims, one per outcome, keyed by URL so the fake is deterministic
+    plan = {
+        "https://ok.example/green":   FakeV(V.GREEN, ""),
+        "https://dead.example/403":   FakeV(V.UNKNOWN, V.SOURCE_UNREAD),   # fetch weather
+        "https://silent.example/read": FakeV(V.UNKNOWN, V.SOURCE_SILENT),  # real UNSOURCED
+    }
+    d = _corpus(
+        "[CLAIM] A sourced claim about the world.\n[URL] https://ok.example/green\n"
+        "[CLAIM] A claim whose source is dead.\n[URL] https://dead.example/403\n"
+        "[CLAIM] A claim its source does not state.\n[URL] https://silent.example/read\n"
+    )
+    orig = facts.judge_claim
+    facts.judge_claim = lambda claim, **kw: plan[claim.source_url]
+    try:
+        res = cc.verify_corpus(d, fetch=False)
+    finally:
+        facts.judge_claim = orig
+
+    assert res["sourced"] == 1, res
+    assert res["unknown"] == 1, res      # the dead URL, NOT counted against the corpus
+    assert res["refused"] == 1, res      # only the genuinely unsourced claim
+    verdicts = {r["verdict"] for r in res["rows"]}
+    assert verdicts == {"SOURCED", "UNKNOWN", "UNSOURCED"}, res["rows"]

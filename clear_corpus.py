@@ -131,7 +131,16 @@ def verify_corpus(corpus_dir: str, *, fetch: bool = True, live_search: bool = Fa
     Import is local so parse_corpus / stage_corpus stay usable with zero dependencies.
     """
     from clearance.facts import Claim, judge_claim
-    from clearance.verdict import GREEN
+    from clearance.verdict import (GREEN, NO_SOURCE, SOURCE_UNREAD,
+                                   SEARCH_FOUND_NOTHING)
+
+    # A fetch that never returned a document is FETCH WEATHER, not a verdict on the
+    # claim: it flips run-to-run as a URL 403s or a paywall moves. Bucketing those as
+    # UNSOURCED made the dogfood cry wolf (the harness folded 9 dead URLs into
+    # "refused"). UNSOURCED must mean ONLY "we read the source and it does not state
+    # this" (SOURCE_SILENT / source_does_not_state_it) — the one cause a CI gate can
+    # stand on without flapping.
+    _FETCH_WEATHER = {NO_SOURCE, SOURCE_UNREAD, SEARCH_FOUND_NOTHING}
 
     rows = []
     sourced = refused = unknown = 0
@@ -148,12 +157,19 @@ def verify_corpus(corpus_dir: str, *, fetch: bool = True, live_search: bool = Fa
                          "cause": f"error: {type(e).__name__}", "url": c.url})
             unknown += 1
             continue
-        ok = getattr(v, "verdict", None) == GREEN
-        rows.append({"file": c.file, "line": c.line,
-                     "verdict": "SOURCED" if ok else "UNSOURCED",
-                     "cause": getattr(v, "cause", ""), "url": c.url})
-        if ok:
+        cause = getattr(v, "cause", "") or ""
+        if getattr(v, "verdict", None) == GREEN:
+            verdict, bucket = "SOURCED", "sourced"
+        elif cause in _FETCH_WEATHER:
+            verdict, bucket = "UNKNOWN", "unknown"
+        else:  # read it, and it does not carry the claim — the real red-build failure
+            verdict, bucket = "UNSOURCED", "refused"
+        rows.append({"file": c.file, "line": c.line, "verdict": verdict,
+                     "cause": cause, "url": c.url})
+        if bucket == "sourced":
             sourced += 1
+        elif bucket == "unknown":
+            unknown += 1
         else:
             refused += 1
     return {"sourced": sourced, "refused": refused, "unknown": unknown,
