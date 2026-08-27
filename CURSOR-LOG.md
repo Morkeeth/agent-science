@@ -477,3 +477,19 @@ encyclopedia. Receipt: `docs/VALIDATION-2026-08-22.md`.
 `GET /health` → `gemini_path: vertex:hack-fleet`. Desk UI live.
 
 **Oscar still:** rotate Parallel/Gemini keys that were once in plaintext env.
+
+## 2026-08-27 — public skill PRD (ideation, no product code)
+
+Question: what is missing to publish as a public skill *and have people use it*?
+
+**Bar A (publishable) is packaging:** no `SKILL.md`, no `.cursor-plugin/plugin.json`,
+repo still PRIVATE. Hours.
+
+**Bar B (used) is the product:** no `GET /ask`, registry is local sqlite (not even
+GCS-synced across our own Cloud Run), hosted surface is `POST /clear` on a whole
+script, two API keys for a stranger. A prompt-only skill spends the name.
+
+Full write-up: `PRD-PUBLIC-SKILL.md`. Pointer added on `VISION-2026-08.md`. Corpus
+claims: `research-corpus/2026-08-27-prd-public-skill.md`. Recommended ship is
+registry-read plugin (C), not an instructions-only `SKILL.md`. Did not install a
+skill in `.cursor/skills/` — that would auto-invoke and then fail without tools.
