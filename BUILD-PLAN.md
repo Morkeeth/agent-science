@@ -2,10 +2,13 @@
 date: 2026-08-22
 ruling: AGENT SCIENCE (fact clearance) · Parallel track · Oscar, verbatim: "Agent science! thats the goal"
 event: Agentic Cinema · deadline 2026-09-09 14:00 PT
-status: admissibility is the whole lane
+status: HISTORICAL (22 Aug admissibility). Do not execute. Current plan: BUILD-NOW.md
 ---
 
 # Build plan — from "inadmissible" to "submittable"
+
+*Frozen 22 Aug. Credentials, Agent Builder, and the two-tree split are all
+stale here. Kept as the trail of how the lane was ruled.*
 
 ## 0 · TREE RULING (mine, reasoning stated, neither tree deleted)
 

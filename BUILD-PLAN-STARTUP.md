@@ -201,8 +201,9 @@ After slice 1 ships, re-plan 2–7 against reality.
 | Doc | Job |
 |---|---|
 | **This file (`BUILD-PLAN-STARTUP.md`)** | Ambition ceiling — production company |
+| `BUILD-NOW.md` | **Current plan (28 Aug).** Next move: `GET /ask` + GCS-share the refusal log. Slice order in §5 of this file is the *ceiling* order; BUILD-NOW reorders the near queue after the vision ruling. |
 | `PLAN-30.md` | Near calendar / wedge hygiene |
-| `NEXT-STEPS.md` | What to build **this session** |
+| `NEXT-STEPS.md` | Pointer at `BUILD-NOW.md` |
 | `docs/WEDGE.md` / `docs/AMBITION-AUDIT.md` | Idea lock |
 | `docs/VALIDATION-*.md` | Claims checked against primary sources |
 

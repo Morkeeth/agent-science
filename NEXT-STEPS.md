@@ -1,49 +1,38 @@
-# NEXT STEPS — read this first, every session
+# NEXT STEPS — read `BUILD-NOW.md` first
 
-**PRODUCT:** Agent Science — clearance audit platform (startup ceiling)  
-**Checkpoint:** Agentic Cinema Sep 9 · Parallel track
+**PRODUCT:** Agent Science — sourced-or-refuse companion (registry); Desk and
+Art. 53 are the same `Verdict` pointed at a script / a filing.  
+**Checkpoint:** Agentic Cinema 9 Sep 2026 · Parallel track. Packaging parked.
 
-## Ambition
+The session queue below was frozen on 23 Aug. It is **stale** as a head of
+queue. Current plan, live URL receipts, and the next move:
 
-> Over-build toward the **production company**. Hackathon is a wedge, not the product.
-> Ceiling: `BUILD-PLAN-STARTUP.md`. Near calendar: `PLAN-30.md`. Oscar cuts.
+→ **`BUILD-NOW.md`** (28 Aug). Next move: `GET /ask` + GCS-share the refusal log.
 
-## State
-- Hosted Desk + Vertex ADC + GCS corpus + live compounding ✅  
-- Orphan A/B 43% search avoided · 70 controls · refusal set ✅  
-- **Not yet a startup app:** no tenants, async jobs, dossier PDF, design partner
+Ceiling unchanged: `BUILD-PLAN-STARTUP.md`. Spine: `VISION-2026-08.md`.
 
-## This session’s head of queue (from STARTUP §5)
+## What is no longer the blocker
 
-| # | Slice | Why |
-|---|-------|-----|
-| **1** | Independence workbench on the Desk | Dust Bowl failed primary; corroboration must be visible |
-| 2 | Async runs + job status | Production scripts ≠ sync HTTP |
-| 3 | Dossier PDF/JSON export | The paid artifact |
-| 4 | Org + subject shelves (multi-tenant skeleton) | Two customers |
-| 5 | Agent Builder proved as client | Platform requirement + real agent path |
-| 6 | Design partner on their material | Day-two user ≠ judge |
-| 7 | Asset leg in production path | Second noun / second buyer |
+- Hosted `/health` returns `"engine_default": "adk"` (verified 28 Aug). The
+  "Oscar runs `deploy.sh` for 3/3" line is done.
+- One GitHub repo: `Morkeeth/agent-science`. `hack-agent-science` is 404.
 
-Video / Devpost / public — parked.
+## Parked (Oscar, un-nagged)
+
+Video · Devpost · public-repo flip · key rotation if plaintext env ever leaked.
 
 ---
 
-## 2026-08-23 — Agent Builder wired onto the default path (GM run, Oscar away)
+## Historical (23 Aug) — kept so the trail is honest
 
-**The board's #1 "ONLY YOU" item was stale.** SLASK/ACTIONS/PITCH/BUILD-PLAN all said
-Agent Builder was blocked on "Oscar provisions GCP + billing". Verified live this
-morning: project `hack-fleet`, `billingEnabled: true`, `aiplatform` + `agentregistry`
-enabled, ADC on disk. Nothing was blocked. The slice was executable and is now done,
-minus the deploy.
+Ambition was: over-build toward the production company. Head of queue then:
 
-- ADK now runs `/clear` by default; every gap report stamps `engine: adk|direct`.
-- Proved with keys stripped, not merely absent. Receipt: `docs/RECEIPT-agent-builder.md`.
-- 72 controls still pass.
-- Defect found: the ADK client 404s on any regional Vertex endpoint. Only `global`
-  publishes these models — `clearance/gemini.py:51` already knew, `deploy.sh` now sets it.
-
-**LEFT FOR OSCAR (one command):** `bash deploy.sh` in `~/CODE/cleared`. It writes a
-Secret Manager version, edits IAM and ships a billed public revision, so it is his click
-by the script's own header. Rotate the Parallel/Gemini keys first if that is still open.
-Then: `curl -s <hosted>/health | grep '"engine_default": "adk"'` → 3/3.
+| # | Slice | Status 28 Aug |
+|---|-------|---|
+| 1 | Independence workbench on the Desk | **Not done.** Now BUILD-NOW queue #3 (after /ask + resolution queue + escalation). |
+| 2 | Async runs + job status | Not done. BUILD-NOW #6. |
+| 3 | Dossier PDF/JSON export | Not done. BUILD-NOW #5. |
+| 4 | Org + subject shelves | Not done. H1. |
+| 5 | Agent Builder proved as client | **Done on the hosted URL.** |
+| 6 | Design partner on their material | Not done. BUILD-NOW #7. |
+| 7 | Asset leg in production path | Not done. H1. |

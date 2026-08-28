@@ -493,3 +493,19 @@ Full write-up: `PRD-PUBLIC-SKILL.md`. Pointer added on `VISION-2026-08.md`. Corp
 claims: `research-corpus/2026-08-27-prd-public-skill.md`. Recommended ship is
 registry-read plugin (C), not an instructions-only `SKILL.md`. Did not install a
 skill in `.cursor/skills/` — that would auto-invoke and then fail without tools.
+
+## 2026-08-28 — orientation: one plan, next move is GET /ask
+
+Oscar: "what's going on? search all context and build the build plan."
+
+**What's going on:** three identities (companion / desk / vertical) on one
+engine; session docs still queued "independence workbench"; hosted ADK already
+live (`engine_default: adk` on both Cloud Run hostnames — same service);
+`hack-agent-science` GitHub 404; `ask_registry.py` exists and `/ask` does not.
+
+**The plan:** `BUILD-NOW.md`. Next move: `GET /ask` + GCS-share the refusal
+log. Not a SKILL.md. Not a second repo. Independence workbench becomes queue #3
+once refusals have a next action.
+
+Stale lines killed in `NEXT-STEPS.md` / `SUBMISSION.md` (Agent Builder ✅,
+one repo).

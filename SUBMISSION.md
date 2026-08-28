@@ -2,8 +2,10 @@
 
 **Event:** Agentic Cinema · Devpost · Sep 9 2026 2:00pm PDT  
 **Code:** https://github.com/Morkeeth/agent-science (private until submit)  
-**Docs:** https://github.com/Morkeeth/hack-agent-science (private)  
 **License:** MIT (`LICENSE`)
+
+One repo. `hack-agent-science` was a local docs sibling; it is not on GitHub
+(404 as of 2026-08-28). Canonical plan: `BUILD-NOW.md`.
 
 ## Hosted URL
 
@@ -21,7 +23,7 @@
 | Gemini (extract + locate) | ✅ | live default path |
 | Parallel Search | ✅ | live default path |
 | Google Cloud (Cloud Run) | ✅ | URL above · project `hack-fleet` |
-| Agent Builder (ADK) | ⬜ **wired as the default `/clear` path and proved LOCALLY** under `env -u GEMINI_API_KEY` (`engine: adk`, `adk_tool_calls: [clear_script_tool]`, `vertex:hack-fleet`) — receipt in `docs/RECEIPT-agent-builder.md`. Stays ⬜ until the hosted URL returns `"engine_default": "adk"`; that needs `deploy.sh`, which is Oscar's click |
+| Agent Builder (ADK) | ✅ hosted `/health` returns `"engine_default": "adk"`, `adk_version: 2.7.1` (curl 2026-08-28). Local `env -u` receipt remains `docs/RECEIPT-agent-builder.md` |
 | Corpus compounding | ✅ local full orphan A/B **43% search avoided** · GCS shelf in `deploy.sh` |
 
 ## Checklist
