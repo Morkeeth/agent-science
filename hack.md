@@ -8,31 +8,39 @@
 
 ## ⛔ PRIOR LOSS — read before the next result table
 
+**Corrected 2026-08-29. The earlier version of this section said Mount Helicon lost because its
+evaluation had "no alternative arm." That is retracted — it was falsified at n=40 and it was wrong
+about our own submission.**
+
 Mount Helicon lost Track 1 of the Qwen Cloud Global AI Hackathon to **Quên**
-(`github.com/phamthanhhang208/quen`). Measured at the submitted tag `submission/devpost-2026-07-21`
-against their `HEAD`: they won with **11,007 Python LOC, 17 test files, 50 commits and a top-level
-`eval/`**; we lost with **29,588 LOC, 41 test files, 310 commits and no `eval/`**. We were not
-under-measured — the submission carried 1,104 lines of benchmark code and two named benchmarks.
-**What it never had was an alternative arm.** Every Helicon number answered *does it work*, scored
-against Oscar's own vault and his own rulings. Every Quên number answered *is it better than what
-you would have built instead*: FAMA 0.933 vs append-only RAG 0.400 vs full-context 0.367 on
-identical inputs, plus an ablation of their own mechanism at 0.833, Wilson CIs and paired McNemar
-(16–0, p=3×10⁻⁵) because n=30, an external anchor (LongMemEval n=229), a paraphrase holdout frozen
-before any tuning, cost from billing, an offline no-key dry-run, and a section titled "Algorithmic
-biases — found & fixed" listing defects in their own scoring. Their README is *shorter* than ours.
-**Tests prove it runs; a self-benchmark proves it works; only a control arm proves it is better —
-and "better than the alternative" is the only claim a judge scores.** A benchmark against your own
-answer key on your own data reads as proof and is not one; it is worse than no numbers, because its
-rigour vouches for a claim it never tested.
+(`github.com/phamthanhhang208/quen`). The entry exists and was submitted:
+`devpost.com/software/glaze-lo72xn` — the slug carries the project's old codename `glaze`. Measured
+at our submitted tag `submission/devpost-2026-07-21` (commit `0eef89f`) against their `HEAD`: they
+won with **~11–14k Python LOC** *(two counters disagree; unreconciled)*, **17 test files, 50 commits
+and a top-level `eval/`**; we lost with **29,588 LOC, 41 test files, 310 commits and no top-level
+`eval/`**. Their README is *shorter* than ours. **We were not under-measured** — the submission
+carried 1,104 lines of benchmark code, two named benchmarks, and a rival-model arm reported with
+numbers at README line 206 (`qwen3.6-plus 0.962 ties claude-sonnet-5 0.962, beats gpt-5 0.808`).
 
-**Footnote on the retro itself, which is half the lesson.** The first retro of this loss blamed the
-tagline, written from 24 scraped taglines with nobody having opened the winner's repo. The brief
-that corrected it then measured `~/CODE/mountain-of-helicon` — a different, never-submitted repo —
-and counted `.venv` as our code, producing a "1/63 our size" headline that is false. Two
-wrong-object errors in the two documents whose job was to explain the loss. **Measure the commit
-that was submitted, not the working tree and not the same-named sibling.**
+**WHY WE LOST IS UNKNOWN.** Four confident diagnoses were written in two days and all four were
+wrong: (1) *the tagline* — from 24 scraped taglines, no repo opened; the winner's tagline is the
+same shape, and our real Devpost tagline is benefit-shaped. (2) *no eval dir / 63× their size* —
+measured the wrong repo (`mountain-of-helicon`, never submitted) and counted `.venv` as our code.
+(3) *no alternative arm* — falsified at n=40, blind-coded, pre-registered: **7 of 20 winners ship
+none**, and non-winner `clearcrew` has one of the most rigorous benchmarks in the field and still
+lost. (4) *never submitted* — wrong; the gallery search failed on the old codename. **Each was
+fitted to whatever had most recently been measured, and none was checked against the object it made
+a claim about.** What survives from (3) is a tendency only: 65% of winners vs 25% of non-winners,
+Fisher p=0.025, post-hoc and correlational — not an explanation.
 
-**Gate before this event's result table ships:**
+**Untested candidates that remain live:** category fit against the track brief · demo/video
+visibility (the live Devpost page shows **no video**, and the frozen tag's `DEVPOST-FINAL.md` still
+reads *"PASTE PUBLIC VIDEO URL HERE"*) · the rubric's actual weights (**30/30/25/15, with no
+eval-rigor line at all**) · field size (724 slugs, 23 badges) · judging noise. **The one thing that
+would settle it is judge feedback from the organisers — an outward act only Oscar can request.**
+
+**Gate before this event's result table ships** — this checklist now stands on its own merits as
+submission craft, supported by a real tendency, **not** as the explanation of that loss:
 
 - [ ] **Alternative arm named and run** — what a competent person does *without* this project, on identical inputs, identical budget, identical prompt.
 - [ ] **Ablation** — our one signature mechanism switched off; its delta is the only number that credits our idea.
@@ -44,9 +52,12 @@ that was submitted, not the working tree and not the same-named sibling.**
 - [ ] **Cost from billing**, with the price card's date stated.
 - [ ] **Offline path with no API key.**
 - [ ] **"Honesty & limitations" section carrying our worst number.**
-- [ ] **Every artifact claim measured at the submitted commit.**
+- [ ] **Answer the track brief in the track's own words on the first screen** — that is what the rubric weights, not eval rigor.
+- [ ] **Video verified attached and public on the live entry page, from a logged-out browser** — not in a checklist file, on the page.
+- [ ] **Every artifact claim measured at the submitted commit.** Four retros of that loss failed this row.
 
-Full record: `~/CODE/fleet-ops/retros/QWEN-LOSS-RETRO-2026-08-30.md` · playbook lesson 97.
+Full record: `~/CODE/fleet-ops/retros/QWEN-LOSS-RETRO-2026-08-30.md` (corrected) ·
+`QWEN-FIELD-TEST-2026-08-30.md` (the n=40 falsification) · playbook lesson 97.
 
 ---
 
