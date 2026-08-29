@@ -75,7 +75,7 @@ Full record: `~/CODE/fleet-ops/retros/QWEN-LOSS-RETRO-2026-08-30.md` (corrected)
 
 ---
 
-## NOW — 2026-08-29 (slices 2 + 3 + 4 run)
+## NOW — 2026-08-29 (slices 2–4 run · slice 7 docs on main)
 
 **Baseline:** `refusal_log.py` 264 lines · registry backfilled: **173 rows** (29 SOURCED + 144 proven-unprovable refusals seeded from `research-corpus/`).
 
@@ -106,8 +106,13 @@ python3 ask_registry.py --serve                     # http://127.0.0.1:8091/
 - [x] Receipt: `docs/SECOND-SUBJECT-RECEIPT-2026-08-29.md` — failures named honestly
 - [x] Offline proof: `tests/test_cross_subject_reuse.py` 2/2 — dust-bowl reuses orphan-works log at 0 Parallel calls
 
+### Slice 7 — submission pack (docs only; Oscar gates outward acts)
+- [x] `docs/SUBMISSION-PACK-2026-08-29.md` — Devpost paste block, sealed-prediction draft, Oscar checklist
+- [x] `docs/VIDEO-SCRIPT-2026-08-29.md` — 178 s beats (≤ 180 s cap)
+- [ ] Public repo · video upload · Devpost submit · seal prediction — **Oscar only**
+
 ### Controls
-- `python3 tests/test_watch_it_go_red.py` → **26 passed, 13 failed** (suite crashes on missing EUR-Lex body; rightsstatements fetched OK)
+- `python3 tests/test_watch_it_go_red.py` → **72/72** (mutation controls strip instruments by canonical key; requires `cache/documents.json` + `cache/searches.json` on disk)
 - `python3 tests/test_registry_surface.py` → **5 passed**
 - `python3 tests/test_cross_subject_reuse.py` → **2 passed**
 - `python3 review/corpus_compound_receipt.py` → **50/50 reuse, 0 network on Run 2**
@@ -117,4 +122,4 @@ python3 ask_registry.py --serve                     # http://127.0.0.1:8091/
 
 ---
 
-*Update the NOW section after every slice. Oscar owns slice 1 and submission gates.*
+*Update the NOW section after every slice. Oscar owns slice 1 deploy and submission gates.*
