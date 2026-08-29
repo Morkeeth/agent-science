@@ -1,6 +1,6 @@
 # COMPOUND EXHIBIT — orphan-works A/B
 
-**Date:** 2026-08-29 20:35 UTC · **Subject:** `orphan-works` · **Mode:** offline
+**Date:** 2026-08-29 20:48 UTC · **Subject:** `orphan-works` · **Mode:** offline
 **Fixtures:** `compound-mini-A.txt` → `compound-mini-B.txt`
 
 ## Quantified compounding
@@ -11,6 +11,12 @@
 
 - Run B parallel < Run A: **yes**
 - corpus_hits B ≥ 1: **yes**
+
+## Live path BLOCKED
+
+Missing: **GEMINI_API_KEY / GOOGLE_API_KEY / ~/.config/keys/gemini.key; PARALLEL_API_KEY / ~/.config/keys/parallel.key**
+
+Offline simulation below runs real verdict rules with faked network boundaries.
 
 ## Offline simulation (no Gemini/Parallel keys on this VM)
 
@@ -25,7 +31,7 @@ Ground-truth Parallel calls at fake boundary (Run A only): `4`
 
 ## Registry backfill
 
-`python3 clear_corpus.py research-corpus --backfill` → **173 rows** (29 SOURCED + proven-unprovable refusals) in `cache/refusal_log.db`
+`python3 clear_corpus.py research-corpus --backfill` → **0 rows** (29 SOURCED + proven-unprovable refusals) in `cache/refusal_log.db`
 
 ## Controls
 

@@ -77,17 +77,19 @@ Full record: `~/CODE/fleet-ops/retros/QWEN-LOSS-RETRO-2026-08-30.md` (corrected)
 
 ## NOW — 2026-08-29 night wave · Qwen eval gate + submission truth refresh
 
-**ONE slice:** falsifiable eval gate with baseline arm + SUBMISSION-PACK counts re-derived at object.
+**ONE slice:** falsifiable eval gate (baseline + ablation + shipping) + SUBMISSION-PACK counts re-derived at object.
 
 ### Shipped tonight
-- [x] `eval/refusal_correctness_gate.py` + `eval/README.md` — baseline vs shipping on held-out set (n=6, RC5 engine_limit pinned)
-- [x] `eval/RECEIPT-refusal-gate.md` — per-item rows; **RC5: both arms false GREEN** (worst number)
+- [x] `eval/refusal_correctness_gate.py` + `eval/README.md` — three arms on held-out set (n=6, RC5 engine_limit pinned)
+- [x] `eval/RECEIPT-refusal-gate.md` — per-item rows; **RC5: all three arms false GREEN** (worst number)
 - [x] `scripts/seed_test_cache.py` — stranger path to **72/72** red-watch offline (EUR-Lex 403 → honest fixture seed)
 - [x] `docs/SUBMISSION-PACK-2026-08-29.md` — stale **26/13** replaced with **72/72 · 99/99**; one-command block added
 - [x] `docs/DEPLOY-CHECKLIST-2026-08-29.md` — slice 1 prep for Oscar (no deploy run)
+- [x] `tests/test_eval_gate.py` — 3 controls on eval gate receipt
+- [x] `scripts/compound_exhibit_receipt.py` — live path BLOCKED section names missing keys
 
 ### Blocked (honest receipts, not guessed)
-- [ ] Live orphan-works A/B — **no Gemini/Parallel keys** on agent VM (`docs/COMPOUND-EXHIBIT-2026-08-29.md` offline only)
+- [ ] Live orphan-works A/B — **no Gemini/Parallel keys** on agent VM (`docs/COMPOUND-EXHIBIT-2026-08-29.md` offline + BLOCKED section)
 - [ ] Hosted `/registry` — slice 1 deploy (Oscar)
 - [ ] Public repo · video · Devpost — Oscar only
 
@@ -100,19 +102,21 @@ python3 eval/refusal_correctness_gate.py
 python3 tests/test_watch_it_go_red.py   # → 72/72 after seed
 ```
 
-### Controls (re-derived @ object)
-- `python3 tests/test_watch_it_go_red.py` → **72/72** (requires `python3 scripts/seed_test_cache.py` first)
+### Controls (re-derived @ object — run 2026-08-29 night wave)
+- `python3 scripts/seed_test_cache.py` → documents.json + searches.json seeded (EUR-Lex via fixture on 403)
+- `python3 tests/test_watch_it_go_red.py` → **72/72**
 - `python3 tests/test_registry_surface.py` → **5/5**
 - `python3 tests/test_cross_subject_reuse.py` → **2/2**
-- All 8 suites → **99/99**
-- `python3 eval/refusal_correctness_gate.py` → receipt; catchable **5/5** both arms; **RC5 both GREEN** (engine_limit)
+- All 9 suites → **102/102** (includes `test_eval_gate.py` 3/3)
+- `python3 eval/refusal_correctness_gate.py` → receipt; catchable **5/5** all arms; **RC5 all GREEN** (engine_limit); verify delta **0** on catchable
 
 ### LOG
 - **2026-08-29 start:** `git pull` OK; red-watch **11 fail** on cold VM — missing `cache/documents.json` + `cache/searches.json` (hack.md claimed 72/72; NOW was stale)
 - **2026-08-29 seed:** EUR-Lex HTTP 403 from VM egress → fixture `eur-lex-orphan-snippet.html` with provenance string (not silent)
-- **2026-08-29 seed bug:** first `seed_test_cache.py` overwrote RS fetches when writing EUR-Lex — fixed merge order; re-run **72/72**
-- **2026-08-29 eval:** baseline ties shipping on catchable accuracy (5/5) but **RC5 substring trap: both false GREEN** — goes in receipt honesty section
-- **2026-08-29 compound:** live path BLOCKED; offline receipt regenerated (A=2, B=1 Parallel, corpus_hits=2)
+- **2026-08-29 cherry-pick:** `7e0ee80` from `cursor/qwen-eval-gate-0e77` onto `cursor/qwen-eval-gate-d2e2`; seed → **72/72**
+- **2026-08-29 ablation:** added ABLATION arm (StringLocator, verify off); verify delta 0 on catchable n=5; RC5 still false GREEN on all arms
+- **2026-08-29 compound:** live path BLOCKED (no keys); offline receipt A=2, B=1 Parallel, corpus_hits=2; BLOCKED section names missing env vars
+- **2026-08-29 counts:** SUBMISSION-PACK stale 26/13 fixed; **102/102** across 9 suites after `test_eval_gate.py`
 
 ### Prior slices (unchanged)
 - Registry backfill **173 rows** · dust-bowl offline **2/2** · slice 7 video script **178 s**

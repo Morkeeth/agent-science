@@ -33,6 +33,21 @@ OFFLINE_A = ROOT / "fixtures/scripts/compound-mini-A.txt"
 OFFLINE_B = ROOT / "fixtures/scripts/compound-mini-B.txt"
 
 
+def _missing_keys_detail() -> str:
+    missing = []
+    gemini = Path.home() / ".config/keys/gemini.key"
+    parallel = Path.home() / ".config/keys/parallel.key"
+    if not (
+        os.environ.get("GEMINI_API_KEY")
+        or os.environ.get("GOOGLE_API_KEY")
+        or gemini.exists()
+    ):
+        missing.append("GEMINI_API_KEY / GOOGLE_API_KEY / ~/.config/keys/gemini.key")
+    if not (os.environ.get("PARALLEL_API_KEY") or parallel.exists()):
+        missing.append("PARALLEL_API_KEY / ~/.config/keys/parallel.key")
+    return "; ".join(missing) if missing else ""
+
+
 def _has_keys() -> bool:
     gemini = Path.home() / ".config/keys/gemini.key"
     parallel = Path.home() / ".config/keys/parallel.key"
@@ -168,6 +183,7 @@ def _run_offline() -> dict:
 
     return {
         "mode": "offline",
+        "live_blocked": _missing_keys_detail(),
         "a": results["A"],
         "b": results["B"],
         "fixtures": (OFFLINE_A.name, OFFLINE_B.name),
@@ -232,6 +248,16 @@ def _write_receipt(run: dict, *, backfill_rows: int) -> None:
     ]
 
     if mode == "offline":
+        blocked = run.get("live_blocked")
+        if blocked:
+            lines += [
+                "## Live path BLOCKED",
+                "",
+                f"Missing: **{blocked}**",
+                "",
+                "Offline simulation below runs real verdict rules with faked network boundaries.",
+                "",
+            ]
         lines += [
             "## Offline simulation (no Gemini/Parallel keys on this VM)",
             "",

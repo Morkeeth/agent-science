@@ -14,6 +14,18 @@ python3 agent_science.py fixtures/scripts/documentary-orphan-works.txt
 ./demo.sh          # the whole story in one command
 ```
 
+**Stranger path (offline, no API key):**
+
+```bash
+python3 scripts/seed_test_cache.py
+python3 tests/test_registry_surface.py -q
+python3 scripts/compound_exhibit_receipt.py
+python3 eval/refusal_correctness_gate.py
+python3 tests/test_watch_it_go_red.py   # → 72/72 after seed
+```
+
+See `eval/README.md` for baseline vs ablation vs shipping arms on the held-out refusal set.
+
 ## The one rule
 
 **A model may only LOCATE evidence. It may never ASSERT it.**

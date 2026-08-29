@@ -11,6 +11,8 @@ inputs**, and writes a receipt with the worst number in plain sight.
 |------|--------|-----------------|----------|
 | Refusal correctness | `eval/refusal_correctness_gate.py` | `fixtures/refusal-correctness/set.json` | yes |
 
+Three arms: **BASELINE** (naive substring, no verify) · **ABLATION** (StringLocator, verify off) · **SHIPPING** (locator + verify).
+
 ## Stranger path (no API key)
 
 ```bash

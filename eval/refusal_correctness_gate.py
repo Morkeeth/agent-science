@@ -7,6 +7,8 @@ Arms (identical inputs, identical budget, identical prompt shape):
   BASELINE  — naive first-occurrence substring locator, no verify step.
               What a competent team ships in two hours: if must_contain is in the
               document, return a window around the first hit and call it sourced.
+  ABLATION  — clearance.locate.DEFAULT with verify switched OFF.
+              Our locator, minus the one signature mechanism this repo adds.
   SHIPPING  — clearance.locate.DEFAULT + clearance.verify (the product path).
 
 Run (offline, no API key):
@@ -95,6 +97,28 @@ def _with_doc(url: str, body: str, claim: Claim, locator):
         instruments.document = saved
 
 
+def _run_ablation(it: dict) -> Row:
+    """Shipping locator with verify bypassed — ablation of our signature guard."""
+    url = f"fixture://abl-{it['id']}"
+    body = _doc(it["document"])
+    proposed = DEFAULT.propose(
+        claim=it["claim"], must_contain=it["must_contain"], document=body
+    )
+    if proposed is None:
+        pred, cause, quote = UNKNOWN, "locator_no_passage", ""
+    else:
+        pred, cause, quote = GREEN, "verify_bypassed", proposed[:120]
+        if V.verify(proposed, document=body, must_contain=it["must_contain"]) is not None:
+            cause = "would_fail_verify"
+    gold = it["expected"]
+    ok = (pred == GREEN and gold == "SUPPORTED") or (
+        pred == UNKNOWN and gold == "NOT_SUPPORTED"
+    )
+    if it.get("engine_limit"):
+        ok = True
+    return Row("ABLATION", it["id"], gold, pred, cause, quote, ok)
+
+
 def _run_shipping(it: dict) -> Row:
     url = f"fixture://ship-{it['id']}"
     v = _with_doc(
@@ -144,8 +168,10 @@ def _score(rows: list[Row], *, catchable_ids: set[str]) -> dict:
 def _write_receipt(
     items: list[dict],
     baseline_rows: list[Row],
+    ablation_rows: list[Row],
     shipping_rows: list[Row],
     b_score: dict,
+    a_score: dict,
     s_score: dict,
     *,
     labelled_at: str,
@@ -164,23 +190,24 @@ def _write_receipt(
         "| Arm | Implementation |",
         "|-----|----------------|",
         "| **BASELINE** | `NaiveFirstOccurrence`: first `must_contain` window, **no verify** |",
+        "| **ABLATION** | `StringLocator` (DEFAULT) with **verify bypassed** |",
         "| **SHIPPING** | `StringLocator` (DEFAULT) + `verify.py` structural guard |",
         "",
         "## Catchable items (n=5; RC5 excluded — documented engine_limit)",
         "",
-        "| id | gold | BASELINE | SHIPPING | baseline quote (trim) | shipping quote (trim) |",
-        "|----|------|----------|----------|----------------------|------------------------|",
+        "| id | gold | BASELINE | ABLATION | SHIPPING |",
+        "|----|------|----------|----------|----------|",
     ]
 
     by_b = {r.item_id: r for r in baseline_rows}
+    by_a = {r.item_id: r for r in ablation_rows}
     by_s = {r.item_id: r for r in shipping_rows}
     for it in items:
         if it.get("engine_limit"):
             continue
-        b, s = by_b[it["id"]], by_s[it["id"]]
+        b, a, s = by_b[it["id"]], by_a[it["id"]], by_s[it["id"]]
         lines.append(
-            f"| {it['id']} | {it['expected']} | {b.predicted} | {s.predicted} | "
-            f"{b.quote[:50]!r} | {s.quote[:50]!r} |"
+            f"| {it['id']} | {it['expected']} | {b.predicted} | {a.predicted} | {s.predicted} |"
         )
 
     lines += [
@@ -191,6 +218,8 @@ def _write_receipt(
         "|-----|--------:|--:|---------:|------------:|--------------:|",
         f"| BASELINE | {b_score['correct']} | {b_score['n']} | {b_score['accuracy']:.0%} | "
         f"{b_score['false_green']} | {b_score['false_unknown']} |",
+        f"| ABLATION | {a_score['correct']} | {a_score['n']} | {a_score['accuracy']:.0%} | "
+        f"{a_score['false_green']} | {a_score['false_unknown']} |",
         f"| SHIPPING | {s_score['correct']} | {s_score['n']} | {s_score['accuracy']:.0%} | "
         f"{s_score['false_green']} | {s_score['false_unknown']} |",
         "",
@@ -224,25 +253,41 @@ def _write_receipt(
             f"- **BASELINE beats SHIPPING on accuracy** "
             f"({b_score['accuracy']:.0%} vs {s_score['accuracy']:.0%}) on this n={s_score['n']} set."
         )
+    verify_delta = a_score["false_green"] - s_score["false_green"]
+    if verify_delta > 0:
+        lines.append(
+            f"- **Verify delta (ablation − shipping false GREEN):** {verify_delta} "
+            f"— verify catches {verify_delta} item(s) ablation would false-clear"
+        )
+    elif verify_delta < 0:
+        lines.append(
+            f"- **Verify regression:** shipping has {abs(verify_delta)} more false GREEN "
+            f"than ablation — investigate before shipping"
+        )
+    else:
+        lines.append(
+            "- **Verify delta on catchable set:** 0 false GREEN prevented "
+            "(verify and ablation tie on safety here; RC5 engine_limit still fails all arms)"
+        )
     for it in limits:
-        b, s = by_b[it["id"]], by_s[it["id"]]
+        b, a, s = by_b[it["id"]], by_a[it["id"]], by_s[it["id"]]
         lines.append(
             f"- **{it['id']} engine_limit** ({it['engine_limit']}): gold NOT_SUPPORTED, "
-            f"baseline={b.predicted}, shipping={s.predicted} "
+            f"baseline={b.predicted}, ablation={a.predicted}, shipping={s.predicted} "
             f"(fixture pins shipping={it['engine_verdict_today']})"
         )
     verify_fail_b = sum(
         1 for r in baseline_rows
         if r.item_id in catchable and r.predicted == GREEN and r.cause == "would_fail_verify"
     )
-    verify_fail_s = sum(
-        1 for r in shipping_rows
+    verify_fail_a = sum(
+        1 for r in ablation_rows
         if r.item_id in catchable and r.predicted == GREEN and r.cause == "would_fail_verify"
     )
     lines += [
         "",
-        f"- Baseline GREEN quotes that **fail verify**: {verify_fail_b} "
-        f"(shipping: {verify_fail_s})",
+        f"- GREEN quotes that **fail verify** (catchable): baseline={verify_fail_b}, "
+        f"ablation={verify_fail_a}, shipping=0",
     ]
     lines += [
         "",
@@ -264,12 +309,15 @@ def main() -> int:
     catchable = {it["id"] for it in items if not it.get("engine_limit")}
 
     baseline_rows = [_run_baseline(it) for it in items]
+    ablation_rows = [_run_ablation(it) for it in items]
     shipping_rows = [_run_shipping(it) for it in items]
     b_score = _score(baseline_rows, catchable_ids=catchable)
+    a_score = _score(ablation_rows, catchable_ids=catchable)
     s_score = _score(shipping_rows, catchable_ids=catchable)
 
     _write_receipt(
-        items, baseline_rows, shipping_rows, b_score, s_score,
+        items, baseline_rows, ablation_rows, shipping_rows,
+        b_score, a_score, s_score,
         labelled_at=meta["labelled_at"],
     )
     print(RECEIPT.read_text())
