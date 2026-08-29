@@ -1,6 +1,6 @@
 # SECOND SUBJECT RECEIPT — dust-bowl
 
-**Date:** 2026-08-29 12:45 UTC · **Subject:** `dust-bowl` (unrelated to orphan-works)
+**Date:** 2026-08-29 12:55 UTC · **Subject:** `dust-bowl` (unrelated to orphan-works)
 **Scripts:** `dust-bowl-A.txt` → `dust-bowl-B.txt`
 
 ## Constitution check
@@ -14,9 +14,7 @@
 **NOT RUN on this VM.** Blockers:
 - no Gemini credential (GEMINI_API_KEY / ~/.config/keys/gemini.key / Vertex ADC)
 - no Parallel credential (PARALLEL_API_KEY / ~/.config/keys/parallel.key)
-
-Registry backfill **did** run (`python3 clear_corpus.py research-corpus --backfill`):
-29 SOURCED + 144 proven-unprovable refusals → **173 rows** in `cache/refusal_log.db`.
+- instrument cache empty (cache/instruments.json has no fetched bodies)
 
 Command that would run when keys are present:
 
@@ -39,15 +37,17 @@ PASS  test_second_subject_reuses_the_log_and_spends_no_parallel_call
 
 ## Controls on this VM
 
-`python3 tests/test_watch_it_go_red.py` → **28 passed, 11 failed** (suite crashes mid-run on missing rightsstatements.org / EUR-Lex bodies in `cache/instruments.json`)
+`python3 tests/test_watch_it_go_red.py` → **26 passed, 13 failed (suite crashed)**
 
-`python3 tests/test_registry_surface.py` → **4 passed**
+Instrument fixtures absent on this VM; several controls are UNMEASURABLE or fail
+until `pull_fixtures.py` / key paths are populated.
 
 ## What a stranger can do today (slice 2)
 
 ```bash
 python3 clear_corpus.py research-corpus --backfill   # seed registry (urllib only)
-python3 ask_registry.py "Directive 2012/28/EU"
+python3 ask_registry.py "arxiv:2511.12884"          # → SOURCED span
+python3 ask_registry.py "agentlint"                 # → UNSOURCED + named cause
 python3 ask_registry.py --browse
 python3 ask_registry.py --serve   # http://127.0.0.1:8091/
 ```

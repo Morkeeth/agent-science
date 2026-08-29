@@ -53,3 +53,13 @@ def test_miss_is_honest_not_cleared():
     assert res["cause"] == "not_in_registry"
     rows = L.browse_queries(con)
     assert rows[0]["result_label"] == "NOT_CLEARED"
+
+
+def test_serve_page_renders_without_format_keyerror():
+    """CSS custom properties use {--name}; .format() must not touch the template."""
+    import ask_registry as ar
+    page = (ar._PAGE
+            .replace("{q}", "")
+            .replace("{result}", "")
+            .replace("{browse}", "<p>ok</p>"))
+    assert "Registry" in page and "--paper" in page

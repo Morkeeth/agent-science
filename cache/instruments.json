@@ -3,9 +3,17 @@
     "fetched_from": "https://creativecommons.org/licenses/by-nc-nd/3.0/",
     "terms": "You are free to: Share \u2014 copy and redistribute the material in any medium or format The licensor cannot revoke these freedoms as long as you follow the license terms. Under the following terms: Attribution \u2014 You must give appropriate credit , provide a link to the license, and indicate if changes were made . You may do"
   },
+  "http://creativecommons.org/licenses/by-nc-nd/3.0/es": {
+    "fetched_from": "https://creativecommons.org/licenses/by-nc-nd/3.0/es/",
+    "terms": "Usted es libre de: Compartir \u2014 copiar y redistribuir el material en cualquier medio o formato La licenciante no puede revocar estas libertades en tanto usted siga los t\u00e9rminos de la licencia Bajo los siguientes t\u00e9rminos: Atribuci\u00f3n \u2014 Usted debe dar cr\u00e9dito de manera adecuada , brindar un enlace a la licencia, e indicar"
+  },
   "http://creativecommons.org/licenses/by-nc-nd/3.0/es/": {
     "fetched_from": "https://creativecommons.org/licenses/by-nc-nd/3.0/es/",
     "terms": "Usted es libre de: Compartir \u2014 copiar y redistribuir el material en cualquier medio o formato La licenciante no puede revocar estas libertades en tanto usted siga los t\u00e9rminos de la licencia Bajo los siguientes t\u00e9rminos: Atribuci\u00f3n \u2014 Usted debe dar cr\u00e9dito de manera adecuada , brindar un enlace a la licencia, e indicar"
+  },
+  "http://creativecommons.org/licenses/by-nc-nd/4.0": {
+    "fetched_from": "https://creativecommons.org/licenses/by-nc-nd/4.0/",
+    "terms": "You are free to: Share \u2014 copy and redistribute the material in any medium or format The licensor cannot revoke these freedoms as long as you follow the license terms. Under the following terms: Attribution \u2014 You must give appropriate credit , provide a link to the license, and indicate if changes were made . You may do"
   },
   "http://creativecommons.org/licenses/by-nc-nd/4.0/": {
     "fetched_from": "https://creativecommons.org/licenses/by-nc-nd/4.0/",
@@ -47,6 +55,10 @@
     "fetched_from": "https://creativecommons.org/publicdomain/zero/1.0/",
     "terms": "has dedicated the work to the public domain by waiving all of his or her rights to the work worldwide under copyright law, including all related and neighboring rights, to the extent allowed by law. You can copy, modify, distribute and perform the work, even for commercial purposes, all without asking permission. See O"
   },
+  "http://rightsstatements.org/vocab/CNE/1.0": {
+    "fetched_from": "https://rightsstatements.org/page/CNE/1.0/?language=en",
+    "terms": "The copyright and related rights status of this Item has not been evaluated. Please refer to the organization that has made the Item available for more information. You are free to use this Item in any way that is permitted by the copyright and related rights legislation that applies to your use. Notices Unless express"
+  },
   "http://rightsstatements.org/vocab/CNE/1.0/": {
     "fetched_from": "http://rightsstatements.org/page/CNE/1.0/?language=en",
     "terms": "The copyright and related rights status of this Item has not been evaluated. Please refer to the organization that has made the Item available for more information. You are free to use this Item in any way that is permitted by the copyright and related rights legislation that applies to your use. Notices Unless express"
@@ -55,9 +67,17 @@
     "fetched_from": "http://rightsstatements.org/page/InC-EDU/1.0/?language=en",
     "terms": "This Item is protected by copyright and/or related rights. You are free to use this Item in any way that is permitted by the copyright and related rights legislation that applies to your use. In addition, no permission is required from the rights-holder(s) for educational uses. For other uses, you need to obtain permis"
   },
+  "http://rightsstatements.org/vocab/InC-OW-EU/1.0": {
+    "fetched_from": "http://rightsstatements.org/page/InC-OW-EU/1.0/?language=en",
+    "terms": "You are free to use this Item in any way that is permitted by the copyright and related rights legislation that applies to your use. Notices If you have any information that can contribute to identifying or locating the rights-holder(s), please notify the organization that has made the Item available. Unless expressly"
+  },
   "http://rightsstatements.org/vocab/InC-OW-EU/1.0/": {
     "fetched_from": "http://rightsstatements.org/page/InC-OW-EU/1.0/?language=en",
     "terms": "You are free to use this Item in any way that is permitted by the copyright and related rights legislation that applies to your use. Notices If you have any information that can contribute to identifying or locating the rights-holder(s), please notify the organization that has made the Item available. Unless expressly"
+  },
+  "http://rightsstatements.org/vocab/InC/1.0": {
+    "fetched_from": "https://rightsstatements.org/page/InC/1.0/?language=en",
+    "terms": "This Item is protected by copyright and/or related rights. You are free to use this Item in any way that is permitted by the copyright and related rights legislation that applies to your use. For other uses you need to obtain permission from the rights-holder(s). Notices Unless expressly stated otherwise, the organizat"
   },
   "http://rightsstatements.org/vocab/InC/1.0/": {
     "fetched_from": "http://rightsstatements.org/page/InC/1.0/?language=en",
