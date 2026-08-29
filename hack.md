@@ -159,6 +159,10 @@ python3 review/corpus_compound_receipt.py      # 50/50 reuse
 | 2026-08-30 | ADK engine tests | `python3 tests/test_adk_default_path.py` | **5/5** |
 | 2026-08-30 | Eval gate | `python3 scripts/eval_refusal_baseline.py` | baseline=shipping=5/6; RC5 both false-GREEN |
 | 2026-08-30 | Live compound | env keys | **BLOCKED** — doc written |
+| 2026-08-30 | Cold clone path | `git clone --no-local file://… && seed && test_watch_it_go_red` | **72/72** |
+| 2026-08-30 | google-adk dep | `pip install google-adk==2.7.1 && python3 -c "…version…"` | **2.7.1** (not preinstalled on VM; in `requirements.txt`/Dockerfile) |
+| 2026-08-30 | Full suite | 9× `python3 tests/test_*.py` | **104/104** |
+| 2026-08-30 | Push gate | `git push origin main` | pending this turn |
 
 ---
 
