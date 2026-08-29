@@ -1,6 +1,6 @@
 # SUBMISSION PACK — Agentic Cinema · slice 7
 
-**Date:** 2026-08-29 · **Repo:** https://github.com/Morkeeth/agent-science @ `8fe9d00`  
+**Date:** 2026-08-29 · **Repo:** https://github.com/Morkeeth/agent-science @ `e6793ab`  
 **Hosted:** https://agent-science-568004190078.us-central1.run.app · **Deadline:** 2026-09-09 14:00 PT  
 **Scope:** docs only — no public repo flip, no video upload, no Devpost submit, no `deploy.sh`
 
@@ -16,7 +16,7 @@
 | OSI licence | Open-source approved | [x] | `LICENSE` (MIT) |
 | Sealed prediction | Pre-registered, falsifiable | [ ] | Draft below; seal after live corpus exhibit on hosted URL |
 
-**Controls on disk @ `8fe9d00`:** `test_registry_surface.py` **5/5** · `test_cross_subject_reuse.py` **2/2** · `test_backfill_seeds_reuse.py` **2/2** · `test_clear_corpus.py` **4/4** · `test_search_path.py` **5/5** · `test_source_map.py` **3/3** · `test_refusal_correctness.py` **6/6** · `test_watch_it_go_red.py` **26 pass / 13 fail** (suite crashes on missing EUR-Lex body) → **53 pass / 13 fail** across 8 suites.
+**Controls on disk @ `e6793ab`:** `test_registry_surface.py` **5/5** · `test_cross_subject_reuse.py` **2/2** · `test_backfill_seeds_reuse.py` **2/2** · `test_clear_corpus.py` **4/4** · `test_search_path.py` **5/5** · `test_source_map.py` **3/3** · `test_refusal_correctness.py` **6/6** · `test_watch_it_go_red.py` **26 pass / 13 fail** (suite crashes on missing EUR-Lex body) → **53 pass / 13 fail** across 8 suites.
 
 **Compound exhibit (offline, slice 3):** Run A **2** Parallel → Run B **1** Parallel, **2** corpus hits — `docs/COMPOUND-EXHIBIT-2026-08-29.md`.
 
@@ -85,7 +85,7 @@ market.
 
 | | |
 |---|---|
-| Repo | `https://github.com/Morkeeth/agent-science` @ `8fe9d00` |
+| Repo | `https://github.com/Morkeeth/agent-science` @ `e6793ab` |
 | Entry point | `python3 agent_science.py <script.txt>` — Gemini + Parallel **live by default** |
 | Hosted | https://agent-science-568004190078.us-central1.run.app — `POST /clear` · `GET /corpus` |
 | Controls | registry **5/5** · cross-subject reuse **2/2** · compound exhibit B **1** Parallel vs A **2** (offline) |
