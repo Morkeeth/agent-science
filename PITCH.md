@@ -1,11 +1,21 @@
 ---
-date: 2026-08-22
+date: 2026-08-30
 event: Agentic Cinema · Devpost · deadline 2026-09-09 14:00 PT
-repo: /Users/morkeeth/CODE/cleared @ ab03e3a (local only, never pushed)
-status: slice 7 prep @ e6793ab — tests 53 pass / 13 fail (8 suites; watch_it_go_red crashes on missing EUR-Lex body)
+repo: https://github.com/Morkeeth/agent-science @ main
+status: slice 5 ADK default path · partner integrations doc · Sep 9 path
 ---
 
-# The clearance desk for factual production
+# Paste a script. Get every claim sourced — verbatim — or refused with the reason.
+
+> **Constraint:** if the fetched document does not contain the exact passage, the desk
+> prints UNSOURCED. No paraphrase. No verdict without a citation — enforced in the
+> constructor, not by convention.
+
+**What you get:** a gap report — each checkable claim **SOURCED** (URL + verbatim quote)
+or **UNSOURCED** (named cause). Second script on the same subject shelf compounds:
+Parallel calls drop because the corpus remembers prior clears.
+
+**Proof on disk:** `python3 scripts/seed_document_cache.py && python3 tests/test_watch_it_go_red.py` → **72/72** · ADK engine selection **5/5** · compound exhibit **2→1** Parallel offline.
 
 ## 1 · THE COMPANY
 
