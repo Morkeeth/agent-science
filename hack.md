@@ -6,6 +6,50 @@
 
 ---
 
+## ⛔ PRIOR LOSS — read before the next result table
+
+Mount Helicon lost Track 1 of the Qwen Cloud Global AI Hackathon to **Quên**
+(`github.com/phamthanhhang208/quen`). Measured at the submitted tag `submission/devpost-2026-07-21`
+against their `HEAD`: they won with **11,007 Python LOC, 17 test files, 50 commits and a top-level
+`eval/`**; we lost with **29,588 LOC, 41 test files, 310 commits and no `eval/`**. We were not
+under-measured — the submission carried 1,104 lines of benchmark code and two named benchmarks.
+**What it never had was an alternative arm.** Every Helicon number answered *does it work*, scored
+against Oscar's own vault and his own rulings. Every Quên number answered *is it better than what
+you would have built instead*: FAMA 0.933 vs append-only RAG 0.400 vs full-context 0.367 on
+identical inputs, plus an ablation of their own mechanism at 0.833, Wilson CIs and paired McNemar
+(16–0, p=3×10⁻⁵) because n=30, an external anchor (LongMemEval n=229), a paraphrase holdout frozen
+before any tuning, cost from billing, an offline no-key dry-run, and a section titled "Algorithmic
+biases — found & fixed" listing defects in their own scoring. Their README is *shorter* than ours.
+**Tests prove it runs; a self-benchmark proves it works; only a control arm proves it is better —
+and "better than the alternative" is the only claim a judge scores.** A benchmark against your own
+answer key on your own data reads as proof and is not one; it is worse than no numbers, because its
+rigour vouches for a claim it never tested.
+
+**Footnote on the retro itself, which is half the lesson.** The first retro of this loss blamed the
+tagline, written from 24 scraped taglines with nobody having opened the winner's repo. The brief
+that corrected it then measured `~/CODE/mountain-of-helicon` — a different, never-submitted repo —
+and counted `.venv` as our code, producing a "1/63 our size" headline that is false. Two
+wrong-object errors in the two documents whose job was to explain the loss. **Measure the commit
+that was submitted, not the working tree and not the same-named sibling.**
+
+**Gate before this event's result table ships:**
+
+- [ ] **Alternative arm named and run** — what a competent person does *without* this project, on identical inputs, identical budget, identical prompt.
+- [ ] **Ablation** — our one signature mechanism switched off; its delta is the only number that credits our idea.
+- [ ] **External anchor** — one dataset or benchmark we did not build and cannot tune, or an explicit README line saying there is none.
+- [ ] **Holdout frozen before the first tuning pass.**
+- [ ] **Baseline steelmanned** — run it, read its raw rows, confirm it can actually score before believing our margin.
+- [ ] **Statistic matched to n** — n<100 → CIs + a paired test, never a bare point.
+- [ ] **Scorer symmetrical** — nothing only our system can emit; judge from delivered output for every arm.
+- [ ] **Cost from billing**, with the price card's date stated.
+- [ ] **Offline path with no API key.**
+- [ ] **"Honesty & limitations" section carrying our worst number.**
+- [ ] **Every artifact claim measured at the submitted commit.**
+
+Full record: `~/CODE/fleet-ops/retros/QWEN-LOSS-RETRO-2026-08-30.md` · playbook lesson 97.
+
+---
+
 ## The seven slices
 
 | # | Slice | Owner | Done when |
