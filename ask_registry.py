@@ -153,11 +153,11 @@ class _Handler(BaseHTTPRequestHandler):
             return self._send(200, json.dumps(ask(q), indent=1).encode(), "application/json")
         q = (qs.get("q") or [""])[0].strip()
         res = ask(q) if q else None
-        page = _PAGE.format(
-            q=html.escape(q, quote=True),
-            result=_html_result(res),
-            browse=_html_browse(browse()),
-        )
+        # .format() breaks on CSS `{--var}` blocks; substitute the three slots only.
+        page = (_PAGE
+                .replace("{q}", html.escape(q, quote=True))
+                .replace("{result}", _html_result(res))
+                .replace("{browse}", _html_browse(browse())))
         self._send(200, page.encode(), "text/html; charset=utf-8")
 
     def log_message(self, fmt, *a):

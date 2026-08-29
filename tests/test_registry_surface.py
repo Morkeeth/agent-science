@@ -53,3 +53,19 @@ def test_miss_is_honest_not_cleared():
     assert res["cause"] == "not_in_registry"
     rows = L.browse_queries(con)
     assert rows[0]["result_label"] == "NOT_CLEARED"
+
+
+if __name__ == "__main__":
+    passed = failed = 0
+    for name, fn in sorted(globals().items()):
+        if not name.startswith("test_") or not callable(fn):
+            continue
+        try:
+            fn()
+            print(f"  PASS  {name}")
+            passed += 1
+        except AssertionError as e:
+            print(f"  FAIL  {name}\n        {e}")
+            failed += 1
+    print(f"\n{passed} passed, {failed} failed")
+    raise SystemExit(1 if failed else 0)
