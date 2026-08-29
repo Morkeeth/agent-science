@@ -24,6 +24,12 @@ REAL_INC = "http://rightsstatements.org/vocab/InC/1.0/"
 passed, failed = 0, 0
 
 
+def _cache_without_instrument(cache: dict, uri: str) -> dict:
+    """Drop every cached spelling of one instrument — canonical and alias keys."""
+    drop = instruments.canonical(uri)
+    return {k: v for k, v in cache.items() if instruments.canonical(k) != drop}
+
+
 def check(name, fn):
     global passed, failed
     try:
@@ -66,7 +72,7 @@ def t_ruled_but_never_fetched_is_unknown():
     """Strip the evidence, keep the rule: the engine must stop asserting."""
     real = instruments._load()
     try:
-        instruments._save({k: v for k, v in real.items() if k != REAL_INC})
+        instruments._save(_cache_without_instrument(real, REAL_INC))
         v = engine.judge(subject_id="x", subject_title="t",
                          instrument_uri=REAL_INC, use=engine.AI_TRAINING)
         assert v.verdict == UNKNOWN, \
@@ -157,7 +163,7 @@ def t_cne_never_read_degrades_to_unread_not_to_a_claim():
     """Strip the CNE terms: it must fall back to UNREAD_TERMS, not assert non-evaluation."""
     real = instruments._load()
     try:
-        instruments._save({k: v for k, v in real.items() if k != engine.CNE})
+        instruments._save(_cache_without_instrument(real, engine.CNE))
         v = engine.judge(subject_id="x", subject_title="t",
                          instrument_uri=engine.CNE, use=engine.AI_TRAINING)
         assert v.cause == UNREAD_TERMS, \
