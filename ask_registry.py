@@ -1,80 +1,207 @@
-"""ask_registry — the websearch companion, POC #1 (Oscar's spine, VISION-2026-08).
+"""ask_registry — the registry has a face (slice 2).
 
-The front surface of Agent Science: ask a question, get the SOURCED answer from the
-registry of already-cleared truths, or an honest "not cleared yet." No model, no network
-— it reads the compounding log (clearance/refusal_log.py) that every clearance run writes.
+Query in → SOURCED span, UNSOURCED, or UNKNOWN with named refusal.
+Every query becomes a browsable registry row. The refusal is the product.
 
-    python3 ask_registry.py "EU AI Act penalties"
-    python3 ask_registry.py "React 19"          --> GREEN, sourced, or honest miss
+    python3 ask_registry.py "Directive 2012/28/EU"
+    python3 ask_registry.py --browse
+    python3 ask_registry.py --serve          # local UI on :8091
 
-This is the daily-use hook: a claim proven once is free for everyone afterward. A miss is
-not a failure — it is the registry telling you this has not been cleared, so you know NOT
-to trust an unsourced answer. That honesty is the product.
+No model, no network on the read path — it searches the compounding log
+(clearance/refusal_log.py) that every clearance run writes.
 """
 from __future__ import annotations
 
+import argparse
+import html
+import json
 import os
-import sqlite3
 import sys
+from http.server import BaseHTTPRequestHandler, HTTPServer
+from pathlib import Path
+from urllib.parse import parse_qs, urlparse
 
-DB = os.path.join(os.path.dirname(__file__), "cache", "refusal_log.db")
+from clearance import refusal_log
 
-_VERDICT_GLOSS = {
-    "GREEN": "SOURCED — a real document states this, verbatim",
-    "UNKNOWN": "NOT CLEARED — searched/attempted, no admissible source yet",
-    "RED": "REFUTED — a source contradicts it",
-    "DISPUTED": "DISPUTED — sources conflict",
-}
+DB = Path(os.environ.get("REFUSAL_LOG_DB", refusal_log.DB))
 
 
-def ask(query: str, db: str = DB, limit: int = 5) -> dict:
-    """Search the registry by distinctive term. Returns the cleared rows (verdict +
-    citation) or an empty hit list — the honest 'not cleared yet'."""
-    if not os.path.exists(db):
-        return {"query": query, "rows": [], "note": "registry empty (no log yet — run a clearance)"}
-    con = sqlite3.connect(db)
-    q = f"%{query.lower().strip()}%"
-    rows = con.execute(
-        "SELECT term, verdict, cause, citation_url, quoted_terms, reused "
-        "FROM claims WHERE lower(term) LIKE ? OR lower(quoted_terms) LIKE ? "
-        "ORDER BY (verdict='GREEN') DESC, reused DESC LIMIT ?",
-        (q, q, limit),
-    ).fetchall()
-    return {
-        "query": query,
-        "rows": [
-            {"term": t, "verdict": v, "cause": c, "url": u,
-             "quote": (qt or "")[:120], "reused": r}
-            for (t, v, c, u, qt, r) in rows
-        ],
-    }
+def ask(query: str, db: Path | str = DB) -> dict:
+    """Search the registry; log this query as a browsable row."""
+    con = refusal_log.connect(db)
+    return refusal_log.search_registry(con, query)
+
+
+def browse(*, db: Path | str = DB, limit: int = 50) -> list[dict]:
+    con = refusal_log.connect(db)
+    return refusal_log.browse_queries(con, limit=limit)
 
 
 def _fmt(res: dict) -> str:
-    L = [f"\n  registry ← {res['query']!r}"]
-    if res.get("note"):
-        L.append(f"    {res['note']}")
-    if not res["rows"]:
-        L.append("    NOT CLEARED YET — nothing in the registry sources this.")
-        L.append("    (an honest miss: do not trust an unsourced answer. This is the product.)")
-        return "\n".join(L) + "\n"
-    for r in res["rows"]:
-        gloss = _VERDICT_GLOSS.get(r["verdict"], r["verdict"])
-        L.append(f"    [{r['verdict']}] {r['term'][:60]}")
-        L.append(f"        {gloss}")
-        if r["url"]:
-            L.append(f"        source: {r['url'][:80]}")
-        if r["reused"]:
-            L.append(f"        reused {r['reused']}x — cleared once, free since")
-    return "\n".join(L) + "\n"
+    lines = [f"\n  registry ← {res['query']!r}"]
+    label = res["label"]
+    lines.append(f"    [{label}]")
+
+    if label == "SOURCED":
+        span = (res.get("quoted_terms") or "")[:240]
+        lines.append(f"        span: \"{span}\"")
+        if res.get("citation_url"):
+            lines.append(f"        source: {res['citation_url'][:90]}")
+        if res.get("reused"):
+            lines.append(f"        reused {res['reused']}x — cleared once, free since")
+    elif label in ("UNSOURCED", "UNKNOWN", "REFUTED"):
+        cause = res.get("cause") or "unspecified"
+        lines.append(f"        refusal: {cause}")
+        if res.get("why"):
+            lines.append(f"        why: {res['why']}")
+        if res.get("resolves_with"):
+            lines.append(f"        would resolve with: {res['resolves_with']}")
+        if res.get("quoted_terms"):
+            lines.append(f"        read: \"{(res['quoted_terms'] or '')[:120]}\"")
+    else:
+        lines.append(f"        {res.get('why', 'not cleared yet')}")
+
+    if res.get("matches", 0) > 1:
+        lines.append(f"        ({res['matches']} claim rows matched)")
+    return "\n".join(lines) + "\n"
+
+
+_PAGE = """<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Agent Science — registry</title>
+<style>
+:root{--paper:#e9ecef;--ink:#14161c;--mute:#5c6370;--line:#c5cad3;--sourced:#1a5c2e;--unsourced:#b42318}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);
+  font-family:Georgia,serif;font-size:18px;line-height:1.45}
+.wrap{max-width:46rem;margin:0 auto;padding:2rem 1.25rem 3rem}
+h1{font-size:2rem;margin:0 0 .25rem}p.lead{color:var(--mute);margin:0 0 1.5rem}
+form{display:flex;gap:.5rem;margin-bottom:2rem}
+input[type=text]{flex:1;padding:.65rem .8rem;border:1px solid var(--line);font:inherit}
+button{padding:.65rem 1rem;background:var(--ink);color:var(--paper);border:0;cursor:pointer}
+.result{border-top:1px solid var(--ink);padding-top:1rem;margin-bottom:2rem}
+.label{font-family:monospace;font-size:.85rem;letter-spacing:.04em}
+.label.sourced{color:var(--sourced)}.label.unsourced,.label.unknown{color:var(--unsourced)}
+blockquote{margin:.5rem 0;padding-left:.8rem;border-left:2px solid var(--line);color:var(--mute)}
+table{width:100%;border-collapse:collapse;font-size:.9rem}
+th,td{text-align:left;padding:.45rem .3rem;border-bottom:1px solid var(--line)}
+th{font-family:monospace;font-size:.7rem;text-transform:uppercase;color:var(--mute)}
+</style></head><body>
+<div class="wrap">
+  <h1>Registry</h1>
+  <p class="lead">Sourced span, or a named refusal. Every query is logged.</p>
+  <form method="get" action="/">
+    <input type="text" name="q" value="{q}" placeholder="Ask anything cleared…" autofocus>
+    <button type="submit">Query</button>
+  </form>
+  {result}
+  <h2>Recent queries</h2>
+  {browse}
+</div>
+</body></html>"""
+
+
+def _html_result(res: dict | None) -> str:
+    if not res:
+        return ""
+    label = html.escape(res.get("label") or "")
+    cls = label.lower().replace("_", "-")
+    parts = [f'<div class="result"><p class="label {cls}">[{label}]</p>']
+    if res.get("label") == "SOURCED":
+        parts.append(f'<blockquote>{html.escape((res.get("quoted_terms") or "")[:400])}</blockquote>')
+        if res.get("citation_url"):
+            u = html.escape(res["citation_url"])
+            parts.append(f'<p><a href="{u}">{u[:80]}</a></p>')
+    elif res.get("why") or res.get("cause"):
+        parts.append(f'<p>{html.escape(res.get("why") or res.get("cause") or "")}</p>')
+        if res.get("resolves_with"):
+            parts.append(f'<p>Would resolve with: {html.escape(res["resolves_with"])}</p>')
+    else:
+        parts.append(f'<p>{html.escape(res.get("why", "not cleared"))}</p>')
+    parts.append("</div>")
+    return "".join(parts)
+
+
+def _html_browse(rows: list[dict]) -> str:
+    if not rows:
+        return "<p class='lead'>No queries yet.</p>"
+    tr = []
+    for r in rows[:30]:
+        tr.append(
+            f"<tr><td>{html.escape((r.get('query_text') or '')[:50])}</td>"
+            f"<td>{html.escape(r.get('result_label') or '')}</td>"
+            f"<td>{html.escape((r.get('cause') or '')[:40])}</td>"
+            f"<td>{html.escape((r.get('asked_at') or '')[:19])}</td></tr>"
+        )
+    return ("<table><tr><th>Query</th><th>Label</th><th>Cause</th><th>When</th></tr>"
+            + "".join(tr) + "</table>")
+
+
+class _Handler(BaseHTTPRequestHandler):
+    def _send(self, code: int, body: bytes, ctype: str):
+        self.send_response(code)
+        self.send_header("Content-Type", ctype)
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+    def do_GET(self):
+        parsed = urlparse(self.path)
+        qs = parse_qs(parsed.query)
+        if parsed.path == "/api":
+            q = (qs.get("q") or [""])[0]
+            return self._send(200, json.dumps(ask(q), indent=1).encode(), "application/json")
+        q = (qs.get("q") or [""])[0].strip()
+        res = ask(q) if q else None
+        page = _PAGE.format(
+            q=html.escape(q, quote=True),
+            result=_html_result(res),
+            browse=_html_browse(browse()),
+        )
+        self._send(200, page.encode(), "text/html; charset=utf-8")
+
+    def log_message(self, fmt, *a):
+        sys.stderr.write("%s - %s\n" % (self.address_string(), fmt % a))
+
+
+def serve(port: int = 8091) -> None:
+    sys.stderr.write(f"registry on http://127.0.0.1:{port}/\n")
+    HTTPServer(("127.0.0.1", port), _Handler).serve_forever()
 
 
 def main(argv=None) -> int:
-    args = argv if argv is not None else sys.argv[1:]
-    if not args:
-        print("usage: python3 ask_registry.py \"<your question>\"")
+    p = argparse.ArgumentParser(description=__doc__)
+    p.add_argument("query", nargs="*", help="question to search the registry")
+    p.add_argument("--browse", action="store_true", help="list recent queries")
+    p.add_argument("--json", action="store_true", help="machine-readable output")
+    p.add_argument("--serve", action="store_true", help="local registry UI")
+    p.add_argument("--port", type=int, default=8091)
+    args = p.parse_args(argv)
+
+    if args.serve:
+        serve(args.port)
+        return 0
+
+    if args.browse:
+        rows = browse()
+        if args.json:
+            print(json.dumps(rows, indent=1))
+            return 0
+        print(f"\n  registry — {len(rows)} recent quer{'y' if len(rows)==1 else 'ies'}\n")
+        for r in rows:
+            print(f"    [{r['result_label']:12}] {r['query_text'][:55]:55}  {r['asked_at'][:19]}")
+        print()
+        return 0
+
+    if not args.query:
+        p.print_help()
         return 2
-    print(_fmt(ask(" ".join(args))))
+
+    res = ask(" ".join(args.query))
+    if args.json:
+        print(json.dumps(res, indent=1))
+    else:
+        print(_fmt(res))
     return 0
 
 

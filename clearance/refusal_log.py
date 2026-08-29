@@ -42,7 +42,42 @@ CREATE TABLE IF NOT EXISTS claims (
     reused        INTEGER NOT NULL DEFAULT 0,
     PRIMARY KEY (term, slot)
 );
+CREATE TABLE IF NOT EXISTS queries (
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    query_text    TEXT NOT NULL,
+    result_label  TEXT NOT NULL,     -- SOURCED | UNSOURCED | UNKNOWN | NOT_CLEARED
+    verdict       TEXT,
+    cause         TEXT,
+    term          TEXT,
+    citation_url  TEXT,
+    quoted_terms  TEXT,
+    resolves_with TEXT,
+    asked_at      TEXT NOT NULL
+);
 """
+
+# User-facing labels on the registry surface. Collapsing no_source and search-empty
+# into one blob was the defect this product refuses everywhere else.
+_UNSOURCED_CAUSES = frozenset({
+    "no_source_offered",
+    "search_found_no_admissible_source",
+    "source_does_not_state_it",
+    "source_never_fetched",
+    "terms_never_fetched",
+})
+
+
+def surface_label(*, verdict: str | None, cause: str | None = None) -> str:
+    """Map an engine verdict to the registry's three poles (+ honest miss)."""
+    if verdict == "GREEN":
+        return "SOURCED"
+    if verdict == "RED":
+        return "REFUTED"
+    if verdict == "UNKNOWN" and (cause or "") in _UNSOURCED_CAUSES:
+        return "UNSOURCED"
+    if verdict == "UNKNOWN":
+        return "UNKNOWN"
+    return "NOT_CLEARED"
 
 # What a claim is ABOUT, so "adopted in 2012" and "was known as the Orphan Works
 # Directive" do not collide on the same distinctive term. This is the collision the
@@ -122,6 +157,81 @@ def stats(con) -> dict:
         " SUM(reused) reuses, COUNT(DISTINCT first_seen_in) productions FROM claims"
     ).fetchone()
     return {k: (row[k] or 0) for k in row.keys()}
+
+
+def log_query(con, *, query: str, result: dict) -> int:
+    """Every query becomes a browsable registry row — the refusal is the product."""
+    cur = con.execute(
+        "INSERT INTO queries (query_text, result_label, verdict, cause, term, "
+        "citation_url, quoted_terms, resolves_with, asked_at) VALUES (?,?,?,?,?,?,?,?,?)",
+        (query.strip(), result["label"], result.get("verdict"), result.get("cause"),
+         result.get("term"), result.get("citation_url"), result.get("quoted_terms"),
+         result.get("resolves_with"),
+         datetime.now(timezone.utc).isoformat(timespec="seconds")))
+    con.commit()
+    return cur.lastrowid
+
+
+def browse_queries(con, *, limit: int = 50) -> list[dict]:
+    """Recent registry queries — what strangers actually asked."""
+    return [dict(r) for r in con.execute(
+        "SELECT * FROM queries ORDER BY id DESC LIMIT ?", (limit,))]
+
+
+def search_registry(con, query: str, *, limit: int = 5) -> dict:
+    """Query in → SOURCED span, UNSOURCED, or UNKNOWN with named refusal."""
+    q = query.strip()
+    if not q:
+        return {"query": q, "label": "NOT_CLEARED", "cause": "empty_query",
+                "why": "query was empty", "matches": 0}
+
+    qnorm = f"%{norm_term(q)}%"
+    rows = con.execute(
+        "SELECT * FROM claims WHERE lower(term) LIKE ? OR lower(established) LIKE ? "
+        "OR lower(quoted_terms) LIKE ? ORDER BY (verdict='GREEN') DESC, reused DESC "
+        "LIMIT ?",
+        (qnorm, qnorm, qnorm, limit)).fetchall()
+
+    if not rows:
+        result = {
+            "query": q,
+            "label": "NOT_CLEARED",
+            "verdict": None,
+            "cause": "not_in_registry",
+            "why": ("nothing in the registry sources this yet — run a clearance or "
+                    "backfill; do not trust an unsourced answer"),
+            "matches": 0,
+        }
+        log_query(con, query=q, result=result)
+        return result
+
+    best = dict(rows[0])
+    best["origins"] = json.loads(best.get("origins") or "[]")
+    label = surface_label(verdict=best["verdict"], cause=best.get("cause"))
+    why = None
+    if label == "UNSOURCED":
+        why = best.get("resolves_with") or best.get("cause") or "no admissible source"
+    elif label == "UNKNOWN":
+        why = best.get("cause") or "unknown gap"
+    result = {
+        "query": q,
+        "label": label,
+        "verdict": best["verdict"],
+        "cause": best.get("cause"),
+        "term": best["term"],
+        "established": best["established"],
+        "citation_url": best.get("citation_url"),
+        "quoted_terms": best.get("quoted_terms"),
+        "resolves_with": best.get("resolves_with"),
+        "reused": best.get("reused", 0),
+        "first_seen_in": best.get("first_seen_in"),
+        "matches": len(rows),
+        "why": why,
+    }
+    log_query(con, query=q, result=result)
+    # Bump reuse on the matched claim when a registry query hits it.
+    lookup(con, term=best["term"], assertion=best["established"])
+    return result
 
 
 def as_claimreview(con, limit: int = 100) -> list:
