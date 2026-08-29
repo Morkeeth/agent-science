@@ -20,9 +20,9 @@
 
 ---
 
-## NOW — 2026-08-29 (slices 2 + 4 run)
+## NOW — 2026-08-29 (slices 2 + 3 + 4 run)
 
-**Baseline:** `refusal_log.py` 264 lines · registry backfilled: **173 rows** (28 SOURCED + 145 proven-unprovable refusals seeded from `research-corpus/`).
+**Baseline:** `refusal_log.py` 264 lines · registry backfilled: **173 rows** (29 SOURCED + 144 proven-unprovable refusals seeded from `research-corpus/`).
 
 ### Slice 2 — registry surface
 - [x] `clearance/refusal_log.py` — `queries` table, `search_registry()`, `browse_queries()`, `surface_label()`
@@ -30,6 +30,12 @@
 - [x] Every query logged as a browsable row; refusal carries named `cause` + `why`
 - [x] `tests/test_registry_surface.py` — 5 controls green
 - [ ] Hosted `/registry` on Cloud Run (blocked: slice 1 deploy is Oscar's)
+
+### Slice 3 — backfill + compound exhibit
+- [x] Registry backfilled from `research-corpus/` — **173 rows** (`clear_corpus.py --backfill`)
+- [x] Orphan-works A/B: Run A **2** Parallel → Run B **1** Parallel, **2** corpus hits (offline; keys absent)
+- [x] Receipt: `docs/COMPOUND-EXHIBIT-2026-08-29.md`
+- [ ] Live orphan-works A/B on `documentary-orphan-works*.txt` — **blocked on this VM:** no Gemini/Parallel keys
 
 **Stranger path (this VM):**
 ```bash
@@ -48,6 +54,8 @@ python3 ask_registry.py --serve                     # http://127.0.0.1:8091/
 ### Controls
 - `python3 tests/test_watch_it_go_red.py` → **26 passed, 13 failed** (suite crashes on missing EUR-Lex body; rightsstatements fetched OK)
 - `python3 tests/test_registry_surface.py` → **5 passed**
+- `python3 tests/test_cross_subject_reuse.py` → **2 passed**
+- `python3 review/corpus_compound_receipt.py` → **50/50 reuse, 0 network on Run 2**
 
 ### Not touched (per constitution)
 - `deploy.sh`, repo visibility, key rotation, slice 5 Agent Builder deploy claims
