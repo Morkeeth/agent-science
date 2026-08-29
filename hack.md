@@ -42,7 +42,7 @@ would settle it is judge feedback from the organisers — an outward act only Os
 **Gate before this event's result table ships** — this checklist now stands on its own merits as
 submission craft, supported by a real tendency, **not** as the explanation of that loss:
 
-- [ ] **Alternative arm named and run** — what a competent person does *without* this project, on identical inputs, identical budget, identical prompt.
+- [x] **Alternative arm named and run** — `eval/refusal_correctness_gate.py`: `NaiveFirstOccurrence` vs shipping on `fixtures/refusal-correctness/set.json`; receipt `eval/RECEIPT-refusal-gate.md`
 - [ ] **Ablation** — our one signature mechanism switched off; its delta is the only number that credits our idea.
 - [ ] **External anchor** — one dataset or benchmark we did not build and cannot tune, or an explicit README line saying there is none.
 - [ ] **Holdout frozen before the first tuning pass.**
@@ -75,50 +75,47 @@ Full record: `~/CODE/fleet-ops/retros/QWEN-LOSS-RETRO-2026-08-30.md` (corrected)
 
 ---
 
-## NOW — 2026-08-29 (slices 2–4 run · slice 7 docs on main)
+## NOW — 2026-08-29 night wave · Qwen eval gate + submission truth refresh
 
-**Baseline:** `refusal_log.py` 264 lines · registry backfilled: **173 rows** (29 SOURCED + 144 proven-unprovable refusals seeded from `research-corpus/`).
+**ONE slice:** falsifiable eval gate with baseline arm + SUBMISSION-PACK counts re-derived at object.
 
-### Slice 2 — registry surface
-- [x] `clearance/refusal_log.py` — `queries` table, `search_registry()`, `browse_queries()`, `surface_label()`
-- [x] `ask_registry.py` — CLI + `--browse` + `--serve` local UI on :8091 (CSS template bug fixed)
-- [x] Every query logged as a browsable row; refusal carries named `cause` + `why`
-- [x] `tests/test_registry_surface.py` — 5 controls green
-- [ ] Hosted `/registry` on Cloud Run (blocked: slice 1 deploy is Oscar's)
+### Shipped tonight
+- [x] `eval/refusal_correctness_gate.py` + `eval/README.md` — baseline vs shipping on held-out set (n=6, RC5 engine_limit pinned)
+- [x] `eval/RECEIPT-refusal-gate.md` — per-item rows; **RC5: both arms false GREEN** (worst number)
+- [x] `scripts/seed_test_cache.py` — stranger path to **72/72** red-watch offline (EUR-Lex 403 → honest fixture seed)
+- [x] `docs/SUBMISSION-PACK-2026-08-29.md` — stale **26/13** replaced with **72/72 · 99/99**; one-command block added
+- [x] `docs/DEPLOY-CHECKLIST-2026-08-29.md` — slice 1 prep for Oscar (no deploy run)
 
-### Slice 3 — backfill + compound exhibit
-- [x] Registry backfilled from `research-corpus/` — **173 rows** (`clear_corpus.py --backfill`)
-- [x] Orphan-works A/B: Run A **2** Parallel → Run B **1** Parallel, **2** corpus hits (offline; keys absent)
-- [x] Receipt: `docs/COMPOUND-EXHIBIT-2026-08-29.md`
-- [ ] Live orphan-works A/B on `documentary-orphan-works*.txt` — **blocked on this VM:** no Gemini/Parallel keys
+### Blocked (honest receipts, not guessed)
+- [ ] Live orphan-works A/B — **no Gemini/Parallel keys** on agent VM (`docs/COMPOUND-EXHIBIT-2026-08-29.md` offline only)
+- [ ] Hosted `/registry` — slice 1 deploy (Oscar)
+- [ ] Public repo · video · Devpost — Oscar only
 
-**Stranger path (this VM):**
+### Stranger path (offline)
 ```bash
-python3 clear_corpus.py research-corpus --backfill
-python3 ask_registry.py "arxiv:2511.12884"          # → SOURCED span
-python3 ask_registry.py "agentlint"                 # → UNSOURCED + named cause
-python3 ask_registry.py --serve                     # http://127.0.0.1:8091/
+python3 scripts/seed_test_cache.py
+python3 tests/test_registry_surface.py -q
+python3 scripts/compound_exhibit_receipt.py
+python3 eval/refusal_correctness_gate.py
+python3 tests/test_watch_it_go_red.py   # → 72/72 after seed
 ```
 
-### Slice 4 — second subject (dust-bowl)
-- [x] Fixtures: `fixtures/scripts/dust-bowl-A.txt`, `dust-bowl-B.txt` (public-domain narration, not orphan works)
-- [ ] Live full chain: `agent_science.py` on dust-bowl — **blocked on this VM:** no Gemini/Parallel keys
-- [x] Receipt: `docs/SECOND-SUBJECT-RECEIPT-2026-08-29.md` — failures named honestly
-- [x] Offline proof: `tests/test_cross_subject_reuse.py` 2/2 — dust-bowl reuses orphan-works log at 0 Parallel calls
+### Controls (re-derived @ object)
+- `python3 tests/test_watch_it_go_red.py` → **72/72** (requires `python3 scripts/seed_test_cache.py` first)
+- `python3 tests/test_registry_surface.py` → **5/5**
+- `python3 tests/test_cross_subject_reuse.py` → **2/2**
+- All 8 suites → **99/99**
+- `python3 eval/refusal_correctness_gate.py` → receipt; catchable **5/5** both arms; **RC5 both GREEN** (engine_limit)
 
-### Slice 7 — submission pack (docs only; Oscar gates outward acts)
-- [x] `docs/SUBMISSION-PACK-2026-08-29.md` — Devpost paste block, sealed-prediction draft, Oscar checklist
-- [x] `docs/VIDEO-SCRIPT-2026-08-29.md` — 178 s beats (≤ 180 s cap)
-- [ ] Public repo · video upload · Devpost submit · seal prediction — **Oscar only**
+### LOG
+- **2026-08-29 start:** `git pull` OK; red-watch **11 fail** on cold VM — missing `cache/documents.json` + `cache/searches.json` (hack.md claimed 72/72; NOW was stale)
+- **2026-08-29 seed:** EUR-Lex HTTP 403 from VM egress → fixture `eur-lex-orphan-snippet.html` with provenance string (not silent)
+- **2026-08-29 seed bug:** first `seed_test_cache.py` overwrote RS fetches when writing EUR-Lex — fixed merge order; re-run **72/72**
+- **2026-08-29 eval:** baseline ties shipping on catchable accuracy (5/5) but **RC5 substring trap: both false GREEN** — goes in receipt honesty section
+- **2026-08-29 compound:** live path BLOCKED; offline receipt regenerated (A=2, B=1 Parallel, corpus_hits=2)
 
-### Controls
-- `python3 tests/test_watch_it_go_red.py` → **72/72** (mutation controls strip instruments by canonical key; requires `cache/documents.json` + `cache/searches.json` on disk)
-- `python3 tests/test_registry_surface.py` → **5 passed**
-- `python3 tests/test_cross_subject_reuse.py` → **2 passed**
-- `python3 review/corpus_compound_receipt.py` → **50/50 reuse, 0 network on Run 2**
-
-### Not touched (per constitution)
-- `deploy.sh`, repo visibility, key rotation, slice 5 Agent Builder deploy claims
+### Prior slices (unchanged)
+- Registry backfill **173 rows** · dust-bowl offline **2/2** · slice 7 video script **178 s**
 
 ---
 
