@@ -1,8 +1,23 @@
 # SUBMISSION PACK — Agentic Cinema · slice 7
 
-**Date:** 2026-08-29 · **Repo:** https://github.com/Morkeeth/agent-science @ `e6793ab`  
+**Date:** 2026-08-29 (re-run @ branch tip) · **Repo:** https://github.com/Morkeeth/agent-science @ `cursor/qwen-eval-gate-0e77`  
 **Hosted:** https://agent-science-568004190078.us-central1.run.app · **Deadline:** 2026-09-09 14:00 PT  
-**Scope:** docs only — no public repo flip, no video upload, no Devpost submit, no `deploy.sh`
+**Scope:** docs + eval gate + offline cache seed — no public repo flip, no video upload, no Devpost submit, no `deploy.sh`
+
+---
+
+## Stranger one-command block (offline, no API key)
+
+Run once after clone:
+
+```bash
+python3 scripts/seed_test_cache.py
+python3 tests/test_registry_surface.py -q
+python3 scripts/compound_exhibit_receipt.py
+python3 eval/refusal_correctness_gate.py
+```
+
+Expected: registry **5/5** · compound receipt written to `docs/COMPOUND-EXHIBIT-2026-08-29.md` · eval receipt to `eval/RECEIPT-refusal-gate.md` · red-watch **72/72** after seed.
 
 ---
 
@@ -16,9 +31,11 @@
 | OSI licence | Open-source approved | [x] | `LICENSE` (MIT) |
 | Sealed prediction | Pre-registered, falsifiable | [ ] | Draft below; seal after live corpus exhibit on hosted URL |
 
-**Controls on disk @ `e6793ab`:** `test_registry_surface.py` **5/5** · `test_cross_subject_reuse.py` **2/2** · `test_backfill_seeds_reuse.py` **2/2** · `test_clear_corpus.py` **4/4** · `test_search_path.py` **5/5** · `test_source_map.py` **3/3** · `test_refusal_correctness.py` **6/6** · `test_watch_it_go_red.py` **26 pass / 13 fail** (suite crashes on missing EUR-Lex body) → **53 pass / 13 fail** across 8 suites.
+**Controls on disk (re-derived 2026-08-29 @ branch tip):** `test_registry_surface.py` **5/5** · `test_cross_subject_reuse.py` **2/2** · `test_backfill_seeds_reuse.py` **2/2** · `test_clear_corpus.py` **4/4** · `test_search_path.py` **5/5** · `test_source_map.py` **3/3** · `test_refusal_correctness.py` **6/6** · `test_watch_it_go_red.py` **72/72** (after `python3 scripts/seed_test_cache.py`) → **99/99** across 8 suites.
 
-**Compound exhibit (offline, slice 3):** Run A **2** Parallel → Run B **1** Parallel, **2** corpus hits — `docs/COMPOUND-EXHIBIT-2026-08-29.md`.
+**Eval gate (Qwen checklist):** `eval/refusal_correctness_gate.py` — baseline `NaiveFirstOccurrence` vs shipping locator on held-out set; receipt `eval/RECEIPT-refusal-gate.md`. **RC5 engine_limit:** both arms false GREEN (documented gap).
+
+**Compound exhibit (offline, slice 3):** Run A **2** Parallel → Run B **1** Parallel, **2** corpus hits — `docs/COMPOUND-EXHIBIT-2026-08-29.md`. Live path **BLOCKED** (no Gemini/Parallel keys on agent VM).
 
 ---
 
