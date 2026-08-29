@@ -2,7 +2,7 @@
 date: 2026-08-22
 event: Agentic Cinema · Devpost · deadline 2026-09-09 14:00 PT
 repo: /Users/morkeeth/CODE/cleared @ ab03e3a (local only, never pushed)
-status: fork UNRULED — this pitch holds under either ruling
+status: slice 7 prep @ 8fe9d00 — tests 53 pass / 13 fail (8 suites; watch_it_go_red crashes on missing EUR-Lex body)
 ---
 
 # The clearance desk for factual production
