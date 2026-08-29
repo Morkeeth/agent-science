@@ -1,17 +1,21 @@
 # Agent Science
 
-**A production cannot be insured until every fact is sourced. Today that is done by hand,
-and a miss is a lawsuit.**
+**Paste a documentary script. Get back every checkable claim with the document that
+supports it — quoted verbatim — and every claim you cannot source, with the reason
+you cannot.**
 
-Paste a documentary script. Get back every checkable claim with the document that
-supports it — quoted verbatim — and the ones that cannot be sourced printed with the
-reason.
+**Proof:** `python3 scripts/seed_document_cache.py && python3 tests/test_watch_it_go_red.py` → **72/72** mutation controls; orphan-works A/B **2 → 1** Parallel calls offline (`docs/COMPOUND-EXHIBIT-2026-08-29.md`).
+
+**Constraint:** a model may only **locate** evidence. If the proposed passage is not
+**verbatim** in the fetched document, the verdict is UNSOURCED — never paraphrase,
+never infer.
 
 Built for [Agentic Cinema](https://agentic-cinema.devpost.com/) · Parallel track.
 
 ```bash
+python3 scripts/seed_document_cache.py   # offline document cache (cold clone)
 python3 agent_science.py fixtures/scripts/documentary-orphan-works.txt
-./demo.sh          # the whole story in one command
+./demo.sh          # the whole story in one command (live keys required)
 ```
 
 ## The one rule
@@ -131,7 +135,9 @@ fails the build if any deploy surface passes a secret via `--set-env-vars`.
 ## Controls
 
 ```bash
-python3 tests/test_watch_it_go_red.py     # 71 passed, 0 failed
+python3 scripts/seed_document_cache.py
+python3 tests/test_watch_it_go_red.py     # 72 passed, 0 failed
+python3 tests/test_adk_default_path.py    # 5 passed — engine_default: adk when configured
 ```
 
 Every control is watched **going red** before it is trusted green. They include five

@@ -6,6 +6,44 @@
 
 ---
 
+## NORTH STAR
+
+Paste a documentary script; get every checkable claim back as a verbatim quote with its source URL, or UNSOURCED with a named reason — so a production can insure and release without guessing.
+
+## PROMISE LINE
+
+**You get:** a gap report where every claim is SOURCED (exact passage + citation) or UNSOURCED (actionable cause).  
+**Constraint:** if the document does not contain the exact passage, refuse — never paraphrase, never infer.
+
+## OPEN QUESTIONS
+
+- Hosted `engine_default: adk` — blocked on Oscar running `deploy.sh` (slice 1).
+- Live compound exhibit on hosted URL — blocked on keys + deploy (Oscar).
+- RC5 substring false-GREEN — semantic guard not decided; structural verifier cannot catch it.
+- Design partner session — Oscar outreach (slice 6).
+
+## CONSTITUTION
+
+- Verbatim span or REFUSE — `Verdict.__post_init__` enforces citation.
+- Locator untrusted; verifier structural; model never authors verdict.
+- No plaintext secrets in repo or deploy surfaces (control scans tree + git log).
+- Outward acts (deploy, public repo, Devpost, video) — Oscar only.
+- Do not tick a box whose done-when was not RUN; say the command.
+
+## PLAN (risk-first slices)
+
+| # | Slice | Risk |
+|---|--------|------|
+| 1 | Deploy desk | Keys leak / wrong revision |
+| 2 | Registry face | False SOURCED in browse UI |
+| 3 | Compound exhibit | Compounding claim unproved |
+| 4 | Second subject | Cross-subject collision |
+| **5** | **ADK default path** | **Agent Builder claimed but not on runtime path** |
+| 6 | Design partner loop | Friction unknown |
+| 7 | Submission pack | Outward gates |
+
+---
+
 ## ⛔ PRIOR LOSS — read before the next result table
 
 **Corrected 2026-08-29. The earlier version of this section said Mount Helicon lost because its
@@ -42,7 +80,7 @@ would settle it is judge feedback from the organisers — an outward act only Os
 **Gate before this event's result table ships** — this checklist now stands on its own merits as
 submission craft, supported by a real tendency, **not** as the explanation of that loss:
 
-- [ ] **Alternative arm named and run** — what a competent person does *without* this project, on identical inputs, identical budget, identical prompt.
+- [x] **Alternative arm named and run** — `python3 scripts/eval_refusal_baseline.py` · `docs/QWEN-EVAL-GATE-2026-08-30.md`
 - [ ] **Ablation** — our one signature mechanism switched off; its delta is the only number that credits our idea.
 - [ ] **External anchor** — one dataset or benchmark we did not build and cannot tune, or an explicit README line saying there is none.
 - [ ] **Holdout frozen before the first tuning pass.**
@@ -50,7 +88,7 @@ submission craft, supported by a real tendency, **not** as the explanation of th
 - [ ] **Statistic matched to n** — n<100 → CIs + a paired test, never a bare point.
 - [ ] **Scorer symmetrical** — nothing only our system can emit; judge from delivered output for every arm.
 - [ ] **Cost from billing**, with the price card's date stated.
-- [ ] **Offline path with no API key.**
+- [x] **Offline path with no API key.**
 - [ ] **"Honesty & limitations" section carrying our worst number.**
 - [ ] **Answer the track brief in the track's own words on the first screen** — that is what the rubric weights, not eval rigor.
 - [ ] **Video verified attached and public on the live entry page, from a logged-out browser** — not in a checklist file, on the page.
@@ -65,61 +103,63 @@ Full record: `~/CODE/fleet-ops/retros/QWEN-LOSS-RETRO-2026-08-30.md` (corrected)
 
 | # | Slice | Owner | Done when |
 |---|--------|-------|-----------|
-| **1** | **Deploy the desk** | Oscar | Hosted URL a stranger can paste a script into; keys via Secret Manager; `deploy.sh` only |
-| **2** | **The registry has a face** | build | Query in → SOURCED span, UNSOURCED, or UNKNOWN with named refusal; every query browsable |
-| **3** | **Backfill + compound exhibit** | build | Cross-production log seeded from fleet corpus; orphan-works A/B shows Parallel drop |
-| **4** | **A second subject** | build | Full chain on a corpus unrelated to orphan works; receipt with failures honest |
-| **5** | **Agent Builder as default** | build | ADK on default `/clear` path; receipt with `engine: adk` — **claims only, no deploy** |
-| **6** | **Design partner loop** | Oscar + build | One real clearance lead runs their script; friction list in CURSOR-LOG |
-| **7** | **Submission pack** | Oscar | Public repo, OSI licence, ≤3-min video, Devpost — all four mandatory |
+| **1** | **Deploy the desk** | Oscar | Hosted URL; keys via Secret Manager; `deploy.sh` only |
+| **2** | **The registry has a face** | build | Query → SOURCED/UNSOURCED/UNKNOWN; browsable |
+| **3** | **Backfill + compound exhibit** | build | Orphan-works A/B shows Parallel drop |
+| **4** | **A second subject** | build | Dust-bowl chain; receipt honest |
+| **5** | **Agent Builder as default** | build | ADK on default `/clear`; receipt `engine: adk` locally |
+| **6** | **Design partner loop** | Oscar + build | One lead; friction in CURSOR-LOG |
+| **7** | **Submission pack** | Oscar | Public repo, video, Devpost |
 
 ---
 
-## NOW — 2026-08-29 (slices 2–4 run · slice 7 docs on main)
+## NOW — slice 5 · ADK default path + partner integrations (2026-08-30)
 
-**Baseline:** `refusal_log.py` 264 lines · registry backfilled: **173 rows** (29 SOURCED + 144 proven-unprovable refusals seeded from `research-corpus/`).
+**One slice.** Wire and prove all four partners in docs + offline controls; ADK engine selection tests; hosted deploy still Oscar.
 
-### Slice 2 — registry surface
-- [x] `clearance/refusal_log.py` — `queries` table, `search_registry()`, `browse_queries()`, `surface_label()`
-- [x] `ask_registry.py` — CLI + `--browse` + `--serve` local UI on :8091 (CSS template bug fixed)
-- [x] Every query logged as a browsable row; refusal carries named `cause` + `why`
-- [x] `tests/test_registry_surface.py` — 5 controls green
-- [ ] Hosted `/registry` on Cloud Run (blocked: slice 1 deploy is Oscar's)
+### Slice 5 — Agent Builder default path
+- [x] `cloud/service.py` — ADK default, `engine_default` on `/health`
+- [x] `tests/test_adk_default_path.py` — **5/5** (`python3 tests/test_adk_default_path.py`)
+- [x] Receipt: `docs/RECEIPT-adk-default-path-2026-08-30.md`
+- [ ] Hosted `/health` returns `"engine_default": "adk"` — **Oscar: `deploy.sh`**
 
-### Slice 3 — backfill + compound exhibit
-- [x] Registry backfilled from `research-corpus/` — **173 rows** (`clear_corpus.py --backfill`)
-- [x] Orphan-works A/B: Run A **2** Parallel → Run B **1** Parallel, **2** corpus hits (offline; keys absent)
-- [x] Receipt: `docs/COMPOUND-EXHIBIT-2026-08-29.md`
-- [ ] Live orphan-works A/B on `documentary-orphan-works*.txt` — **blocked on this VM:** no Gemini/Parallel keys
+### Partner integrations (admissibility)
+- [x] `docs/PARTNER-INTEGRATIONS-2026-08-30.md` — Gemini, Parallel, GCP, ADK entrypoints + curl
+- [x] `scripts/seed_document_cache.py` — stranger cold-clone path for offline controls
 
-**Stranger path (this VM):**
+### Also shipped this turn
+- [x] Promise line — README + PITCH first screen (outcome · proof · constraint)
+- [x] Qwen eval gate — baseline arm `scripts/eval_refusal_baseline.py` + doc
+- [x] Live compound — `docs/BLOCKED-live-compound-exhibit-2026-08-30.md` (no keys)
+- [x] SUBMISSION-PACK counts refreshed — **104/104** across 9 suites
+- [x] Slice 6 prep — `docs/DESIGN-PARTNER-LOOP.md`
+
+### Controls (re-run at object)
 ```bash
-python3 clear_corpus.py research-corpus --backfill
-python3 ask_registry.py "arxiv:2511.12884"          # → SOURCED span
-python3 ask_registry.py "agentlint"                 # → UNSOURCED + named cause
-python3 ask_registry.py --serve                     # http://127.0.0.1:8091/
+python3 scripts/seed_document_cache.py
+python3 tests/test_watch_it_go_red.py          # 72/72
+python3 tests/test_adk_default_path.py         # 5/5
+python3 tests/test_registry_surface.py         # 5/5
+python3 review/corpus_compound_receipt.py      # 50/50 reuse
 ```
 
-### Slice 4 — second subject (dust-bowl)
-- [x] Fixtures: `fixtures/scripts/dust-bowl-A.txt`, `dust-bowl-B.txt` (public-domain narration, not orphan works)
-- [ ] Live full chain: `agent_science.py` on dust-bowl — **blocked on this VM:** no Gemini/Parallel keys
-- [x] Receipt: `docs/SECOND-SUBJECT-RECEIPT-2026-08-29.md` — failures named honestly
-- [x] Offline proof: `tests/test_cross_subject_reuse.py` 2/2 — dust-bowl reuses orphan-works log at 0 Parallel calls
-
-### Slice 7 — submission pack (docs only; Oscar gates outward acts)
-- [x] `docs/SUBMISSION-PACK-2026-08-29.md` — Devpost paste block, sealed-prediction draft, Oscar checklist
-- [x] `docs/VIDEO-SCRIPT-2026-08-29.md` — 178 s beats (≤ 180 s cap)
-- [ ] Public repo · video upload · Devpost submit · seal prediction — **Oscar only**
-
-### Controls
-- `python3 tests/test_watch_it_go_red.py` → **72/72** (mutation controls strip instruments by canonical key; requires `cache/documents.json` + `cache/searches.json` on disk)
-- `python3 tests/test_registry_surface.py` → **5 passed**
-- `python3 tests/test_cross_subject_reuse.py` → **2 passed**
-- `python3 review/corpus_compound_receipt.py` → **50/50 reuse, 0 network on Run 2**
-
-### Not touched (per constitution)
-- `deploy.sh`, repo visibility, key rotation, slice 5 Agent Builder deploy claims
+### Not touched
+- `deploy.sh` execution, repo visibility, key rotation, `--set-env-vars` secrets
 
 ---
 
-*Update the NOW section after every slice. Oscar owns slice 1 deploy and submission gates.*
+## LOG
+
+| When | What | Command | Outcome |
+|------|------|---------|---------|
+| 2026-08-30 start | Baseline claimed 72/72 but cache missing | `python3 tests/test_watch_it_go_red.py` | **13 fail + TypeError** — no `documents.json` |
+| 2026-08-30 | EUR-Lex live fetch | `urllib` to eur-lex | **HTTP 403** — seeded from fixture |
+| 2026-08-30 | Cache seed | `python3 scripts/seed_document_cache.py` | documents + searches on disk |
+| 2026-08-30 | Controls green | `python3 tests/test_watch_it_go_red.py` | **72/72** |
+| 2026-08-30 | ADK engine tests | `python3 tests/test_adk_default_path.py` | **5/5** |
+| 2026-08-30 | Eval gate | `python3 scripts/eval_refusal_baseline.py` | baseline=shipping=5/6; RC5 both false-GREEN |
+| 2026-08-30 | Live compound | env keys | **BLOCKED** — doc written |
+
+---
+
+*Update NOW after every slice. Oscar owns slice 1 deploy and submission gates.*
