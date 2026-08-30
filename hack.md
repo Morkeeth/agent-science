@@ -112,34 +112,27 @@ Full record: `~/CODE/fleet-ops/retros/QWEN-LOSS-RETRO-2026-08-30.md` (corrected)
 
 ---
 
-## NOW — live compound + eval stats (2026-08-30 night)
+## NOW — clearance memo test + compound delta (2026-08-31)
 
-**One slice.** Prove compounding on hosted URL; close three PRIOR LOSS gates (ablation, external anchor, stats).
+**One slice.** Fixture-driven clearance memo HTML test + persist prior `parallel_calls` per subject for A-vs-B delta in compound strip.
 
-### Live compound exhibit (hosted)
-- [x] `docs/RECEIPT-live-compound-exhibit-2026-08-30.md` — A=2 Parallel → B=1 Parallel, B corpus_hits=2
-- [x] `docs/RECEIPT-hosted-partner-runtime-2026-08-30.md` — `/health` + `/clear` engine=adk
+### Shipped this slice
+- [x] `tests/test_report_html.py` — compound strip, Claims requiring action, SOURCED verbatim blockquote (**5/5**)
+- [x] `corpus.run_stats` — `prior_parallel` / `remember_parallel` per subject shelf
+- [x] `_report_html` — `N → M (−Δ vs last run)` when `corpus_hits ≥ 1`
+- [x] `docs/RECEIPT-live-compound-2026-08-31.md` — hosted compound-mini sealed table
 
-### Eval gates (PRIOR LOSS)
-- [x] Wilson CI + McNemar in `scripts/eval_refusal_baseline.py` / `eval_refusal_ablation.py`
-- [x] External anchor — `scripts/eval_external_anchor.py` (live rightsstatements.org)
-- [x] Cold-clone verify — `scripts/verify_cold_clone.sh`
-
-### Partner integrations (admissibility) — carried forward
-- [x] `docs/PARTNER-INTEGRATIONS-2026-08-30.md`
-- [x] `tests/test_partner_runtime.py` — **5/5**
-- [x] Slice 5 ADK — hosted `engine_default: adk`
-
-### Controls (re-run at object)
+### Verify (run at object)
 ```bash
-python3 scripts/seed_document_cache.py
-bash scripts/verify_cold_clone.sh
-python3 scripts/eval_external_anchor.py
-curl -s https://agent-science-568004190078.us-central1.run.app/health
+python3 tests/test_report_html.py
+python3 tests/test_watch_it_go_red.py
+curl -s https://agent-science-33kamss2jq-uc.a.run.app/health
 ```
 
-### Not touched
-- `deploy.sh` execution, repo visibility, key rotation, `--set-env-vars` secrets
+### Blocked / not this slice
+- Hosted orphan-works A/B — **504** on Run A (gateway timeout)
+- Hosted `prior_parallel_calls` in JSON — needs deploy (Oscar)
+- `docs/MOONSHOT-MEMO-2026-08-31.md` — **not in repo** at pull
 
 ---
 
@@ -170,6 +163,11 @@ curl -s https://agent-science-568004190078.us-central1.run.app/health
 | 2026-08-30 night2 | External anchor | `python3 scripts/eval_external_anchor.py` | **2/2 tied** baseline=shipping |
 | 2026-08-30 night2 | Eval stats | `python3 scripts/eval_refusal_baseline.py` | Wilson CI + McNemar p=1.0 |
 | 2026-08-30 night2 | Cold clone script | `bash scripts/verify_cold_clone.sh` | **all gates green** |
+| 2026-08-31 | Clearance memo test | `python3 tests/test_report_html.py` | **5/5** compound+action+verbatim |
+| 2026-08-31 | Controls | `python3 tests/test_watch_it_go_red.py` | **72/72** |
+| 2026-08-31 | Hosted compound-mini | POST `/clear` A/B `compound-mini-live-2026-08-31` | **2→1 Parallel, hits=2, pass** |
+| 2026-08-31 | Hosted orphan-works | POST `/clear` Run A | **504 Gateway Timeout** |
+| 2026-08-31 | Hosted health | `curl -s …33kamss2jq…/health` | **engine_default: adk** |
 
 ---
 
