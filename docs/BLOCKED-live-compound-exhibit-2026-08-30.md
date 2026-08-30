@@ -1,4 +1,7 @@
-# BLOCKED — live compound exhibit · 2026-08-30
+# BLOCKED — live compound exhibit · LOCAL VM ONLY · 2026-08-30
+
+**Update:** Hosted URL **proved** — see `docs/RECEIPT-live-compound-exhibit-2026-08-30.md`.
+This file applies to **this VM only** (no keys).
 
 **Subject:** orphan-works A/B on `documentary-orphan-works*.txt`  
 **Mode attempted:** live (Gemini extract + Parallel search)
@@ -33,4 +36,6 @@ Receipt: `docs/COMPOUND-EXHIBIT-2026-08-29.md`
 
 ## Honest status
 
-Live compound exhibit: **BLOCKED** on credentials. Offline A/B: **SHIPPED** with measured delta.
+**Hosted compound exhibit:** **SHIPPED** — `docs/RECEIPT-live-compound-exhibit-2026-08-30.md` (compound-mini A/B: 2→1 Parallel, 2 corpus hits).
+
+**Local VM compound exhibit:** **BLOCKED** on credentials. Offline A/B: **SHIPPED** with measured delta.

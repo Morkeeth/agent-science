@@ -154,14 +154,9 @@ curl -s localhost:8099/health
 
 ```bash
 git clone https://github.com/Morkeeth/agent-science.git && cd agent-science
-python3 scripts/seed_document_cache.py
-python3 tests/test_watch_it_go_red.py          # 72/72 offline
-python3 tests/test_adk_default_path.py       # 5/5 engine selection
-python3 tests/test_partner_runtime.py        # 5/5 partner entrypoints
-python3 scripts/eval_refusal_baseline.py       # baseline vs shipping numbers
-python3 scripts/eval_refusal_ablation.py       # ablation: verify() off
-python3 scripts/bench_check_docs.py            # SUBMISSION-PACK counts gate
-python3 ask_registry.py --browse | head -5
+bash scripts/verify_cold_clone.sh
 ```
+
+Receipts: `docs/RECEIPT-hosted-partner-runtime-2026-08-30.md`, `docs/RECEIPT-live-compound-exhibit-2026-08-30.md`.
 
 Live `/clear` requires Oscar deploy + keys. Offline controls prove partner **code paths** exist and are tested.

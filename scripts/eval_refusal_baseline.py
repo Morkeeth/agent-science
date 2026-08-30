@@ -24,6 +24,9 @@ from clearance.facts import Claim, judge_claim
 from clearance.locate import DEFAULT, StringLocator
 from clearance.verdict import GREEN, UNKNOWN
 
+sys.path.insert(0, str(ROOT / "scripts"))
+from eval_stats import format_ci, mcnemar_exact  # noqa: E402
+
 SET = json.loads((ROOT / "fixtures/refusal-correctness/set.json").read_text())
 
 
@@ -65,6 +68,7 @@ def _gold(expected: str) -> str:
 def main() -> None:
     rows = []
     base_correct = ship_correct = 0
+    b_win = c = 0  # McNemar discordant: baseline-only correct / shipping-only correct
     n = len(SET["items"])
 
     for item in SET["items"]:
@@ -85,6 +89,10 @@ def main() -> None:
 
         base_correct += int(base_ok)
         ship_correct += int(ship_ok)
+        if base_ok and not ship_ok:
+            b_win += 1
+        elif ship_ok and not base_ok:
+            c += 1
         rows.append({
             "id": item["id"],
             "expected": item["expected"],
@@ -105,10 +113,12 @@ def main() -> None:
             f"{str(r['baseline_ok']):<6} {r['shipping_ok']}"
         )
     print()
-    print(f"Baseline accuracy: {base_correct}/{n} = {base_correct/n:.3f}")
-    print(f"Shipping accuracy: {ship_correct}/{n} = {ship_correct/n:.3f}")
+    print(f"Baseline:  {format_ci(base_correct, n)}")
+    print(f"Shipping:  {format_ci(ship_correct, n)}")
     delta = ship_correct - base_correct
     print(f"Delta (shipping - baseline): {delta:+d}")
+    p, detail = mcnemar_exact(b_win, c)
+    print(f"McNemar:   p={p:.4f} ({detail})")
     if ship_correct < base_correct:
         print("FINDING: baseline beats shipping on this set — report honestly.")
     elif ship_correct == base_correct:

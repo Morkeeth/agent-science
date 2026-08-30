@@ -80,11 +80,11 @@ would settle it is judge feedback from the organisers — an outward act only Os
 submission craft, supported by a real tendency, **not** as the explanation of that loss:
 
 - [x] **Alternative arm named and run** — `python3 scripts/eval_refusal_baseline.py` · `docs/QWEN-EVAL-GATE-2026-08-30.md`
-- [ ] **Ablation** — our one signature mechanism switched off; its delta is the only number that credits our idea.
-- [ ] **External anchor** — one dataset or benchmark we did not build and cannot tune, or an explicit README line saying there is none.
+- [x] **Ablation** — `python3 scripts/eval_refusal_ablation.py` · delta=0 on n=6; RC5 both false-GREEN
+- [x] **External anchor** — `python3 scripts/eval_external_anchor.py` · live rightsstatements.org (EA1/EA2)
 - [ ] **Holdout frozen before the first tuning pass.**
-- [ ] **Baseline steelmanned** — run it, read its raw rows, confirm it can actually score before believing our margin.
-- [ ] **Statistic matched to n** — n<100 → CIs + a paired test, never a bare point.
+- [x] **Baseline steelmanned** — raw rows printed by eval scripts; RC5 false-GREEN both arms
+- [x] **Statistic matched to n** — Wilson 95% CI + McNemar in baseline/ablation scripts
 - [ ] **Scorer symmetrical** — nothing only our system can emit; judge from delivered output for every arm.
 - [ ] **Cost from billing**, with the price card's date stated.
 - [x] **Offline path with no API key.**
@@ -112,38 +112,29 @@ Full record: `~/CODE/fleet-ops/retros/QWEN-LOSS-RETRO-2026-08-30.md` (corrected)
 
 ---
 
-## NOW — slice 5 complete · partner integrations + eval gates (2026-08-30)
+## NOW — live compound + eval stats (2026-08-30 night)
 
-**One slice.** ADK default path proved on hosted `/health`; all four partners wired + tested offline.
+**One slice.** Prove compounding on hosted URL; close three PRIOR LOSS gates (ablation, external anchor, stats).
 
-### Slice 5 — Agent Builder default path
-- [x] `cloud/service.py` — ADK default, `engine_default` on `/health`
-- [x] `tests/test_adk_default_path.py` — **5/5** (`python3 tests/test_adk_default_path.py`)
-- [x] Receipt: `docs/RECEIPT-adk-default-path-2026-08-30.md`
-- [x] Hosted `/health` returns `"engine_default": "adk"` — `curl -s …/health | python3 -m json.tool`
+### Live compound exhibit (hosted)
+- [x] `docs/RECEIPT-live-compound-exhibit-2026-08-30.md` — A=2 Parallel → B=1 Parallel, B corpus_hits=2
+- [x] `docs/RECEIPT-hosted-partner-runtime-2026-08-30.md` — `/health` + `/clear` engine=adk
 
-### Partner integrations (admissibility)
-- [x] `docs/PARTNER-INTEGRATIONS-2026-08-30.md` — Gemini, Parallel, GCP, ADK entrypoints + curl
-- [x] `tests/test_partner_runtime.py` — **5/5** entrypoints at import/call sites
-- [x] `scripts/seed_document_cache.py` — stranger cold-clone path for offline controls
+### Eval gates (PRIOR LOSS)
+- [x] Wilson CI + McNemar in `scripts/eval_refusal_baseline.py` / `eval_refusal_ablation.py`
+- [x] External anchor — `scripts/eval_external_anchor.py` (live rightsstatements.org)
+- [x] Cold-clone verify — `scripts/verify_cold_clone.sh`
 
-### Also shipped this turn
-- [x] Promise line — README + PITCH first screen (outcome · proof · constraint)
-- [x] Qwen eval gate — baseline + **ablation** (`scripts/eval_refusal_ablation.py`) + doc
-- [x] Docs count gate — `scripts/bench_check_docs.py` (109/109 match)
-- [x] Live compound — `docs/BLOCKED-live-compound-exhibit-2026-08-30.md` (no keys)
-- [x] SUBMISSION-PACK counts refreshed — **109/109** across 10 suites
-- [x] Slice 6 prep — `docs/DESIGN-PARTNER-LOOP.md`
+### Partner integrations (admissibility) — carried forward
+- [x] `docs/PARTNER-INTEGRATIONS-2026-08-30.md`
+- [x] `tests/test_partner_runtime.py` — **5/5**
+- [x] Slice 5 ADK — hosted `engine_default: adk`
 
 ### Controls (re-run at object)
 ```bash
 python3 scripts/seed_document_cache.py
-python3 tests/test_watch_it_go_red.py          # 72/72
-python3 tests/test_adk_default_path.py         # 5/5
-python3 tests/test_partner_runtime.py          # 5/5
-python3 tests/test_registry_surface.py         # 5/5
-python3 review/corpus_compound_receipt.py      # 50/50 reuse
-python3 scripts/bench_check_docs.py            # 109/109 match SUBMISSION-PACK
+bash scripts/verify_cold_clone.sh
+python3 scripts/eval_external_anchor.py
 curl -s https://agent-science-568004190078.us-central1.run.app/health
 ```
 
@@ -172,6 +163,13 @@ curl -s https://agent-science-568004190078.us-central1.run.app/health
 | 2026-08-30 night | Partner runtime | `python3 tests/test_partner_runtime.py` | **5/5** |
 | 2026-08-30 night | Hosted ADK | `curl -s …/health` | **`engine_default: adk`** — slice 5 hosted done |
 | 2026-08-30 night | Cold clone | `git clone file://… && seed && test_watch_it_go_red` | **72/72** |
+| 2026-08-30 night2 | Baseline missing cache | `python3 tests/test_watch_it_go_red.py` | **13 fail + TypeError** — re-seeded |
+| 2026-08-30 night2 | Cache seed | `python3 scripts/seed_document_cache.py` | **72/72** restored |
+| 2026-08-30 night2 | Hosted compound | `POST /clear` compound-mini A/B | **2→1 Parallel, hits=2, pass** |
+| 2026-08-30 night2 | Hosted /clear | dust-bowl one-liner | **engine=adk, parallel_calls=1** |
+| 2026-08-30 night2 | External anchor | `python3 scripts/eval_external_anchor.py` | **2/2 tied** baseline=shipping |
+| 2026-08-30 night2 | Eval stats | `python3 scripts/eval_refusal_baseline.py` | Wilson CI + McNemar p=1.0 |
+| 2026-08-30 night2 | Cold clone script | `bash scripts/verify_cold_clone.sh` | **all gates green** |
 
 ---
 

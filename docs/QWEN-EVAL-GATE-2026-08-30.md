@@ -25,9 +25,11 @@ python3 scripts/eval_refusal_baseline.py
 **Output this run (2026-08-30 UTC):**
 
 ```
-Baseline accuracy: 5/6 = 0.833
-Shipping accuracy: 5/6 = 0.833
+Baseline:  5/6 = 0.833  95% CI [0.436, 0.978]
+Shipping:  5/6 = 0.833  95% CI [0.436, 0.978]
 Delta (shipping - baseline): +0
+McNemar:   p=1.0000 (no discordant pairs — arms identical on every item)
+FINDING: tied — verifier adds no delta on n=6; look at per-item false GREENs.
 RC5 substring trap: BOTH arms false-GREEN — documented engine limit.
 ```
 
@@ -54,13 +56,34 @@ python3 scripts/eval_refusal_ablation.py
 **Output this run (2026-08-30 UTC):**
 
 ```
-Ablation accuracy: 5/6 = 0.833
-Shipping accuracy: 5/6 = 0.833
+Ablation:  5/6 = 0.833  95% CI [0.436, 0.978]
+Shipping:  5/6 = 0.833  95% CI [0.436, 0.978]
 Delta (shipping - ablation): +0
+McNemar:   p=1.0000 (no discordant pairs — arms identical on every item)
+FINDING: tied — verify() adds no delta on n=6.
 RC5 substring trap: BOTH arms false-GREEN — semantic guard still missing.
 ```
 
 **Finding:** ablation (locator only, no `verify()`) ties shipping on n=6. RC3 near-miss date still refuses because `StringLocator` never proposes a passage containing `29 October 2020` — verify() is not the mechanism that saves RC3 on this locator. The signature guard's measurable delta on this set is **zero**; RC5 false-GREEN persists in both arms.
+
+---
+
+## External anchor — live rightsstatements.org
+
+```bash
+python3 scripts/eval_external_anchor.py
+```
+
+Pages fetched at runtime from rightsstatements.org (not our fixtures). Labels EA1/EA2 mirror RC4/RC6.
+
+**Output this run (2026-08-30 UTC):**
+
+```
+Baseline:  2/2 = 1.000  95% CI [0.342, 1.000]
+Shipping:  2/2 = 1.000  95% CI [0.342, 1.000]
+McNemar:   p=1.0000 (no discordant pairs — arms identical on every item)
+FINDING: tied on external anchor — no measured delta.
+```
 
 ---
 
@@ -78,6 +101,7 @@ Re-derives all 9 suite counts against `docs/SUBMISSION-PACK-2026-08-29.md` — e
 
 - [x] Alternative arm named and run
 - [x] Ablation with measured delta (delta=0; RC5 both false-GREEN)
-- [ ] External anchor dataset we did not build
+- [x] External anchor — live rightsstatements.org (`scripts/eval_external_anchor.py`)
 - [x] Offline path with no API key
+- [x] Wilson CI + McNemar (n=6)
 - [x] Honesty carries worst number (tie + RC5 false-GREEN both arms)

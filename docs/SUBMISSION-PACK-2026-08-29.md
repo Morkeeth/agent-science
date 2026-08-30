@@ -10,9 +10,7 @@
 
 ```bash
 git clone https://github.com/Morkeeth/agent-science.git && cd agent-science
-python3 scripts/seed_document_cache.py
-python3 tests/test_watch_it_go_red.py && python3 tests/test_adk_default_path.py
-python3 scripts/eval_refusal_baseline.py
+bash scripts/verify_cold_clone.sh
 python3 ask_registry.py "agentlint" | head -5
 ```
 
@@ -47,7 +45,7 @@ python3 ask_registry.py "agentlint" | head -5
 | **Total** | 10 suites | **109/109** |
 | docs gate | `python3 scripts/bench_check_docs.py` | **109/109 match** |
 
-**Compound exhibit (offline, slice 3):** Run A **2** Parallel → Run B **1** Parallel, **2** corpus hits — `docs/COMPOUND-EXHIBIT-2026-08-29.md`. Live: **BLOCKED** — `docs/BLOCKED-live-compound-exhibit-2026-08-30.md`.
+**Compound exhibit (live hosted, 2026-08-30):** compound-mini A/B · A=**2** Parallel → B=**1** Parallel · B corpus hits=**2** — `docs/RECEIPT-live-compound-exhibit-2026-08-30.md`. Offline: `docs/COMPOUND-EXHIBIT-2026-08-29.md`. Local VM: **BLOCKED** — `docs/BLOCKED-live-compound-exhibit-2026-08-30.md`.
 
 **Eval gate:** `docs/QWEN-EVAL-GATE-2026-08-30.md` — baseline vs shipping **5/6 = 0.833** tie; RC5 false-GREEN both arms.
 
