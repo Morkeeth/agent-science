@@ -291,6 +291,11 @@ def clear_script(
     n = len(rows)
     remembered = corpus.size_for_use(con, _use(subject))
     log_size = refusal_log.stats(logcon)["n"]
+    prior_parallel_calls = corpus.prior_parallel(con, subject)
+    corpus.remember_parallel(con, subject, parallel_calls)
+    parallel_delta = None
+    if corpus_hits >= 1 and prior_parallel_calls is not None:
+        parallel_delta = prior_parallel_calls - parallel_calls
     return {
         "ok": True,
         "subject": subject,
@@ -300,6 +305,8 @@ def clear_script(
         "sourced": sourced,
         "unsourced": n - sourced,
         "parallel_calls": parallel_calls,
+        "prior_parallel_calls": prior_parallel_calls,
+        "parallel_delta": parallel_delta,
         "corpus_hits": corpus_hits,
         # Cross-subject reuse is a DIFFERENT economic object from same-subject reuse, so
         # it is counted separately, never folded into corpus_hits.

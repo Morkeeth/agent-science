@@ -42,6 +42,11 @@ CREATE TABLE IF NOT EXISTS verdicts (
     observed_at   TEXT NOT NULL,
     PRIMARY KEY (subject_id, use)
 );
+CREATE TABLE IF NOT EXISTS run_stats (
+    subject         TEXT PRIMARY KEY,
+    parallel_calls  INTEGER NOT NULL,
+    observed_at     TEXT NOT NULL
+);
 """
 
 
@@ -122,3 +127,25 @@ def size_for_use(con: sqlite3.Connection, use: str) -> int:
     return con.execute(
         "SELECT COUNT(*) FROM verdicts WHERE use=?", (use,)
     ).fetchone()[0]
+
+
+def prior_parallel(con: sqlite3.Connection, subject: str) -> Optional[int]:
+    """Last recorded parallel_calls for this subject shelf (before the current run)."""
+    r = con.execute(
+        "SELECT parallel_calls FROM run_stats WHERE subject=?", (subject,)
+    ).fetchone()
+    return int(r[0]) if r else None
+
+
+def remember_parallel(con: sqlite3.Connection, subject: str, parallel_calls: int) -> None:
+    """Persist parallel_calls for A-vs-B delta on the next run on the same subject."""
+    from datetime import datetime, timezone
+    con.execute(
+        "INSERT OR REPLACE INTO run_stats VALUES (?,?,?)",
+        (subject, parallel_calls, datetime.now(timezone.utc).isoformat()),
+    )
+    con.commit()
+    uri = corpus_gcs.gcs_uri()
+    path = _PATHS.get(id(con))
+    if uri and path is not None:
+        corpus_gcs.push(uri, path)

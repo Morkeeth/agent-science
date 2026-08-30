@@ -113,8 +113,20 @@ def _report_html(out: dict) -> str:
     parallel = out.get("parallel_calls") or 0
     hits = out.get("corpus_hits") or 0
     remembered = out.get("corpus_remembered") or 0
+    prior_parallel = out.get("prior_parallel_calls")
+    parallel_delta = out.get("parallel_delta")
     subject = _esc(out.get("subject"))
     rows = out.get("rows") or []
+
+    delta_html = ""
+    if hits and prior_parallel is not None and parallel_delta is not None:
+        sign = "−" if parallel_delta > 0 else "+" if parallel_delta < 0 else "±"
+        mag = abs(parallel_delta)
+        delta_html = (
+            f"<p class='compound-delta'>Parallel calls on this shelf: "
+            f"<strong>{_esc(prior_parallel)} → {_esc(parallel)}</strong> "
+            f"({sign}{_esc(mag)} vs last run)</p>"
+        )
 
     compound = ""
     if hits:
@@ -126,6 +138,7 @@ def _report_html(out: dict) -> str:
     <div><span class="n hit">{_esc(hits)}</span><span class="k">Corpus hits</span></div>
     <div><span class="n">{_esc(remembered)}</span><span class="k">On this shelf</span></div>
   </div>
+  {delta_html}
   <p class="compound-note">{_esc(hits)} claim(s) resolved from memory — search not re-spent.
   Paste another script with subject <strong>{subject}</strong> to compound further.</p>
 </section>"""
@@ -223,6 +236,7 @@ h1{{font-size:clamp(1.8rem,4vw,2.6rem);margin:.8rem 0 .3rem;letter-spacing:-.02e
 .nums .k{{font-family:"IBM Plex Mono",monospace;font-size:.65rem;letter-spacing:.06em;
   text-transform:uppercase;color:var(--mute)}}
 .compound-note{{margin:.85rem 0 0;color:var(--mute);font-size:.95rem}}
+.compound-delta{{font-family:"IBM Plex Mono",monospace;font-size:.82rem;margin:.6rem 0 0}}
 h2{{font-size:1.15rem;margin:2rem 0 .8rem;border-bottom:1px solid var(--ink);padding-bottom:.3rem}}
 ul{{list-style:none;padding:0;margin:0}}
 li{{padding:1rem 0;border-bottom:1px solid var(--line)}}
