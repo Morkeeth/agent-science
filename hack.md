@@ -65,7 +65,7 @@ Full record: `~/CODE/fleet-ops/retros/QWEN-LOSS-RETRO-2026-08-30.md` (corrected)
 
 | # | Slice | Owner | Done when |
 |---|--------|-------|-----------|
-| **1** | **Deploy the desk** | Oscar | Hosted URL a stranger can paste a script into; keys via Secret Manager; `deploy.sh` only |
+| **1** | **Deploy the desk** (LIVE: https://agent-science-33kamss2jq-uc.a.run.app) | Oscar | Hosted URL a stranger can paste a script into; keys via Secret Manager; `deploy.sh` only |
 | **2** | **The registry has a face** | build | Query in → SOURCED span, UNSOURCED, or UNKNOWN with named refusal; every query browsable |
 | **3** | **Backfill + compound exhibit** | build | Cross-production log seeded from fleet corpus; orphan-works A/B shows Parallel drop |
 | **4** | **A second subject** | build | Full chain on a corpus unrelated to orphan works; receipt with failures honest |
@@ -90,7 +90,7 @@ Full record: `~/CODE/fleet-ops/retros/QWEN-LOSS-RETRO-2026-08-30.md` (corrected)
 - [x] Registry backfilled from `research-corpus/` — **173 rows** (`clear_corpus.py --backfill`)
 - [x] Orphan-works A/B: Run A **2** Parallel → Run B **1** Parallel, **2** corpus hits (offline; keys absent)
 - [x] Receipt: `docs/COMPOUND-EXHIBIT-2026-08-29.md`
-- [ ] Live orphan-works A/B on `documentary-orphan-works*.txt` — **blocked on this VM:** no Gemini/Parallel keys
+- [x] Live orphan-works A/B on `documentary-orphan-works*.txt` — **RAN LIVE 2026-08-29 21:58 UTC.** Run A 11 parallel_calls -> Run B 9, corpus_hits B 5. Curve reproduces on real APIs, not fixtures. Receipt: `docs/COMPOUND-EXHIBIT-2026-08-29.md`, mode now `live`
 
 **Stranger path (this VM):**
 ```bash
@@ -102,7 +102,7 @@ python3 ask_registry.py --serve                     # http://127.0.0.1:8091/
 
 ### Slice 4 — second subject (dust-bowl)
 - [x] Fixtures: `fixtures/scripts/dust-bowl-A.txt`, `dust-bowl-B.txt` (public-domain narration, not orphan works)
-- [ ] Live full chain: `agent_science.py` on dust-bowl — **blocked on this VM:** no Gemini/Parallel keys
+- [ ] Live full chain: `agent_science.py` on dust-bowl — keys are absent IN THIS SHELL ONLY. The hosted desk has both: https://agent-science-33kamss2jq-uc.a.run.app/health returns `gemini: true` (vertex:hack-fleet), `parallel: true`, `engine_default: adk`. Run it against the desk, not the laptop
 - [x] Receipt: `docs/SECOND-SUBJECT-RECEIPT-2026-08-29.md` — failures named honestly
 - [x] Offline proof: `tests/test_cross_subject_reuse.py` 2/2 — dust-bowl reuses orphan-works log at 0 Parallel calls
 

@@ -1,31 +1,24 @@
 # COMPOUND EXHIBIT — orphan-works A/B
 
-**Date:** 2026-08-29 16:24 UTC · **Subject:** `orphan-works` · **Mode:** offline
-**Fixtures:** `compound-mini-A.txt` → `compound-mini-B.txt`
+**Date:** 2026-08-29 21:58 UTC · **Subject:** `orphan-works` · **Mode:** live
+**Fixtures:** `documentary-orphan-works.txt` → `documentary-orphan-works-B.txt`
 
 ## Quantified compounding
 
 | Run A parallel_calls | Run B parallel_calls | delta | corpus_hits B |
 |---:|---:|---:|---:|
-| 2 | 1 | +1 | 2 |
+| 11 | 9 | +2 | 5 |
 
 - Run B parallel < Run A: **yes**
 - corpus_hits B ≥ 1: **yes**
 
-## Offline simulation (no Gemini/Parallel keys on this VM)
+## Live chain
 
-Network boundaries faked; verdict rules run for real:
-
-- GeminiExtractor → fixed claim lists from compound-mini-A/B (not live extraction)
-- search.find_sources → scripted primary URLs + honest call counter
-- instruments.document → fixture bodies (no HTTP)
-- StringLocator (DEFAULT) + verify + independence — real shipping rules
-
-Ground-truth Parallel calls at fake boundary (Run A only): `4`
+Two consecutive `agent_science.clear_script` runs on one corpus DB with Gemini extract + Parallel search.
 
 ## Registry backfill
 
-`python3 clear_corpus.py research-corpus --backfill` → **173 rows** (29 SOURCED + proven-unprovable refusals) in `cache/refusal_log.db`
+`python3 clear_corpus.py research-corpus --backfill` → **176 rows** (29 SOURCED + proven-unprovable refusals) in `cache/refusal_log.db`
 
 ## Controls
 
