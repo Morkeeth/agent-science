@@ -1,8 +1,20 @@
 # SUBMISSION PACK — Agentic Cinema · slice 7
 
-**Date:** 2026-08-29 · **Repo:** https://github.com/Morkeeth/agent-science @ `e6793ab`  
+**Date:** 2026-08-30 · **Repo:** https://github.com/Morkeeth/agent-science @ `main`  
 **Hosted:** https://agent-science-568004190078.us-central1.run.app · **Deadline:** 2026-09-09 14:00 PT  
-**Scope:** docs only — no public repo flip, no video upload, no Devpost submit, no `deploy.sh`
+**Scope:** docs + offline controls — no public repo flip, no video upload, no Devpost submit, no `deploy.sh`
+
+---
+
+## Stranger one-command block (cold clone, no keys)
+
+```bash
+git clone https://github.com/Morkeeth/agent-science.git && cd agent-science
+python3 scripts/seed_document_cache.py
+python3 tests/test_watch_it_go_red.py && python3 tests/test_adk_default_path.py
+python3 scripts/eval_refusal_baseline.py
+python3 ask_registry.py "agentlint" | head -5
+```
 
 ---
 
@@ -11,14 +23,33 @@
 | Gate | Requirement | Status | Evidence |
 |------|-------------|--------|----------|
 | Video | ≤ 3 min (≤ 180 s) | [ ] | Script: `docs/VIDEO-SCRIPT-2026-08-29.md` — beats sum **178 s** |
-| Devpost | All mandatory fields filled | [ ] | Paste block below (§1–3 from `PITCH.md`, **3771 chars**) |
+| Devpost | All mandatory fields filled | [ ] | Paste block below (§1–3 from `PITCH.md`) |
 | Public repo | Stranger can clone | [ ] | Private until submit — flip visibility on GitHub |
 | OSI licence | Open-source approved | [x] | `LICENSE` (MIT) |
 | Sealed prediction | Pre-registered, falsifiable | [ ] | Draft below; seal after live corpus exhibit on hosted URL |
+| Partner integrations | All four called at runtime | [x] docs | `docs/PARTNER-INTEGRATIONS-2026-08-30.md` |
+| ADK default path | `engine_default: adk` | [x] local / [x] hosted | `docs/RECEIPT-adk-default-path-2026-08-30.md` |
 
-**Controls on disk @ `e6793ab`:** `test_registry_surface.py` **5/5** · `test_cross_subject_reuse.py` **2/2** · `test_backfill_seeds_reuse.py` **2/2** · `test_clear_corpus.py` **4/4** · `test_search_path.py` **5/5** · `test_source_map.py` **3/3** · `test_refusal_correctness.py` **6/6** · `test_watch_it_go_red.py` **26 pass / 13 fail** (suite crashes on missing EUR-Lex body) → **53 pass / 13 fail** across 8 suites.
+**Controls re-measured 2026-08-30** (run each at object):
 
-**Compound exhibit (offline, slice 3):** Run A **2** Parallel → Run B **1** Parallel, **2** corpus hits — `docs/COMPOUND-EXHIBIT-2026-08-29.md`.
+| Suite | Command | Result |
+|-------|---------|--------|
+| watch_it_go_red | `python3 tests/test_watch_it_go_red.py` | **72/72** |
+| adk_default_path | `python3 tests/test_adk_default_path.py` | **5/5** |
+| registry_surface | `python3 tests/test_registry_surface.py` | **5/5** |
+| cross_subject_reuse | `python3 tests/test_cross_subject_reuse.py` | **2/2** |
+| backfill_seeds_reuse | `python3 tests/test_backfill_seeds_reuse.py` | **2/2** |
+| clear_corpus | `python3 tests/test_clear_corpus.py` | **4/4** |
+| search_path | `python3 tests/test_search_path.py` | **5/5** |
+| source_map | `python3 tests/test_source_map.py` | **3/3** |
+| refusal_correctness | `python3 tests/test_refusal_correctness.py` | **6/6** |
+| partner_runtime | `python3 tests/test_partner_runtime.py` | **5/5** |
+| **Total** | 10 suites | **109/109** |
+| docs gate | `python3 scripts/bench_check_docs.py` | **109/109 match** |
+
+**Compound exhibit (offline, slice 3):** Run A **2** Parallel → Run B **1** Parallel, **2** corpus hits — `docs/COMPOUND-EXHIBIT-2026-08-29.md`. Live: **BLOCKED** — `docs/BLOCKED-live-compound-exhibit-2026-08-30.md`.
+
+**Eval gate:** `docs/QWEN-EVAL-GATE-2026-08-30.md` — baseline vs shipping **5/6 = 0.833** tie; RC5 false-GREEN both arms.
 
 ---
 
