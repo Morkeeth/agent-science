@@ -23,12 +23,18 @@ from typing import Optional
 from . import instruments, search as _search
 from .locate import DEFAULT, Locator
 from .independence import assess as assess_independence
+from . import semantic as _semantic
 from .verify import verify
 from .verdict import (Verdict, GREEN, UNKNOWN, FACT,
                       NO_SOURCE, SOURCE_UNREAD, SOURCE_SILENT, SEARCH_FOUND_NOTHING,
                       NO_INDEPENDENT_SOURCE)
 
 SOURCING = "sourcing"  # the "use" a fact is judged for
+
+# A term can occur hundreds of times in a 95,000-character page. Every occurrence is a
+# verify() call; this caps the work per document. Stated as a number so the ceiling is
+# visible rather than discovered under load.
+_MAX_CANDIDATE_SPANS = 24
 
 # Fewer candidates on first pass — each one costs a fetch + locate. Escalation adds more.
 _DEFAULT_CANDIDATES = int(__import__("os").environ.get("PARALLEL_MAX_CANDIDATES", "3"))
@@ -69,9 +75,71 @@ class Claim:
     must_contain: str         # the terms that document must carry
 
 
+def _admissible(locator: Locator, claim: Claim, body: str,
+                semantic: Optional[bool]) -> tuple[Optional[str], object]:
+    """The first candidate span that survives the verifier — not the first span proposed.
+
+    THE MEASUREMENT THAT FORCED THIS. Adding the semantic guard dropped the held-out set
+    from 5/6 to 4/6: RC1 and RC2 flipped to refusals. Reading the spans rather than the
+    score, both had been GREEN on a passage that does not support the claim (a `<nav>`
+    link carrying the date; the wrong sentence carrying the other date), because
+    `must_contain` occurs TWICE in that document and the locator returned occurrence one.
+    They scored correct only because the labels say whether a claim is supported and
+    never which span supported it.
+
+    So the guard was not costing true GREENs. It was exposing two false GREENs the set
+    could not see, and the fix is not a softer threshold — it is to let the locator keep
+    looking. Guarded, this returns the RIGHT sentence for both.
+
+    With the guard off exactly one candidate is considered, so the pre-guard engine is
+    reproduced bit for bit.
+    """
+    use_guard = _semantic.enabled() if semantic is None else semantic
+    gen = getattr(locator, "candidates", None)
+    if not use_guard or gen is None:
+        proposed = locator.propose(claim=claim.text, must_contain=claim.must_contain,
+                                   document=body)
+        return proposed, verify(proposed, document=body,
+                                must_contain=claim.must_contain,
+                                claim=claim.text, semantic=semantic)
+
+    # Take the BEST admissible span, not the first. Both are verbatim, both carry the
+    # term; only one is the evidence. Ranking by how much of the claim the span actually
+    # carries is the half of the semantic reading that costs nothing — it never refuses
+    # anything, it only chooses between spans that already passed every gate.
+    first, first_refusal, best, best_score = None, None, None, -1.0
+    for n, cand in enumerate(gen(claim=claim.text, must_contain=claim.must_contain,
+                                 document=body)):
+        if n >= _MAX_CANDIDATE_SPANS:
+            break
+        refusal = verify(cand, document=body, must_contain=claim.must_contain,
+                         claim=claim.text, semantic=semantic)
+        if refusal is None:
+            score = _semantic.coverage(cand, claim.text)
+            if score > best_score:
+                best, best_score = cand, score
+            if score >= 1.0:
+                return cand, None
+        elif first is None:
+            first, first_refusal = cand, refusal
+    if best is not None:
+        return best, None
+    if first is None:
+        return None, verify(None, document=body, must_contain=claim.must_contain,
+                            claim=claim.text, semantic=semantic)
+    return first, first_refusal
+
+
 def judge_claim(claim: Claim, *, fetch: bool = False,
                 locator: Locator = DEFAULT, live_search: bool = False,
-                search_candidates: int = _DEFAULT_CANDIDATES) -> Verdict:
+                search_candidates: int = _DEFAULT_CANDIDATES,
+                semantic: Optional[bool] = None) -> Verdict:
+    """`semantic` forces the semantic guard on/off; None follows the process default.
+
+    It is threaded to EVERY verify() call site below — the named-source path, the search
+    loop and the escalation loop. Three doors into GREEN; a guard on one of them is a
+    guard that tests green and ships two-thirds off.
+    """
     def unknown(reason: str, cause: str, **kw) -> Verdict:
         return Verdict(subject_id=claim.claim_id, subject_title=claim.text,
                        noun=FACT, use=SOURCING, verdict=UNKNOWN,
@@ -104,9 +172,8 @@ def judge_claim(claim: Claim, *, fetch: bool = False,
             if body is None:
                 continue
             read += 1
-            proposed = locator.propose(claim=claim.text,
-                                       must_contain=claim.must_contain, document=body)
-            if verify(proposed, document=body, must_contain=claim.must_contain) is None:
+            proposed, refusal = _admissible(locator, claim, body, semantic)
+            if refusal is None:
                 verified.append((c.url, proposed))
                 # Best case: one PRIMARY source that verifies — stop reading and
                 # do not escalate. Every extra fetch is spend with no verdict gain.
@@ -137,11 +204,8 @@ def judge_claim(claim: Claim, *, fetch: bool = False,
                 if body is None:
                     continue
                 read += 1
-                proposed = locator.propose(claim=claim.text,
-                                           must_contain=claim.must_contain,
-                                           document=body)
-                if verify(proposed, document=body,
-                          must_contain=claim.must_contain) is None:
+                proposed, refusal = _admissible(locator, claim, body, semantic)
+                if refusal is None:
                     verified.append((c.url, proposed))
                     if assess_independence([c.url])["basis"] == "primary":
                         return _green_from_verified(claim, verified, locator)
@@ -172,9 +236,7 @@ def judge_claim(claim: Claim, *, fetch: bool = False,
             f"source {claim.source_url} has never been fetched — "
             "no text on file to quote", SOURCE_UNREAD)
 
-    proposed = locator.propose(claim=claim.text, must_contain=claim.must_contain,
-                               document=body)
-    refusal = verify(proposed, document=body, must_contain=claim.must_contain)
+    proposed, refusal = _admissible(locator, claim, body, semantic)
     if refusal is not None:
         # The quotation for a non-finding is a stated, checkable fact ABOUT the
         # document — never an arbitrary slice OF it, which reads as evidence and

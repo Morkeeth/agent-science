@@ -10,7 +10,7 @@ implementation among others is what stops it pretending to be one.
 from __future__ import annotations
 
 import re
-from typing import Optional, Protocol
+from typing import Iterable, Optional, Protocol
 
 
 class Locator(Protocol):
@@ -18,6 +18,19 @@ class Locator(Protocol):
 
     def propose(self, *, claim: str, must_contain: str, document: str) -> Optional[str]:
         """A candidate passage from `document` that supports `claim`, or None."""
+
+    def candidates(self, *, claim: str, must_contain: str,
+                   document: str) -> Iterable[str]:
+        """EVERY passage worth proposing, best first. Optional; `propose` is the first.
+
+        A locator that can only hand over one guess forces the verifier into a false
+        choice: accept this span or refuse the claim. Measured on the held-out set, that
+        choice was being made wrongly in BOTH directions at once — RC1 and RC2 were
+        cleared GREEN on a navigation link and on the wrong sentence, because the term
+        occurs twice and the supporting sentence is the SECOND occurrence. They scored as
+        correct because the labels record whether the claim is supported, never which
+        span supported it. One guess is not a search.
+        """
 
 
 _ENDER = re.compile(r"[.!?][\s​]")
@@ -43,15 +56,20 @@ class StringLocator:
     name = "string"
 
     def propose(self, *, claim: str, must_contain: str, document: str) -> Optional[str]:
-        occurrences, probe = [], document.find(must_contain)
-        while probe >= 0:
-            occurrences.append(probe)
-            probe = document.find(must_contain, probe + 1)
-        for at in occurrences:
-            cand = self._at(document, at, len(must_contain))
-            if self._prose(cand):
-                return cand
+        for cand in self.candidates(claim=claim, must_contain=must_contain,
+                                    document=document):
+            return cand
         return None
+
+    def candidates(self, *, claim: str, must_contain: str, document: str):
+        """Every occurrence of the term, in document order, deduplicated."""
+        seen, probe = set(), document.find(must_contain)
+        while probe >= 0:
+            cand = self._at(document, probe, len(must_contain))
+            if self._prose(cand) and cand not in seen:
+                seen.add(cand)
+                yield cand
+            probe = document.find(must_contain, probe + 1)
 
     def _prose(self, passage: str) -> bool:
         if not passage:
@@ -70,24 +88,70 @@ class StringLocator:
         if m:
             right = m.end()
         if right - left > _MAX or left == 0:
-            left = max(0, at - _WINDOW)
+            # Look back _MAX, not _WINDOW. Measured: at 130 characters the window began
+            # inside the word "Member", so the only sentence start it could find was
+            # "States", and an EU directive's operative provision was quoted from its
+            # second word. The reach has to be at least as long as the sentence you are
+            # trying to find the beginning of.
+            left = max(0, at - _MAX)
             right = min(len(body), at + span + _WINDOW)
-            while left > 0 and not body[left - 1].isspace():
-                left += 1
             while right < len(body) and not body[right].isspace():
                 right -= 1
-            return self._start_of_statement(body[left:right], at - left)
+            cand = self._start_of_statement(body[left:right], at - left)
+            if self._prose(cand):
+                return cand
+            left = max(0, at - _WINDOW)
+            while left > 0 and not body[left - 1].isspace():
+                left += 1
+            return body[left:right].strip().strip("\u200b").strip()
         return body[left:right].strip().strip("​").strip()
 
+    # Where a SENTENCE starts: a capitalised word after a sentence ender, or straight
+    # after a closing tag — which is how a fetched HTML page marks the same thing. Not
+    # merely "a capital letter", which matches every proper noun mid-sentence and let the
+    # passage begin at "October".
+    _SENTENCE_START = re.compile(
+        r"(?:^|[.!?][\"'\)\]]?\s+|>\s*|\n\s*)([A-Z][A-Za-z])")
+
     def _start_of_statement(self, window: str, match_offset: int) -> str:
-        tokens, pos, starts = window.split(" "), 0, []
+        """Where the statement begins — not where the whitespace happens to fall.
+
+        The first version required a capitalised token followed by a LOWERCASE one, and
+        scanned space-separated tokens. Both assumptions break on the same sentence:
+        `Member States shall bring into force…` opens with two capitalised words, so the
+        only start it could find was `States`, and the operative provision of an EU
+        directive was quoted from its second word. A cited passage that begins mid-subject
+        is still verbatim and still wrong — it is a different sentence than the one the
+        document contains. Caught by a control that asserts WHICH span cleared the claim,
+        not merely that one did.
+        """
+        # 1. A REAL boundary, if the page has any. Take the LAST one before the match:
+        #    that is the sentence the term is actually in. Taking the first quoted from
+        #    wherever the window happened to open.
+        strict = [m.start(1) for m in self._SENTENCE_START.finditer(window)
+                  if m.start(1) <= match_offset]
+        for start in reversed(strict):
+            cand = window[start:].strip().strip("​").strip()
+            if self._prose(cand):
+                return cand
+
+        # 2. NO BOUNDARY IN THE PAGE. rightsstatements.org serves its language switcher
+        #    and its operative sentence in one unpunctuated run — "…Dutch Polski Go
+        #    Copyright Not Evaluated The copyright and related rights status of this Item
+        #    has not been evaluated." There is no full stop to find, so the only signal
+        #    left is a capitalised word followed by a lowercase one. That is the original
+        #    heuristic and it is kept EXACTLY, in forward order, because on text with no
+        #    punctuation the widest passage that still reads as prose is the right one —
+        #    and because replacing it wholesale silently dropped this document's only
+        #    quotable sentence, which is the product's most common real verdict.
+        tokens, pos, loose = window.split(" "), 0, []
         for i, tok in enumerate(tokens[:-1]):
             if pos > match_offset:
                 break
             if tok[:1].isupper() and tokens[i + 1][:1].islower():
-                starts.append(pos)
+                loose.append(pos)
             pos += len(tok) + 1
-        for start in starts:
+        for start in loose:
             cand = window[start:].strip().strip("​").strip()
             if self._prose(cand):
                 return cand

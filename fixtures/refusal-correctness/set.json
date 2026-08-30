@@ -10,7 +10,7 @@
       "must_contain": "29 October 2014",
       "document": "fixtures/refusal-correctness/docs/eur-lex-orphan-snippet.html",
       "accepted_passage": "Member States shall bring into force the laws, regulations and administrative provisions necessary to comply with this Directive by 29 October 2014.",
-      "why": "Supporting sentence sits AFTER a navigation occurrence of the same date string — the false-UNKNOWN seed from FINDING-refusal-correctness."
+      "why": "Supporting sentence sits AFTER a navigation occurrence of the same date string \u2014 the false-UNKNOWN seed from FINDING-refusal-correctness."
     },
     {
       "id": "RC2",
@@ -19,7 +19,7 @@
       "must_contain": "25 October 2012",
       "document": "fixtures/refusal-correctness/docs/eur-lex-orphan-snippet.html",
       "accepted_passage": "Done at Strasbourg, 25 October 2012.",
-      "why": "Short complete sentence — previously refused by word floor as chrome."
+      "why": "Short complete sentence \u2014 previously refused by word floor as chrome."
     },
     {
       "id": "RC3",
@@ -28,7 +28,7 @@
       "must_contain": "29 October 2020",
       "document": "fixtures/refusal-correctness/docs/eur-lex-orphan-snippet.html",
       "accepted_passage": null,
-      "why": "Near-miss date — model-confident wrong. Document has 2014, not 2020."
+      "why": "Near-miss date \u2014 model-confident wrong. Document has 2014, not 2020."
     },
     {
       "id": "RC4",
@@ -37,7 +37,7 @@
       "must_contain": "has not been evaluated",
       "document": "fixtures/refusal-correctness/docs/wrong-doc-no-cne.html",
       "accepted_passage": null,
-      "why": "Wrong document — terms absent entirely."
+      "why": "Wrong document \u2014 terms absent entirely."
     },
     {
       "id": "RC5",
@@ -46,9 +46,9 @@
       "must_contain": "free of known copyright restrictions",
       "document": "fixtures/refusal-correctness/docs/cne-status-only.html",
       "accepted_passage": null,
-      "engine_limit": "substring_not_a_statement",
-      "engine_verdict_today": "GREEN",
-      "why": "Substring trap — document says status has NOT been evaluated; terms for a different claim appear nearby. See FINDING-substring-is-not-a-statement. GOLD is NOT_SUPPORTED (a careful human refuses this). The shipping StringLocator CANNOT catch it: `must_contain` appears verbatim in a passage that negates the claim, and nothing in this system reads meaning. `engine_limit` records that documented gap so the false GREEN is pinned AS A DEFECT, not hidden — when a locator finally refuses this, the pin fails and says so."
+      "why": "Substring trap - document says the status has NOT been evaluated; the terms for a DIFFERENT claim appear in a neighbouring clause that explicitly excludes this Item. GOLD is NOT_SUPPORTED (a careful human refuses this). Carried as a documented engine limit from 2026-08-22 to 2026-08-31: the structural verifier provably could not catch it, because `verify()` was never passed the claim. CLOSED 2026-08-31 by the semantic guard, which reads the neighbouring clause 'this Item is not one of them' as a denial of the claim's own subject. It is now enforced in the main NOT_SUPPORTED pole. With CLEARANCE_SEMANTIC_GUARD=0 the old engine, and this false GREEN, are reproduced exactly - which is the point of the flag and is pinned by tests/test_semantic_guard.py.",
+      "closed_at": "2026-08-31",
+      "closed_by": "clearance.semantic check_polarity / claim_contradicted_in_span"
     },
     {
       "id": "RC6",
@@ -57,7 +57,7 @@
       "must_contain": "has not been evaluated",
       "document": "fixtures/refusal-correctness/docs/cne-status-only.html",
       "accepted_passage": "The copyright and related rights status of this Item has not been evaluated.",
-      "why": "Awkward placement after language chrome — known-resolvable CNE case."
+      "why": "Awkward placement after language chrome \u2014 known-resolvable CNE case."
     }
   ]
 }
