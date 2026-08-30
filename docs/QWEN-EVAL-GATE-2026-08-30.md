@@ -44,16 +44,40 @@ RC5 substring trap: BOTH arms false-GREEN — documented engine limit.
 
 ---
 
-## Ablation stub (not run tonight)
+## Ablation — verify() switched off
 
-Signature mechanism off = skip `verify()` and accept first locator proposal. Expected: RC3 false-GREEN. Deferred — alternative arm already shows verifier adds zero delta on accuracy at n=6; ablation would not change the headline.
+```bash
+python3 scripts/seed_document_cache.py
+python3 scripts/eval_refusal_ablation.py
+```
+
+**Output this run (2026-08-30 UTC):**
+
+```
+Ablation accuracy: 5/6 = 0.833
+Shipping accuracy: 5/6 = 0.833
+Delta (shipping - ablation): +0
+RC5 substring trap: BOTH arms false-GREEN — semantic guard still missing.
+```
+
+**Finding:** ablation (locator only, no `verify()`) ties shipping on n=6. RC3 near-miss date still refuses because `StringLocator` never proposes a passage containing `29 October 2020` — verify() is not the mechanism that saves RC3 on this locator. The signature guard's measurable delta on this set is **zero**; RC5 false-GREEN persists in both arms.
+
+---
+
+## Docs count gate
+
+```bash
+python3 scripts/bench_check_docs.py
+```
+
+Re-derives all 9 suite counts against `docs/SUBMISSION-PACK-2026-08-29.md` — exit 1 if stale.
 
 ---
 
 ## Checklist status (PRIOR LOSS gate)
 
 - [x] Alternative arm named and run
-- [ ] Ablation with measured delta
+- [x] Ablation with measured delta (delta=0; RC5 both false-GREEN)
 - [ ] External anchor dataset we did not build
 - [x] Offline path with no API key
 - [x] Honesty carries worst number (tie + RC5 false-GREEN both arms)

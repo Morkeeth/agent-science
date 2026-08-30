@@ -17,7 +17,6 @@ Paste a documentary script; get every checkable claim back as a verbatim quote w
 
 ## OPEN QUESTIONS
 
-- Hosted `engine_default: adk` — blocked on Oscar running `deploy.sh` (slice 1).
 - Live compound exhibit on hosted URL — blocked on keys + deploy (Oscar).
 - RC5 substring false-GREEN — semantic guard not decided; structural verifier cannot catch it.
 - Design partner session — Oscar outreach (slice 6).
@@ -113,25 +112,27 @@ Full record: `~/CODE/fleet-ops/retros/QWEN-LOSS-RETRO-2026-08-30.md` (corrected)
 
 ---
 
-## NOW — slice 5 · ADK default path + partner integrations (2026-08-30)
+## NOW — slice 5 complete · partner integrations + eval gates (2026-08-30)
 
-**One slice.** Wire and prove all four partners in docs + offline controls; ADK engine selection tests; hosted deploy still Oscar.
+**One slice.** ADK default path proved on hosted `/health`; all four partners wired + tested offline.
 
 ### Slice 5 — Agent Builder default path
 - [x] `cloud/service.py` — ADK default, `engine_default` on `/health`
 - [x] `tests/test_adk_default_path.py` — **5/5** (`python3 tests/test_adk_default_path.py`)
 - [x] Receipt: `docs/RECEIPT-adk-default-path-2026-08-30.md`
-- [ ] Hosted `/health` returns `"engine_default": "adk"` — **Oscar: `deploy.sh`**
+- [x] Hosted `/health` returns `"engine_default": "adk"` — `curl -s …/health | python3 -m json.tool`
 
 ### Partner integrations (admissibility)
 - [x] `docs/PARTNER-INTEGRATIONS-2026-08-30.md` — Gemini, Parallel, GCP, ADK entrypoints + curl
+- [x] `tests/test_partner_runtime.py` — **5/5** entrypoints at import/call sites
 - [x] `scripts/seed_document_cache.py` — stranger cold-clone path for offline controls
 
 ### Also shipped this turn
 - [x] Promise line — README + PITCH first screen (outcome · proof · constraint)
-- [x] Qwen eval gate — baseline arm `scripts/eval_refusal_baseline.py` + doc
+- [x] Qwen eval gate — baseline + **ablation** (`scripts/eval_refusal_ablation.py`) + doc
+- [x] Docs count gate — `scripts/bench_check_docs.py` (109/109 match)
 - [x] Live compound — `docs/BLOCKED-live-compound-exhibit-2026-08-30.md` (no keys)
-- [x] SUBMISSION-PACK counts refreshed — **104/104** across 9 suites
+- [x] SUBMISSION-PACK counts refreshed — **109/109** across 10 suites
 - [x] Slice 6 prep — `docs/DESIGN-PARTNER-LOOP.md`
 
 ### Controls (re-run at object)
@@ -139,8 +140,11 @@ Full record: `~/CODE/fleet-ops/retros/QWEN-LOSS-RETRO-2026-08-30.md` (corrected)
 python3 scripts/seed_document_cache.py
 python3 tests/test_watch_it_go_red.py          # 72/72
 python3 tests/test_adk_default_path.py         # 5/5
+python3 tests/test_partner_runtime.py          # 5/5
 python3 tests/test_registry_surface.py         # 5/5
 python3 review/corpus_compound_receipt.py      # 50/50 reuse
+python3 scripts/bench_check_docs.py            # 109/109 match SUBMISSION-PACK
+curl -s https://agent-science-568004190078.us-central1.run.app/health
 ```
 
 ### Not touched
@@ -163,6 +167,11 @@ python3 review/corpus_compound_receipt.py      # 50/50 reuse
 | 2026-08-30 | google-adk dep | `pip install google-adk==2.7.1 && python3 -c "…version…"` | **2.7.1** (not preinstalled on VM; in `requirements.txt`/Dockerfile) |
 | 2026-08-30 | Full suite | 9× `python3 tests/test_*.py` | **104/104** |
 | 2026-08-30 | Push gate | `git push origin main` | **83d1f7a** on origin/main |
+| 2026-08-30 night | Ablation eval | `python3 scripts/eval_refusal_ablation.py` | **5/6=0.833** tied shipping; RC5 both false-GREEN |
+| 2026-08-30 night | Docs gate | `python3 scripts/bench_check_docs.py` | **109/109** match SUBMISSION-PACK |
+| 2026-08-30 night | Partner runtime | `python3 tests/test_partner_runtime.py` | **5/5** |
+| 2026-08-30 night | Hosted ADK | `curl -s …/health` | **`engine_default: adk`** — slice 5 hosted done |
+| 2026-08-30 night | Cold clone | `git clone file://… && seed && test_watch_it_go_red` | **72/72** |
 
 ---
 

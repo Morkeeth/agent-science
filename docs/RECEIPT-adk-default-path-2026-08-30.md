@@ -1,6 +1,6 @@
 # RECEIPT — ADK on default path · 2026-08-30
 
-**Status:** proved locally in the hosted shape. **Not on hosted URL** — `deploy.sh` is Oscar's click.
+**Status:** proved locally and on hosted URL (2026-08-30 re-check).
 
 ## What was verified
 
@@ -47,16 +47,25 @@ Output on this run:
 }
 ```
 
-## What is NOT proved here
-
-- **Hosted URL** — prior revision at `agent-science-568004190078.us-central1.run.app` lacks `engine_default`.
-- **Live ADK model call** — no Vertex ADC or Gemini key on this VM; tool path proved by Aug 23 receipt (`docs/RECEIPT-agent-builder.md`) and engine-selection tests above.
-
-## Done-when for slice 5 (hosted)
+## Hosted /health (measured 2026-08-30)
 
 ```bash
-curl -s https://agent-science-568004190078.us-central1.run.app/health \
-  | grep -q '"engine_default": "adk"' && echo slice-5-hosted || echo still-blocked-on-deploy
+curl -s https://agent-science-568004190078.us-central1.run.app/health | python3 -m json.tool
 ```
 
-Oscar runs `deploy.sh` once; agent does not.
+```json
+{
+  "ok": true,
+  "service": "agent-science",
+  "gemini": true,
+  "gemini_path": "vertex:hack-fleet",
+  "parallel": true,
+  "agent_builder": true,
+  "adk_version": "2.7.1",
+  "engine_default": "adk"
+}
+```
+
+## What is NOT proved here
+
+- **Live ADK model call on this VM** — no Vertex ADC or Gemini key locally; tool path proved by Aug 23 receipt (`docs/RECEIPT-agent-builder.md`) and engine-selection tests above.

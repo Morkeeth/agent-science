@@ -28,7 +28,7 @@ python3 ask_registry.py "agentlint" | head -5
 | OSI licence | Open-source approved | [x] | `LICENSE` (MIT) |
 | Sealed prediction | Pre-registered, falsifiable | [ ] | Draft below; seal after live corpus exhibit on hosted URL |
 | Partner integrations | All four called at runtime | [x] docs | `docs/PARTNER-INTEGRATIONS-2026-08-30.md` |
-| ADK default path | `engine_default: adk` | [x] local / [ ] hosted | `docs/RECEIPT-adk-default-path-2026-08-30.md` |
+| ADK default path | `engine_default: adk` | [x] local / [x] hosted | `docs/RECEIPT-adk-default-path-2026-08-30.md` |
 
 **Controls re-measured 2026-08-30** (run each at object):
 
@@ -43,7 +43,9 @@ python3 ask_registry.py "agentlint" | head -5
 | search_path | `python3 tests/test_search_path.py` | **5/5** |
 | source_map | `python3 tests/test_source_map.py` | **3/3** |
 | refusal_correctness | `python3 tests/test_refusal_correctness.py` | **6/6** |
-| **Total** | 9 suites | **104/104** |
+| partner_runtime | `python3 tests/test_partner_runtime.py` | **5/5** |
+| **Total** | 10 suites | **109/109** |
+| docs gate | `python3 scripts/bench_check_docs.py` | **109/109 match** |
 
 **Compound exhibit (offline, slice 3):** Run A **2** Parallel → Run B **1** Parallel, **2** corpus hits — `docs/COMPOUND-EXHIBIT-2026-08-29.md`. Live: **BLOCKED** — `docs/BLOCKED-live-compound-exhibit-2026-08-30.md`.
 
