@@ -80,7 +80,8 @@ def _cache_save(d: dict) -> None:
 
 
 def find_sources(objective: str, queries: list[str], *, mode: str = "advanced",
-                 live: bool = False, max_results: int = 6) -> Optional[list[Candidate]]:
+                 live: bool = False, max_results: int = 6,
+                 term: str = "") -> Optional[list[Candidate]]:
     """Candidate documents that MIGHT carry the claim. Never evidence by itself.
 
     Returns [] when a search RAN and came back empty.
@@ -95,6 +96,9 @@ def find_sources(objective: str, queries: list[str], *, mode: str = "advanced",
     cache = _cache_load()
     if ck in cache:
         return [Candidate(**c) for c in cache[ck][:max_results]]
+    term_key = (term or "").strip().lower()
+    if term_key and term_key in cache:
+        return [Candidate(**c) for c in cache[term_key][:max_results]]
     if not live:
         return None
 
@@ -116,5 +120,7 @@ def find_sources(objective: str, queries: list[str], *, mode: str = "advanced",
                      excerpt=(x.get("excerpts") or [""])[0][:400])
            for x in payload.get("results", []) if x.get("url")]
     cache[ck] = [c.__dict__ for c in out]
+    if term_key:
+        cache[term_key] = cache[ck]
     _cache_save(cache)
     return out[:max_results]

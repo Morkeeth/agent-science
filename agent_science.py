@@ -23,7 +23,8 @@ from dataclasses import asdict
 from pathlib import Path
 from typing import Optional
 
-from clearance import corpus, refusal_log
+from clearance import corpus, refusal_log, search as _search
+from clearance import run_history
 from clearance.extract import GeminiExtractor
 from clearance.facts import Claim, judge_claim
 from clearance.gemini import GeminiLocator
@@ -178,6 +179,8 @@ def clear_script(
     if offline:
         return {"ok": False, "error": "offline mode is for controls only", "subject": subject}
 
+    _search.reset_calls()
+    prior_run = run_history.prior(subject)
     db = corpus_db or corpus.DB
     con = corpus.connect(db)
     # The cross-production log: the per-subject corpus compounds within ONE subject; this
@@ -291,6 +294,13 @@ def clear_script(
     n = len(rows)
     remembered = corpus.size_for_use(con, _use(subject))
     log_size = refusal_log.stats(logcon)["n"]
+    api_calls = _search.calls()
+    run_history.record(
+        subject,
+        parallel_api_calls=api_calls,
+        corpus_hits=corpus_hits,
+        claims=n,
+    )
     return {
         "ok": True,
         "subject": subject,
@@ -300,6 +310,8 @@ def clear_script(
         "sourced": sourced,
         "unsourced": n - sourced,
         "parallel_calls": parallel_calls,
+        "parallel_api_calls": api_calls,
+        "prior_run": prior_run,
         "corpus_hits": corpus_hits,
         # Cross-subject reuse is a DIFFERENT economic object from same-subject reuse, so
         # it is counted separately, never folded into corpus_hits.
@@ -309,14 +321,18 @@ def clear_script(
         "rows": rows,
         "markdown": _markdown(
             rows, subject=subject, n=n, sourced=sourced,
-            parallel_calls=parallel_calls, corpus_hits=corpus_hits,
+            parallel_calls=parallel_calls, parallel_api_calls=api_calls,
+            prior_run=prior_run,
+            corpus_hits=corpus_hits,
             corpus_remembered=remembered, log_hits=log_hits, log_size=log_size,
         ),
     }
 
 
 def _markdown(rows: list[dict], *, subject: str, n: int, sourced: int,
-              parallel_calls: int = 0, corpus_hits: int = 0,
+              parallel_calls: int = 0, parallel_api_calls: int = 0,
+              prior_run: dict | None = None,
+              corpus_hits: int = 0,
               corpus_remembered: int = 0, log_hits: int = 0,
               log_size: int = 0) -> str:
     gaps = n - sourced
@@ -326,7 +342,8 @@ def _markdown(rows: list[dict], *, subject: str, n: int, sourced: int,
         f"| Claims | {n} |",
         f"| SOURCED | {sourced} ({(sourced/n if n else 0):.0%}) |",
         f"| UNSOURCED | {gaps} ({(gaps/n if n else 0):.0%}) |",
-        f"| Parallel calls this run | {parallel_calls} |",
+        f"| Claims searched (no corpus/log hit) | {parallel_calls} |",
+        f"| Parallel API calls (metered) | {parallel_api_calls} |",
         f"| Corpus hits (same subject) | {corpus_hits} |",
         f"| Log hits (cross subject) | {log_hits} |",
         f"| Remembered on this subject | {corpus_remembered} |",
@@ -339,6 +356,15 @@ def _markdown(rows: list[dict], *, subject: str, n: int, sourced: int,
             "That is the second-production cost collapse.",
             "",
         ]
+    if prior_run and corpus_hits:
+        prev = prior_run.get("parallel_api_calls", 0)
+        delta = prev - parallel_api_calls
+        if delta > 0:
+            out += [
+                f"**Compound vs last run on this subject:** Parallel API {prev} → "
+                f"{parallel_api_calls} (−{delta}).",
+                "",
+            ]
     if log_hits:
         out += [
             f"**{log_hits} claim(s) reused from ANOTHER subject's clearance — no Parallel "
@@ -409,7 +435,9 @@ def run(path: Path, *, subject: str = "default", offline: bool = False,
 
     print("=" * 72)
     print(result["markdown"])
-    print(f"\nParallel calls: {result['parallel_calls']} · Corpus hits: {result['corpus_hits']}"
+    print(f"\nClaims searched: {result['parallel_calls']} · Parallel API: "
+          f"{result.get('parallel_api_calls', result['parallel_calls'])} · "
+          f"Corpus hits: {result['corpus_hits']}"
           f" · Cross-subject log hits: {result.get('log_hits', 0)}")
 
 

@@ -112,41 +112,47 @@ Full record: `~/CODE/fleet-ops/retros/QWEN-LOSS-RETRO-2026-08-30.md` (corrected)
 
 ---
 
-## NOW — live compound + eval stats (2026-08-30 night)
+## NOW — vision live · registry + hosted compound (2026-08-31)
 
-**One slice.** Prove compounding on hosted URL; close three PRIOR LOSS gates (ablation, external anchor, stats).
+**Vision:** websearch companion + registry of verified truths. Refuse, don't score. Compound on reuse.
 
-### Live compound exhibit (hosted)
-- [x] `docs/RECEIPT-live-compound-exhibit-2026-08-30.md` — A=2 Parallel → B=1 Parallel, B corpus_hits=2
-- [x] `docs/RECEIPT-hosted-partner-runtime-2026-08-30.md` — `/health` + `/clear` engine=adk
+### Hosted (cloud lane + deploy pending for /registry)
+- [x] Live compound — `docs/RECEIPT-live-compound-exhibit-2026-08-30.md` A=2 → B=1 Parallel, corpus_hits=2
+- [x] Hosted partner runtime — `docs/RECEIPT-hosted-partner-runtime-2026-08-30.md`
+- [x] Eval gates — Wilson CI, McNemar, external anchor, cold-clone verify
+- [ ] **`/registry` on hosted** — in `main` @ this commit; needs `bash deploy.sh`
 
-### Eval gates (PRIOR LOSS)
-- [x] Wilson CI + McNemar in `scripts/eval_refusal_baseline.py` / `eval_refusal_ablation.py`
-- [x] External anchor — `scripts/eval_external_anchor.py` (live rightsstatements.org)
-- [x] Cold-clone verify — `scripts/verify_cold_clone.sh`
+### Vision wiring (this commit)
+| Piece | Evidence |
+|-------|----------|
+| **Hosted `/registry`** | `cloud/service.py` — browse + query; links to desk |
+| **Compound delta UI** | `run_history.json` — Parallel API A→B on same subject shelf |
+| **Search efficiency** | focused queries, primary early-exit, term cache |
+| **Fleet → registry** | `python3 scripts/boot_registry.py` → **176 claims** from `research-corpus/` |
 
-### Partner integrations (admissibility) — carried forward
-- [x] `docs/PARTNER-INTEGRATIONS-2026-08-30.md`
-- [x] `tests/test_partner_runtime.py` — **5/5**
-- [x] Slice 5 ADK — hosted `engine_default: adk`
-
-### Controls (re-run at object)
+### Stranger path
 ```bash
-python3 scripts/seed_document_cache.py
+git clone https://github.com/Morkeeth/agent-science.git && cd agent-science
+python3 scripts/boot_registry.py
+python3 ask_registry.py "Directive 2012/28/EU"
 bash scripts/verify_cold_clone.sh
-python3 scripts/eval_external_anchor.py
-curl -s https://agent-science-568004190078.us-central1.run.app/health
 ```
 
-### Not touched
-- `deploy.sh` execution, repo visibility, key rotation, `--set-env-vars` secrets
+### Still Oscar
+- `bash deploy.sh` — ships `/registry` + compound delta to Cloud Run
+- Video · public repo · Devpost
+
+### Cloud
+- Moonshot lane: [cinema-moonshot-2346](https://cursor.com/agents/bc-ef76fe52-9851-4add-b9d9-3c0f8eb17f3b)
 
 ---
 
-## LOG
+## LOG (prior)
 
 | When | What | Command | Outcome |
 |------|------|---------|---------|
+| 2026-08-31 | Vision wiring | boot + tests | `/registry` · run_history · 176 registry rows |
+| 2026-08-30 night | Live compound hosted | cloud lane | RECEIPT-live-compound exhibit |
 | 2026-08-30 start | Baseline claimed 72/72 but cache missing | `python3 tests/test_watch_it_go_red.py` | **13 fail + TypeError** — no `documents.json` |
 | 2026-08-30 | EUR-Lex live fetch | `urllib` to eur-lex | **HTTP 403** — seeded from fixture |
 | 2026-08-30 | Cache seed | `python3 scripts/seed_document_cache.py` | documents + searches on disk |

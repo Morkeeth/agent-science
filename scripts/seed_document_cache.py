@@ -20,7 +20,7 @@ import sys
 sys.path.insert(0, str(ROOT))
 
 from clearance import instruments, search  # noqa: E402
-from clearance.facts import Claim  # noqa: E402
+from clearance.facts import Claim, _queries_for  # noqa: E402
 
 EUR_URL = "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32012L0028"
 EUR_FIXTURE = ROOT / "fixtures/refusal-correctness/docs/eur-lex-orphan-snippet.html"
@@ -65,12 +65,16 @@ def _seed_documents() -> None:
 
 
 def _search_key(claim: Claim) -> str:
-    queries = [claim.text, claim.must_contain]
+    queries = _queries_for(claim)
     return json.dumps({
         "o": f"Find a primary source that states verbatim: {claim.text}",
         "q": sorted(queries),
         "m": "advanced",
     }, sort_keys=True)
+
+
+def _term_key(claim: Claim) -> str:
+    return (claim.must_contain or claim.text).strip().lower()[:120]
 
 
 def _seed_searches() -> None:
@@ -84,6 +88,7 @@ def _seed_searches() -> None:
         "94% of film archives",
     )
     cache[_search_key(c5)] = []
+    cache[_term_key(c5)] = []
     print("  searches: empty result for 94% claim")
 
     c_s1 = Claim(
@@ -92,11 +97,13 @@ def _seed_searches() -> None:
         None,
         "2012/28/EU",
     )
-    cache[_search_key(c_s1)] = [{
+    hit = [{
         "url": EUR_URL,
         "title": "Directive 2012/28/EU (EUR-Lex)",
         "excerpt": "Directive 2012/28/EU on orphan works",
     }]
+    cache[_search_key(c_s1)] = hit
+    cache[_term_key(c_s1)] = hit
     print("  searches: EUR-Lex candidate for orphan-works directive claim")
 
     cache_path.parent.mkdir(parents=True, exist_ok=True)

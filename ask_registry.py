@@ -26,6 +26,10 @@ from clearance import refusal_log
 DB = Path(os.environ.get("REFUSAL_LOG_DB", refusal_log.DB))
 
 
+def _db(path: Path | str | None = None) -> Path:
+    return Path(path) if path else DB
+
+
 def ask(query: str, db: Path | str = DB) -> dict:
     """Search the registry; log this query as a browsable row."""
     con = refusal_log.connect(db)
@@ -35,6 +39,11 @@ def ask(query: str, db: Path | str = DB) -> dict:
 def browse(*, db: Path | str = DB, limit: int = 50) -> list[dict]:
     con = refusal_log.connect(db)
     return refusal_log.browse_queries(con, limit=limit)
+
+
+def stats(*, db: Path | str = DB) -> dict:
+    con = refusal_log.connect(db)
+    return refusal_log.stats(con)
 
 
 def _fmt(res: dict) -> str:
@@ -75,7 +84,10 @@ _PAGE = """<!DOCTYPE html>
 *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);
   font-family:Georgia,serif;font-size:18px;line-height:1.45}
 .wrap{max-width:46rem;margin:0 auto;padding:2rem 1.25rem 3rem}
-h1{font-size:2rem;margin:0 0 .25rem}p.lead{color:var(--mute);margin:0 0 1.5rem}
+h1{font-size:2rem;margin:0 0 .25rem}p.lead{color:var(--mute);margin:0 0 .5rem}
+p.nav,p.stats{font-family:monospace;font-size:.78rem;margin:0 0 1rem}
+p.nav a{color:var(--ink)}
+p.stats{color:var(--mute)}
 form{display:flex;gap:.5rem;margin-bottom:2rem}
 input[type=text]{flex:1;padding:.65rem .8rem;border:1px solid var(--line);font:inherit}
 button{padding:.65rem 1rem;background:var(--ink);color:var(--paper);border:0;cursor:pointer}
@@ -89,7 +101,9 @@ th{font-family:monospace;font-size:.7rem;text-transform:uppercase;color:var(--mu
 </style></head><body>
 <div class="wrap">
   <h1>Registry</h1>
-  <p class="lead">Sourced span, or a named refusal. Every query is logged.</p>
+  <p class="lead">The websearch companion — verified truths and honest refusals, browsable.</p>
+  <p class="nav"><a href="/">← clearance desk</a></p>
+  <p class="stats">{stats_line}</p>
   <form method="get" action="/">
     <input type="text" name="q" value="{q}" placeholder="Ask anything cleared…" autofocus>
     <button type="submit">Query</button>
@@ -152,16 +166,27 @@ class _Handler(BaseHTTPRequestHandler):
             q = (qs.get("q") or [""])[0]
             return self._send(200, json.dumps(ask(q), indent=1).encode(), "application/json")
         q = (qs.get("q") or [""])[0].strip()
-        res = ask(q) if q else None
-        # .format() breaks on CSS custom properties ({--paper}); three placeholders only.
-        page = (_PAGE
-                .replace("{q}", html.escape(q, quote=True))
-                .replace("{result}", _html_result(res))
-                .replace("{browse}", _html_browse(browse())))
+        page = render_page(q=q)
         self._send(200, page.encode(), "text/html; charset=utf-8")
 
     def log_message(self, fmt, *a):
         sys.stderr.write("%s - %s\n" % (self.address_string(), fmt % a))
+
+
+def render_page(*, q: str = "", db: Path | str | None = None,
+                desk_href: str = "/") -> str:
+    """HTML registry surface for hosted /registry and local --serve."""
+    dbp = _db(db)
+    st = stats(db=dbp)
+    stats_line = (f"{st['n']} claims in registry · {st['cleared']} sourced · "
+                  f"{st['refused']} refused · {st['reuses']} reuses")
+    res = ask(q, db=dbp) if q.strip() else None
+    page = (_PAGE
+            .replace("{q}", html.escape(q, quote=True))
+            .replace("{stats_line}", html.escape(stats_line))
+            .replace("{result}", _html_result(res))
+            .replace("{browse}", _html_browse(browse(db=dbp))))
+    return page.replace('href="/"', f'href="{html.escape(desk_href, quote=True)}"', 1)
 
 
 def serve(port: int = 8091) -> None:

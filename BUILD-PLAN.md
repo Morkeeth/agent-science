@@ -2,7 +2,7 @@
 date: 2026-08-22
 ruling: AGENT SCIENCE (fact clearance) · Parallel track · Oscar, verbatim: "Agent science! thats the goal"
 event: Agentic Cinema · deadline 2026-09-09 14:00 PT
-status: admissibility is the whole lane
+status: admissibility is the whole lane · **slice 5 DONE 2026-08-30** · slice 6 prep · Sep 9 deadline
 ---
 
 # Build plan — from "inadmissible" to "submittable"

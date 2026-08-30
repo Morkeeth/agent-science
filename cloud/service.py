@@ -3,6 +3,8 @@
 
   GET  /health           liveness (not /healthz — GCP reserves *z paths)
   GET  /                 clearance desk UI
+  GET  /registry         browsable verified-truths registry (vision front surface)
+  GET  /registry/api?q=  JSON registry query
   GET  /corpus?subject=  remembered count for a subject shelf
   POST /clear           {"script","subject"} -> gap report JSON or HTML memo
 
@@ -17,6 +19,7 @@ import html
 import json
 import os
 import sys
+from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -24,6 +27,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from http.server import BaseHTTPRequestHandler, HTTPServer  # noqa: E402
 
 import agent_science  # noqa: E402
+import ask_registry  # noqa: E402
 from clearance import corpus  # noqa: E402
 from cloud import agent as adk_agent  # noqa: E402
 
@@ -75,11 +79,14 @@ button{
 button:hover{background:#000}
 .hint{font-size:.9rem;color:var(--mute);margin:1rem 0 0;max-width:34rem}
 .hint code{font-family:"IBM Plex Mono",monospace;font-size:.78rem}
+.nav{font-family:"IBM Plex Mono",monospace;font-size:.78rem;margin:0 0 1.5rem}
+.nav a{color:var(--ink)}
 </style></head><body>
 <div class="wrap">
   <h1 class="brand">Agent Science</h1>
-  <p class="thesis">The second documentary about the same subject costs a fraction of the first —
-  because the corpus remembers every sourced claim and refuses to invent the rest.</p>
+  <p class="thesis">The websearch companion — every claim sourced verbatim from a real document,
+  or refused with the reason why. The registry remembers: clear once, reuse for free.</p>
+  <p class="nav"><a href="/registry">Browse the registry</a> — {registry_stats} verified truths on disk.</p>
   <form class="desk" method="post" action="/clear">
     <div class="row">
       <div>
@@ -105,27 +112,62 @@ def _esc(s) -> str:
     return html.escape("" if s is None else str(s), quote=True)
 
 
+def _log_db() -> Path:
+    return agent_science._log_db()
+
+
+def _registry_stats_line() -> str:
+    try:
+        st = ask_registry.stats(db=_log_db())
+        return f"{st['n']} claims · {st['cleared']} sourced"
+    except Exception:
+        return "registry loading…"
+
+
+def _desk_page(subject: str = "orphan-works") -> str:
+    page = _PAGE.replace("{registry_stats}", _esc(_registry_stats_line()))
+    if subject:
+        page = page.replace(
+            'value="orphan-works"',
+            f'value="{html.escape(subject, quote=True)}"',
+            1,
+        )
+    return page
+
+
 def _report_html(out: dict) -> str:
     """Clearance memo: compound strip → action items → sourced evidence."""
     n = out.get("claims_extracted") or 0
     sourced = out.get("sourced") or 0
     unsourced = out.get("unsourced") or 0
-    parallel = out.get("parallel_calls") or 0
+    parallel = out.get("parallel_api_calls")
+    if parallel is None:
+        parallel = out.get("parallel_calls") or 0
     hits = out.get("corpus_hits") or 0
+    prior = out.get("prior_run") or {}
+    prior_parallel = prior.get("parallel_api_calls")
     remembered = out.get("corpus_remembered") or 0
     subject = _esc(out.get("subject"))
     rows = out.get("rows") or []
 
     compound = ""
+    delta_note = ""
+    if prior_parallel is not None and hits and prior_parallel > parallel:
+        delta_note = (
+            f"<p class='compound-note'><strong>Compound:</strong> Parallel API "
+            f"{_esc(prior_parallel)} → {_esc(parallel)} "
+            f"(−{_esc(prior_parallel - parallel)} vs last run on this shelf).</p>"
+        )
     if hits:
         compound = f"""
 <section class="compound">
   <p class="compound-label">Compounding — this run</p>
   <div class="nums">
-    <div><span class="n">{_esc(parallel)}</span><span class="k">Parallel calls</span></div>
+    <div><span class="n">{_esc(parallel)}</span><span class="k">Parallel API</span></div>
     <div><span class="n hit">{_esc(hits)}</span><span class="k">Corpus hits</span></div>
     <div><span class="n">{_esc(remembered)}</span><span class="k">On this shelf</span></div>
   </div>
+  {delta_note}
   <p class="compound-note">{_esc(hits)} claim(s) resolved from memory — search not re-spent.
   Paste another script with subject <strong>{subject}</strong> to compound further.</p>
 </section>"""
@@ -134,7 +176,7 @@ def _report_html(out: dict) -> str:
 <section class="compound cold">
   <p class="compound-label">First pass on this shelf</p>
   <div class="nums">
-    <div><span class="n">{_esc(parallel)}</span><span class="k">Parallel calls</span></div>
+    <div><span class="n">{_esc(parallel)}</span><span class="k">Parallel API</span></div>
     <div><span class="n">{_esc(remembered)}</span><span class="k">Now remembered</span></div>
   </div>
   <p class="compound-note">Nothing reused yet. Clear a <em>second</em> script with the same
@@ -315,15 +357,17 @@ class Handler(BaseHTTPRequestHandler):
         qs = parse_qs(parsed.query)
 
         if path in ("/", "/index.html"):
-            page = _PAGE
-            subj = (qs.get("subject") or [""])[0].strip()
-            if subj:
-                page = page.replace(
-                    'value="orphan-works"',
-                    f'value="{html.escape(subj, quote=True)}"',
-                    1,
-                )
+            subj = (qs.get("subject") or [""])[0].strip() or "orphan-works"
+            return self._send(200, _desk_page(subj).encode(), "text/html; charset=utf-8")
+
+        if path in ("/registry", "/registry/"):
+            q = (qs.get("q") or [""])[0]
+            page = ask_registry.render_page(q=q.strip(), db=_log_db())
             return self._send(200, page.encode(), "text/html; charset=utf-8")
+
+        if path == "/registry/api":
+            q = (qs.get("q") or [""])[0]
+            return self._json(200, ask_registry.ask(q, db=_log_db()))
 
         if path == "/health":
             gemini_path = "none"
