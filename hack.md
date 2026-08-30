@@ -112,38 +112,30 @@ Full record: `~/CODE/fleet-ops/retros/QWEN-LOSS-RETRO-2026-08-30.md` (corrected)
 
 ---
 
-## NOW — vision live · registry + hosted compound (2026-08-31)
+## NOW — stack product · all websearch routes here (2026-08-31)
 
-**Vision:** websearch companion + registry of verified truths. Refuse, don't score. Compound on reuse.
+**Product:** verified websearch companion for the whole fleet — registry first, Parallel+verify on miss.
 
-### Hosted (cloud lane + deploy pending for /registry)
-- [x] Live compound — `docs/RECEIPT-live-compound-exhibit-2026-08-30.md` A=2 → B=1 Parallel, corpus_hits=2
-- [x] Hosted partner runtime — `docs/RECEIPT-hosted-partner-runtime-2026-08-30.md`
-- [x] Eval gates — Wilson CI, McNemar, external anchor, cold-clone verify
-- [ ] **`/registry` on hosted** — in `main` @ this commit; needs `bash deploy.sh`
+### Surfaces (pick one)
+| Surface | Command |
+|---------|---------|
+| **MCP** | `science_search` — installed in `~/.cursor/mcp.json` via `scripts/install-mcp.sh` |
+| **CLI** | `python3 -m clearance search "query"` |
+| **HTTP** | `GET/POST /search` · `/registry` · `/ingest` · `/stats` |
+| **Desk** | `python3 -m clearance serve` or hosted `/` |
 
-### Vision wiring (this commit)
-| Piece | Evidence |
-|-------|----------|
-| **Hosted `/registry`** | `cloud/service.py` — browse + query; links to desk |
-| **Compound delta UI** | `run_history.json` — Parallel API A→B on same subject shelf |
-| **Search efficiency** | focused queries, primary early-exit, term cache |
-| **Fleet → registry** | `python3 scripts/boot_registry.py` → **176 claims** from `research-corpus/` |
-
-### Stranger path
+### Boot once
 ```bash
-git clone https://github.com/Morkeeth/agent-science.git && cd agent-science
-python3 scripts/boot_registry.py
-python3 ask_registry.py "Directive 2012/28/EU"
-bash scripts/verify_cold_clone.sh
+python3 scripts/boot_registry.py   # fleet research-corpus → 176 registry rows
 ```
 
-### Still Oscar
-- `bash deploy.sh` — ships `/registry` + compound delta to Cloud Run
-- Video · public repo · Devpost
+### Docs
+- `AGENTS.md` — fleet rule: use Agent Science instead of raw web search
+- Hosted compound + eval gates shipped (cloud lane)
 
-### Cloud
-- Moonshot lane: [cinema-moonshot-2346](https://cursor.com/agents/bc-ef76fe52-9851-4add-b9d9-3c0f8eb17f3b)
+### Oscar
+- `bash deploy.sh` — ships `/search` + MCP stack to Cloud Run
+- Video · Devpost · public repo
 
 ---
 

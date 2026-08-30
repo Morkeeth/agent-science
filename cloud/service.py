@@ -3,10 +3,12 @@
 
   GET  /health           liveness (not /healthz — GCP reserves *z paths)
   GET  /                 clearance desk UI
-  GET  /registry         browsable verified-truths registry (vision front surface)
-  GET  /registry/api?q=  JSON registry query
+  GET  /search?q=         stack websearch (registry → live)
+  POST /search            {"query","live?","subject?"}
+  POST /ingest            claim markdown or {claim,url}
+  GET  /registry         browsable verified-truths registry
+  GET  /registry/api?q=  JSON registry query (read-only)
   GET  /corpus?subject=  remembered count for a subject shelf
-  POST /clear           {"script","subject"} -> gap report JSON or HTML memo
 
 Stdlib in the serving path, except the ADK agent that /clear runs through: Agent
 Builder is a submission requirement and a requirement is not met by a module nobody
@@ -28,6 +30,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer  # noqa: E402
 
 import agent_science  # noqa: E402
 import ask_registry  # noqa: E402
+from clearance import ingest as stack_ingest, stack_search  # noqa: E402
 from clearance import corpus  # noqa: E402
 from cloud import agent as adk_agent  # noqa: E402
 
@@ -369,6 +372,15 @@ class Handler(BaseHTTPRequestHandler):
             q = (qs.get("q") or [""])[0]
             return self._json(200, ask_registry.ask(q, db=_log_db()))
 
+        if path == "/search":
+            q = (qs.get("q") or [""])[0]
+            live = (qs.get("live") or ["true"])[0].lower() not in ("0", "false", "no")
+            subj = (qs.get("subject") or ["stack"])[0]
+            return self._json(200, stack_search.search(q, live=live, subject=subj, db=_log_db()))
+
+        if path == "/stats":
+            return self._json(200, stack_search.stats(db=_log_db()))
+
         if path == "/health":
             gemini_path = "none"
             if os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY"):
@@ -417,6 +429,33 @@ class Handler(BaseHTTPRequestHandler):
         self._json(404, {"error": f"no route {path}"})
 
     def do_POST(self):
+        if self.path == "/search":
+            body = self._read_json()
+            if body is None:
+                return self._json(400, {"error": "body is not valid JSON"})
+            q = (body.get("query") or "").strip()
+            if not q:
+                return self._json(400, {"error": "field 'query' is required"})
+            live = body.get("live", True)
+            subject = (body.get("subject") or "stack").strip()
+            return self._json(200, stack_search.search(q, live=live, subject=subject, db=_log_db()))
+
+        if self.path == "/ingest":
+            body = self._read_json()
+            if body is None:
+                return self._json(400, {"error": "body is not valid JSON"})
+            prod = (body.get("production") or "ingest").strip()
+            try:
+                if body.get("claim") and body.get("url"):
+                    res = stack_ingest.ingest_claim(body["claim"], body["url"], production=prod)
+                elif body.get("text"):
+                    res = stack_ingest.ingest_text(body["text"], production=prod)
+                else:
+                    return self._json(400, {"error": "pass text or claim+url"})
+            except ValueError as e:
+                return self._json(400, {"error": str(e)})
+            return self._json(200, res)
+
         if self.path == "/clear":
             ct = self.headers.get("Content-Type", "")
             if "application/json" in ct:
