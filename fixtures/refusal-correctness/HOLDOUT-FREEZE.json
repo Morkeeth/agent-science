@@ -1,0 +1,7 @@
+{
+  "frozen_at": "2026-08-22T21:30:00Z",
+  "set_path": "fixtures/refusal-correctness/set.json",
+  "sha256": "df578e315a49b67de7ee1348d7c9619bf1a8d485237ec52f214f6c5c878a42f9",
+  "labelled_before_engine": true,
+  "note": "RC1–RC6 labels written before any engine run on these items. Do not edit set.json after tuning begins without Oscar unfreezing and re-sealing this file."
+}

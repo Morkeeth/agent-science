@@ -97,11 +97,50 @@ Re-derives all 9 suite counts against `docs/SUBMISSION-PACK-2026-08-29.md` — e
 
 ---
 
+## Holdout frozen before tuning
+
+```bash
+python3 scripts/eval_holdout_freeze.py
+```
+
+Sealed SHA256 in `fixtures/refusal-correctness/HOLDOUT-FREEZE.json`. Baseline/ablation/symmetric scripts exit 1 if `set.json` drifts.
+
+**Output this run (2026-08-30 UTC):**
+
+```
+holdout OK · frozen 2026-08-22T21:30:00Z · fixtures/refusal-correctness/set.json sha256=df578e315a49…
+```
+
+---
+
+## Symmetric scorer — judge from delivered output only
+
+Both arms emit identical registry gap rows (`CLAIM` / `LABEL` / `SPAN|CAUSE`). Scorer parses text only — no internal `Verdict` enum.
+
+```bash
+python3 scripts/seed_document_cache.py
+python3 scripts/eval_symmetric_scorer.py
+```
+
+**Output this run (2026-08-30 UTC):**
+
+```
+Baseline:  5/6 = 0.833  95% CI [0.436, 0.970]
+Shipping:  5/6 = 0.833  95% CI [0.436, 0.970]
+McNemar:   p=1.0000 (no discordant pairs)
+RC5 substring trap: BOTH arms false-SOURCED on delivered rows
+FINDING: tied — symmetric scorer adds no delta on n=6.
+```
+
+---
+
 ## Checklist status (PRIOR LOSS gate)
 
 - [x] Alternative arm named and run
 - [x] Ablation with measured delta (delta=0; RC5 both false-GREEN)
 - [x] External anchor — live rightsstatements.org (`scripts/eval_external_anchor.py`)
+- [x] **Holdout frozen before the first tuning pass** — `scripts/eval_holdout_freeze.py`
 - [x] Offline path with no API key
 - [x] Wilson CI + McNemar (n=6)
-- [x] Honesty carries worst number (tie + RC5 false-GREEN both arms)
+- [x] **Scorer symmetrical** — `scripts/eval_symmetric_scorer.py` (delivered rows only)
+- [x] Honesty carries worst number (tie + RC5 false-SOURCED both arms)

@@ -29,9 +29,19 @@ echo "5. SUBMISSION-PACK doc gate..."
 python3 scripts/bench_check_docs.py 2>&1 | tail -1
 
 echo
-echo "6. Eval gate (baseline + ablation)..."
-python3 scripts/eval_refusal_baseline.py 2>&1 | tail -3
-python3 scripts/eval_refusal_ablation.py 2>&1 | tail -2
+echo "6. Eval gate (holdout + baseline + ablation + symmetric scorer)..."
+python3 scripts/eval_holdout_freeze.py
+python3 scripts/eval_refusal_baseline.py 2>&1 | tail -4
+python3 scripts/eval_refusal_ablation.py 2>&1 | tail -3
+python3 scripts/eval_symmetric_scorer.py 2>&1 | tail -4
+
+echo
+echo "7. Registry surface (stranger -q)..."
+python3 tests/test_registry_surface.py -q 2>&1 | tail -1
+
+echo
+echo "8. Offline compound exhibit receipt..."
+python3 scripts/compound_exhibit_receipt.py 2>&1 | grep -E 'parallel_calls|COMPOUND|delta' | head -3
 
 echo
 echo "=== cold-clone verify OK ==="

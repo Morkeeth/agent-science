@@ -11,8 +11,32 @@
 ```bash
 git clone https://github.com/Morkeeth/agent-science.git && cd agent-science
 bash scripts/verify_cold_clone.sh
+python3 tests/test_registry_surface.py -q
+python3 scripts/compound_exhibit_receipt.py | tail -8
 python3 ask_registry.py "agentlint" | head -5
 ```
+
+Expected tail lines (re-derive — do not carry):
+
+```
+=== cold-clone verify OK ===
+5/5 passed
+| 2 | 1 | +1 | 2 |
+```
+
+---
+
+## Honesty & limitations (worst numbers at object)
+
+| Finding | Number | Command |
+|---------|--------|---------|
+| Refusal eval tie | **5/6 = 0.833** both arms | `python3 scripts/eval_refusal_baseline.py` |
+| RC5 substring trap | **both arms false-SOURCED** | `python3 scripts/eval_symmetric_scorer.py` |
+| Live compound sourcing | **sourced=0** on hosted mini A/B | `docs/RECEIPT-live-compound-exhibit-2026-08-30.md` |
+| Marketing self-audit | **2/5 claims** verified verbatim (C3 misattributes) | `docs/FINDING-refusal-correctness.md` |
+| Gap report headline | **561/600 (93.5%)** not sellable for ai_training | `fixtures/gap-report-600.md` |
+
+We report the tie and RC5 false-SOURCED explicitly — shipping does not beat the naive baseline on the held-out set at n=6.
 
 ---
 

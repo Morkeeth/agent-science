@@ -37,10 +37,13 @@ PASS  test_second_subject_reuses_the_log_and_spends_no_parallel_call
 
 ## Controls on this VM
 
-`python3 tests/test_watch_it_go_red.py` → **26 passed, 13 failed (suite crashed)**
+`python3 tests/test_watch_it_go_red.py` → **72 passed, 0 failed** (re-measured 2026-08-30 after cache seed)
 
-Instrument fixtures absent on this VM; several controls are UNMEASURABLE or fail
-until `pull_fixtures.py` / key paths are populated.
+```bash
+python3 scripts/seed_document_cache.py
+python3 tests/test_watch_it_go_red.py 2>&1 | tail -1
+# 72 passed, 0 failed
+```
 
 ## What a stranger can do today (slice 2)
 

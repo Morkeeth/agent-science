@@ -25,6 +25,7 @@ from clearance.locate import DEFAULT, StringLocator
 from clearance.verdict import GREEN, UNKNOWN
 
 sys.path.insert(0, str(ROOT / "scripts"))
+from eval_holdout_freeze import check_holdout  # noqa: E402
 from eval_stats import format_ci, mcnemar_exact  # noqa: E402
 
 SET = json.loads((ROOT / "fixtures/refusal-correctness/set.json").read_text())
@@ -66,6 +67,11 @@ def _gold(expected: str) -> str:
 
 
 def main() -> None:
+    ok, msg = check_holdout()
+    print(msg)
+    if not ok:
+        sys.exit(1)
+
     rows = []
     base_correct = ship_correct = 0
     b_win = c = 0  # McNemar discordant: baseline-only correct / shipping-only correct

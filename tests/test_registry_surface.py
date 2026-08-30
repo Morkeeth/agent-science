@@ -66,15 +66,24 @@ def test_serve_page_renders_without_format_keyerror():
 
 
 if __name__ == "__main__":
+    import argparse
+
+    ap = argparse.ArgumentParser(description="Registry surface controls (slice 2)")
+    ap.add_argument("-q", "--quiet", action="store_true", help="print summary line only")
+    args = ap.parse_args()
+
     fns = [v for k, v in sorted(globals().items())
            if k.startswith("test_") and callable(v)]
     bad = 0
     for fn in fns:
         try:
             fn()
-            print(f"PASS  {fn.__name__}")
+            if not args.quiet:
+                print(f"PASS  {fn.__name__}")
         except AssertionError as e:
             bad += 1
-            print(f"FAIL  {fn.__name__}: {e}")
-    print(f"\n{len(fns) - bad}/{len(fns)} passed")
+            if not args.quiet:
+                print(f"FAIL  {fn.__name__}: {e}")
+    passed = len(fns) - bad
+    print(f"\n{passed}/{len(fns)} passed")
     sys.exit(1 if bad else 0)
