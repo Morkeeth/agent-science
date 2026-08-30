@@ -12,6 +12,17 @@ never infer.
 
 Built for [Agentic Cinema](https://agentic-cinema.devpost.com/) · Parallel track.
 
+## Stack websearch (use this for all fleet research)
+
+```bash
+python3 scripts/boot_registry.py              # once: fleet corpus → registry
+python3 scripts/install-mcp.sh                # Cursor: science_search tool
+python3 -m clearance search "your query"      # CLI
+python3 -m clearance serve                    # HTTP :8080 — /search /registry /clear
+```
+
+See **`AGENTS.md`** — route every agent websearch through Agent Science, not raw search.
+
 ```bash
 python3 scripts/seed_document_cache.py   # offline document cache (cold clone)
 python3 agent_science.py fixtures/scripts/documentary-orphan-works.txt
