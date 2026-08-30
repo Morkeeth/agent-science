@@ -35,12 +35,16 @@ PASS  test_second_subject_reuses_the_log_and_spends_no_parallel_call
 2/2 passed
 ```
 
-## Controls on this VM
+## Controls on this VM (re-measured 2026-08-30)
 
-`python3 tests/test_watch_it_go_red.py` → **26 passed, 13 failed (suite crashed)**
+```bash
+python3 scripts/seed_document_cache.py
+python3 tests/test_watch_it_go_red.py
+```
 
-Instrument fixtures absent on this VM; several controls are UNMEASURABLE or fail
-until `pull_fixtures.py` / key paths are populated.
+→ **72/72** (after cache seed; without seed: 13 fail + TypeError — documents not on disk)
+
+Prior stale count **26 passed, 13 failed** was from an unseeded cache; do not carry it.
 
 ## What a stranger can do today (slice 2)
 

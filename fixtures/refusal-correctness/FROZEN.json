@@ -1,0 +1,8 @@
+{
+  "frozen_at": "2026-08-22T21:30:00Z",
+  "labelled_at": "2026-08-22T21:30:00Z",
+  "labelled_by": "cursor",
+  "set_sha256": "df578e315a49b67de7ee1348d7c9619bf1a8d485237ec52f214f6c5c878a42f9",
+  "item_count": 6,
+  "note": "Holdout frozen before any eval tuning. Changing set.json requires updating this manifest deliberately — not silently."
+}

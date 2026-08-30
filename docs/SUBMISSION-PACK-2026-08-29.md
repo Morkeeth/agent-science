@@ -11,6 +11,8 @@
 ```bash
 git clone https://github.com/Morkeeth/agent-science.git && cd agent-science
 bash scripts/verify_cold_clone.sh
+python3 tests/test_registry_surface.py -q
+python3 scripts/compound_exhibit_receipt.py | grep -E 'parallel_calls|corpus_hits|yes|NO'
 python3 ask_registry.py "agentlint" | head -5
 ```
 

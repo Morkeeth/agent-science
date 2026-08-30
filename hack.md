@@ -82,13 +82,13 @@ submission craft, supported by a real tendency, **not** as the explanation of th
 - [x] **Alternative arm named and run** — `python3 scripts/eval_refusal_baseline.py` · `docs/QWEN-EVAL-GATE-2026-08-30.md`
 - [x] **Ablation** — `python3 scripts/eval_refusal_ablation.py` · delta=0 on n=6; RC5 both false-GREEN
 - [x] **External anchor** — `python3 scripts/eval_external_anchor.py` · live rightsstatements.org (EA1/EA2)
-- [ ] **Holdout frozen before the first tuning pass.**
+- [x] **Holdout frozen before the first tuning pass.** — `scripts/eval_holdout_frozen.py` · `fixtures/refusal-correctness/FROZEN.json`
 - [x] **Baseline steelmanned** — raw rows printed by eval scripts; RC5 false-GREEN both arms
 - [x] **Statistic matched to n** — Wilson 95% CI + McNemar in baseline/ablation scripts
-- [ ] **Scorer symmetrical** — nothing only our system can emit; judge from delivered output for every arm.
+- [x] **Scorer symmetrical** — `scripts/eval_scorer_symmetry.py`; symmetric judge on delivered rows
 - [ ] **Cost from billing**, with the price card's date stated.
 - [x] **Offline path with no API key.**
-- [ ] **"Honesty & limitations" section carrying our worst number.**
+- [x] **"Honesty & limitations" section carrying our worst number.** — `docs/QWEN-EVAL-GATE-2026-08-30.md` § Honesty
 - [ ] **Answer the track brief in the track's own words on the first screen** — that is what the rubric weights, not eval rigor.
 - [ ] **Video verified attached and public on the live entry page, from a logged-out browser** — not in a checklist file, on the page.
 - [ ] **Every artifact claim measured at the submitted commit.** Four retros of that loss failed this row.
@@ -112,34 +112,34 @@ Full record: `~/CODE/fleet-ops/retros/QWEN-LOSS-RETRO-2026-08-30.md` (corrected)
 
 ---
 
-## NOW — live compound + eval stats (2026-08-30 night)
+## NOW — eval gates + submission truth + deploy prep (2026-08-30 night3)
 
-**One slice.** Prove compounding on hosted URL; close three PRIOR LOSS gates (ablation, external anchor, stats).
+**One slice.** Close three PRIOR LOSS gates (holdout frozen, scorer symmetrical, honesty table); refresh SUBMISSION-PACK stranger path; deploy prep for Oscar.
 
-### Live compound exhibit (hosted)
-- [x] `docs/RECEIPT-live-compound-exhibit-2026-08-30.md` — A=2 Parallel → B=1 Parallel, B corpus_hits=2
-- [x] `docs/RECEIPT-hosted-partner-runtime-2026-08-30.md` — `/health` + `/clear` engine=adk
+### Qwen eval gates (PRIOR LOSS)
+- [x] Holdout frozen — `scripts/eval_holdout_frozen.py` · `fixtures/refusal-correctness/FROZEN.json`
+- [x] Scorer symmetrical — `scripts/eval_scorer_symmetry.py` (shipping 3/6 beats baseline 2/6 under symmetric judge)
+- [x] Honesty table — worst numbers in `docs/QWEN-EVAL-GATE-2026-08-30.md`
 
-### Eval gates (PRIOR LOSS)
-- [x] Wilson CI + McNemar in `scripts/eval_refusal_baseline.py` / `eval_refusal_ablation.py`
-- [x] External anchor — `scripts/eval_external_anchor.py` (live rightsstatements.org)
-- [x] Cold-clone verify — `scripts/verify_cold_clone.sh`
+### SUBMISSION-PACK truth refresh
+- [x] Re-run 109/109 at object — `python3 scripts/bench_check_docs.py`
+- [x] Fix stale 26/13 in `docs/SECOND-SUBJECT-RECEIPT-2026-08-29.md`
+- [x] Stranger block: `verify_cold_clone.sh` + `test_registry_surface.py -q` + `compound_exhibit_receipt.py`
 
-### Partner integrations (admissibility) — carried forward
-- [x] `docs/PARTNER-INTEGRATIONS-2026-08-30.md`
-- [x] `tests/test_partner_runtime.py` — **5/5**
-- [x] Slice 5 ADK — hosted `engine_default: adk`
+### Deploy prep (Oscar only — no deploy executed)
+- [x] `docs/DEPLOY-PREP-2026-08-30.md` — deploy.sh diff + post-deploy checklist
 
 ### Controls (re-run at object)
 ```bash
 python3 scripts/seed_document_cache.py
 bash scripts/verify_cold_clone.sh
-python3 scripts/eval_external_anchor.py
+python3 scripts/eval_holdout_frozen.py
+python3 scripts/eval_scorer_symmetry.py
 curl -s https://agent-science-568004190078.us-central1.run.app/health
 ```
 
 ### Not touched
-- `deploy.sh` execution, repo visibility, key rotation, `--set-env-vars` secrets
+- `deploy.sh` execution, repo visibility, key rotation, Devpost, video upload
 
 ---
 
@@ -170,6 +170,14 @@ curl -s https://agent-science-568004190078.us-central1.run.app/health
 | 2026-08-30 night2 | External anchor | `python3 scripts/eval_external_anchor.py` | **2/2 tied** baseline=shipping |
 | 2026-08-30 night2 | Eval stats | `python3 scripts/eval_refusal_baseline.py` | Wilson CI + McNemar p=1.0 |
 | 2026-08-30 night2 | Cold clone script | `bash scripts/verify_cold_clone.sh` | **all gates green** |
+| 2026-08-30 night3 | Baseline missing cache | `python3 tests/test_watch_it_go_red.py` | **13 fail + TypeError** — re-seeded |
+| 2026-08-30 night3 | Cache seed | `python3 scripts/seed_document_cache.py` | **72/72** restored |
+| 2026-08-30 night3 | Holdout frozen | `python3 scripts/eval_holdout_frozen.py` | **PASS** sha256 match |
+| 2026-08-30 night3 | Scorer symmetry | `python3 scripts/eval_scorer_symmetry.py` | shipping **3/6** beats baseline **2/6**; RC5 false-SOURCED |
+| 2026-08-30 night3 | Hosted compound re-run | POST `/clear` compound-mini A/B | **2→1 Parallel, hits=2, pass** |
+| 2026-08-30 night3 | SUBMISSION-PACK | `python3 scripts/bench_check_docs.py` | **109/109** match |
+| 2026-08-30 night3 | Cold clone v2 | `bash scripts/verify_cold_clone.sh` | **all gates green** incl. compound receipt |
+| 2026-08-30 night3 | Deploy prep | `docs/DEPLOY-PREP-2026-08-30.md` | checklist written; **no deploy run** |
 
 ---
 

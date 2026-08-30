@@ -97,11 +97,66 @@ Re-derives all 9 suite counts against `docs/SUBMISSION-PACK-2026-08-29.md` — e
 
 ---
 
+## Holdout frozen — before any tuning pass
+
+```bash
+python3 scripts/eval_holdout_frozen.py
+```
+
+**Output this run (2026-08-30 UTC):**
+
+```
+PASS — holdout matches FROZEN manifest; safe to score eval arms.
+sha256: df578e315a49b67de7ee1348d7c9619bf1a8d485237ec52f214f6c5c878a42f9
+```
+
+Manifest: `fixtures/refusal-correctness/FROZEN.json` — changing `set.json` requires deliberate manifest update.
+
+---
+
+## Scorer symmetrical — judge from delivered output only
+
+```bash
+python3 scripts/seed_document_cache.py
+python3 scripts/eval_scorer_symmetry.py
+```
+
+All arms emit the same public row (`SOURCED`/`UNSOURCED` + passage). One external judge — no internal GREEN/UNKNOWN enums.
+
+**Output this run (2026-08-30 UTC):**
+
+```
+Baseline   2/6 = 0.333  95% CI [0.097, 0.700]
+Shipping   3/6 = 0.500  95% CI [0.188, 0.812]
+Ablation   3/6 = 0.500  95% CI [0.188, 0.812]
+McNemar (shipping vs baseline, symmetric judge): p=1.0000 (b=0 c=1 discordant)
+RC5 substring trap: shipping false-SOURCED under symmetric judge — documented engine limit.
+FINDING: shipping=3 baseline=2 ablation=3
+```
+
+**Finding:** under symmetric judge (requires verified passage for SOURCED), baseline **loses** on RC1/RC2 because it never quotes. Shipping beats baseline by 1 item (RC6 only). RC5 still false-SOURCED in all substring arms — worst number unchanged.
+
+---
+
+## Honesty & limitations (worst numbers — do not bury)
+
+| Metric | Worst arm | Value | Why it matters |
+|--------|-----------|-------|----------------|
+| Refusal accuracy (internal enum) | baseline = shipping | **5/6 = 0.833 tie** | Verifier adds zero delta on held-out set |
+| Refusal accuracy (symmetric judge) | baseline | **2/6 = 0.333** | Naive substring cannot produce verified passages |
+| RC5 substring trap | baseline + shipping + ablation | **false pass** | Document negates claim; terms appear nearby |
+| Live compound sourcing | hosted compound-mini | **sourced=0 both runs** | Compounding proved; sourcing rate did not |
+| Cross-subject offline | dust-bowl | **keys blocked locally** | Only offline reuse test runnable without keys |
+
+---
+
 ## Checklist status (PRIOR LOSS gate)
 
 - [x] Alternative arm named and run
 - [x] Ablation with measured delta (delta=0; RC5 both false-GREEN)
 - [x] External anchor — live rightsstatements.org (`scripts/eval_external_anchor.py`)
+- [x] Holdout frozen (`scripts/eval_holdout_frozen.py` + `FROZEN.json`)
+- [x] Scorer symmetrical (`scripts/eval_scorer_symmetry.py`)
 - [x] Offline path with no API key
 - [x] Wilson CI + McNemar (n=6)
-- [x] Honesty carries worst number (tie + RC5 false-GREEN both arms)
+- [x] Honesty carries worst number (symmetric baseline 2/6; RC5 false-SOURCED; live sourced=0)
