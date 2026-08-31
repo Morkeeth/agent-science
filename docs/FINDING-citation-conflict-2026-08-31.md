@@ -279,7 +279,8 @@ the wave-4 fix the page names it as a different population from the corpus.
 
 ## What the 23-row set found — including the first false refusal
 
-`python3 scripts/probe_citation_heldout.py`, 2026-08-31 ~07:15. SET A is the wave-4
+`python3 scripts/probe_citation_heldout.py`, 2026-08-31 ~05:5x (was written as "~07:15", which is
+later than this file's own commit 2732177 at 05:58:14 CEST; corrected by the L10 gate sweep at 07:1x). SET A is the wave-4
 population, reported unchanged; SET B is 12 rows added in wave 5 because SET A priced the
 shape the gate CLOSES at n=3 and the shapes it cannot see at n=1.
 
