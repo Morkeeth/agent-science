@@ -75,8 +75,25 @@ class Claim:
     must_contain: str         # the terms that document must carry
 
 
+def _trail_row(span: str, refusal, claim: Claim) -> dict:
+    """One candidate the locator offered, and the exact reason it was or was not evidence.
+
+    The span is stored WHOLE. Truncating here would put a quotation on an audit page that
+    is not the text the engine judged — this product's own founding sin, committed by the
+    surface that exists to expose it.
+    """
+    return {
+        "span": span,
+        "admissible": refusal is None,
+        "code": None if refusal is None else refusal.code,
+        "detail": None if refusal is None else refusal.detail,
+        "coverage": _semantic.coverage(span or "", claim.text),
+    }
+
+
 def _admissible(locator: Locator, claim: Claim, body: str,
-                semantic: Optional[bool]) -> tuple[Optional[str], object]:
+                semantic: Optional[bool],
+                trail: Optional[list] = None) -> tuple[Optional[str], object]:
     """The first candidate span that survives the verifier — not the first span proposed.
 
     THE MEASUREMENT THAT FORCED THIS. Adding the semantic guard dropped the held-out set
@@ -93,15 +110,24 @@ def _admissible(locator: Locator, claim: Claim, body: str,
 
     With the guard off exactly one candidate is considered, so the pre-guard engine is
     reproduced bit for bit.
+
+    `trail`, when a list is passed, receives one row PER CANDIDATE CONSIDERED: the
+    span, whether it was admissible, the refusal code and detail that killed it, and
+    how much of the claim it carried. This loop is the only place in the engine that
+    knows a candidate was ever looked at — everywhere downstream sees one verdict and
+    one span, which is why 'why was this refused' has never had an answer beyond the
+    winning refusal's code. Recording is free: every value here was already computed.
     """
     use_guard = _semantic.enabled() if semantic is None else semantic
     gen = getattr(locator, "candidates", None)
     if not use_guard or gen is None:
         proposed = locator.propose(claim=claim.text, must_contain=claim.must_contain,
                                    document=body)
-        return proposed, verify(proposed, document=body,
-                                must_contain=claim.must_contain,
-                                claim=claim.text, semantic=semantic)
+        refusal = verify(proposed, document=body, must_contain=claim.must_contain,
+                         claim=claim.text, semantic=semantic)
+        if trail is not None and proposed:
+            trail.append(_trail_row(proposed, refusal, claim))
+        return proposed, refusal
 
     # Take the BEST admissible span, not the first. Both are verbatim, both carry the
     # term; only one is the evidence. Ranking by how much of the claim the span actually
@@ -114,6 +140,8 @@ def _admissible(locator: Locator, claim: Claim, body: str,
             break
         refusal = verify(cand, document=body, must_contain=claim.must_contain,
                          claim=claim.text, semantic=semantic)
+        if trail is not None:
+            trail.append(_trail_row(cand, refusal, claim))
         if refusal is None:
             score = _semantic.coverage(cand, claim.text)
             if score > best_score:
@@ -140,7 +168,13 @@ def judge_claim(claim: Claim, *, fetch: bool = False,
     loop and the escalation loop. Three doors into GREEN; a guard on one of them is a
     guard that tests green and ships two-thirds off.
     """
+    # ONE trail per claim, across every door into GREEN. Three call sites verify
+    # spans; a trail on one of them would be an audit page that quietly omits two
+    # thirds of what the engine looked at, which is worse than no audit page.
+    trail: list = []
+
     def unknown(reason: str, cause: str, **kw) -> Verdict:
+        kw.setdefault("trail", tuple(trail))
         return Verdict(subject_id=claim.claim_id, subject_title=claim.text,
                        noun=FACT, use=SOURCING, verdict=UNKNOWN,
                        reason=reason, cause=cause, **kw)
@@ -172,7 +206,7 @@ def judge_claim(claim: Claim, *, fetch: bool = False,
             if body is None:
                 continue
             read += 1
-            proposed, refusal = _admissible(locator, claim, body, semantic)
+            proposed, refusal = _admissible(locator, claim, body, semantic, trail)
             if refusal is None:
                 verified.append((c.url, proposed))
                 # Best case: one PRIMARY source that verifies — stop reading and
@@ -204,7 +238,7 @@ def judge_claim(claim: Claim, *, fetch: bool = False,
                 if body is None:
                     continue
                 read += 1
-                proposed, refusal = _admissible(locator, claim, body, semantic)
+                proposed, refusal = _admissible(locator, claim, body, semantic, trail)
                 if refusal is None:
                     verified.append((c.url, proposed))
                     if assess_independence([c.url])["basis"] == "primary":
@@ -236,7 +270,7 @@ def judge_claim(claim: Claim, *, fetch: bool = False,
             f"source {claim.source_url} has never been fetched — "
             "no text on file to quote", SOURCE_UNREAD)
 
-    proposed, refusal = _admissible(locator, claim, body, semantic)
+    proposed, refusal = _admissible(locator, claim, body, semantic, trail)
     if refusal is not None:
         # The quotation for a non-finding is a stated, checkable fact ABOUT the
         # document — never an arbitrary slice OF it, which reads as evidence and
@@ -245,6 +279,7 @@ def judge_claim(claim: Claim, *, fetch: bool = False,
         return unknown(
             f"no admissible passage found by locator '{locator.name}': {refusal.code}",
             SOURCE_SILENT, citation_url=claim.source_url,
+            refusal_code=refusal.code,
             quoted_terms=(f"document opened, {len(body):,} characters read; "
                           f"{refusal.detail}"))
 
@@ -254,4 +289,5 @@ def judge_claim(claim: Claim, *, fetch: bool = False,
         reason=f"the named source states this, passage verified verbatim "
                f"(locator: {locator.name})",
         citation_url=claim.source_url, quoted_terms=proposed.strip(),
+        trail=tuple(trail),
     )

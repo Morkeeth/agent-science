@@ -113,26 +113,71 @@ def norm_term(term: str) -> str:
     return re.sub(r"\s+", " ", (term or "").strip().lower())
 
 
+# ADDITIVE, and additive on purpose. Every registry on disk predates the audit trail,
+# and a migration that rewrote them would be this product asserting something about rows
+# it never judged. New columns default NULL, and a row with no trail SAYS SO on the
+# surface rather than rendering an empty audit page that reads like "nothing was
+# considered".
+_ADDED_COLUMNS = (
+    ("refusal_code", "TEXT"),   # the precise mechanism, beside the coarse cause
+    ("trail", "TEXT"),          # json: every span considered, and why each was not evidence
+)
+
+
 def connect(path: Path | str = DB) -> sqlite3.Connection:
     p = Path(path)
     p.parent.mkdir(parents=True, exist_ok=True)
     con = sqlite3.connect(p)
     con.row_factory = sqlite3.Row
     con.executescript(_SCHEMA)
+    have = {r["name"] for r in con.execute("PRAGMA table_info(claims)")}
+    for name, decl in _ADDED_COLUMNS:
+        if name not in have:
+            con.execute(f"ALTER TABLE claims ADD COLUMN {name} {decl}")
+    con.commit()
     return con
 
 
 def record(con, *, term: str, assertion: str, verdict: str, production: str,
            basis: Optional[str] = None, cause: Optional[str] = None,
            citation_url: Optional[str] = None, quoted_terms: Optional[str] = None,
-           origins: Optional[list] = None, resolves_with: Optional[str] = None) -> None:
-    """Write a claim OR a refusal. Refusals are first-class here, not a side effect."""
-    con.execute(
-        "INSERT OR IGNORE INTO claims VALUES (?,?,?,?,?,?,?,?,?,?,?,?,0)",
-        (norm_term(term), slot_of(assertion, term), assertion, verdict, basis, cause,
-         citation_url, quoted_terms, json.dumps(origins or []), resolves_with,
-         production, datetime.now(timezone.utc).isoformat(timespec="seconds")))
+           origins: Optional[list] = None, resolves_with: Optional[str] = None,
+           refusal_code: Optional[str] = None,
+           trail: Optional[list] = None) -> None:
+    """Write a claim OR a refusal. Refusals are first-class here, not a side effect.
+
+    `trail` is every span the locator offered for this claim and the reason each one was
+    or was not evidence. It is written by NAMED COLUMN rather than positionally: the
+    old INSERT listed thirteen bare values and adding a column to the schema would have
+    shifted every one of them by one, silently, with no error — a row where `basis`
+    holds a URL and `cause` holds a quotation still inserts.
+    """
+    cols = ("term", "slot", "established", "verdict", "basis", "cause", "citation_url",
+            "quoted_terms", "origins", "resolves_with", "first_seen_in", "first_seen_at",
+            "reused", "refusal_code", "trail")
+    vals = (norm_term(term), slot_of(assertion, term), assertion, verdict, basis, cause,
+            citation_url, quoted_terms, json.dumps(origins or []), resolves_with,
+            production, datetime.now(timezone.utc).isoformat(timespec="seconds"), 0,
+            refusal_code, json.dumps(trail) if trail else None)
+    con.execute(f"INSERT OR IGNORE INTO claims ({','.join(cols)}) "
+                f"VALUES ({','.join('?' * len(cols))})", vals)
     con.commit()
+
+
+def trail_of(row) -> list:
+    """The spans considered for one row, or [] when the row predates the trail.
+
+    [] and "no trail recorded" are different facts and the surface must not merge them:
+    one means the locator found nothing worth offering, the other means nobody wrote it
+    down. `has_trail` is the column being non-NULL; the list is what is in it.
+    """
+    raw = (dict(row) if not isinstance(row, dict) else row).get("trail")
+    if not raw:
+        return []
+    try:
+        return json.loads(raw) or []
+    except ValueError:
+        return []
 
 
 def lookup(con, *, term: str, assertion: str) -> Optional[dict]:

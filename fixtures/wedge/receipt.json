@@ -1,0 +1,99 @@
+{
+ "produced_by": "python3 scripts/wedge_receipt.py",
+ "produced_at": "2026-08-31T02:36:22+00:00",
+ "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32024R1689",
+ "instrument": "Regulation (EU) 2024/1689 \u2014 the EU AI Act",
+ "document_chars": 590271,
+ "cases": [
+  {
+   "id": "WEDGE-1",
+   "claim": "Article 50 transparency breaches are subject to \"administrative fines of up to EUR 35 000 000\"",
+   "must_contain": "administrative fines of up to EUR 35 000 000",
+   "expect": "REFUSED",
+   "note": "False. 35M/7% is the Article 5 tier. The span that carries the anchor is Article 99(3), which is about Article 5 and never mentions Article 50.",
+   "base": {
+    "verdict": "GREEN",
+    "label": "SOURCED",
+    "cause": null,
+    "refusal_code": null,
+    "reason": "the named source states this, passage verified verbatim (locator: string)",
+    "citation_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32024R1689",
+    "quoted_terms": "Non-compliance with the prohibition of the AI practices referred to in Article 5 shall be subject to administrative fines of up to EUR 35 000 000 or, if the offender is an undertaking, up to 7 % of its total worldwide annual turnover for the preceding financial year, whichever is higher.",
+    "trail": [
+     {
+      "span": "Non-compliance with the prohibition of the AI practices referred to in Article 5 shall be subject to administrative fines of up to EUR 35 000 000 or, if the offender is an undertaking, up to 7 % of its total worldwide annual turnover for the preceding financial year, whichever is higher.",
+      "admissible": true,
+      "code": null,
+      "detail": null,
+      "coverage": 0.7272727272727273
+     }
+    ]
+   },
+   "ships": {
+    "verdict": "UNKNOWN",
+    "label": "REFUSED",
+    "cause": "source_does_not_state_it",
+    "refusal_code": "cited_provision_differs",
+    "reason": "no admissible passage found by locator 'string': cited_provision_differs",
+    "citation_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32024R1689",
+    "quoted_terms": "document opened, 590,271 characters read; cited_provision_differs: the claim is about Article 50; the clause carrying 'administrative fines of up to EUR 35 000 000' cites Article 5 and never Article 50",
+    "trail": [
+     {
+      "span": "Non-compliance with the prohibition of the AI practices referred to in Article 5 shall be subject to administrative fines of up to EUR 35 000 000 or, if the offender is an undertaking, up to 7 % of its total worldwide annual turnover for the preceding financial year, whichever is higher.",
+      "admissible": false,
+      "code": "cited_provision_differs",
+      "detail": "cited_provision_differs: the claim is about Article 50; the clause carrying 'administrative fines of up to EUR 35 000 000' cites Article 5 and never Article 50",
+      "coverage": 0.7272727272727273
+     }
+    ]
+   },
+   "engine_agrees_with_label": true,
+   "coverage": 0.7272727272727273
+  },
+  {
+   "id": "WEDGE-2",
+   "claim": "Article 50 transparency breaches are subject to \"administrative fines of up to EUR 15 000 000\"",
+   "must_contain": "administrative fines of up to EUR 15 000 000",
+   "expect": "SOURCED",
+   "note": "True. Article 99(4) sets EUR 15 000 000 / 3 % and reaches Article 50 at point (g). The same mechanism must let this one through.",
+   "base": {
+    "verdict": "GREEN",
+    "label": "SOURCED",
+    "cause": null,
+    "refusal_code": null,
+    "reason": "the named source states this, passage verified verbatim (locator: string)",
+    "citation_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32024R1689",
+    "quoted_terms": "Non-compliance with any of the following provisions related to operators or notified bodies, other than those laid down in Articles 5, shall be subject to administrative fines of up to EUR 15 000 000 or, if the offender is an undertaking, up to 3 % of its total worldwide annual turnover for the preceding financial year,",
+    "trail": [
+     {
+      "span": "Non-compliance with any of the following provisions related to operators or notified bodies, other than those laid down in Articles 5, shall be subject to administrative fines of up to EUR 15 000 000 or, if the offender is an undertaking, up to 3 % of its total worldwide annual turnover for the preceding financial year,",
+      "admissible": true,
+      "code": null,
+      "detail": null,
+      "coverage": 0.7272727272727273
+     }
+    ]
+   },
+   "ships": {
+    "verdict": "GREEN",
+    "label": "SOURCED",
+    "cause": null,
+    "refusal_code": null,
+    "reason": "the named source states this, passage verified verbatim (locator: string)",
+    "citation_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32024R1689",
+    "quoted_terms": "Non-compliance with any of the following provisions related to operators or notified bodies, other than those laid down in Articles 5, shall be subject to administrative fines of up to EUR 15 000 000 or, if the offender is an undertaking, up to 3 % of its total worldwide annual turnover for the preceding financial year,",
+    "trail": [
+     {
+      "span": "Non-compliance with any of the following provisions related to operators or notified bodies, other than those laid down in Articles 5, shall be subject to administrative fines of up to EUR 15 000 000 or, if the offender is an undertaking, up to 3 % of its total worldwide annual turnover for the preceding financial year,",
+      "admissible": true,
+      "code": null,
+      "detail": null,
+      "coverage": 0.7272727272727273
+     }
+    ]
+   },
+   "engine_agrees_with_label": true,
+   "coverage": 0.7272727272727273
+  }
+ ]
+}

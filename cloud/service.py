@@ -6,6 +6,8 @@
   GET  /search?q=         stack websearch (registry → live)
   POST /search            {"query","live?","subject?"}
   POST /ingest            claim markdown or {claim,url}
+  GET  /front            the front surface — the wedge, the curve, the negative space
+  GET  /refusal?term=    one refusal opened: every span considered, and why each failed
   GET  /registry         browsable verified-truths registry
   GET  /registry/api?q=  JSON registry query (read-only)
   GET  /corpus?subject=  remembered count for a subject shelf
@@ -89,7 +91,7 @@ button:hover{background:#000}
   <h1 class="brand">Agent Science</h1>
   <p class="thesis">The websearch companion — every claim sourced verbatim from a real document,
   or refused with the reason why. The registry remembers: clear once, reuse for free.</p>
-  <p class="nav"><a href="/registry">Browse the registry</a> — {registry_stats} verified truths on disk.</p>
+  <p class="nav"><a href="/front">What this desk refuses, and why that is the product</a> · <a href="/registry">Browse the registry</a> — {registry_stats} verified truths on disk.</p>
   <form class="desk" method="post" action="/clear">
     <div class="row">
       <div>
@@ -362,6 +364,19 @@ class Handler(BaseHTTPRequestHandler):
         if path in ("/", "/index.html"):
             subj = (qs.get("subject") or [""])[0].strip() or "orphan-works"
             return self._send(200, _desk_page(subj).encode(), "text/html; charset=utf-8")
+
+        # THE FRONT SURFACE. Served at /front rather than replacing "/": the desk at
+        # "/" is the live clearance runner and is what the hosted demo and the partner
+        # runtime already point at. Silently swapping what a shipped URL returns is the
+        # substitution defect wearing a routing table. The desk links here instead.
+        if path in ("/front", "/front/"):
+            page = ask_registry.render_front(db=_log_db(), registry_href="/registry")
+            return self._send(200, page.encode(), "text/html; charset=utf-8")
+
+        if path in ("/refusal", "/refusal/"):
+            term = (qs.get("term") or [""])[0]
+            page = ask_registry.render_refusal(term=term, db=_log_db(), home="/front")
+            return self._send(200, page.encode(), "text/html; charset=utf-8")
 
         if path in ("/registry", "/registry/"):
             q = (qs.get("q") or [""])[0]

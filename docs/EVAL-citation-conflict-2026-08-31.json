@@ -1,0 +1,126 @@
+{
+ "gold": {
+  "n": 6,
+  "labelled_at": "2026-08-22T21:30:00Z",
+  "rows": [
+   {
+    "id": "RC1",
+    "gold": "SUPPORTED",
+    "BASE": "SUPPORTED",
+    "BASE_code": "",
+    "CONFLICT": "SUPPORTED",
+    "CONFLICT_code": "",
+    "ABSENCE": "SUPPORTED",
+    "ABSENCE_code": ""
+   },
+   {
+    "id": "RC2",
+    "gold": "SUPPORTED",
+    "BASE": "SUPPORTED",
+    "BASE_code": "",
+    "CONFLICT": "SUPPORTED",
+    "CONFLICT_code": "",
+    "ABSENCE": "SUPPORTED",
+    "ABSENCE_code": ""
+   },
+   {
+    "id": "RC3",
+    "gold": "NOT_SUPPORTED",
+    "BASE": "NOT_SUPPORTED",
+    "BASE_code": "no_passage",
+    "CONFLICT": "NOT_SUPPORTED",
+    "CONFLICT_code": "no_passage",
+    "ABSENCE": "NOT_SUPPORTED",
+    "ABSENCE_code": "no_passage"
+   },
+   {
+    "id": "RC4",
+    "gold": "NOT_SUPPORTED",
+    "BASE": "NOT_SUPPORTED",
+    "BASE_code": "no_passage",
+    "CONFLICT": "NOT_SUPPORTED",
+    "CONFLICT_code": "no_passage",
+    "ABSENCE": "NOT_SUPPORTED",
+    "ABSENCE_code": "no_passage"
+   },
+   {
+    "id": "RC5",
+    "gold": "NOT_SUPPORTED",
+    "BASE": "NOT_SUPPORTED",
+    "BASE_code": "claim_contradicted_in_span",
+    "CONFLICT": "NOT_SUPPORTED",
+    "CONFLICT_code": "claim_contradicted_in_span",
+    "ABSENCE": "NOT_SUPPORTED",
+    "ABSENCE_code": "claim_contradicted_in_span"
+   },
+   {
+    "id": "RC6",
+    "gold": "SUPPORTED",
+    "BASE": "SUPPORTED",
+    "BASE_code": "",
+    "CONFLICT": "SUPPORTED",
+    "CONFLICT_code": "",
+    "ABSENCE": "SUPPORTED",
+    "ABSENCE_code": ""
+   }
+  ],
+  "correct_BASE": 6,
+  "correct_CONFLICT": 6,
+  "correct_ABSENCE": 6
+ },
+ "attribution": {
+  "greens": 27,
+  "cite_a_provision": 0,
+  "hits": {
+   "CONFLICT": [],
+   "ABSENCE": []
+  }
+ },
+ "registry": {
+  "total": 314,
+  "counts": {
+   "BASE": {
+    "sourced": 27,
+    "refused": 271,
+    "unknown": 16
+   },
+   "CONFLICT": {
+    "sourced": 27,
+    "refused": 271,
+    "unknown": 16
+   },
+   "ABSENCE": {
+    "sourced": 27,
+    "refused": 271,
+    "unknown": 16
+   }
+  },
+  "flips": {
+   "CONFLICT": [],
+   "ABSENCE": []
+  }
+ },
+ "wedge": {
+  "document_chars": 590271,
+  "cases": [
+   {
+    "id": "WEDGE-1",
+    "expect": "REFUSED",
+    "base": "GREEN",
+    "ships": "UNKNOWN",
+    "code": "cited_provision_differs",
+    "trail": 1,
+    "ok": true
+   },
+   {
+    "id": "WEDGE-2",
+    "expect": "SOURCED",
+    "base": "GREEN",
+    "ships": "GREEN",
+    "code": "",
+    "trail": 1,
+    "ok": true
+   }
+  ]
+ }
+}

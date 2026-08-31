@@ -39,7 +39,7 @@ from dataclasses import dataclass
 from typing import Optional, Sequence
 
 # EVERY mechanism that can be measured.
-CHECKS = ("polarity", "binding", "coverage")
+CHECKS = ("polarity", "binding", "coverage", "citation")
 
 # The mechanisms that may REFUSE. Only one, and the shortlist was cut by measurement,
 # not by design taste — see docs/FINDING-semantic-guard-2026-08-31.md:
@@ -56,7 +56,7 @@ CHECKS = ("polarity", "binding", "coverage")
 # So they are not gates. They are kept, exported and measured — and `coverage` is used
 # where it is actually sound: to PREFER one admissible span over another. Choosing the
 # better of two legitimate spans costs nothing; refusing a legitimate span costs a claim.
-DEFAULT_CHECKS = ("polarity",)
+DEFAULT_CHECKS = ("polarity", "citation")
 
 # One code per mechanism. "the guard fired" is not a finding — a registry row has to say
 # WHICH reading of the span refused it, or nobody can audit the refusal.
@@ -64,7 +64,12 @@ CONTRADICTED = "claim_contradicted_in_span"
 UNDER_NEGATION = "terms_appear_under_negation"
 NOT_BOUND = "subject_not_bound"
 NOT_CARRIED = "claim_content_not_carried"
-CODES = (CONTRADICTED, UNDER_NEGATION, NOT_BOUND, NOT_CARRIED)
+# The claim cites one provision; the clause carrying the anchor cites another.
+CITED_PROVISION_DIFFERS = "cited_provision_differs"
+# The measured, NON-GATING arm: the claim cites a provision the span never names.
+CITATION_ABSENT = "cited_provision_absent"
+CODES = (CONTRADICTED, UNDER_NEGATION, NOT_BOUND, NOT_CARRIED,
+         CITED_PROVISION_DIFFERS, CITATION_ABSENT)
 
 # Chosen by MEASUREMENT, not by taste — see docs/FINDING-semantic-guard-2026-08-31.md
 # for the sweep over 0.30/0.40/0.50/0.60 on the 177-row registry replay.
@@ -350,8 +355,135 @@ def check_coverage(passage: str, *, claim: str, must_contain: str,
     return None
 
 
+
+# ------------------------------------------------------- provision citations
+
+# A PROVISION CITATION is two tokens that mean one thing: a structural head noun and a
+# number. Every bag-of-words path in this file splits that pair and then throws the
+# number away -- `content()` drops tokens of length 1, so the "5" in "Article 5" is
+# invisible, and the surviving token "article" MATCHES "Article 50". The claim and the
+# span therefore agree on the only token either of them can see. That is why a fourth
+# mechanism was needed and a stronger version of an existing one could not have worked:
+# the old checks were not weak, they were reading the wrong object.
+#
+# The head list is a CLOSED CLASS -- the structural nouns of legal and technical
+# drafting. It is a genre convention, the same kind of fact as English negation, and not
+# a list that grows when a new website defeats it. If a domain word is ever added here,
+# the check is being overfitted and the addition is the bug.
+_PROVISION_HEADS = ("article", "articles", "section", "sections", "annex", "annexes",
+                    "chapter", "chapters", "paragraph", "paragraphs", "recital",
+                    "recitals", "clause", "clauses", "schedule", "schedules",
+                    "rule", "rules", "part", "parts", "title", "titles",
+                    "subsection", "subsections")
+
+_PROVISION = re.compile(
+    r"\b(" + "|".join(_PROVISION_HEADS) + r")\s+(\d+)\b", re.IGNORECASE)
+
+# AN EXCLUSION IS NOT A SUBJECT. Found by measurement, not by thinking, on the first
+# run of the gate against a real penalties provision:
+#
+#   "Non-compliance with any of the following provisions ... other than those laid down
+#    in Articles 5, shall be subject to administrative fines of up to EUR 15 000 000"
+#
+# That paragraph is the TRUE source for the true claim, and the gate refused it — the
+# only citation inside the carrier clause is the one the clause exists to EXCLUDE. A
+# rule that reads an exception as the subject refuses the correct answer to the very
+# question the exhibit was built around, which is the refuse-everything failure this
+# repo has lost a day to before, arriving inside the mechanism written to prevent it.
+#
+# Exclusion markers are a closed class of English, like the negators and the contrastive
+# conjunctions above. They are not a list that grows per document.
+_EXCLUSION = re.compile(
+    r"\b(?:other\s+than|apart\s+from|save\s+for|save\s+as\s+provided|"
+    r"with\s+the\s+exception\s+of|except(?:ing)?(?:\s+for)?|excluding|"
+    r"but\s+not)\b[^,;:.]{0,90}", re.IGNORECASE)
+
+
+def _without_exclusions(text: str, must_contain: str) -> str:
+    """Drop excepting phrases before reading which provision a clause is ABOUT.
+
+    Skipped entirely if the strip would eat the anchor — the same rule the aside-stripper
+    keeps: never delete the text under judgement.
+    """
+    stripped = _EXCLUSION.sub(" ", text or "")
+    if must_contain and must_contain not in stripped:
+        return text
+    return stripped
+
+
+def provisions(text: str) -> set:
+    """(head, number) pairs cited in `text`, parsed from RAW text.
+
+    Raw, not tokens: by the time text reaches `tokens()` the number is gone. The head is
+    singularised so "Articles 5" and "Article 5" are the same citation -- a penalties
+    provision writes both within one sentence. The number keeps only its leading integer,
+    so "Article 33(1)" and "Article 33" are one provision and never conflict; the
+    sub-paragraph is a part of the article, not a rival to it.
+    """
+    out = set()
+    for m in _PROVISION.finditer(text or ""):
+        head = m.group(1).lower()
+        head = head[:-1] if head.endswith("s") else head
+        out.add((head, m.group(2)))
+    return out
+
+
+def check_citation(passage: str, *, claim: str, must_contain: str,
+                   gate_absence: bool = False) -> Optional[Finding]:
+    """Does the clause carrying the anchor cite the provision the CLAIM is about?
+
+    THE CASE, measured on the shipping engine 2026-08-31 against a live-fetched
+    regulation (the exhibit and its provenance live in clearance/wedge.py, so no
+    document this guard was tuned against is named inside the guard). A claim about
+    Article 50 was cleared GREEN on a penalties paragraph about Article 5: verbatim,
+    in the cited document, carrying 75%% of the claim's content terms. Every existing
+    check returned None. A keyword grounder returns a citation and a URL.
+
+    ASYMMETRIC, AND BOTH DIRECTIONS BIAS AWAY FROM REFUSING.
+      * The claimed provision counts as bound if it appears ANYWHERE in the span. A
+        legal sentence names its subject once and then pronominalises; demanding it in
+        the carrier clause is the mistake that got `binding` cut as a gate.
+      * A RIVAL provision only counts inside the carrier clause. A penalties article
+        names twenty provisions per paragraph, and any of them would otherwise read as a
+        conflict.
+
+    ABSENCE IS NOT A GATE. `gate_absence=True` runs the second arm so its cost can be
+    COUNTED before anyone argues for it -- see scripts/eval_citation_conflict.py. It is
+    off by default because "the span never names the provision" is ordinary topic
+    continuity, and this repo has already lost a day to a gate that refuses ordinary
+    prose.
+    """
+    want = provisions(claim) - provisions(must_contain)
+    if not want:
+        return None                      # the claim cites nothing; nothing to bind
+    # Presence is read on the WHOLE, UNSTRIPPED passage: the most generous reading
+    # available, because a false refusal costs a true claim.
+    here = provisions(passage)
+    unbound = {p for p in want if p not in here}
+    if not unbound:
+        return None
+
+    # Conflict is read on the carrier clause with its exceptions removed: the least
+    # generous input the check is allowed, because a false GREEN costs a lawsuit.
+    body = _without_exclusions(passage, must_contain)
+    carrier = provisions(_carrier(body, must_contain))
+    for head, number in sorted(unbound):
+        rivals = sorted(n for h, n in carrier if h == head and n != number)
+        if rivals:
+            return _detail(
+                CITED_PROVISION_DIFFERS,
+                f"the claim is about {head.title()} {number}; the clause carrying "
+                f"{must_contain!r} cites {head.title()} "
+                f"{', '.join(rivals)} and never {head.title()} {number}")
+    if gate_absence:
+        head, number = sorted(unbound)[0]
+        return _detail(CITATION_ABSENT,
+                       f"the claim is about {head.title()} {number} and the span "
+                       f"never names it")
+    return None
+
 _BY_NAME = {"polarity": check_polarity, "binding": check_binding,
-            "coverage": check_coverage}
+            "coverage": check_coverage, "citation": check_citation}
 
 
 def coverage(passage: str, claim: str) -> float:
@@ -369,16 +501,25 @@ def coverage(passage: str, claim: str) -> float:
 
 
 def inspect(passage: Optional[str], *, claim: str, must_contain: str,
-            checks: Sequence[str] = DEFAULT_CHECKS,
+            checks: Optional[Sequence[str]] = None,
             min_coverage: float = DEFAULT_MIN_COVERAGE) -> Optional[Finding]:
     """None if the span may stand as evidence for the claim, else the first finding.
 
     Runs in the order given so a caller measuring one mechanism can pass `checks=("x",)`
     and get that mechanism's contribution alone.
+
+    `checks=None` reads DEFAULT_CHECKS **at call time**, and that word is load-bearing.
+    It used to be a default ARGUMENT, which Python binds once at import — so an eval
+    harness that set `semantic.DEFAULT_CHECKS` to measure a control arm changed nothing,
+    and the arm labelled BASE silently ran the new gate. Caught 2026-08-31 by a receipt
+    that printed BASE=REFUSED for a case measured GREEN on the same engine twenty minutes
+    earlier. The measurement harness was substituting a rule that never applied, which is
+    a worse failure than the defect it was measuring: it makes the control agree with the
+    treatment and reports it as agreement.
     """
     if not passage or not (claim or "").strip():
         return None
-    for name in checks:
+    for name in (DEFAULT_CHECKS if checks is None else checks):
         fn = _BY_NAME[name]
         kw = {"min_coverage": min_coverage} if name == "coverage" else {}
         found = fn(passage, claim=claim, must_contain=must_contain, **kw)

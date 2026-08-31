@@ -79,6 +79,16 @@ class Verdict:
     holder: Optional[str] = None
     interpretive: bool = False # True = our legal reading, not the text's plain words
     cause: Optional[str] = None  # UNKNOWN only: which of CAUSES applies
+    # THE PRECISE MECHANISM, beside the coarse cause — never instead of it.
+    # `cause` is a CLOSED registry vocabulary and widening it would let the
+    # vocabulary say more than the engine can prove. But 'we read it and it does
+    # not state this' is the same cause for a blank page and for a paragraph that
+    # cites the wrong provision, and only one of those is auditable. So the code
+    # rides alongside, optional, and the registry renders it when it is there.
+    refusal_code: Optional[str] = None
+    # EVERY span the locator considered, and why each one was not evidence. A
+    # refusal you must trust is a chatbot; a refusal you can open is the product.
+    trail: tuple = ()
     published_instrument: Optional[str] = None
     # What the archive actually published, when it differs from citation_url — e.g.
     # it published CC BY-NC-ND 3.0/es and we read the 4.0 text. Quoting one URL while

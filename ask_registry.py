@@ -14,12 +14,13 @@ from __future__ import annotations
 
 import argparse
 import html
+import re
 import json
 import os
 import sys
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
-from urllib.parse import parse_qs, urlencode, urlparse
+from urllib.parse import parse_qs, quote, urlencode, urlparse
 
 from clearance import curve, refusal_log
 
@@ -137,7 +138,13 @@ form.ask button{padding:.62rem 1.1rem;background:var(--ink);color:var(--paper);
   color:var(--unknown);margin:.3rem 0 0;padding-left:.85rem}
 
 /* the curve exhibit — visually a different object from the live shelf */
-.exhibit{background:var(--card);border:1px solid var(--rule);padding:1.1rem 1.2rem}
+.exhibit{background:var(--card);border:1px solid var(--rule);
+  padding:1.1rem 1.2rem;overflow-x:auto}
+/* A wide table scrolls inside its own box. Measured at a REAL 390px
+   viewport (document.documentElement.clientWidth === 390, not a cropped
+   screenshot): the causes table pushed the page to 411px and the whole
+   body scrolled sideways. */
+.exhibit table{min-width:26rem}
 .exhibit table{width:100%;border-collapse:collapse;font-size:.8rem;
   font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace}
 .exhibit th{text-align:left;font-size:.6rem;letter-spacing:.09em;text-transform:uppercase;
@@ -152,6 +159,96 @@ form.ask button{padding:.62rem 1.1rem;background:var(--ink);color:var(--paper);
 .warn{border-left:3px solid var(--unknown);padding-left:.8rem;font-size:.82rem;
   color:#4a4438;margin:1rem 0 0;max-width:46rem}
 @media(max-width:620px){.row{grid-template-columns:1fr}.tag{padding-top:0}}
+
+/* ============================================================ THE FRONT SURFACE
+   ONE signature device, taken from this subject and from nothing else: THE NEAR-MISS
+   STACK. Two spans, the same anchor, one numeral apart. The anchor is underlined in
+   both so you can see it is identical; the provision citation is BOXED so you can see
+   it is not. Everything a keyword grounder checks is drawn as matching; the one thing
+   it does not check is drawn as the difference. The layout is the argument — delete the
+   marks and the page has to make the point in a sentence instead, and loses it. */
+.hero{border:1px solid var(--rule);background:var(--card);margin:0 0 2rem}
+.hero-head{padding:1.05rem 1.2rem .9rem;border-bottom:1px solid var(--rule)}
+.hero-kicker{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace;font-size:.6rem;
+  letter-spacing:.18em;text-transform:uppercase;color:var(--refused);font-weight:600;
+  margin:0 0 .5rem}
+.hero-claim{margin:0;font-size:1.12rem;line-height:1.35}
+.hero-body{padding:1.05rem 1.2rem 1.2rem}
+
+/* the two candidate readings, stacked */
+.nearmiss{display:grid;grid-template-columns:8.5rem 1fr;gap:0 1.1rem;
+  border-top:1px solid var(--rule);padding:.95rem 0 .1rem}
+.nearmiss:first-of-type{border-top:0}
+.nm-side{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace;font-size:.63rem;
+  letter-spacing:.08em;line-height:1.55;color:var(--mute)}
+.nm-verdict{display:block;font-weight:600;letter-spacing:.1em;margin:0 0 .35rem}
+.nm-verdict.pass{color:var(--sourced)} .nm-verdict.fail{color:var(--refused)}
+.nm-span{margin:0;font-size:.92rem;line-height:1.6;color:#2c3038}
+.nm-span .anchor{border-bottom:2px solid var(--sourced);padding-bottom:1px}
+.nm-cite{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace;font-size:.84em;
+  border:1.5px solid var(--refused);color:var(--refused);padding:0 .28em;
+  border-radius:2px;white-space:nowrap;font-weight:600}
+.nm-cite.ok{border-color:var(--sourced);color:var(--sourced)}
+.nm-why{margin:.5rem 0 0;font-size:.82rem;color:#4a4438;line-height:1.5}
+.nm-why code{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace;font-size:.92em}
+.checks{list-style:none;margin:.1rem 0 0;padding:0;
+  font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace;font-size:.68rem;
+  color:var(--mute);line-height:1.85}
+.checks li:before{content:"✓ ";color:var(--sourced);font-weight:600}
+.checks li.no:before{content:"✕ ";color:var(--refused)}
+.hero-foot{border-top:1px solid var(--rule);padding:.8rem 1.2rem;
+  font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace;font-size:.66rem;
+  color:var(--mute);line-height:1.6}
+.hero-foot a{color:var(--mute)}
+
+/* the curve — two panels, ONE measure each, never two scales on one axis */
+.panels{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem}
+@media(max-width:640px){.panels{grid-template-columns:1fr}}
+.panel{border:1px solid var(--rule);background:var(--card);padding:.95rem 1rem 1rem}
+.panel h3{margin:0 0 .1rem;font-size:.92rem;font-weight:600;letter-spacing:-.01em}
+.panel p.sub{margin:0 0 .8rem;font-size:.72rem;color:var(--mute);line-height:1.5;
+  font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace}
+.panel svg{display:block;width:100%;height:auto;overflow:visible}
+.axis{stroke:var(--rule);stroke-width:1}
+.gridline{stroke:var(--rule);stroke-width:1;opacity:.55}
+.tick{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace;font-size:8.5px;
+  fill:var(--mute)}
+.vlabel{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace;font-size:9.5px;
+  font-weight:600}
+.bar-reuse{fill:var(--sourced)} .bar-cost{fill:var(--mute);opacity:.55}
+.hero-num{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace;font-weight:600;
+  font-size:2rem;line-height:1;letter-spacing:-.02em}
+
+/* the audit page */
+.cand{border-top:1px solid var(--rule);padding:.9rem 0}
+.cand:last-of-type{border-bottom:1px solid var(--rule)}
+.cand-head{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace;font-size:.64rem;
+  letter-spacing:.08em;margin:0 0 .4rem;color:var(--mute)}
+.cand-head b.no{color:var(--refused)} .cand-head b.yes{color:var(--sourced)}
+.cand-span{margin:0;padding-left:.85rem;font-size:.9rem;line-height:1.6;color:#2c3038;
+  border-left:3px solid var(--rule)}
+.cand-span.no{border-left-color:var(--refused)}
+.cand-span.yes{border-left-color:var(--sourced)}
+.cand-why{margin:.45rem 0 0;padding-left:.85rem;font-size:.78rem;color:#4a4438;
+  font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace;line-height:1.55}
+.empty{border-left:3px solid var(--unknown);padding-left:.8rem;font-size:.84rem;
+  color:#4a4438;max-width:46rem}
+.rowlink{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace;font-size:.64rem;
+  text-decoration:none;border-bottom:1px solid var(--rule)}
+
+/* PHONE. Measured at a real 390px viewport, not a cropped 500px screenshot: the
+   near-miss grid held its 8.5rem label column, leaving the span about fourteen
+   characters wide and the label a tall thin ribbon beside it. The device only works
+   when the two readings sit one above the other, which is also how they should be read. */
+@media(max-width:640px){
+  .nearmiss{grid-template-columns:1fr;gap:.45rem 0;padding:1rem 0 .3rem}
+  .nm-side{display:flex;flex-wrap:wrap;align-items:baseline;gap:0 .6rem;font-size:.6rem}
+  .nm-verdict{margin:0}
+  .hero-head,.hero-body,.hero-foot{padding-left:.9rem;padding-right:.9rem}
+  .nm-span{font-size:.88rem;line-height:1.55}
+  .hero-claim{font-size:1rem}
+}
+
 """
 
 _SHELL = """<!DOCTYPE html>
@@ -366,8 +463,490 @@ def render_page(*, q: str = "", db: Path | str | None = None,
 
     body.append(f'<p class="meta" style="margin-top:2.4rem">'
                 f'<a href="{html.escape(desk_href, quote=True)}">← the clearance desk</a>'
+                f' · <a href="/front">the front surface</a>'
                 f" · /registry/api?q= for JSON</p>")
     return _SHELL.replace("__CSS__", _CSS).replace("__BODY__", "".join(body))
+
+
+
+# ============================================================== THE NEAR-MISS STACK
+#
+# The signature device. It marks TWO things inside a span the engine produced, and it
+# marks them by searching that span — never by re-typing it:
+#
+#   the ANCHOR          the distinctive phrase the claim demanded, underlined. Identical
+#                       in both readings, which is the point: every test a keyword
+#                       grounder runs is a test on this substring.
+#   the CITATION        the provision the clause is actually about, boxed. This is the
+#                       only difference between a €15,000,000 answer and a €35,000,000
+#                       one, and it is one numeral wide.
+#
+# If either mark cannot be found in the span, the span renders PLAIN. It is never
+# rewritten to make a mark fit: the text on this page has to be the text the engine
+# judged, character for character, or the page is doing what the product refuses.
+
+def _mark_span(span: str, *, must_contain: str, claim: str,
+               rivals: frozenset = frozenset()) -> str:
+    """Escape, then mark the anchor and ONLY the citations the engine spoke about.
+
+    Escaping AFTER inserting tags would escape the tags, so both needles are matched
+    against the already-escaped string.
+
+    THE MARK MUST NOT ASSERT MORE THAN THE ENGINE DID. The first version boxed EVERY
+    provision it could find and coloured it by whether the claim mentioned it — which
+    put a refusal-red box around "Articles 5" inside the span that CLEARS the true
+    claim, because that sentence names Article 5 in order to exclude it. Two correct
+    facts adjacent, asserting a relation neither supports: the row was right, the mark
+    said it was wrong, and nothing on the page checked the mark against the verdict.
+    So: green marks the provision the CLAIM is about; red marks only a provision the
+    engine's own finding named as the rival. Everything else stays plain text.
+    """
+    from clearance import semantic as _sem
+
+    text = html.escape(span or "")
+    marks = []                                   # (start, end, css class)
+    # CASE-INSENSITIVE, because the registry stores the anchor normalised (lowercased)
+    # while the span is the document's own casing. Matching exactly meant the audit page
+    # underlined nothing at all and the reader could not see that both readings turn on
+    # the same substring — the one fact the whole device exists to show.
+    anchor = html.escape(must_contain or "")
+    if anchor:
+        at = text.lower().find(anchor.lower())
+        if at >= 0:
+            marks.append((at, at + len(anchor), "anchor"))
+
+    wanted = {n for _h, n in _sem.provisions(claim or "")}
+    for m in _sem._PROVISION.finditer(text):
+        num = m.group(2)
+        if num in wanted:
+            marks.append((m.start(), m.end(), "nm-cite ok"))
+        elif num in rivals:
+            marks.append((m.start(), m.end(), "nm-cite"))
+
+    # Overlaps would produce crossed tags. Keep the first of any overlapping pair:
+    # deterministic, and it degrades to an unmarked span, never to broken markup.
+    marks.sort()
+    kept, last = [], -1
+    for a, b, cls in marks:
+        if a >= last:
+            kept.append((a, b, cls))
+            last = b
+    out, pos = [], 0
+    for a, b, cls in kept:
+        out += [text[pos:a], f'<span class="{cls}">', text[a:b], "</span>"]
+        pos = b
+    out.append(text[pos:])
+    return "".join(out)
+
+
+def _rivals_named_by(detail: str, claim: str = "") -> frozenset:
+    """The provision numbers the engine's own finding names AS THE RIVAL.
+
+    Reading them back out of the finding keeps the mark downstream of the engine: the
+    page cannot box a citation the refusal did not mention.
+
+    It reads the `cites …` clause specifically, not everything after the semicolon. The
+    finding's sentence ends "…cites Article 5 and never Article 50", so a looser parse
+    pulled BOTH numbers out and the page then boxed the claim's own provision in
+    refusal-red wherever it appeared. `claim` is subtracted as well, so the two
+    independent ways of getting this wrong both have to fail at once.
+    """
+    from clearance import semantic as _sem
+    if not detail:
+        return frozenset()
+    m = re.search(r"\bcites\s+(.*?)\s+and never\b", detail)
+    text = m.group(1) if m else (detail.split(";", 1)[1] if ";" in detail else detail)
+    # "cites Article 5, 7" — the head noun is written once and the rest are bare numbers.
+    head = next((h for h, _n in _sem.provisions(text)), "")
+    nums = {n for _h, n in _sem.provisions(text)}
+    if head:
+        nums |= {t for t in re.findall(r"\b\d+\b", text)}
+    return frozenset(nums - {n for _h, n in _sem.provisions(claim or "")})
+
+
+def _nearmiss_html(*, side: str, verdict: str, passed: bool, span: str,
+                   must_contain: str, claim: str, why: str = "",
+                   rivals: frozenset = frozenset()) -> str:
+    cls = "pass" if passed else "fail"
+    # No placeholder for an absent span. "— no span" read as "the desk found nothing",
+    # which is the opposite of what this row says: it read the SAME span as the row
+    # above it and refused it.
+    body = (f'<p class="nm-span">{_mark_span(span, must_contain=must_contain, claim=claim, rivals=rivals)}</p>'
+            if span else "")
+    return (f'<div class="nearmiss"><div class="nm-side">'
+            f'<span class="nm-verdict {cls}">{html.escape(verdict)}</span>'
+            f'{html.escape(side)}</div><div>{body}'
+            + (f'<p class="nm-why">{why}</p>' if why else "") + "</div></div>")
+
+
+EVAL_PATH = Path(__file__).resolve().parent / "docs/EVAL-citation-conflict-2026-08-31.json"
+EVAL_COMMAND = "python3 scripts/eval_citation_conflict.py"
+
+
+def _measurement_html() -> str:
+    """What this mechanism has and has not been shown to cost. Read from the eval file.
+
+    THE SENTENCE THIS EXISTS TO PREVENT. "Measured on 314 claims, zero false refusals"
+    is true and it is the wrong object: zero of the 27 cleared claims on this shelf cite
+    a provision at all, so the population contains no case the check could have got
+    wrong. A number produced by a population that cannot exercise the mechanism is not
+    evidence the mechanism is safe — it is evidence nobody has looked yet, and it reads
+    identically. So the count that matters is printed FIRST, and it is a count of
+    eligible rows, not of verdicts unchanged.
+    """
+    import json
+    if not EVAL_PATH.exists():
+        return ""
+    try:
+        e = json.loads(EVAL_PATH.read_text())
+    except (ValueError, OSError):
+        return ""
+    g, a, r = e["gold"], e["attribution"], e["registry"]
+    arms = [k for k in ("BASE", "CONFLICT", "ABSENCE") if f"correct_{k}" in g]
+    gold_line = "; ".join(f"{k.lower()} {g['correct_' + k]}/{g['n']}" for k in arms)
+    changed = len(r["flips"].get("CONFLICT", []))
+    return (
+        '<p class="warn"><b>What this check has been shown to cost, and what it '
+        "has not.</b> On the labelled held-out set it costs nothing: "
+        f"{html.escape(gold_line)}, unchanged. On the live shelf it changes "
+        f"{changed} of {r['total']} verdicts — and that number is not evidence of "
+        f"safety, because <b>{a['cite_a_provision']} of the {a['greens']} cleared "
+        "claims on this shelf cite a provision at all</b>. This corpus cannot "
+        "exercise the mechanism. Its only evidence is the two cases above, one of "
+        "which is the case it was built for. The looser arm — refusing when the span "
+        "never names the provision — is built and measured and does NOT ship, for the "
+        f"same reason. Reproduce: <code>{html.escape(EVAL_COMMAND)}</code>.</p>")
+
+
+def _wedge_html() -> str:
+    """The first ten seconds. Rendered from the engine's receipt, or not at all.
+
+    There is no written-down fallback and there must never be one: a page that can
+    print a verdict the engine did not produce is the product's own founding defect,
+    committed by the surface built to sell against it.
+    """
+    from clearance import wedge as W
+
+    r = W.receipt()
+    if not r:
+        return ('<div class="hero"><div class="hero-body"><p class="empty">The wedge '
+                "has no receipt on this machine. It is produced by <code>"
+                f"{html.escape(W.COMMAND)}</code>, which fetches the cited instrument "
+                "and runs the shipping engine. Nothing is rendered from memory.</p>"
+                "</div></div>")
+
+    by_id = {c["id"]: c for c in r["cases"]}
+    one, two = by_id.get("WEDGE-1"), by_id.get("WEDGE-2")
+    if not one:
+        return ""
+
+    base_span = one["base"].get("quoted_terms") or ""
+    detail = (one["ships"].get("trail") or [{}])[0].get("detail") or ""
+    # The detail is `code: sentence`. The code is already printed beside it.
+    detail = detail.split(":", 1)[1].strip() if ":" in detail else detail
+
+    rivals = _rivals_named_by((one["ships"].get("trail") or [{}])[0].get("detail") or "",
+                               one["claim"])
+    cov = one.get("coverage")
+    # The third test is printed with its MEASURED value, not as an adjective beside it.
+    # Both lines said the same thing and one of them had a number, which made the other
+    # decoration.
+    passes = list(W.KEYWORD_GROUNDER_PASSES)
+    if cov is not None:
+        passes[-1] = f"carries {cov:.0%} of the claim's content terms"
+    checks = "".join(f"<li>{html.escape(c)}</li>" for c in passes)
+    out = [
+        '<div class="hero">',
+        '<div class="hero-head">',
+        '<p class="hero-kicker">the near miss — one numeral, twenty million euro</p>',
+        f'<p class="hero-claim">{html.escape(one["claim"])}</p>',
+        "</div><div class=\"hero-body\">",
+        _nearmiss_html(
+            side="this engine at 04:00 today, and what any keyword-grounded answer "
+                 "returns: a citation, a verbatim quote, a green tick",
+            verdict=one["base"]["label"], passed=one["base"]["verdict"] == "GREEN",
+            span=base_span, must_contain=one["must_contain"], claim=one["claim"],
+            rivals=rivals,
+            why='<ul class="checks">' + checks + "</ul>"),
+        _nearmiss_html(
+            side="what this desk returns",
+            verdict=one["ships"]["label"], passed=one["ships"]["verdict"] == "GREEN",
+            span="", must_contain="", claim="",
+            why=(f'<code>{html.escape(one["ships"].get("refusal_code") or "")}</code> — '
+                 + html.escape(detail))),
+    ]
+    if two:
+        out.append(_nearmiss_html(
+            side="the same desk, the same article, the true claim",
+            verdict=two["ships"]["label"], passed=two["ships"]["verdict"] == "GREEN",
+            span=two["ships"].get("quoted_terms") or "",
+            must_contain=two["must_contain"], claim=two["claim"],
+            why=html.escape(two["note"])
+                + " The span stops before point (g); the desk cleared it because "
+                  "nothing in the clause it quotes claims a different article, and "
+                  "absence alone is not a refusal here."))
+    out.append("</div>")
+    out.append('<p class="hero-foot">'
+               + html.escape(W.PROVENANCE)
+               + f' Document: <a href="{html.escape(W.URL, quote=True)}">'
+               + html.escape(W.INSTRUMENT) + "</a>, "
+               + f'{r["document_chars"]:,} characters fetched {html.escape(r["produced_at"][:10])}. '
+               + '<a class="rowlink" href="/refusal?term='
+               + html.escape(quote(one["must_contain"]), quote=True)
+               + '">open this refusal and read every span considered →</a>'
+               + "</p></div>")
+    return "".join(out)
+
+
+# ================================================================== THE CURVE, DRAWN
+#
+# TWO PANELS, ONE MEASURE EACH. Reuse is a percentage and cost is a fraction of a cent;
+# putting both on one plot needs two y-scales, and a dual-axis chart lets whoever drew it
+# choose the crossing point and therefore the conclusion. Side by side on their own
+# scales, the reader draws it: one climbs, the other does not. Both baselines are ZERO —
+# a cost axis cropped to its own range would render a flat line as a mountain range, and
+# "cost stays flat" is the half of this exhibit that is easy to fake and hard to notice.
+
+def _panel(*, title: str, sub: str, values, labels, fmt, bar_class: str,
+           ymax: float) -> str:
+    W, H = 300.0, 120.0
+    left, bottom, top = 26.0, 22.0, 16.0
+    plot_w, plot_h = W - left - 6, H - bottom - top
+    n = len(values)
+    slot = plot_w / n
+    bw = slot * 0.46
+    bars, ticks = [], []
+    for i, (v, lab) in enumerate(zip(values, labels)):
+        h = plot_h * (v / ymax) if ymax else 0
+        x = left + slot * i + (slot - bw) / 2
+        y = top + plot_h - h
+        # 4px rounded data-end anchored to the baseline: the corners that touch the
+        # axis stay square, so the bar reads as growing FROM the axis.
+        bars.append(f'<path class="{bar_class}" d="M{x:.1f},{top + plot_h:.1f} '
+                    f'V{y + 3:.1f} q0,-3 3,-3 h{bw - 6:.1f} q3,0 3,3 '
+                    f'V{top + plot_h:.1f} Z"/>')
+        bars.append(f'<text class="vlabel" x="{x + bw / 2:.1f}" y="{y - 4:.1f}" '
+                    f'text-anchor="middle" fill="currentColor">{fmt(v)}</text>')
+        ticks.append(f'<text class="tick" x="{x + bw / 2:.1f}" '
+                     f'y="{top + plot_h + 11:.1f}" text-anchor="middle">{lab}</text>')
+    grid = "".join(
+        f'<line class="gridline" x1="{left}" x2="{W - 6}" '
+        f'y1="{top + plot_h * (1 - f):.1f}" y2="{top + plot_h * (1 - f):.1f}"/>'
+        f'<text class="tick" x="{left - 4}" y="{top + plot_h * (1 - f) + 3:.1f}" '
+        f'text-anchor="end">{fmt(ymax * f)}</text>'
+        for f in (0.0, 0.5, 1.0))
+    return (f'<div class="panel"><h3>{html.escape(title)}</h3>'
+            f'<p class="sub">{html.escape(sub)}</p>'
+            f'<svg viewBox="0 0 {W:.0f} {H:.0f}" role="img" '
+            f'aria-label="{html.escape(title)}">{grid}'
+            f'<line class="axis" x1="{left}" x2="{W - 6}" y1="{top + plot_h}" '
+            f'y2="{top + plot_h}"/>' + "".join(bars) + "".join(ticks) + "</svg></div>")
+
+
+def _curve_panels_html() -> str:
+    legs = curve.LEGS
+    labels = [f"leg {l.n}" for l in legs]
+    reuse = [l.reuse for l in legs]
+    cost = [l.cost_per_claim for l in legs]
+    return (
+        '<div class="panels">'
+        + _panel(title="Reuse climbs",
+                 sub="claims answered from the corpus, no search",
+                 values=reuse, labels=labels, fmt=lambda v: f"{v:.0%}",
+                 bar_class="bar-reuse", ymax=0.5)
+        + _panel(title="Cost per claim does not fall",
+                 # "Flat" is the word that would be doing the work here, and it is not
+                 # quite true: the four legs are not identical. What IS true is that
+                 # there is no downward trend while reuse climbs 46 points. So the
+                 # subtitle prints the RANGE, from the same numbers the bars are drawn
+                 # from, and lets the reader hold the engine to it.
+                 sub=(f"US dollars per claim, axis from zero. "
+                      f"Range ${min(cost):.4f}-${max(cost):.4f}; "
+                      f"last leg {abs(cost[-1] / cost[0] - 1):.0%} "
+                      f"{'below' if cost[-1] < cost[0] else 'above'} the first, "
+                      f"and not monotonic."),
+                 values=cost, labels=labels, fmt=lambda v: f"${v:.4f}",
+                 bar_class="bar-cost", ymax=0.005)
+        + "</div>")
+
+
+# ================================================================= THE AUDIT PAGE
+#
+# A refusal you must trust is a chatbot. A refusal you can open is the product.
+
+def _trail_html(trail: list, *, claim: str, must_contain: str) -> str:
+    if not trail:
+        return ""
+    out = []
+    for i, t in enumerate(trail, 1):
+        ok = bool(t.get("admissible"))
+        cls = "yes" if ok else "no"
+        cov = t.get("coverage")
+        head = (f'candidate {i} of {len(trail)} · '
+                f'<b class="{cls}">{"ADMISSIBLE" if ok else "REFUSED"}</b>'
+                + (f' · carries {cov:.0%} of the claim' if cov is not None else ""))
+        out.append(f'<div class="cand"><p class="cand-head">{head}</p>'
+                   f'<p class="cand-span {cls}">'
+                   + _mark_span(t.get("span") or "", must_contain=must_contain,
+                                claim=claim,
+                                rivals=_rivals_named_by(t.get("detail") or "", claim))
+                   + "</p>")
+        if t.get("detail"):
+            d = t["detail"]
+            code, _, rest = d.partition(":")
+            out.append(f'<p class="cand-why"><b>{html.escape(code)}</b> —'
+                       f'{html.escape(rest)}</p>')
+        out.append("</div>")
+    return "".join(out)
+
+
+def render_refusal(*, term: str, db: Path | str | None = None,
+                   home: str = "/") -> str:
+    """One row, opened: the claim, every span weighed, and why each was not evidence."""
+    con = refusal_log.connect(_db(db))
+    row = con.execute("SELECT * FROM claims WHERE term = ? LIMIT 1",
+                      (refusal_log.norm_term(term),)).fetchone()
+    if row is None:
+        return _SHELL.replace("__CSS__", _CSS).replace(
+            "__BODY__", "<h1>Not on the shelf</h1><p class=\"lead\">No claim in this "
+            "registry is keyed by that term. That is an honest miss, not an answer.</p>"
+            f'<p class="meta"><a href="{html.escape(home, quote=True)}">← the desk</a></p>')
+    r = dict(row)
+    label = refusal_log.surface_label(verdict=r["verdict"], cause=r.get("cause"))
+    meaning, settles = refusal_log.explain(r.get("cause"))
+    trail = refusal_log.trail_of(r)
+    has_trail = r.get("trail") is not None
+
+    body = [
+        f'<p class="hero-kicker">{html.escape(label)}</p>',
+        f'<h1 style="font-size:1.35rem">{html.escape(r["established"][:400])}</h1>',
+        '<p class="meta">' + " · ".join(filter(None, [
+            html.escape(r.get("cause") or ""),
+            f'<code>{html.escape(r["refusal_code"])}</code>' if r.get("refusal_code") else "",
+            html.escape(r.get("first_seen_in") or ""),
+            f'reused {r["reused"]}x' if r.get("reused") else "",
+        ])) + "</p>",
+    ]
+    if r.get("citation_url"):
+        u = html.escape(r["citation_url"], quote=True)
+        body.append(f'<p class="meta"><a href="{u}">{html.escape(r["citation_url"][:100])}</a></p>')
+    if meaning:
+        body.append(f'<p class="lead">{html.escape(meaning)}'
+                    + (f' <span class="settles">Settled by: {html.escape(settles)}.</span>'
+                       if settles else "") + "</p>")
+
+    body.append(f"<h2>The spans considered — {len(trail)}</h2>")
+    if trail:
+        # The anchor is the row's TERM — the distinctive phrase the claim demanded.
+        # `quoted_terms` on a refusal row is the engine's note about the document, not
+        # the claim's anchor, and passing it underlined nothing.
+        body.append(_trail_html(trail, claim=r["established"], must_contain=r["term"]))
+    elif has_trail:
+        body.append('<p class="empty">The locator offered nothing. The document was '
+                    "opened and no passage in it carried the claim's anchor at all — "
+                    "which is a different fact from a passage that carried it and did "
+                    "not support the claim.</p>")
+    else:
+        body.append('<p class="empty"><b>No trail was recorded for this row.</b> It was '
+                    "written to the registry before the audit trail existed "
+                    "(2026-08-31). Re-clearing the claim records one. The row is not "
+                    "shown with an empty trail, because “nothing was considered” and "
+                    "“nobody wrote it down” are different facts and only one of them is "
+                    "true here.</p>")
+    body.append(f'<p class="meta" style="margin-top:2.2rem">'
+                f'<a href="{html.escape(home, quote=True)}">← the desk</a> · '
+                f'<a href="/registry">the shelf</a></p>')
+    return _SHELL.replace("__CSS__", _CSS).replace("__BODY__", "".join(body))
+
+
+# ================================================================== THE FRONT PAGE
+
+def render_front(*, db: Path | str | None = None, registry_href: str = "/registry") -> str:
+    """What a stranger meets. The refusal first, the economics second, the desk third."""
+    con = refusal_log.connect(_db(db))
+    st = refusal_log.stats(con)
+    thin, sourced_n = refusal_log.thin_evidence_count(con)
+    causes = refusal_log.by_cause(con)
+    refusal_rows = [c for c in causes if c["label"] != "SOURCED"]
+
+    body = [
+        "<h1>Agent Science</h1>",
+        '<p class="lead">A clearance desk for documentary claims. Every answer is a '
+        "verbatim span from a document we fetched, or a refusal with a named cause you "
+        "can open and audit. There is no third option, and nothing here paraphrases.</p>",
+        _wedge_html(),
+        _measurement_html(),
+
+        "<h2>Why it compounds</h2>",
+        '<p class="lead">A cleared claim is established once and free to every '
+        "production afterwards. The interesting half is that the bill does not fall "
+        "with it.</p>",
+        _curve_panels_html(),
+        f'<p class="note"><b>{html.escape(curve.WHAT_IS_TRUE)}</b></p>',
+        f'<p class="note">{html.escape(curve.WHAT_IS_NOT_TRUE)} {html.escape(curve.WHY)}</p>',
+        f'<p class="prov">{html.escape(curve.PROVENANCE)}</p>',
+
+        "<h2>The negative space, counted</h2>",
+        '<p class="lead">A refusal costs a search, several documents fetched and read, '
+        "and an independence assessment. It is the expensive half a marketplace has no "
+        "reason to build, so nobody else accumulates it. This desk keeps every one, "
+        "with what would settle it.</p>",
+        '<div class="counts">'
+        f'<div><b>{st["n"]}</b><span>claims</span></div>'
+        f'<div><b>{st["cleared"]}</b><span>sourced</span></div>'
+        f'<div><b>{st["refused"]}</b><span>refused</span></div>'
+        f'<div><b>{thin}</b><span>thin evidence</span></div>'
+        f'<div><b>{st["productions"]}</b><span>productions</span></div></div>',
+        '<div class="exhibit"><table><tr><th>cause</th><th>n</th>'
+        "<th>what it means</th><th>settled by</th></tr>"
+        + "".join(f"<tr><td>{html.escape(c['cause'] or '—')}</td><td>{c['n']}</td>"
+                  f"<td>{html.escape(c['meaning'] or '—')}</td>"
+                  f"<td>{html.escape(c['settles_it'] or '—')}</td></tr>"
+                  for c in refusal_rows)
+        + "</table></div>",
+        ('<p class="warn">Every refusal on this desk currently carries the same cause. '
+         "That is a property of how the shelf was filled — a corpus backfill seeds only "
+         "the one refusal that carries the document it read — and not a claim that the "
+         "other nine causes are rare. The engine's refusal vocabulary is a closed set of "
+         f"{len(refusal_log.CAUSE_ENGLISH)}; this shelf has exercised "
+         f"{len(refusal_rows)} of them.</p>") if len(refusal_rows) < 2 else "",
+        f'<p class="meta" style="margin-top:2.4rem">'
+        f'<a class="rowlink" href="{html.escape(registry_href, quote=True)}">'
+        "browse every claim on the shelf →</a></p>",
+    ]
+    return _SHELL.replace("__CSS__", _CSS).replace("__BODY__", "".join(body))
+
+
+class _Handler(BaseHTTPRequestHandler):
+    """Local surface: the desk, the shelf, and one refusal opened.
+
+    `serve()` referenced this class for a week and it did not exist — `--serve` raised
+    NameError on every invocation. Found while rendering the front surface, which is the
+    only reason anyone ran it.
+    """
+
+    def log_message(self, *a):        # keep the terminal readable
+        pass
+
+    def do_GET(self):
+        u = urlparse(self.path)
+        qs = parse_qs(u.query)
+        if u.path in ("/", "/index.html"):
+            page = render_front()
+        elif u.path.rstrip("/") == "/refusal":
+            page = render_refusal(term=(qs.get("term") or [""])[0])
+        elif u.path.rstrip("/") in ("/registry", ""):
+            page = render_page(q=(qs.get("q") or [""])[0].strip(),
+                               label=(qs.get("label") or [""])[0].strip())
+        else:
+            self.send_error(404)
+            return
+        raw = page.encode()
+        self.send_response(200)
+        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.send_header("Content-Length", str(len(raw)))
+        self.end_headers()
+        self.wfile.write(raw)
 
 
 def serve(port: int = 8091) -> None:
