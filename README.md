@@ -1,5 +1,8 @@
 # Agent Science
 
+**LIVE:** https://agent-science-568004190078.us-central1.run.app · [registry](https://agent-science-568004190078.us-central1.run.app/registry) · [popular](https://agent-science-568004190078.us-central1.run.app/popular/ui)  
+**Status:** `docs/STATUS.md` · **Deadline:** Agentic Cinema · Sep 9 2026 · Parallel track
+
 **Paste a documentary script. Get back every checkable claim with the document that
 supports it — quoted verbatim — and every claim you cannot source, with the reason
 you cannot.**

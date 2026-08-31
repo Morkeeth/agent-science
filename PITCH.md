@@ -2,7 +2,7 @@
 date: 2026-08-30
 event: Agentic Cinema · Devpost · deadline 2026-09-09 14:00 PT
 repo: https://github.com/Morkeeth/agent-science @ main
-status: slice 5 ADK default path · partner integrations doc · Sep 9 path
+status: LIVE · public repo · sealed · video + Devpost pending Oscar
 ---
 
 # Paste a script. Get every claim sourced — verbatim — or refused with the reason.

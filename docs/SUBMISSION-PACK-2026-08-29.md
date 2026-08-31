@@ -34,7 +34,7 @@ python3 ask_registry.py "agentlint" | head -5
 |-------|---------|--------|
 | watch_it_go_red | `python3 tests/test_watch_it_go_red.py` | **72/72** |
 | adk_default_path | `python3 tests/test_adk_default_path.py` | **5/5** |
-| registry_surface | `python3 tests/test_registry_surface.py` | **5/5** |
+| registry_surface | `python3 tests/test_registry_surface.py` | **13/13** |
 | cross_subject_reuse | `python3 tests/test_cross_subject_reuse.py` | **2/2** |
 | backfill_seeds_reuse | `python3 tests/test_backfill_seeds_reuse.py` | **2/2** |
 | clear_corpus | `python3 tests/test_clear_corpus.py` | **4/4** |
@@ -42,8 +42,8 @@ python3 ask_registry.py "agentlint" | head -5
 | source_map | `python3 tests/test_source_map.py` | **3/3** |
 | refusal_correctness | `python3 tests/test_refusal_correctness.py` | **6/6** |
 | partner_runtime | `python3 tests/test_partner_runtime.py` | **5/5** |
-| **Total** | 10 suites | **109/109** |
-| docs gate | `python3 scripts/bench_check_docs.py` | **109/109 match** |
+| **Total** | 10 suites | **117/117** |
+| docs gate | `python3 scripts/bench_check_docs.py` | **117/117 match** |
 
 **Compound exhibit (live hosted, 2026-08-31 PM):** `long_run_goal.sh` · A=**1**→B=**0** Parallel · B corpus hits=**1** — `docs/LONG-RUN-RECEIPT-2026-08-31.md` · sealed `docs/SEALED-PREDICTION-2026-08-31.md`. Prior: compound-mini A=**2**→B=**1**. Orphan-works full script: run B **503** — do not claim on video.
 
@@ -51,7 +51,7 @@ python3 ask_registry.py "agentlint" | head -5
 
 ---
 
-## Sealed prediction (draft — do not edit after seal)
+## Sealed prediction (sealed 2026-08-31 — do not edit)
 
 > **Prediction:** On the hosted URL, a second `POST /clear` with the same `subject` and an overlapping claim returns `corpus_hits ≥ 1` and strictly fewer `parallel_calls` than the first run on a shared corpus shelf.
 
@@ -117,7 +117,7 @@ market.
 | Repo | `https://github.com/Morkeeth/agent-science` @ `e6793ab` |
 | Entry point | `python3 agent_science.py <script.txt>` — Gemini + Parallel **live by default** |
 | Hosted | https://agent-science-568004190078.us-central1.run.app — `POST /clear` · `GET /corpus` |
-| Controls | registry **5/5** · cross-subject reuse **2/2** · compound exhibit B **1** Parallel vs A **2** (offline) |
+| Controls | registry **13/13** · cross-subject reuse **2/2** · compound exhibit B **1** Parallel vs A **2** (offline) |
 | License | `LICENSE` (MIT) |
 | Gap report | `fixtures/gap-report-600.md` — **561 of 600 (94%)** not sellable as-is |
 | Second question | `fixtures/shift-ai-training-vs-noncommercial.md` — 247 of 600 flip |

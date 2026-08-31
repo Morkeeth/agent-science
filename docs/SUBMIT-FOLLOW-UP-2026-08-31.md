@@ -1,6 +1,7 @@
 # Submit follow-up — Agent Science · 2026-08-31
 
-**Status after agent pass:** everything buildable is **DONE**. Three Oscar clicks remain.
+**Living board:** `docs/STATUS.md` · **Devpost form:** `docs/DEVPOST-READY.md`  
+**Build lane:** IDLE — three Oscar clicks remain.
 
 ---
 

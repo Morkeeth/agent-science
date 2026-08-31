@@ -14,8 +14,8 @@ supersedes: docs/PHASE0-LADDER.md ClickHouse-track note (runtime track is Parall
 **Spine:** Agent Science = the websearch companion — a truth dictionary that compounds from what devs actually search.  
 **Constitution:** verbatim span or REFUSE — never paraphrase. No public repo until keys rotated. No rename. No `--set-env-vars` secrets. Slice 1 deploy/keys/video/Devpost: Oscar only.
 
-> **Handbook:** ladder + judge pack below. Detail: `docs/MOONSHOT-MEMO-2026-08-31.md` · `VISION-2026-08.md` · `AGENTS.md`  
-> **Next:** EYES panel on §WINNER ANGLES + §ROADMAP (multi-model review queued).
+> **Handbook:** ladder + judge pack below. **Living status:** `docs/STATUS.md` · `CLAUDE.md`  
+> Detail: `docs/MOONSHOT-MEMO-2026-08-31.md` · `VISION-2026-08.md` · `AGENTS.md`
 
 ---
 
@@ -351,7 +351,7 @@ bash scripts/verify_cold_clone.sh                                               
 
 | When | What | Command | Outcome |
 |------|------|---------|---------|
-| 2026-08-31 PM | Submit pass | sealed · public repo · falsification doc | `SUBMIT-FOLLOW-UP` — video + Devpost remain |
+| 2026-08-31 11:27Z | Full gate | `bash scripts/full_gate.sh` | **FULL GATE OK** · STATUS.md · DEVPOST-READY · CLAUDE.md |
 | 2026-08-31 PM | Handbook pass | hack.md rewrite | ladder · field · websearch · roadmap · winner angles |
 | 2026-08-31 L5 | Semantic guard RED first | `python3 tests/test_semantic_guard.py` (null guard) | **4 fail / 9 pass** — watched red before implementing |
 | 2026-08-31 L5 | Semantic guard measured | `python3 scripts/eval_semantic_guard.py` | **gold 5/6 -> 6/6**; registry **0/313** verdicts changed; **8/27** better spans |
