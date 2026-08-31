@@ -203,6 +203,15 @@ def test_the_template_is_never_run_through_format():
     assert page.strip().startswith("<!DOCTYPE html>") and page.rstrip().endswith("</html>")
 
 
+def test_truths_dashboard_page_renders():
+    """Hosted /truths/ui — popular queries + field strip."""
+    from cloud.service import _truths_page
+    page = _truths_page(limit=5)
+    assert "Truths dashboard" in page
+    assert "Top queries" in page
+    assert "hit rate" in page.lower()
+
+
 def test_the_shelf_shows_a_refusal_in_the_same_column_as_evidence():
     """The product's argument, rendered as a layout rather than asserted in prose."""
     import ask_registry as ar

@@ -17,7 +17,7 @@ PACK = ROOT / "docs/SUBMISSION-PACK-2026-08-29.md"
 SUITES = [
     ("test_watch_it_go_red.py", "watch_it_go_red", 72),
     ("test_adk_default_path.py", "adk_default_path", 5),
-    ("test_registry_surface.py", "registry_surface", 5),
+    ("test_registry_surface.py", "registry_surface", 14),
     ("test_cross_subject_reuse.py", "cross_subject_reuse", 2),
     ("test_backfill_seeds_reuse.py", "backfill_seeds_reuse", 2),
     ("test_clear_corpus.py", "clear_corpus", 4),

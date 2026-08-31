@@ -38,7 +38,7 @@
 
 | Time | Sec | Beat | On screen | Voiceover |
 |------|----:|------|-----------|-----------|
-| 0:00 | 10 | **Hook — M&E** | Title: *Agent Science — clearance for factual production* | "Every documentary needs two reports before it can be insured: every fact sourced, every asset cleared. Miss one — that's a lawsuit." |
+| 0:00 | 10 | **Hook — truth layer** | Title: *Agent Science — truth layer for what builders believe and use* | "Your agent websearches. You get one answer and a green check. You never see what was skipped. We built the layer that shows the full search — and stamps when the field outruns the paper." |
 | 0:10 | 14 | **Problem** | E&O checklist · provenance stall | "Studios and AI labs stall on the same thing: nobody can prove provenance at asset level. Humans do this by hand." |
 | 0:24 | 12 | **Rule** | Constructor rejects uncited verdict (3 s) | "Cite the document, or print that you could not. No citation — no verdict. Enforced in code." |
 | 0:36 | 22 | **Demo — SOURCED (non-EU first)** | Prefer `/clear` on `demo-arxiv-attention.txt` **or** dust-bowl mini — **verbatim span**. EU lookup only as backup. | "Same desk. A paper id, a film history claim — we return the exact sentence from the source, not a summary." |

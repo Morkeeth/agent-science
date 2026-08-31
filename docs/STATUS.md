@@ -2,7 +2,7 @@
 doc: status
 project: Agent Science
 canonical: true
-last-updated: 2026-08-31T21:31:00Z
+last-updated: 2026-09-01T05:45:00Z
 deadline: 2026-09-09T14:00:00-07:00
 ---
 
@@ -11,7 +11,7 @@ deadline: 2026-09-09T14:00:00-07:00
 > **For Claude / fleet:** this file is the single “where we are” surface.  
 > `hack.md` = process · `CLAUDE.md` = entry · this file = gates + evidence.
 
-**Last gate run:** 2026-08-31T21:31:31Z — `bash scripts/full_gate.sh` → **FULL GATE OK** (truth-layer shape · 265 claims · 19/19 long run · trial OK)
+**Last gate run:** 2026-08-31T21:39:43Z — `bash scripts/full_gate.sh` → **FULL GATE OK** (deploy 00018 · 125/125 · 19/19 long run)
 
 ---
 
@@ -22,7 +22,7 @@ deadline: 2026-09-09T14:00:00-07:00
 | **Product noun** | **Agent Science** — truth layer for what people believe and use · B lead · A on the same layer |
 | **Product** | LIVE on Cloud Run · public repo · sealed prediction |
 | **Build lane** | WOW websearch transparency · CONTRARY stamp · stack-fit · community notes · `/truths/ui` |
-| **Oscar** | Deploy `./deploy.sh` for `/truths/ui` on hosted · film via `docs/FILM-SCOUT-COMMANDS.md` |
+| **Oscar** | **Film 30 min** — `docs/PITCH-TOMORROW.md` · transparency WOW first · Devpost paste ready |
 | **Film lead** | Ask → sourced/refuse → free on re-ask · ≥2 domains · E&O as *a* truth not the only story |
 
 ---
@@ -43,11 +43,11 @@ deadline: 2026-09-09T14:00:00-07:00
 | Gate | Result | Command / doc |
 |------|--------|----------------|
 | Mutation controls | **72/72** | `test_watch_it_go_red.py` |
-| All test suites | **124/124** | `bench_check_docs.py` suites (see full_gate log) |
+| All test suites | **125/125** + truth-layer suites | `bench_check_docs.py` + `full_gate.sh` |
 | Secret scan | **6/6** | `test_secret_surfaces.py` |
 | Partner runtime | **6/6** | `test_partner_runtime.py` + `test_parallel_integration.py` |
 | ADK default | **5/5** | `test_adk_default_path.py` |
-| Registry surface | **13/13** | `test_registry_surface.py` |
+| Registry surface | **14/14** | `test_registry_surface.py` |
 | Cold clone | ✅ | `verify_cold_clone.sh` |
 | Hosted long run | **19/19** | `long_run_goal.sh` |
 | Stranger trial | ✅ | `new_user_trial.sh` |
@@ -64,10 +64,10 @@ deadline: 2026-09-09T14:00:00-07:00
 | | |
 |---|---|
 | **URL** | https://agent-science-568004190078.us-central1.run.app |
-| **Revision** | `agent-science-00016-pm7` · `parallel_sdk: true` |
-| **Health** | `engine_default: adk` · `parallel_transport: parallel-web` · Gemini |
-| **New** | `GET /partners` — judge manifest (live) |
-| **Stats** | ~183 claims · hit rate ~0.70 · queries logged growing |
+| **Revision** | `agent-science-00018-n4s` · `parallel_sdk: true` · **`/truths/ui` live** |
+| **Health** | `engine_default: adk` · 265 claims · hit rate ~0.80 |
+| **New** | `GET /truths/ui` — truths dashboard (deployed overnight) |
+| **Stats** | 265 claims · hit rate ~0.80 · queries logged growing |
 
 **Compound (sealed):** `longrun-0831-1320` A=**1** → B=**0** Parallel · B `corpus_hits=1`
 
@@ -75,10 +75,10 @@ deadline: 2026-09-09T14:00:00-07:00
 
 ## Oscar checklist (only human work left)
 
-1. **Record** ≤180s — `docs/VIDEO-SCRIPT-2026-08-29.md`
-2. **Devpost** — `docs/DEVPOST-READY.md` (all fields pre-filled)
-3. **Verify** logged-out: video on live entry page
-4. **Optional:** rotate Vertex/Gemini if leaked (`hack.md` OPEN QUESTIONS)
+1. **Read** `docs/PITCH-TOMORROW.md` — 30s pitch + morning plan
+2. **Record** ≤180s — transparency WOW first · `docs/FILM-SCOUT-COMMANDS.md`
+3. **Devpost** — `docs/DEVPOST-READY.md` (elevator pitch updated)
+4. **Verify** logged-out: video on live entry page
 
 ---
 
@@ -103,7 +103,7 @@ bash scripts/full_gate.sh
 
 | When (UTC) | What |
 |------------|------|
-| 2026-08-31 21:31 | **Shape pass** — merge truth-layer to main path · 52 inbox ingests · FILM-SCOUT + DEPLOY-CLICK-LIST · desk links `/truths/ui` |
+| 2026-09-01 05:45 | **Overnight** — deploy `00018-n4s` · `/truths/ui` live · PITCH-TOMORROW · DEVPOST truth-layer copy |
 | 2026-08-31 21:23 | Truth layer night — transparency, CONTRARY, stack-fit, community notes, `/truths/ui` (branch) |
 | 2026-08-31 21:55 | Competitor research — websearch field map + steal angles → `RESEARCH-WEBSEARCH-COMPETITORS-2026-08-31.md` |
 | 2026-08-31 20:35 | Full websearch rundown — `WEBSEARCH-FULL-RUNDOWN.md` + `visibility --full` (10 panes) |

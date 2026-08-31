@@ -1,9 +1,9 @@
 # Long run receipt — Agent Science · 2026-08-31
 
-**Stamp:** 2026-08-31T21:32:20Z UTC  
+**Stamp:** 2026-08-31T21:40:50Z UTC  
 **URL:** https://agent-science-568004190078.us-central1.run.app  
-**Subject:** `longrun-0831-2332`  
-**Log:** `/tmp/agent-science-longrun-48804.log`
+**Subject:** `longrun-0831-2340`  
+**Log:** `/tmp/agent-science-longrun-70527.log`
 
 ## Goal
 
@@ -17,27 +17,27 @@ Truth dictionary stranger path: free lookup first, compound on repeat, honest mi
 | Hosted health | `engine_default: adk`, Parallel + Gemini |
 | Free tier | `2012/28/EU` + `Directive 2012/28/EU` SOURCED, 0 Parallel |
 | NOT_CLEARED | miss returns `next_step` |
-| Compound A/B | subject `longrun-0831-2332` — see log |
+| Compound A/B | subject `longrun-0831-2340` — see log |
 | Surfaces | /, /registry, /popular/ui, /stats |
 
 ## Stats delta
 
 ```json
 before: {
- "n": 184,
- "cleared": 30,
- "refused": 154,
- "reuses": 26,
- "productions": 6,
- "queries_logged": 70,
- "queries_answered": 50,
- "queries_not_cleared": 20,
- "dictionary_hit_rate": 0.714,
- "aliases": 8,
+ "n": 265,
+ "cleared": 31,
+ "refused": 234,
+ "reuses": 65,
+ "productions": 7,
+ "queries_logged": 66,
+ "queries_answered": 52,
+ "queries_not_cleared": 14,
+ "dictionary_hit_rate": 0.788,
+ "aliases": 39,
  "db": "/tmp/refusal_log.db",
  "recent_queries": [
   {
-   "id": 70,
+   "id": 66,
    "query_text": "xyzzy-nonexistent-claim-99999",
    "result_label": "NOT_CLEARED",
    "verdict": null,
@@ -46,65 +46,9 @@ before: {
    "citation_url": null,
    "quoted_terms": null,
    "resolves_with": null,
-   "asked_at": "2026-08-31T21:32:33+00:00",
+   "asked_at": "2026-08-31T21:41:08+00:00",
    "cost_tier": "free",
    "source": "dictionary_miss"
-  },
-  {
-   "id": 69,
-   "query_text": "xyzzy-nonexistent-claim-99999",
-   "result_label": "NOT_CLEARED",
-   "verdict": null,
-   "cause": "not_in_registry",
-   "term": null,
-   "citation_url": null,
-   "quoted_terms": null,
-   "resolves_with": null,
-   "asked_at": "2026-08-31T21:32:33+00:00",
-   "cost_tier": null,
-   "source": null
-  },
-  {
-   "id": 68,
-   "query_text": "Directive 2012/28/EU",
-   "result_label": "SOURCED",
-   "verdict": "GREEN",
-   "cause": null,
-   "term": "directive 2012/28/eu of the european parliament and of the council of 25 october",
-   "citation_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32012L0028",
-   "quoted_terms": "Legal act \u200b Directive 2012/28/EU of the European Parliament and of the Council of 25 October 2012 on certain permitted uses of orphan works Text with EEA relevance Directive 2012/28/EU of the European Parliament and of the",
-   "resolves_with": null,
-   "asked_at": "2026-08-31T21:32:32+00:00",
-   "cost_tier": "free",
-   "source": "dictionary_exact"
-  },
-  {
-   "id": 67,
-   "query_text": "2012/28/EU",
-   "result_label": "SOURCED",
-   "verdict": "GREEN",
-   "cause": null,
-   "term": "directive 2012/28/eu of the european parliament and of the council of 25 october",
-   "citation_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32012L0028",
-   "quoted_terms": "Legal act \u200b Directive 2012/28/EU of the European Parliament and of the Council of 25 October 2012 on certain permitted uses of orphan works Text with EEA relevance Directive 2012/28/EU of the European Parliament and of the",
-   "resolves_with": null,
-   "asked_at": "2026-08-31T21:32:32+00:00",
-   "cost_tier": "free",
-   "source": "dictionary_exact"
-  },
-  {
-   "id": 66,
-   "query_text": "2012",
-   "result_label": "SOURCED",
-   "verdict": "GREEN",
-   "cause": null,
-   "term": "directive 2012/28/eu of the european parliament and of the council of 25 october",
-   "citation_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32012L0028",
-   "quoted_terms": "Legal act \u200b Directive 2012/28/EU of the European Parliament and of the Council of 25 October 2012 on certain permitted uses of orphan works Text with EEA relevance Directive 2012/28/EU of the European Parliament and of the",
-   "resolves_with": null,
-   "asked_at": "2026-08-31T21:32:32+00:00",
-   "cost_tier": null,
-   "source": null
   },
   {
    "id": 65,
@@ -116,23 +60,23 @@ before: {
    "citation_url": null,
    "quoted_terms": null,
    "resolves_with": null,
-   "asked_at": "2026-08-31T21:28:21+00:00",
-   "cost_tier": "free",
-   "source": "dictionary_miss"
+   "asked_at": "2026-08-31T21:41:08+00:00",
+   "cost_tier": null,
+   "source": null
   },
   {
    "id": 64,
-   "query_text": "xyzzy-nonexistent-claim-99999",
-   "result_label": "NOT_CLEARED",
-   "verdict": null,
-   "cause": "not_in_registry",
-   "term": null,
-   "citation_url": null,
-   "quoted_terms": null,
+   "query_text": "Directive 2012/28/EU",
+   "result_label": "SOURCED",
+   "verdict": "GREEN",
+   "cause": null,
+   "term": "directive 2012/28/eu of the european parliament and of the council of 25 october",
+   "citation_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32012L0028",
+   "quoted_terms": "Legal act \u200b Directive 2012/28/EU of the European Parliament and of the Council of 25 October 2012 on certain permitted uses of orphan works Text with EEA relevance Directive 2012/28/EU of the European Parliament and of the",
    "resolves_with": null,
-   "asked_at": "2026-08-31T21:28:21+00:00",
-   "cost_tier": null,
-   "source": null
+   "asked_at": "2026-08-31T21:41:08+00:00",
+   "cost_tier": "free",
+   "source": "dictionary_exact"
   },
   {
    "id": 63,
@@ -144,7 +88,7 @@ before: {
    "citation_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32012L0028",
    "quoted_terms": "Legal act \u200b Directive 2012/28/EU of the European Parliament and of the Council of 25 October 2012 on certain permitted uses of orphan works Text with EEA relevance Directive 2012/28/EU of the European Parliament and of the",
    "resolves_with": null,
-   "asked_at": "2026-08-31T21:28:21+00:00",
+   "asked_at": "2026-08-31T21:41:07+00:00",
    "cost_tier": "free",
    "source": "dictionary_exact"
   },
@@ -158,83 +102,26 @@ before: {
    "citation_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32012L0028",
    "quoted_terms": "Legal act \u200b Directive 2012/28/EU of the European Parliament and of the Council of 25 October 2012 on certain permitted uses of orphan works Text with EEA relevance Directive 2012/28/EU of the European Parliament and of the",
    "resolves_with": null,
-   "asked_at": "2026-08-31T21:28:20+00:00",
+   "asked_at": "2026-08-31T21:41:07+00:00",
    "cost_tier": null,
    "source": null
   },
   {
    "id": 61,
-   "query_text": "xyzzy-nonexistent-claim-99999",
-   "result_label": "NOT_CLEARED",
-   "verdict": null,
-   "cause": "not_in_registry",
-   "term": null,
-   "citation_url": null,
-   "quoted_terms": null,
-   "resolves_with": null,
-   "asked_at": "2026-08-31T21:28:05+00:00",
-   "cost_tier": "free",
-   "source": "dictionary_miss"
-  }
- ]
-}
-after:  {
- "n": 184,
- "cleared": 30,
- "refused": 154,
- "reuses": 28,
- "productions": 6,
- "queries_logged": 71,
- "queries_answered": 51,
- "queries_not_cleared": 20,
- "dictionary_hit_rate": 0.718,
- "aliases": 8,
- "db": "/tmp/refusal_log.db",
- "recent_queries": [
-  {
-   "id": 71,
-   "query_text": "2012",
-   "result_label": "SOURCED",
-   "verdict": "GREEN",
-   "cause": null,
-   "term": "directive 2012/28/eu of the european parliament and of the council of 25 october",
+   "query_text": "orphan works directive",
+   "result_label": "UNSOURCED",
+   "verdict": "UNKNOWN",
+   "cause": "source_does_not_state_it",
+   "term": "the eu orphan works directive is directive 2012/28/eu.",
    "citation_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32012L0028",
-   "quoted_terms": "Legal act \u200b Directive 2012/28/EU of the European Parliament and of the Council of 25 October 2012 on certain permitted uses of orphan works Text with EEA relevance Directive 2012/28/EU of the European Parliament and of the",
+   "quoted_terms": "document opened, 42,469 characters read; the locator proposed nothing",
    "resolves_with": null,
-   "asked_at": "2026-08-31T21:32:46+00:00",
+   "asked_at": "2026-08-31T21:32:31+00:00",
    "cost_tier": null,
    "source": null
   },
   {
-   "id": 70,
-   "query_text": "xyzzy-nonexistent-claim-99999",
-   "result_label": "NOT_CLEARED",
-   "verdict": null,
-   "cause": "not_in_registry",
-   "term": null,
-   "citation_url": null,
-   "quoted_terms": null,
-   "resolves_with": null,
-   "asked_at": "2026-08-31T21:32:33+00:00",
-   "cost_tier": "free",
-   "source": "dictionary_miss"
-  },
-  {
-   "id": 69,
-   "query_text": "xyzzy-nonexistent-claim-99999",
-   "result_label": "NOT_CLEARED",
-   "verdict": null,
-   "cause": "not_in_registry",
-   "term": null,
-   "citation_url": null,
-   "quoted_terms": null,
-   "resolves_with": null,
-   "asked_at": "2026-08-31T21:32:33+00:00",
-   "cost_tier": null,
-   "source": null
-  },
-  {
-   "id": 68,
+   "id": 60,
    "query_text": "Directive 2012/28/EU",
    "result_label": "SOURCED",
    "verdict": "GREEN",
@@ -243,12 +130,12 @@ after:  {
    "citation_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32012L0028",
    "quoted_terms": "Legal act \u200b Directive 2012/28/EU of the European Parliament and of the Council of 25 October 2012 on certain permitted uses of orphan works Text with EEA relevance Directive 2012/28/EU of the European Parliament and of the",
    "resolves_with": null,
-   "asked_at": "2026-08-31T21:32:32+00:00",
+   "asked_at": "2026-08-31T21:32:31+00:00",
    "cost_tier": "free",
    "source": "dictionary_exact"
   },
   {
-   "id": 67,
+   "id": 59,
    "query_text": "2012/28/EU",
    "result_label": "SOURCED",
    "verdict": "GREEN",
@@ -257,12 +144,55 @@ after:  {
    "citation_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32012L0028",
    "quoted_terms": "Legal act \u200b Directive 2012/28/EU of the European Parliament and of the Council of 25 October 2012 on certain permitted uses of orphan works Text with EEA relevance Directive 2012/28/EU of the European Parliament and of the",
    "resolves_with": null,
-   "asked_at": "2026-08-31T21:32:32+00:00",
+   "asked_at": "2026-08-31T21:32:31+00:00",
    "cost_tier": "free",
    "source": "dictionary_exact"
   },
   {
-   "id": 66,
+   "id": 58,
+   "query_text": "ralph loop agentic practice",
+   "result_label": "CONTRARY_TO_RESEARCH",
+   "verdict": "CONTRARY_TO_RESEARCH",
+   "cause": "field_outruns_research",
+   "term": null,
+   "citation_url": "https://arxiv.org/abs/2512.14012",
+   "quoted_terms": "Professional developers don't vibe, they control",
+   "resolves_with": null,
+   "asked_at": "2026-08-31T21:31:45+00:00",
+   "cost_tier": "free",
+   "source": "contrary_check"
+  },
+  {
+   "id": 57,
+   "query_text": "ralph loop agentic practice",
+   "result_label": "NOT_CLEARED",
+   "verdict": null,
+   "cause": "not_in_registry",
+   "term": null,
+   "citation_url": null,
+   "quoted_terms": null,
+   "resolves_with": null,
+   "asked_at": "2026-08-31T21:31:45+00:00",
+   "cost_tier": null,
+   "source": null
+  }
+ ]
+}
+after:  {
+ "n": 266,
+ "cleared": 31,
+ "refused": 235,
+ "reuses": 66,
+ "productions": 8,
+ "queries_logged": 67,
+ "queries_answered": 53,
+ "queries_not_cleared": 14,
+ "dictionary_hit_rate": 0.791,
+ "aliases": 39,
+ "db": "/tmp/refusal_log.db",
+ "recent_queries": [
+  {
+   "id": 67,
    "query_text": "2012",
    "result_label": "SOURCED",
    "verdict": "GREEN",
@@ -271,9 +201,23 @@ after:  {
    "citation_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32012L0028",
    "quoted_terms": "Legal act \u200b Directive 2012/28/EU of the European Parliament and of the Council of 25 October 2012 on certain permitted uses of orphan works Text with EEA relevance Directive 2012/28/EU of the European Parliament and of the",
    "resolves_with": null,
-   "asked_at": "2026-08-31T21:32:32+00:00",
+   "asked_at": "2026-08-31T21:41:43+00:00",
    "cost_tier": null,
    "source": null
+  },
+  {
+   "id": 66,
+   "query_text": "xyzzy-nonexistent-claim-99999",
+   "result_label": "NOT_CLEARED",
+   "verdict": null,
+   "cause": "not_in_registry",
+   "term": null,
+   "citation_url": null,
+   "quoted_terms": null,
+   "resolves_with": null,
+   "asked_at": "2026-08-31T21:41:08+00:00",
+   "cost_tier": "free",
+   "source": "dictionary_miss"
   },
   {
    "id": 65,
@@ -285,23 +229,23 @@ after:  {
    "citation_url": null,
    "quoted_terms": null,
    "resolves_with": null,
-   "asked_at": "2026-08-31T21:28:21+00:00",
-   "cost_tier": "free",
-   "source": "dictionary_miss"
+   "asked_at": "2026-08-31T21:41:08+00:00",
+   "cost_tier": null,
+   "source": null
   },
   {
    "id": 64,
-   "query_text": "xyzzy-nonexistent-claim-99999",
-   "result_label": "NOT_CLEARED",
-   "verdict": null,
-   "cause": "not_in_registry",
-   "term": null,
-   "citation_url": null,
-   "quoted_terms": null,
+   "query_text": "Directive 2012/28/EU",
+   "result_label": "SOURCED",
+   "verdict": "GREEN",
+   "cause": null,
+   "term": "directive 2012/28/eu of the european parliament and of the council of 25 october",
+   "citation_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32012L0028",
+   "quoted_terms": "Legal act \u200b Directive 2012/28/EU of the European Parliament and of the Council of 25 October 2012 on certain permitted uses of orphan works Text with EEA relevance Directive 2012/28/EU of the European Parliament and of the",
    "resolves_with": null,
-   "asked_at": "2026-08-31T21:28:21+00:00",
-   "cost_tier": null,
-   "source": null
+   "asked_at": "2026-08-31T21:41:08+00:00",
+   "cost_tier": "free",
+   "source": "dictionary_exact"
   },
   {
    "id": 63,
@@ -313,7 +257,7 @@ after:  {
    "citation_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32012L0028",
    "quoted_terms": "Legal act \u200b Directive 2012/28/EU of the European Parliament and of the Council of 25 October 2012 on certain permitted uses of orphan works Text with EEA relevance Directive 2012/28/EU of the European Parliament and of the",
    "resolves_with": null,
-   "asked_at": "2026-08-31T21:28:21+00:00",
+   "asked_at": "2026-08-31T21:41:07+00:00",
    "cost_tier": "free",
    "source": "dictionary_exact"
   },
@@ -327,9 +271,65 @@ after:  {
    "citation_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32012L0028",
    "quoted_terms": "Legal act \u200b Directive 2012/28/EU of the European Parliament and of the Council of 25 October 2012 on certain permitted uses of orphan works Text with EEA relevance Directive 2012/28/EU of the European Parliament and of the",
    "resolves_with": null,
-   "asked_at": "2026-08-31T21:28:20+00:00",
+   "asked_at": "2026-08-31T21:41:07+00:00",
    "cost_tier": null,
    "source": null
+  },
+  {
+   "id": 61,
+   "query_text": "orphan works directive",
+   "result_label": "UNSOURCED",
+   "verdict": "UNKNOWN",
+   "cause": "source_does_not_state_it",
+   "term": "the eu orphan works directive is directive 2012/28/eu.",
+   "citation_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32012L0028",
+   "quoted_terms": "document opened, 42,469 characters read; the locator proposed nothing",
+   "resolves_with": null,
+   "asked_at": "2026-08-31T21:32:31+00:00",
+   "cost_tier": null,
+   "source": null
+  },
+  {
+   "id": 60,
+   "query_text": "Directive 2012/28/EU",
+   "result_label": "SOURCED",
+   "verdict": "GREEN",
+   "cause": null,
+   "term": "directive 2012/28/eu of the european parliament and of the council of 25 october",
+   "citation_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32012L0028",
+   "quoted_terms": "Legal act \u200b Directive 2012/28/EU of the European Parliament and of the Council of 25 October 2012 on certain permitted uses of orphan works Text with EEA relevance Directive 2012/28/EU of the European Parliament and of the",
+   "resolves_with": null,
+   "asked_at": "2026-08-31T21:32:31+00:00",
+   "cost_tier": "free",
+   "source": "dictionary_exact"
+  },
+  {
+   "id": 59,
+   "query_text": "2012/28/EU",
+   "result_label": "SOURCED",
+   "verdict": "GREEN",
+   "cause": null,
+   "term": "directive 2012/28/eu of the european parliament and of the council of 25 october",
+   "citation_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32012L0028",
+   "quoted_terms": "Legal act \u200b Directive 2012/28/EU of the European Parliament and of the Council of 25 October 2012 on certain permitted uses of orphan works Text with EEA relevance Directive 2012/28/EU of the European Parliament and of the",
+   "resolves_with": null,
+   "asked_at": "2026-08-31T21:32:31+00:00",
+   "cost_tier": "free",
+   "source": "dictionary_exact"
+  },
+  {
+   "id": 58,
+   "query_text": "ralph loop agentic practice",
+   "result_label": "CONTRARY_TO_RESEARCH",
+   "verdict": "CONTRARY_TO_RESEARCH",
+   "cause": "field_outruns_research",
+   "term": null,
+   "citation_url": "https://arxiv.org/abs/2512.14012",
+   "quoted_terms": "Professional developers don't vibe, they control",
+   "resolves_with": null,
+   "asked_at": "2026-08-31T21:31:45+00:00",
+   "cost_tier": "free",
+   "source": "contrary_check"
   }
  ]
 }
@@ -340,18 +340,18 @@ after:  {
 ```json
 {
     "ok": true,
-    "subject": "longrun-0831-2332",
+    "subject": "longrun-0831-2340",
     "extractor": "gemini-3.5-flash (vertex:hack-fleet)",
-    "locator": "gemini-3.5-flash",
+    "locator": "gemini-3.5-flash (vertex:hack-fleet)",
     "claims_extracted": 1,
     "sourced": 0,
     "unsourced": 1,
-    "parallel_calls": 0,
-    "parallel_api_calls": 0,
+    "parallel_calls": 1,
+    "parallel_api_calls": 1,
     "prior_run": null,
     "corpus_hits": 0,
-    "log_hits": 1,
-    "log_size": 184,
+    "log_hits": 0,
+    "log_size": 266,
     "corpus_remembered": 1,
     "rows": [
         {
@@ -361,29 +361,29 @@ after:  {
             "label": "UNVERIFIED INDEPENDENCE",
             "engine_verdict": "UNKNOWN",
             "cause": "no_independent_source",
-            "reason": "log_hit (cross-subject) \u2014 established in production 'longrun-0831-2119'",
+            "reason": "1 document(s) verified but they collapse to 1 non-independent origin(s) [wikipedia]; derived or unclassified sources are not independent support",
             "why": "documents state this, and every one traces to a derived or unclassified origin \u2014 a human must judge whether that is independent support",
             "citation_url": null,
             "quoted_terms": null,
             "source_class": null,
             "source_note": null,
-            "corpus_hit": true,
-            "probe": "log_hit",
-            "cross_subject": true
+            "corpus_hit": false,
+            "probe": "parallel:web_search"
         }
     ],
-    "markdown": "# GAP REPORT \u2014 subject `longrun-0831-2332`\n\n| Claims | 1 |\n| SOURCED | 0 (0%) |\n| UNSOURCED | 1 (100%) |\n| Claims searched (no corpus/log hit) | 0 |\n| Parallel API calls (metered) | 0 |\n| Corpus hits (same subject) | 0 |\n| Log hits (cross subject) | 1 |\n| Remembered on this subject | 1 |\n| Claims established across all subjects | 184 |\n\n**1 claim(s) reused from ANOTHER subject's clearance \u2014 no Parallel call.** A claim proven (or proven-unprovable) once is free for every subject afterward; that is the cross-production moat.\n\n## Claims requiring action\n\n- **C1** \u2014 UNVERIFIED INDEPENDENCE (no_independent_source)\n  documents state this, and every one traces to a derived or unclassified origin \u2014 a human must judge whether that is independent support\n",
+    "markdown": "# GAP REPORT \u2014 subject `longrun-0831-2340`\n\n| Claims | 1 |\n| SOURCED | 0 (0%) |\n| UNSOURCED | 1 (100%) |\n| Claims searched (no corpus/log hit) | 1 |\n| Parallel API calls (metered) | 1 |\n| Corpus hits (same subject) | 0 |\n| Log hits (cross subject) | 0 |\n| Remembered on this subject | 1 |\n| Claims established across all subjects | 266 |\n\n## Claims requiring action\n\n- **C1** \u2014 UNVERIFIED INDEPENDENCE (no_independent_source)\n  documents state this, and every one traces to a derived or unclassified origin \u2014 a human must judge whether that is independent support\n",
     "engine": "adk",
     "adk_version": "2.7.1",
     "model_routing": "vertex:hack-fleet",
     "adk_tool_calls": [
         "clear_script_tool"
+    ]
 ```
 
 ```json
 {
     "ok": true,
-    "subject": "longrun-0831-2332",
+    "subject": "longrun-0831-2340",
     "extractor": "gemini-3.5-flash (vertex:hack-fleet)",
     "locator": "gemini-3.5-flash",
     "claims_extracted": 1,
@@ -392,14 +392,14 @@ after:  {
     "parallel_calls": 0,
     "parallel_api_calls": 0,
     "prior_run": {
-        "at": "2026-08-31T21:32:37+00:00",
+        "at": "2026-08-31T21:41:34+00:00",
         "claims": 1,
         "corpus_hits": 0,
-        "parallel_api_calls": 0
+        "parallel_api_calls": 1
     },
     "corpus_hits": 1,
     "log_hits": 0,
-    "log_size": 184,
+    "log_size": 266,
     "corpus_remembered": 1,
     "rows": [
         {
@@ -409,7 +409,7 @@ after:  {
             "label": "UNVERIFIED INDEPENDENCE",
             "engine_verdict": "UNKNOWN",
             "cause": "no_independent_source",
-            "reason": "corpus_hit \u2014 log_hit (cross-subject) \u2014 established in production 'longrun-0831-2119'",
+            "reason": "corpus_hit \u2014 1 document(s) verified but they collapse to 1 non-independent origin(s) [wikipedia]; derived or unclassified sources are not independent support",
             "why": "documents state this, and every one traces to a derived or unclassified origin \u2014 a human must judge whether that is independent support",
             "citation_url": null,
             "quoted_terms": null,
@@ -419,7 +419,7 @@ after:  {
             "probe": "corpus_hit"
         }
     ],
-    "markdown": "# GAP REPORT \u2014 subject `longrun-0831-2332`\n\n| Claims | 1 |\n| SOURCED | 0 (0%) |\n| UNSOURCED | 1 (100%) |\n| Claims searched (no corpus/log hit) | 0 |\n| Parallel API calls (metered) | 0 |\n| Corpus hits (same subject) | 1 |\n| Log hits (cross subject) | 0 |\n| Remembered on this subject | 1 |\n| Claims established across all subjects | 184 |\n\n**1 claim(s) resolved from corpus \u2014 no Parallel call.** That is the second-production cost collapse.\n\n## Claims requiring action\n\n- **C1** \u2014 UNVERIFIED INDEPENDENCE (no_independent_source)\n  documents state this, and every one traces to a derived or unclassified origin \u2014 a human must judge whether that is independent support\n",
+    "markdown": "# GAP REPORT \u2014 subject `longrun-0831-2340`\n\n| Claims | 1 |\n| SOURCED | 0 (0%) |\n| UNSOURCED | 1 (100%) |\n| Claims searched (no corpus/log hit) | 0 |\n| Parallel API calls (metered) | 0 |\n| Corpus hits (same subject) | 1 |\n| Log hits (cross subject) | 0 |\n| Remembered on this subject | 1 |\n| Claims established across all subjects | 266 |\n\n**1 claim(s) resolved from corpus \u2014 no Parallel call.** That is the second-production cost collapse.\n\n**Compound vs last run on this subject:** Parallel API 1 \u2192 0 (\u22121).\n\n## Claims requiring action\n\n- **C1** \u2014 UNVERIFIED INDEPENDENCE (no_independent_source)\n  documents state this, and every one traces to a derived or unclassified origin \u2014 a human must judge whether that is independent support\n",
     "engine": "adk",
 ```
 

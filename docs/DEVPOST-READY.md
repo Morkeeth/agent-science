@@ -13,7 +13,7 @@ Fill the form, then paste description from `SUBMISSION-PACK-2026-08-29.md` § De
 | Field | Value |
 |-------|-------|
 | **Project name** | Agent Science |
-| **Elevator pitch** | Every claim sourced verbatim — or refused with a named reason. |
+| **Elevator pitch** | The truth layer for agentic builders — transparent websearch, verbatim source or named refusal, CONTRARY TO RESEARCH when the field outruns papers. Registry compounds. Clearance is one vertical on the shelf. |
 | **Project URL** | https://agent-science-568004190078.us-central1.run.app |
 | **GitHub** | https://github.com/Morkeeth/agent-science |
 | **Video URL** | *(Oscar — YouTube/Vimeo public, ≤3 min)* |
@@ -25,7 +25,7 @@ Fill the form, then paste description from `SUBMISSION-PACK-2026-08-29.md` § De
 
 ## Inspiration (short — or use full paste block)
 
-Studios and AI labs stall on the same problem: nobody can prove provenance at asset level. E&O insurance requires every fact sourced — today that's manual, slow, and lawsuit-risky. Agent Science returns the exact quote from the instrument or an honest refusal with a named cause — and the second production on the same subject costs less because the shelf remembers.
+Agentic builders websearch daily — RAG vs Obsidian, memory, loops, tools — and get one summarized answer. Agent Science is the **truth layer**: show what was searched, what the field believes and uses (★, blogs, peers), stack-fit for your repo, and sourced-or-refuse verdicts. When practitioners outrun papers, we stamp CONTRARY TO RESEARCH. Clearance and E&O are one paying vertical on the same shelf.
 
 ## What we predicted (sealed)
 
@@ -40,7 +40,7 @@ Second `/clear` on same subject: `corpus_hits ≥ 1` and Run B `parallel_api_cal
 ```bash
 git clone https://github.com/Morkeeth/agent-science.git && cd agent-science
 bash scripts/verify_cold_clone.sh
-open https://agent-science-568004190078.us-central1.run.app/popular/ui
+open https://agent-science-568004190078.us-central1.run.app/truths/ui
 ```
 
 Or hosted only:
