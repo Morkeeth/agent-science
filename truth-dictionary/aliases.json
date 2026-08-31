@@ -23,6 +23,8 @@
 
   "ralph loop": "Geoffrey Huntley's Ralph loop uses a fresh agent, clean context, one unit of work, then commit and exit.",
   "geoffrey huntley ralph": "Geoffrey Huntley's Ralph loop uses a fresh agent, clean context, one unit of work, then commit and exit.",
+  "ralph loop agentic practice": "ralph loop agentic practice",
+  "ralph loop agentic coding": "ralph loop agentic practice",
   "karpathy claude.md": "Andrej Karpathy documented that a CLAUDE.md rules file cut agent mistakes from about 41 percent to 11 percent.",
   "claude.md rules file": "Andrej Karpathy documented that a CLAUDE.md rules file cut agent mistakes from about 41 percent to 11 percent.",
   "karpathy rules cut mistakes": "Andrej Karpathy documented that a CLAUDE.md rules file cut agent mistakes from about 41 percent to 11 percent.",

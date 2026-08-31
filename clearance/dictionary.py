@@ -21,7 +21,7 @@ from clearance import refusal_log, routing, search as _search
 from clearance.facts import Claim, judge_claim
 from clearance.gemini import GeminiLocator
 from clearance.locate import DEFAULT
-from clearance.verdict import GREEN
+from clearance.verdict import CONTRARY_TO_RESEARCH, GREEN
 
 _ROOT = Path(__file__).resolve().parent.parent
 _ALIASES = _ROOT / "truth-dictionary" / "aliases.json"
@@ -197,6 +197,11 @@ def lookup(query: str, *, subject: str = "stack", live: bool = False,
         return _enrich(cheap, cost_tier=COST_CHEAP, subject=subject)
 
     if not live:
+        from clearance import contrary
+        c = contrary.check(q)
+        if c:
+            refusal_log.log_query(con, query=raw, result=c)
+            return _enrich(c, cost_tier=COST_FREE, subject=subject)
         miss = {
             "query": raw,
             "label": "NOT_CLEARED",

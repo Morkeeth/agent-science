@@ -137,12 +137,57 @@ def cmd_truth(args: argparse.Namespace) -> int:
         print(json.dumps(personal_truth.ingest_field_signals(), indent=2))
         return 0
     if args.action == "skill":
+        if getattr(args, "fit", None):
+            from clearance import stack_fit
+            data = stack_fit.score(args.fit)
+            if args.json:
+                print(json.dumps(data, indent=2))
+            else:
+                print(stack_fit.format_result(data), end="")
+            return 0
         tid = personal_truth.record_skill_truth(
             args.skill, args.verdict, probe=args.probe, note=args.note,
         )
         print(json.dumps({"id": tid, **personal_truth.stats()}, indent=2))
         return 0
     print("unknown truth action", file=sys.stderr)
+    return 1
+
+
+def cmd_stack_fit(args: argparse.Namespace) -> int:
+    from clearance import stack_fit
+    data = stack_fit.score(args.query, root=args.root)
+    if args.json:
+        print(json.dumps(data, indent=2))
+    else:
+        print(stack_fit.format_result(data), end="")
+    return 0
+
+
+def cmd_notes(args: argparse.Namespace) -> int:
+    from clearance import community_notes as CN
+    if args.action == "list":
+        rows = CN.list_notes(status=args.status, path=args.path)
+        if args.json:
+            print(json.dumps(rows, indent=2))
+        else:
+            for r in rows:
+                print(f"[{r.get('status')}] {r.get('id')}  {r.get('claim', '')[:70]}")
+                if r.get("dispute"):
+                    print(f"  dispute: {r['dispute'].get('text', '')[:80]}")
+        return 0
+    if args.action == "upload":
+        row = CN.upload(args.claim, submitter=args.submitter, url=args.url, path=args.path)
+        print(json.dumps(row, indent=2))
+        return 0
+    if args.action == "dispute":
+        row = CN.dispute(args.note_id, args.text, submitter=args.submitter, path=args.path)
+        if not row:
+            print(json.dumps({"error": "note not found"}), file=sys.stderr)
+            return 1
+        print(json.dumps(row, indent=2))
+        return 0
+    print("unknown notes action", file=sys.stderr)
     return 1
 
 
@@ -229,11 +274,39 @@ def main(argv=None) -> int:
         "fetch-field", help="pull field-signals URLs into personal fetches"
     ).set_defaults(func=cmd_truth)
     tr_s = tr_sub.add_parser("skill", help="record Magnet skill verdict as truth")
-    tr_s.add_argument("skill")
-    tr_s.add_argument("verdict", choices=["helped", "hurt", "baseline"])
+    tr_s.add_argument("skill", nargs="?")
+    tr_s.add_argument("verdict", nargs="?", choices=["helped", "hurt", "baseline"])
+    tr_s.add_argument("--fit", help="stack-fit score for query instead of recording skill")
     tr_s.add_argument("--probe")
     tr_s.add_argument("--note")
+    tr_s.add_argument("--json", action="store_true")
     tr_s.set_defaults(func=cmd_truth)
+
+    sf = sub.add_parser("stack-fit", help="magnet eval — how well a truth fits your stack")
+    sf.add_argument("query", nargs="+", help="query or truth to score")
+    sf.add_argument("--root", default=".", help="repo root to detect stack from")
+    sf.add_argument("--json", action="store_true")
+    sf.set_defaults(func=cmd_stack_fit)
+
+    nt = sub.add_parser("notes", help="community notes — upload / dispute claims")
+    nt_sub = nt.add_subparsers(dest="action", required=True)
+    nt_l = nt_sub.add_parser("list", help="list community notes")
+    nt_l.add_argument("--status", choices=["pending", "disputed"])
+    nt_l.add_argument("--path", help="override notes JSONL path")
+    nt_l.add_argument("--json", action="store_true")
+    nt_l.set_defaults(func=cmd_notes)
+    nt_u = nt_sub.add_parser("upload", help="upload a claim for community review")
+    nt_u.add_argument("claim")
+    nt_u.add_argument("--submitter", default="anonymous")
+    nt_u.add_argument("--url")
+    nt_u.add_argument("--path")
+    nt_u.set_defaults(func=cmd_notes)
+    nt_d = nt_sub.add_parser("dispute", help="dispute an existing note")
+    nt_d.add_argument("note_id")
+    nt_d.add_argument("text")
+    nt_d.add_argument("--submitter", default="anonymous")
+    nt_d.add_argument("--path")
+    nt_d.set_defaults(func=cmd_notes)
 
     ig = sub.add_parser("ingest", help="ingest claim into registry")
     ig.add_argument("--claim")
@@ -249,7 +322,7 @@ def main(argv=None) -> int:
     sub.add_parser("mcp", help="stdio MCP for Cursor").set_defaults(func=cmd_mcp)
 
     args = p.parse_args(argv)
-    if args.cmd in ("search", "lookup", "visibility"):
+    if args.cmd in ("search", "lookup", "visibility", "stack-fit"):
         args.query = " ".join(args.query)
     return args.func(args)
 

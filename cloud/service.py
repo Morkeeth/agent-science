@@ -370,6 +370,70 @@ JSON: <a href="/popular">/popular</a></p>
 </div></body></html>"""
 
 
+def _truths_page(limit: int = 15) -> str:
+    """Popular truths dashboard — ranked queries + field signals strip."""
+    data = query_analytics.report(db=_log_db(), limit=limit)
+    st = stack_search.stats(db=_log_db())
+    signals_path = Path(__file__).resolve().parents[1] / "truth-dictionary" / "field-signals.json"
+    field_rows = []
+    hn_note = ""
+    if signals_path.exists():
+        try:
+            sig = json.loads(signals_path.read_text(encoding="utf-8"))
+            for g in (sig.get("github") or [])[:6]:
+                field_rows.append(
+                    f"<tr><td>★ {g.get('stars', 0)}</td>"
+                    f"<td>{_esc(g.get('repo', ''))}</td>"
+                    f"<td>{_esc(g.get('why', ''))}</td></tr>"
+                )
+            hn = sig.get("hacker_news") or {}
+            hn_note = f"HN source: {_esc(hn.get('source', 'unknown'))} · read {_esc(hn.get('read_at', '—'))}"
+        except json.JSONDecodeError:
+            pass
+    pop_rows = []
+    for r in data.get("popular_queries", [])[:limit]:
+        pop_rows.append(
+            f"<tr><td>{_esc(r['asks'])}</td>"
+            f"<td>{_esc(r.get('example', '')[:80])}</td>"
+            f"<td>{_esc(r.get('sourced', 0))}</td>"
+            f"<td>{_esc(r.get('not_cleared', 0))}</td></tr>"
+        )
+    hit = st.get("dictionary_hit_rate", 0)
+    return f"""<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Truths · Agent Science</title>
+<style>
+body{{font-family:Georgia,serif;background:#e8e6e1;color:#16181d;margin:0;padding:2rem}}
+.wrap{{max-width:56rem;margin:0 auto}}
+h1{{font-size:1.6rem;margin:0 0 .5rem}}
+p.meta{{color:#61656e;font-size:.95rem}}
+a{{color:inherit}}
+table{{width:100%;border-collapse:collapse;margin:1.5rem 0;font-size:.9rem}}
+th,td{{text-align:left;padding:.5rem;border-bottom:1px solid #c9c5bd}}
+th{{font-family:monospace;font-size:.7rem;text-transform:uppercase;letter-spacing:.08em}}
+.strip{{background:#fff;padding:1rem;border:1px solid #c9c5bd;margin:1rem 0}}
+</style></head><body><div class="wrap">
+<p><a href="/">← desk</a> · <a href="/popular/ui">popular</a> · <a href="/registry">registry</a></p>
+<h1>Truths dashboard</h1>
+<p class="meta">Most websearched claims · field adoption strip · hit rate at object</p>
+<div class="strip">
+  <strong>Shelf:</strong> {st.get('n', 0)} claims · hit rate {hit} · {st.get('queries_logged', 0)} queries logged
+</div>
+<h2>Top queries (ranked by asks)</h2>
+<table>
+<tr><th>Asks</th><th>Query</th><th>Sourced</th><th>Miss</th></tr>
+{''.join(pop_rows) or '<tr><td colspan="4">No queries yet.</td></tr>'}
+</table>
+<h2>Field signals (GitHub ★)</h2>
+<table>
+<tr><th>★</th><th>Repo</th><th>Why</th></tr>
+{''.join(field_rows) or '<tr><td colspan="3">Run refresh_field_signals.py</td></tr>'}
+</table>
+<p class="meta">{hn_note}</p>
+</div></body></html>"""
+
+
 def _run_clearance(script: str, subject: str, model: str) -> dict:
     """Clear through the ADK agent, and say so in the report.
 
@@ -462,6 +526,10 @@ class Handler(BaseHTTPRequestHandler):
         if path in ("/popular/ui", "/popular/ui/"):
             limit = int((qs.get("limit") or ["15"])[0])
             return self._send(200, _popular_page(limit).encode(), "text/html; charset=utf-8")
+
+        if path in ("/truths/ui", "/truths/ui/"):
+            limit = int((qs.get("limit") or ["15"])[0])
+            return self._send(200, _truths_page(limit).encode(), "text/html; charset=utf-8")
 
         if path == "/health":
             gemini_path = "none"

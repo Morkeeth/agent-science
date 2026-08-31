@@ -28,7 +28,20 @@ Stars and “latest blog” feed **believe + use**. Verify still decides SOURCED
 | frankbria/ralph-claude-code | 9612 | 2026-07-18 | Ralph loop — used in building |
 | mikeyobrien/ralph-orchestrator | 3118 | 2026-08-29 | Ralph orchestration — active |
 
-Machine file: `truth-dictionary/field-signals.json` · refresh: `python3 scripts/refresh_field_signals.py`
+Machine file: `truth-dictionary/field-signals.json` · refresh: `python3 scripts/refresh_field_signals.py` · HN: `python3 scripts/refresh_hn_signals.py`
+
+### Hacker News (honest ingest)
+
+| Source | Status | Refresh |
+|--------|--------|---------|
+| HN Algolia API | Live when network allows | `scripts/refresh_hn_signals.py` writes `hacker_news.source=hn_algolia_api` |
+| HN snapshot | Fallback when API blocked | `source=snapshot` — **do not claim live** |
+
+### ARKIVX (snapshot only)
+
+| Source | Status | Note |
+|--------|--------|------|
+| ARKIVX | **Not wired** | Static snapshot in `field-signals.json` · `arkivx.source=snapshot` |
 
 ## Latest blogs / docs (seed, not exhaustive)
 
@@ -55,6 +68,8 @@ Claim seeds: `research-inbox/2026-08-31-field-blogs.md` · Grinder corpus: `docs
 
 ## Next build (when Oscar says go)
 
+- [x] Transparency panes in `visibility --full` (angles / shallow / imbalance)
+- [x] HN refresh script (`refresh_hn_signals.py`) — live or snapshot
 - [ ] Auto-refresh stars on a schedule into `field-signals.json`
 - [ ] `/popular/ui` strip: top field repos ★ beside top queries
 - [ ] Ingest pipeline: blog RSS / awesome-list → claim candidates → verify

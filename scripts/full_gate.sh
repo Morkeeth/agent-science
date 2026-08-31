@@ -24,7 +24,9 @@ python3 tests/test_adk_default_path.py
 
 echo "--- 4. Product suites ---"
 for f in tests/test_dictionary.py tests/test_registry_surface.py tests/test_routing.py \
-         tests/test_popular.py tests/test_stack_product.py tests/test_refusal_correctness.py; do
+         tests/test_popular.py tests/test_stack_product.py tests/test_refusal_correctness.py \
+         tests/test_visibility_transparency.py tests/test_contrary_verdict.py \
+         tests/test_stack_fit.py tests/test_community_notes.py; do
   python3 "$f"
 done
 

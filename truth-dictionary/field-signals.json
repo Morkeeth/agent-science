@@ -101,5 +101,54 @@
       "kind": "latest_blog",
       "when": "2026"
     }
-  ]
+  ],
+  "hacker_news": {
+    "read_at": "2026-08-31T21:22:45Z",
+    "source": "hn_algolia_api",
+    "queries": [
+      {
+        "title": "Ask HN: How do you verify front-end code in agentic LLM coding loops?",
+        "url": "https://news.ycombinator.com/item?id=46081585",
+        "points": 8,
+        "comments": 2
+      },
+      {
+        "title": "Show HN: Ito \u2013 Code reviews that run code",
+        "url": "https://www.ito.ai",
+        "points": 10,
+        "comments": 8
+      },
+      {
+        "title": "The IDE isn't going away",
+        "url": "https://news.ycombinator.com/item?id=44573539",
+        "points": 8,
+        "comments": 10
+      },
+      {
+        "title": "Show HN: lmcli - A sleek, sandboxed alternative to Claude Code",
+        "url": "https://codeberg.org/mlow/lmcli",
+        "points": 2,
+        "comments": 0
+      },
+      {
+        "title": "Show HN: Verification-first workflow plugin for Claude Code",
+        "url": "https://github.com/doodledood/manifest-dev",
+        "points": 1,
+        "comments": 0
+      }
+    ]
+  },
+  "arkivx": {
+    "read_at": "2026-08-31T21:30:00Z",
+    "source": "snapshot",
+    "note": "ARKIVX API not wired \u2014 static snapshot only; do not claim live ingest",
+    "entries": [
+      {
+        "title": "Agent memory vs RAG for coding agents",
+        "url": "https://arkivx.example/agent-memory-rag",
+        "tag": "agentic"
+      }
+    ]
+  },
+  "hn_refresh": "2026-08-31T21:22:45Z"
 }

@@ -113,6 +113,120 @@ def _peer_queries(query: str, *, limit: int = 8) -> list[dict]:
     return peers[:limit]
 
 
+def _lookup_angles(query: str, primary: dict, aliases: list[dict], *, live: bool) -> list[dict]:
+    """Query variants and tier routes attempted for this visibility ask."""
+    from clearance.dictionary import canonical_query, COST_CHEAP, COST_FREE, COST_LIVE
+
+    angles: list[dict] = []
+    canon = canonical_query(query)
+    variants = list(dict.fromkeys([query.strip(), canon]))
+    for v in variants:
+        angles.append({"variant": v, "route": "dictionary_exact", "tier": COST_FREE})
+        if v != query.strip():
+            angles.append({"variant": v, "route": "alias_canonical", "tier": COST_FREE})
+    angles.append({"variant": "registry_fuzzy", "route": "registry", "tier": COST_FREE})
+    angles.append({"variant": canon, "route": "cheap_routing", "tier": COST_CHEAP})
+    tier = primary.get("cost_tier") or "?"
+    source = primary.get("source") or "primary"
+    angles.append({
+        "variant": query.strip(),
+        "route": source,
+        "tier": tier,
+        "hit": primary.get("label"),
+    })
+    if live and tier != COST_LIVE:
+        angles.append({
+            "variant": query.strip(),
+            "route": "live_skipped",
+            "tier": COST_LIVE,
+            "reason": "resolved before live tier",
+        })
+    elif not live and primary.get("label") == "NOT_CLEARED":
+        angles.append({
+            "variant": query.strip(),
+            "route": "live_not_attempted",
+            "tier": COST_LIVE,
+            "reason": "live=false — dictionary miss only",
+        })
+    elif live and tier == COST_LIVE:
+        angles.append({
+            "variant": query.strip(),
+            "route": "live_parallel",
+            "tier": COST_LIVE,
+            "hit": primary.get("label"),
+        })
+    return angles
+
+
+def _compute_transparency(
+    query: str,
+    primary: dict,
+    aliases: list[dict],
+    field: dict,
+    practices: list[dict],
+    peer_queries: list[dict],
+    *,
+    live: bool,
+) -> dict[str, Any]:
+    """Transparency panes: angles searched, shallow route, imbalance."""
+    gh = field.get("github") or []
+    blogs = field.get("blogs_and_docs") or []
+    has_field = bool(gh or blogs)
+    has_practices = bool(practices)
+    has_peers = bool(peer_queries)
+    tier = primary.get("cost_tier") or "?"
+
+    shallow = (
+        tier in ("free", "cheap")
+        and primary.get("label") in ("SOURCED", "UNSOURCED", "UNKNOWN", "CONTRARY_TO_RESEARCH")
+        and not has_field
+        and not has_practices
+        and not has_peers
+    )
+
+    buckets = {
+        "github": len(gh),
+        "blogs_docs": len(blogs),
+        "practices": len(practices),
+        "peers": len(peer_queries),
+        "primary": 1 if primary.get("label") else 0,
+    }
+    nonzero = {k: v for k, v in buckets.items() if v > 0}
+    total = sum(nonzero.values())
+    imbalance: dict | None = None
+    if total >= 3:
+        dominant = max(nonzero, key=nonzero.get)
+        share = nonzero[dominant] / total
+        if share >= 0.65:
+            notes = {
+                "github": "only adoption signals — no verify path or practitioner depth",
+                "blogs_docs": "only blogs/docs — no GitHub use signals or peer asks",
+                "practices": "only practitioner corpus — no field ★ or peer depth",
+                "peers": "only fleet peer asks — thin field belief/use context",
+                "primary": "only dictionary primary — no field or peer panes matched",
+            }
+            imbalance = {
+                "dominant": dominant,
+                "share": round(share, 2),
+                "counts": nonzero,
+                "note": notes.get(dominant, "one source type dominates"),
+            }
+    if has_field and not has_practices and tier == "free":
+        if imbalance is None:
+            imbalance = {
+                "dominant": "github",
+                "share": round(len(gh) / max(total, 1), 2),
+                "counts": nonzero,
+                "note": "dictionary hit with stars only — no practitioner verify path",
+            }
+
+    return {
+        "angles_searched": _lookup_angles(query, primary, aliases, live=live),
+        "shallow_route": shallow,
+        "imbalance": imbalance,
+    }
+
+
 def panel(
     query: str,
     *,
@@ -164,7 +278,18 @@ def panel(
             "Full rundown: docs/WEBSEARCH-FULL-RUNDOWN.md"
         ),
     }
+    out["transparency"] = _compute_transparency(
+        query,
+        primary,
+        out["aliases"],
+        out["field"],
+        out["agentic_practices"],
+        out["peer_queries"],
+        live=live,
+    )
     if full:
+        from clearance import stack_fit
+        out["stack_fit"] = stack_fit.score(query, root=_ROOT)
         out["shelf_stats"] = stack_search.stats()
         out["popular_bundle"] = {
             "top_reused": query_analytics.top_terms(limit=8),
@@ -222,6 +347,38 @@ def format_panel(data: dict) -> str:
         lines.append(f"  cause={p['cause']}")
     if p.get("resolves_with"):
         lines.append(f"  resolves_with={p['resolves_with']}")
+
+    trans = data.get("transparency") or {}
+    lines += ["", "## 1b · Transparency (what was searched)"]
+    if trans.get("shallow_route"):
+        lines.append("  SHALLOW_ROUTE=yes — dictionary/cheap only; no field or peer depth")
+    else:
+        lines.append("  SHALLOW_ROUTE=no — field, practices, or peers present")
+    for a in trans.get("angles_searched") or []:
+        bits = [f"variant={a.get('variant', '')[:60]}", f"route={a.get('route')}", f"tier={a.get('tier')}"]
+        if a.get("hit"):
+            bits.append(f"hit={a['hit']}")
+        if a.get("reason"):
+            bits.append(f"reason={a['reason']}")
+        lines.append("  " + "  ".join(bits))
+    imb = trans.get("imbalance")
+    if imb:
+        lines.append(
+            f"  IMBALANCE: {imb.get('dominant')} dominates ({imb.get('share')}) — {imb.get('note')}"
+        )
+    else:
+        lines.append("  IMBALANCE: none — source mix balanced")
+
+    if data.get("stack_fit"):
+        sf = data["stack_fit"]
+        lines += [
+            "",
+            "## 1c · Stack-fit (magnet eval)",
+            f"  fit={sf.get('fit')}  stack={','.join((sf.get('stack') or {}).get('stack') or [])}",
+            f"  improvement: {sf.get('improvement')}",
+        ]
+        for r in sf.get("reasons") or []:
+            lines.append(f"  reason: {r}")
 
     lines += ["", "## 2 · Aliases (other phrasings → canonical)"]
     for a in data.get("aliases") or []:

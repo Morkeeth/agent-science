@@ -298,7 +298,39 @@ Full record: `~/CODE/fleet-ops/retros/QWEN-LOSS-RETRO-2026-08-30.md` (corrected)
 
 ---
 
-## 🎯 NOW — Phase 6 freeze + video (not more build)
+## 🎯 NOW — Night wave: WOW websearch transparency (build lane)
+
+**Slice:** S1–S8 truth layer night — transparency panes, CONTRARY stamp, stack-fit, community notes, truths dashboard.  
+**Oscar film:** `python3 -m clearance.stack_cli visibility "ralph loop agentic" --full` → pane 1b + CONTRARY stamp.
+
+### Build (shipped 2026-08-31 night)
+
+- [x] S1 transparency — angles / shallow / imbalance (`visibility --full`)
+- [x] S2 `CONTRARY_TO_RESEARCH` + ralph-loop demo + tests
+- [x] S3 `stack-fit` + `truth skill --fit`
+- [x] S4 HN live + ARKIVX snapshot (`refresh_hn_signals.py`)
+- [x] S5 community notes CLI
+- [x] S6 `/truths/ui` + video script beats
+- [x] S7 vision + STATUS + receipt
+- [x] S8 full gate — `bash scripts/full_gate.sh` → **FULL GATE OK** 2026-08-31T21:23:08Z
+
+### Verify (one command each)
+
+```bash
+python3 -m clearance.stack_cli visibility "ralph loop agentic" --full --no-personal | head -30
+python3 -m clearance.stack_cli lookup "ralph loop agentic practice"
+python3 -m clearance.stack_cli stack-fit "science_lookup MCP fleet"
+python3 tests/test_visibility_transparency.py && python3 tests/test_contrary_verdict.py
+bash scripts/full_gate.sh
+```
+
+### Receipt
+
+- `docs/RECEIPT-truth-layer-night-2026-08-31.md`
+
+---
+
+## 🎯 NOW (prior) — Phase 6 freeze + video (Oscar outward)
 
 **Slice:** handbook phase 6 — Oscar drives degraded judge path and films compound + refuse.  
 **Hard-fail artifact:** ≤180s video with hosted URL readable · `docs/VIDEO-SCRIPT-2026-08-29.md`
@@ -354,6 +386,7 @@ bash scripts/verify_cold_clone.sh                                               
 
 | When | What | Command | Outcome |
 |------|------|---------|---------|
+| 2026-08-31 night | Truth layer night S1–S8 | `bash scripts/full_gate.sh` | **FULL GATE OK** · transparency · CONTRARY · stack-fit · notes · receipt |
 | 2026-08-31 11:27Z | Full gate | `bash scripts/full_gate.sh` | **FULL GATE OK** · STATUS.md · DEVPOST-READY · CLAUDE.md |
 | 2026-08-31 PM | Handbook pass | hack.md rewrite | ladder · field · websearch · roadmap · winner angles |
 | 2026-08-31 L5 | Semantic guard RED first | `python3 tests/test_semantic_guard.py` (null guard) | **4 fail / 9 pass** — watched red before implementing |

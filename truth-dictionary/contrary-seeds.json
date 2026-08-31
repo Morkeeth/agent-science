@@ -1,0 +1,20 @@
+{
+  "claims": [
+    {
+      "canonical": "ralph loop agentic practice",
+      "aliases": [
+        "ralph loop agentic",
+        "ralph loop one unit commit",
+        "ralph loop agentic coding"
+      ],
+      "practitioner": "Geoffrey Huntley",
+      "why": "Practitioner corpus + field adoption (ralph-claude-code 9k+★, ralph-orchestrator active 2025+) document Ralph loop; arXiv:2512.14012 states 'control not vibe' but predates Ralph-named tooling and does not generalize this loop pattern to agentic stacks.",
+      "stale_research": {
+        "id": "arXiv:2512.14012",
+        "url": "https://arxiv.org/abs/2512.14012",
+        "span": "Professional developers don't vibe, they control",
+        "predates": "Ralph loop repos and loop-engineering blogs (2025+)"
+      }
+    }
+  ]
+}

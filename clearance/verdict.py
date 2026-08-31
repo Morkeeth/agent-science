@@ -20,7 +20,9 @@ UNKNOWN = "UNKNOWN"
 # say more than the engine can prove, and for most of this build there was no state
 # behind the word. There is now, and it carries the same citation burden as GREEN.
 DISPUTED = "DISPUTED"
-VERDICTS = (GREEN, RED, UNKNOWN, DISPUTED)
+# Field practice outruns peer research — named why required, not a GREEN span.
+CONTRARY_TO_RESEARCH = "CONTRARY_TO_RESEARCH"
+VERDICTS = (GREEN, RED, UNKNOWN, DISPUTED, CONTRARY_TO_RESEARCH)
 ASSERTED = (GREEN, RED, DISPUTED)   # every verdict that makes a claim about the world
 
 ASSET = "asset"

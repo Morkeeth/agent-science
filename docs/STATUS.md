@@ -11,7 +11,7 @@ deadline: 2026-09-09T14:00:00-07:00
 > **For Claude / fleet:** this file is the single “where we are” surface.  
 > `hack.md` = process · `CLAUDE.md` = entry · this file = gates + evidence.
 
-**Last gate run:** 2026-08-31T14:01:03Z — `bash scripts/full_gate.sh` → **FULL GATE OK** (124/124 · 19/19 long run · trial OK · partner SDK deepen)
+**Last gate run:** 2026-08-31T21:23:08Z — `bash scripts/full_gate.sh` → **FULL GATE OK** (139 product tests in gate loop · 19/19 long run · trial OK)
 
 ---
 
@@ -21,7 +21,7 @@ deadline: 2026-09-09T14:00:00-07:00
 |-------|--------|
 | **Product noun** | **Agent Science** — truth layer for what people believe and use · B lead · A on the same layer |
 | **Product** | LIVE on Cloud Run · public repo · sealed prediction |
-| **Build lane** | Personal truth DB + Magnet bridge stub · visibility expands websearch |
+| **Build lane** | WOW websearch transparency · CONTRARY stamp · stack-fit · community notes · `/truths/ui` |
 | **Oscar** | Video + Devpost still open — lead companion, show clearance as one shelf customer |
 | **Film lead** | Ask → sourced/refuse → free on re-ask · ≥2 domains · E&O as *a* truth not the only story |
 

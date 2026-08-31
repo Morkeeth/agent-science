@@ -23,6 +23,17 @@
 
 ---
 
+## WOW transparency beats (film — insert after 0:36 SOURCED demo)
+
+| Time | Sec | Beat | On screen | Voiceover |
+|------|----:|------|-----------|-----------|
+| 0:36+ | 15 | **Transparency** | `python3 -m clearance.stack_cli visibility "ralph loop agentic" --full` — pane **1b** angles + SHALLOW_ROUTE | "I finally know what my agent searched — not just verified. Every tier, every alias route." |
+| +15 | 12 | **Not just verified** | Same panel — primary `CONTRARY_TO_RESEARCH` stamp | "When the field outruns the paper, we stamp CONTRARY TO RESEARCH — with why." |
+| +27 | 10 | **Truths easy to find** | `/truths/ui` or `/popular/ui` — ranked queries + ★ strip | "The most-asked truths get cheaper — and you see what the field actually runs." |
+| +37 | 8 | **Stack-fit** | `stack-fit "science_lookup MCP"` — fit=fits | "Magnet asks: does this truth fit *your* stack — and how does it improve you?" |
+
+*Reorder into timed beats as needed; total still ≤180s.*
+
 ## Timed beats (EYES order)
 
 | Time | Sec | Beat | On screen | Voiceover |
