@@ -111,6 +111,16 @@ _CLAUSE = re.compile(
 _CONTRAST = re.compile(r"\b(?:but|however|although|though|whereas|rather\s+than|"
                        r"instead\s+of)\b", re.IGNORECASE)
 
+# A NON-RESTRICTIVE RELATIVE CLAUSE — ", which had not been amended since first
+# reading," — is an aside about the subject. Its negation does not scope over the main
+# predication: "The Act, which had NOT been amended, came into force on 1 April 2024"
+# asserts that the Act came into force. Same class of fact as the `but` correction: a
+# grammatical boundary the polarity check has to respect, not a word list it has to grow.
+# Caught by the regression set on its first run, from a case written down as a predicted
+# weakness before the rule was checked against it.
+_PARENTHETICAL = re.compile(
+    r",\s*(?:which|who|whom|whose)\b[^,]{0,160},", re.IGNORECASE)
+
 _WORD = re.compile(r"[^\W_]+", re.UNICODE)
 
 
@@ -222,6 +232,24 @@ def _carrier(passage: str, must_contain: str) -> str:
     return passage
 
 
+def _without_asides(clause: str, must_contain: str) -> str:
+    """Drop non-restrictive relative asides before reading a clause's polarity.
+
+    An aside CARRYING the claim's terms is not an aside for this purpose — it is where
+    the claim is being made, and dropping it would delete the very text under judgement.
+    So the strip is skipped whenever `must_contain` falls inside it.
+    """
+    needle = (must_contain or "").strip().lower()
+    out, pos = [], 0
+    for m in _PARENTHETICAL.finditer(clause or ""):
+        if needle and needle in m.group(0).lower():
+            continue
+        out.append(clause[pos:m.start()])
+        pos = m.end() - 1          # keep the closing comma as a boundary
+    out.append((clause or "")[pos:])
+    return "".join(out)
+
+
 def _corrected_between(spans: list, i: int, j: int) -> bool:
     """Is a correcting boundary crossed on the way from clause i to clause j?"""
     lo, hi = sorted((i, j))
@@ -249,7 +277,7 @@ def check_polarity(passage: str, *, claim: str, must_contain: str) -> Optional[F
     carrier = _carrier(passage, must_contain)
     claim_neg = negators(claim)
     own = negators(must_contain)
-    carrier_neg = negators(carrier) - own
+    carrier_neg = negators(_without_asides(carrier, must_contain)) - own
 
     extra = carrier_neg - claim_neg
     if extra:

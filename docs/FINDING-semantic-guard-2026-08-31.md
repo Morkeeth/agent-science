@@ -123,13 +123,14 @@ before any engine run.
 
 **1 false GREEN closed. 0 true GREENs lost.**
 
-**REGISTRY** — every claim in `research-corpus/`, n=313, re-cleared offline against the
-document cache; same command, same parser, same locator as the shipped registry.
+**REGISTRY** — every claim in `research-corpus/`, re-cleared offline against the document
+cache; same command, same parser, same locator as the shipped registry. Re-run after the
+aside fix, 03:2x:
 
 ```
-  guard OFF  {'sourced': 27, 'refused': 270, 'unknown': 16}
-  guard ON   {'sourced': 27, 'refused': 270, 'unknown': 16}
-  verdicts changed: 0/313 (0.0%)
+  guard OFF  {'sourced': 27, 'refused': 271, 'unknown': 16}
+  guard ON   {'sourced': 27, 'refused': 271, 'unknown': 16}
+  verdicts changed: 0/314 (0.0%)
   refusals RESCUED to SOURCED: 0
   SOURCED on a DIFFERENT span: 8/27 — same verdict, better evidence
 ```
@@ -156,6 +157,34 @@ nothing. That is the wrong object: **the verdict was never what was wrong. The s
   coverage threshold sweep:  0.30 -> 8/27   0.40 -> 12/27   0.50 -> 14/27   0.60 -> 17/27
 ```
 
+## A fifth defect, found by the regression set on its first run
+
+`fixtures/refusal-correctness/regression.json` collects the four defects above as cases,
+so they cannot come back. Writing it turned up a fifth, from a case I wrote down as a
+*predicted* weakness and then checked:
+
+```
+claim   "The Act came into force on 1 April 2024."
+passage "The Act, which had not been amended since first reading, came into force
+         on 1 April 2024."
+```
+
+The guard refused it. A negation inside a **non-restrictive relative clause** is an aside
+about the subject; it does not scope over the main predication. Same grammatical class as
+the `but` correction — a boundary the polarity check has to respect, not a word list it
+has to grow. Fixed in `_without_asides`, with the obvious hole closed in the same commit:
+an aside that CARRIES the claim's terms is not an aside for this purpose — it is where
+the claim is being made — so the strip is skipped when `must_contain` falls inside it, and
+a control asserts the denial still fires there.
+
+**That set is DERIVED, and its score is not an eval result.** Every case in it was written
+from a defect this build produced, so the guard passes them by construction; green means
+only "the defects already found have not come back". It lives in a separate file with
+`held_out: false`, and `tests/test_guard_regression.py` fails if anyone merges it into
+`set.json` or flips that flag. Folding six derived cases into a six-item held-out set
+would produce an n=12 number that looks twice as strong and is half as honest — the
+substitution this product exists to refuse, performed on the product's own scoreboard.
+
 ## One clause that would otherwise be unfalsifiable
 
 "The guard may only demote" is exactly true of `verify()`, and a control pins it there.
@@ -176,6 +205,12 @@ holds and measured where it does not.
 - **This is not comprehension.** Three narrow checks over negation and subject binding.
   It will not catch a false GREEN that is fluent, on-topic, positively phrased and simply
   about a different fact. Nothing here should be sold as reading.
+- **The population is LIVE and it moved under the measurement.** The first run read
+  n=313; the re-run after the aside fix read **n=314**, because another lane wrote a file
+  into `research-corpus/` while this one was working. Nothing was smoothed: both readings
+  are stated with their time, and the shipped numbers are the later ones. A corpus that
+  other agents write to is not a frozen holdout and must never be quoted as one.
+
 - **n=6 on the only labelled population.** The gold result is 6/6 on six items. The
   313-claim replay is unlabelled and every changed row was printed and adjudicated by
   hand; that is a weaker instrument than a label set and is not a substitute for one.

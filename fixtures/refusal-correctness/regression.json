@@ -1,0 +1,62 @@
+{
+  "derived_from": "guard-design",
+  "held_out": false,
+  "created": "2026-08-31",
+  "warning": "THESE CASES ARE NOT HELD OUT AND THEIR SCORE IS NOT AN EVAL RESULT. Every item here was written FROM a defect found while building or measuring clearance/semantic.py on 2026-08-31. The guard was shaped by them, so it passes them by construction and a 12/12 here means only 'the defects I already found have not come back'. The held-out measurement is set.json (n=6) and it is the only number that may be reported as accuracy. Two files, because merging them would silently convert a regression suite into an inflated eval set — which is the substitution this product exists to refuse.",
+  "items": [
+    {
+      "id": "REG1",
+      "defect": "RC5 shape, generalised — a neighbouring clause denies the claim's subject",
+      "expect": "REFUSE",
+      "claim": "The Nevis Reel is in the public domain worldwide.",
+      "must_contain": "in the public domain",
+      "passage": "Several reels in this collection are in the public domain; the Nevis Reel is not among them.",
+      "why": "The span carries the terms verbatim and the sentence beside it excludes the very subject the claim is about. This is RC5's mechanism on words RC5 never used, so it tests the rule rather than the fixture."
+    },
+    {
+      "id": "REG2",
+      "defect": "\"not A but B\" read as a denial (false refusal, registry replay)",
+      "expect": "ADMIT",
+      "claim": "Agent context files evolve like configuration code through frequent, small additions.",
+      "must_contain": "evolve like configuration code through frequent, small additions.",
+      "passage": "We find that these files are not static documentation but complex, difficult-to-read artifacts that evolve like configuration code through frequent, small additions. Our content analysis follows.",
+      "why": "After a negation, `but` marks a correction: it replaces the denied element with the affirmed one. The sentence STATES the claim. Also exercises the carrier-by-offset lookup, because must_contain ends on a full stop the clause splitter consumes."
+    },
+    {
+      "id": "REG3",
+      "defect": "lexical verbs in the negator list (false refusal, registry replay)",
+      "expect": "ADMIT",
+      "claim": "Stale instructions in a context file cause the agent to follow the old thing.",
+      "must_contain": "still says the old thing",
+      "passage": "You rename a file, change a build script, or switch from Jest to Vitest and your context file still says the old thing. Your agent follows those stale instructions faithfully, then fails.",
+      "why": "A product whose subject matter is failure says \"fails\" in its true sentences. The negator list must stay a closed class of function words, which is what the module's own docstring claims it is."
+    },
+    {
+      "id": "REG4",
+      "defect": "claim whose own assertion is a negation (RC6's mechanism, different words)",
+      "expect": "ADMIT",
+      "claim": "The rights status of this recording has not been assessed.",
+      "must_contain": "has not been assessed",
+      "passage": "The rights status of this recording has not been assessed by the depositing institution.",
+      "why": "The most common true verdict this engine emits is about an absence. A polarity check that fires on any 'not' in the span would destroy the product. The negation is inside must_contain, so it is the claim's own."
+    },
+    {
+      "id": "REG5",
+      "defect": "topic continuity — the claim's subject is in the PREVIOUS sentence",
+      "expect": "ADMIT",
+      "claim": "An 'In Copyright' item requires permission",
+      "must_contain": "you need to obtain permission from the rights-holder",
+      "passage": "For other uses you need to obtain permission from the rights-holder(s).",
+      "why": "The product's own canonical claim, and the case that disqualified `binding` and `coverage` as gates. The span is the operative clause of the instrument; its subject sits in the sentence before it, because that is how English works."
+    },
+    {
+      "id": "REG6",
+      "defect": "negation legitimately present in an unrelated clause of the carrier",
+      "expect": "ADMIT",
+      "claim": "The Act came into force on 1 April 2024.",
+      "must_contain": "came into force on 1 April 2024",
+      "passage": "The Act, which had not been amended since first reading, came into force on 1 April 2024.",
+      "why": "A parenthetical negation about something else must not flip the polarity of the main predication. This one is a KNOWN WEAKNESS of the shipped rule as much as a control: if it ever goes red, the polarity check has grown a scope it cannot justify."
+    }
+  ]
+}

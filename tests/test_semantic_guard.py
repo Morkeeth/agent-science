@@ -207,6 +207,35 @@ def t_negators_are_function_words_not_lexical_verbs():
         assert word in S._NEGATORS, f"the closed class lost {word!r}"
 
 
+def t_an_aside_about_the_subject_is_not_a_denial_of_the_predicate():
+    """A negation inside ", which …," does not scope over the main verb.
+
+    "The Act, which had not been amended since first reading, came into force on 1 April
+    2024" ASSERTS that it came into force. Same grammatical class as the `but`
+    correction. Found by the regression set on its first run, from a case written down as
+    a predicted weakness before the rule was ever checked against it.
+    """
+    passage = ("The Act, which had not been amended since first reading, came into "
+               "force on 1 April 2024.")
+    assert S.inspect(passage, claim="The Act came into force on 1 April 2024.",
+                     must_contain="came into force on 1 April 2024") is None, \
+        "a parenthetical aside was read as denying the main predication"
+
+
+def t_an_aside_carrying_the_claim_is_not_stripped():
+    """The escape hatch must not become a hole.
+
+    If the claim's terms live INSIDE the aside, the aside is where the claim is being
+    made. Dropping it would delete the text under judgement and admit a denial.
+    """
+    passage = ("This Item, which is not free of known copyright restrictions, appears "
+               "in the catalogue.")
+    assert S.inspect(passage,
+                     claim="This Item is free of known copyright restrictions.",
+                     must_contain="free of known copyright restrictions") is not None, \
+        "the aside carrying the claim's own terms was stripped, and its denial with it"
+
+
 # ----------------------------------------------------------------- the invariants
 
 def t_guard_only_demotes_never_rescues():
