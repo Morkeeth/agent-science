@@ -313,12 +313,24 @@ def browse_claims(con, *, label: str | None = None, production: str | None = Non
     inventory — you can see the shape of what is known and what is not, which is the
     only way the negative space is visible at all.
     """
+    # EVERY label filter resolves in SQL, so COUNT(*) counts the same set the rows come
+    # from. The first version filtered UNSOURCED/UNKNOWN in Python AFTER the LIMIT and
+    # then set total = len(rows): on the live registry that rendered "The shelf — 120
+    # claims matching" one click away from a counter reading "149 refused". Two numbers
+    # on one page, describing one set, disagreeing — the exact failure this surface was
+    # built to prevent, sitting on the surface.
+    _ph = ",".join("?" * len(_UNSOURCED_CAUSES))
+    _causes = sorted(_UNSOURCED_CAUSES)
     where, args = [], []
     if label in ("SOURCED", "REFUTED"):
         where.append("verdict = ?")
         args.append("GREEN" if label == "SOURCED" else "RED")
-    elif label in ("UNSOURCED", "UNKNOWN"):
-        where.append("verdict = 'UNKNOWN'")
+    elif label == "UNSOURCED":
+        where.append(f"verdict = 'UNKNOWN' AND cause IN ({_ph})")
+        args += _causes
+    elif label == "UNKNOWN":
+        where.append(f"verdict = 'UNKNOWN' AND (cause IS NULL OR cause NOT IN ({_ph}))")
+        args += _causes
     if production:
         where.append("first_seen_in = ?")
         args.append(production)
@@ -350,12 +362,12 @@ def browse_claims(con, *, label: str | None = None, production: str | None = Non
         rows.append(d)
     # A label filter that maps to more than one verdict has to be applied after
     # surface_label, or UNSOURCED and UNKNOWN would return each other's rows.
-    if label in ("UNSOURCED", "UNKNOWN"):
-        rows = [r for r in rows if r["label"] == label]
-        total = len(rows)
-    elif label == "THIN":
+    if label == "THIN":
+        # THIN is computed, not stored, so it alone cannot resolve in SQL. Its total is
+        # counted over EVERY sourced row rather than over this page of them — same reason
+        # as above: the header must describe the set, not the slice.
         rows = [r for r in rows if r["thin"]]
-        total = len(rows)
+        total = thin_evidence_count(con)[0]
     return {"rows": rows, "total": total, "limit": limit}
 
 

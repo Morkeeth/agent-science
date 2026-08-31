@@ -156,6 +156,16 @@ nothing. That is the wrong object: **the verdict was never what was wrong. The s
   coverage threshold sweep:  0.30 -> 8/27   0.40 -> 12/27   0.50 -> 14/27   0.60 -> 17/27
 ```
 
+## One clause that would otherwise be unfalsifiable
+
+"The guard may only demote" is exactly true of `verify()`, and a control pins it there.
+It is **not** true by construction at `judge_claim` level: with the guard on, the locator
+offers more candidate spans than with it off, so a claim the old engine refused could in
+principle come back GREEN on a later occurrence the old engine never looked at. Measured
+on this corpus it does not happen — `refusals RESCUED to SOURCED: 0` of 313, and the eval
+exits non-zero if that number is ever anything else. The invariant is enforced where it
+holds and measured where it does not.
+
 ## What is NOT closed
 
 - **The `coverage` residue.** 12 of 28 registry rows are SOURCED on a span carrying under

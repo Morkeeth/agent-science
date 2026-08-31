@@ -134,6 +134,55 @@ def test_every_refusal_says_what_would_settle_it():
         f"engine causes with no plain-English resolution on the surface: {missing}"
 
 
+def test_a_filtered_total_counts_the_SET_not_the_PAGE():
+    """The header must not contradict the counter three inches above it.
+
+    Found by review, live on the shipped surface: the label filter for UNSOURCED and
+    UNKNOWN ran in Python AFTER the SQL LIMIT, and then reported `total = len(rows)`. With
+    149 refusals and a 120-row page, the registry rendered
+
+        counters ->  149 refused
+        header   ->  "The shelf — 120 claims matching"
+
+    one click apart, describing the same set. Two correct-looking numbers asserting a
+    relationship neither supports — which is the failure this whole surface exists to
+    refuse. Every label now resolves in SQL so COUNT(*) counts what the rows come from.
+    """
+    with tempfile.TemporaryDirectory() as d:
+        con = L.connect(Path(d) / "r.db")
+        n = 140                                   # deliberately more than a page
+        for i in range(n):
+            L.record(con, term=f"claim-{i}", assertion=f"assertion number {i} of many",
+                     verdict="UNKNOWN", production="p",
+                     cause="source_does_not_state_it",
+                     citation_url=f"https://example.org/{i}",
+                     quoted_terms="document opened, 100 characters read")
+        assert L.stats(con)["refused"] == n, "premise: the seed did not land"
+        b = L.browse_claims(con, label="UNSOURCED", limit=120)
+        assert len(b["rows"]) == 120, "premise: the page was not actually truncated"
+        assert b["total"] == n, (
+            f"the filtered total reports the PAGE ({b['total']}) and not the SET ({n}) — "
+            "the shelf header would contradict the counter above it")
+        assert L.browse_claims(con, label="UNKNOWN", limit=120)["total"] == 0, \
+            "UNSOURCED rows are leaking into the UNKNOWN filter"
+
+
+def test_thin_total_counts_every_sourced_row_not_just_this_page():
+    """THIN is computed, not stored, so it is the one filter that cannot live in SQL."""
+    with tempfile.TemporaryDirectory() as d:
+        con = L.connect(Path(d) / "r.db")
+        for i in range(130):
+            L.record(con, term=f"widget-{i}",
+                     assertion=f"The Widget Report number {i} found eighty-one per cent "
+                               f"of surveyed factories missed quota in 1998",
+                     verdict="GREEN", production="p", basis="primary",
+                     citation_url=f"https://example.org/{i}",
+                     quoted_terms=f"Home About Contact Widget Report {i} Sign in Menu")
+        b = L.browse_claims(con, label="THIN", limit=120)
+        assert b["total"] == 130, \
+            f"thin total reports the page ({b['total']}), not every sourced row (130)"
+
+
 def test_the_template_is_never_run_through_format():
     """CSS custom properties look like format fields. `.format()` on this page raises.
 
