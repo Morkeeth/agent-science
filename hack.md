@@ -17,8 +17,8 @@ Paste a documentary script; get every checkable claim back as a verbatim quote w
 
 ## OPEN QUESTIONS
 
-- Live compound exhibit on hosted URL — blocked on keys + deploy (Oscar).
-- RC5 substring false-GREEN — semantic guard not decided; structural verifier cannot catch it.
+- **Rotate the leaked Parallel/Gemini keys — OSCAR ONLY, open 8 days.** The plaintext Cloud Run revision cannot be un-written; C3's control now catches 7/7 leak shapes but cannot undo that one.
+- ~~RC5 substring false-GREEN~~ **CLOSED 2026-08-31** by `clearance/semantic.py`: gold 5/6 -> 6/6, 0/313 corpus verdicts changed, 8/27 SOURCED rows got a better span. `docs/FINDING-semantic-guard-2026-08-31.md`.
 - Design partner session — Oscar outreach (slice 6).
 
 ## CONSTITUTION
@@ -79,11 +79,11 @@ would settle it is judge feedback from the organisers — an outward act only Os
 **Gate before this event's result table ships** — this checklist now stands on its own merits as
 submission craft, supported by a real tendency, **not** as the explanation of that loss:
 
-- [x] **Alternative arm named and run** — `python3 scripts/eval_refusal_baseline.py` · `docs/QWEN-EVAL-GATE-2026-08-30.md`
-- [x] **Ablation** — `python3 scripts/eval_refusal_ablation.py` · delta=0 on n=6; RC5 both false-GREEN
+- [x] **Alternative arm named and run** — `python3 scripts/eval_refusal_baseline.py` · **re-run 2026-08-31: baseline 5/6 = 0.833, shipping 6/6 = 1.000, delta +1, McNemar p=1.0000 (b=0 c=1) — a real delta where 08-30 had a tie, and NOT significant at n=6; the CIs overlap [0.436,0.970] vs [0.610,1.000]**
+- [x] **Ablation** — `python3 scripts/eval_refusal_ablation.py` · **re-run 2026-08-31: ablation 5/6, shipping 6/6, delta +1, McNemar p=1.0000.** (2026-08-30 reading, before the semantic guard: delta=0, RC5 false-GREEN in both arms.)
 - [x] **External anchor** — `python3 scripts/eval_external_anchor.py` · live rightsstatements.org (EA1/EA2)
 - [ ] **Holdout frozen before the first tuning pass.**
-- [x] **Baseline steelmanned** — raw rows printed by eval scripts; RC5 false-GREEN both arms
+- [x] **Baseline steelmanned** — raw rows printed by eval scripts; RC5 is now the single discordant item (baseline GREEN, shipping UNKNOWN)
 - [x] **Statistic matched to n** — Wilson 95% CI + McNemar in baseline/ablation scripts
 - [ ] **Scorer symmetrical** — nothing only our system can emit; judge from delivered output for every arm.
 - [ ] **Cost from billing**, with the price card's date stated.
@@ -143,6 +143,13 @@ python3 scripts/boot_registry.py   # fleet research-corpus → 176 registry rows
 
 | When | What | Command | Outcome |
 |------|------|---------|---------|
+| 2026-08-31 L5 | Semantic guard RED first | `python3 tests/test_semantic_guard.py` (null guard) | **4 fail / 9 pass** — watched red before implementing |
+| 2026-08-31 L5 | Semantic guard measured | `python3 scripts/eval_semantic_guard.py` | **gold 5/6 -> 6/6**; registry **0/313** verdicts changed; **8/27** better spans |
+| 2026-08-31 L5 | RC5 promoted | `python3 tests/test_refusal_correctness.py` | `engine_limit` dropped; enforced pole; **all passed** |
+| 2026-08-31 L5 | C3 secret control audit | `python3 tests/test_secret_surfaces.py` (old rule) | **3 of 7 leak shapes MISSED**; control's control graded a copy |
+| 2026-08-31 L5 | C3 closed | `python3 tests/test_secret_surfaces.py` | **6/6** — 7/7 leaks caught, 0/4 safe forms flagged |
+| 2026-08-31 L5 | Registry face | `python3 tests/test_registry_surface.py` + rendered 1280/390 | **11/11**; 12/28 sourced rows marked thin evidence |
+| 2026-08-31 L5 | Full suite | 16x `python3 tests/test_*.py` | **all green** (watch_it_go_red 72/72) |
 | 2026-08-31 | Vision wiring | boot + tests | `/registry` · run_history · 176 registry rows |
 | 2026-08-30 night | Live compound hosted | cloud lane | RECEIPT-live-compound exhibit |
 | 2026-08-30 start | Baseline claimed 72/72 but cache missing | `python3 tests/test_watch_it_go_red.py` | **13 fail + TypeError** — no `documents.json` |

@@ -1,3 +1,11 @@
+> **SUPERSEDED IN PART, 2026-08-31.** Every number below was true when it was read on
+> 2026-08-30, and is kept as the record of that run. The RC5 rows are no longer the
+> current state: the semantic guard closed RC5, so baseline/ablation 5/6 vs shipping
+> **6/6**, delta **+1**, McNemar p=1.0000 (b=0, c=1 — a real delta where this file
+> reports a tie, and still NOT significant at n=6). Re-run:
+> `python3 scripts/eval_refusal_baseline.py` and `..._ablation.py`.
+> Full record: `docs/FINDING-semantic-guard-2026-08-31.md`.
+
 # QWEN EVAL GATE — alternative arm · 2026-08-30
 
 **Gate item:** Alternative arm named and run — competent baseline without this project, identical inputs, offline.
