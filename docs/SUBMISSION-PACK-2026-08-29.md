@@ -24,7 +24,7 @@ python3 ask_registry.py "agentlint" | head -5
 | Devpost | All mandatory fields filled | [ ] | Paste block below (§1–3 from `PITCH.md`) |
 | Public repo | Stranger can clone | [ ] | Private until submit — flip visibility on GitHub |
 | OSI licence | Open-source approved | [x] | `LICENSE` (MIT) |
-| Sealed prediction | Pre-registered, falsifiable | [ ] | Draft below; seal after live corpus exhibit on hosted URL |
+| Sealed prediction | Pre-registered, falsifiable | [x] | `docs/SEALED-PREDICTION-2026-08-31.md` — hosted A=1→B=0, corpus_hits=1 |
 | Partner integrations | All four called at runtime | [x] docs | `docs/PARTNER-INTEGRATIONS-2026-08-30.md` |
 | ADK default path | `engine_default: adk` | [x] local / [x] hosted | `docs/RECEIPT-adk-default-path-2026-08-30.md` |
 
@@ -45,7 +45,7 @@ python3 ask_registry.py "agentlint" | head -5
 | **Total** | 10 suites | **109/109** |
 | docs gate | `python3 scripts/bench_check_docs.py` | **109/109 match** |
 
-**Compound exhibit (live hosted, 2026-08-31):** compound-mini fresh subject · A=**2** Parallel → B=**1** Parallel · B corpus hits=**1** — `docs/RECEIPT-live-compound-exhibit-2026-08-31.md`. Orphan-works full script: run A ok, run B **503**. Offline: `docs/COMPOUND-EXHIBIT-2026-08-29.md`. Local VM: **BLOCKED** — `docs/BLOCKED-live-compound-exhibit-2026-08-30.md`.
+**Compound exhibit (live hosted, 2026-08-31 PM):** `long_run_goal.sh` · A=**1**→B=**0** Parallel · B corpus hits=**1** — `docs/LONG-RUN-RECEIPT-2026-08-31.md` · sealed `docs/SEALED-PREDICTION-2026-08-31.md`. Prior: compound-mini A=**2**→B=**1**. Orphan-works full script: run B **503** — do not claim on video.
 
 **Eval gate:** `docs/QWEN-EVAL-GATE-2026-08-30.md` — baseline vs shipping **5/6 = 0.833** tie; RC5 false-GREEN both arms.
 

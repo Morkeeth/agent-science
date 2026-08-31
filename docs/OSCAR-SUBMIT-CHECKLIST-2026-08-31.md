@@ -8,11 +8,10 @@
 
 ## Before you record (30 min)
 
-- [ ] **Falsification:** 90s PeriodCheck vs 90s Agent Science — decide whether compound or refuse leads
-- [ ] Cold browser: https://agent-science-568004190078.us-central1.run.app/
-- [ ] `bash ~/CODE/cleared/scripts/new_user_trial.sh` → OK
-- [ ] Tab ready: `/popular/ui` · `/registry` · compound-mini fixtures
-- [ ] `fixtures/shift-ai-training-vs-noncommercial.md` open for 247/600 flip
+- [x] **Falsification doc** — `docs/FALSIFICATION-PERIODCHECK-2026-08-31.md` (film refuse + E&O lead)
+- [x] `bash ~/CODE/cleared/scripts/new_user_trial.sh` → OK
+- [x] `bash ~/CODE/cleared/scripts/long_run_goal.sh` → 19/19
+- [ ] **Live 90s/90s** — PeriodCheck vs Agent Science in browser (Oscar eyes)
 
 ---
 
@@ -30,12 +29,11 @@
 
 ## After record
 
-- [ ] **Rotate** Parallel + Gemini keys (leaked revision)
+- [ ] **Rotate** Vertex/Gemini if leaked (Parallel rotated via deploy)
 - [ ] Upload video → YouTube/Vimeo public
-- [ ] **Public repo** flip — MIT license in About
-- [ ] Devpost: paste pack · partner track Parallel · hosted URL · video URL
-- [ ] **Sealed prediction** hash recorded
-- [ ] Logged-out: video plays on live Devpost page
+- [x] **Public repo** — https://github.com/Morkeeth/agent-science (MIT)
+- [ ] Devpost: paste pack · video URL · logged-out verify
+- [x] **Sealed prediction** — `docs/SEALED-PREDICTION-2026-08-31.md`
 
 ---
 

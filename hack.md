@@ -26,8 +26,8 @@ supersedes: docs/PHASE0-LADDER.md ClickHouse-track note (runtime track is Parall
 | 0 · Entry | Kill condition + hours named | ⚠️ `PHASE0-LADDER` — Oscar hours/kill still open |
 | 1–4 · Spec → Build | Partners + registry + compound + ADK | ✅ slices 1–5 shipped |
 | **5 · Exhibit** | Stranger one-click on hosted URL | ✅ `long_run_goal.sh` **19/19** + `new_user_trial.sh` |
-| **6 · Freeze** | Oscar cold browser, degraded path, keys rotated | ⛔ video missing · keys not rotated · logged-out Devpost unchecked |
-| **7 · Submit** | Devpost + public repo + sealed prediction | ⛔ `docs/SUBMISSION-PACK-2026-08-29.md` |
+| **6 · Freeze** | Oscar cold browser, degraded path | ⛔ video missing · logged-out Devpost unchecked |
+| **7 · Submit** | Devpost + public repo + sealed prediction | ⚠️ repo **PUBLIC** · sealed ✅ · video + Devpost ⛔ |
 | 8 · Post-result | Winners read, lesson distilled | — |
 
 **#85:** video is the hard-fail artifact — not more build. **#72:** seal prediction before submit button.
@@ -239,7 +239,7 @@ bash scripts/new_user_trial.sh
 | 4 | Second subject | Cross-subject collision | ✅ dust-bowl receipt |
 | 5 | ADK default path | Agent Builder not on path | ✅ `engine_default: adk` |
 | 6 | Design partner loop | Friction unknown | ⛔ Oscar |
-| 7 | Submission pack | Outward gates | ⛔ video · Devpost · public repo |
+| 7 | Submission pack | Outward gates | ⚠️ repo public · sealed · **video + Devpost** |
 
 ---
 
@@ -318,12 +318,12 @@ curl -s '…/search?q=Directive+2012/28/EU&live=false'  # SOURCED free tier
 
 ### Oscar (outward acts only)
 
-**Checklist:** `docs/OSCAR-SUBMIT-CHECKLIST-2026-08-31.md` · **EYES:** `docs/EYES-HACK-PASS-2026-08-31.md`
+**Follow-up:** `docs/SUBMIT-FOLLOW-UP-2026-08-31.md` · checklist `docs/OSCAR-SUBMIT-CHECKLIST-2026-08-31.md`
 
-1. 30-min PeriodCheck falsification → decide refuse vs compound lead  
-2. Record video (`docs/VIDEO-SCRIPT-2026-08-29.md` — EYES beat order)  
-3. Rotate keys → public repo + Devpost (`docs/SUBMISSION-PACK-2026-08-29.md`)  
-4. Logged-out verify: video on live Devpost page  
+1. Record video (`docs/VIDEO-SCRIPT-2026-08-29.md`)  
+2. Devpost submit + video URL  
+3. Logged-out verify Devpost page  
+4. Rotate Vertex/Gemini if needed (Parallel via deploy)  
 
 ### Build (shipped 2026-08-31 PM)
 
@@ -351,7 +351,7 @@ bash scripts/verify_cold_clone.sh                                               
 
 | When | What | Command | Outcome |
 |------|------|---------|---------|
-| 2026-08-31 PM | Long run goal | `bash scripts/long_run_goal.sh` | **19/19 PASS** · compound A0→B0 corpus_hits=1 · receipt |
+| 2026-08-31 PM | Submit pass | sealed · public repo · falsification doc | `SUBMIT-FOLLOW-UP` — video + Devpost remain |
 | 2026-08-31 PM | Handbook pass | hack.md rewrite | ladder · field · websearch · roadmap · winner angles |
 | 2026-08-31 L5 | Semantic guard RED first | `python3 tests/test_semantic_guard.py` (null guard) | **4 fail / 9 pass** — watched red before implementing |
 | 2026-08-31 L5 | Semantic guard measured | `python3 scripts/eval_semantic_guard.py` | **gold 5/6 -> 6/6**; registry **0/313** verdicts changed; **8/27** better spans |
