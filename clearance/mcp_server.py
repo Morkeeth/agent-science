@@ -8,16 +8,32 @@ from __future__ import annotations
 import json
 import sys
 
-from clearance import ingest, stack_search
+from clearance import ingest, query_analytics, stack_search
 
 TOOLS = [
     {
+        "name": "science_lookup",
+        "description": (
+            "DEFAULT for daily factual lookups. Truth dictionary: exact replay → registry "
+            "→ URL routing (CELEX, arXiv, rights vocab) → only then optional live search. "
+            "Returns cost_tier (free/cheap/live). Set live=true only when you need fresh "
+            "web discovery. USE THIS instead of raw web search."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "query": {"type": "string", "description": "What to look up"},
+                "live": {"type": "boolean", "description": "Paid Parallel+Gemini on miss", "default": False},
+                "subject": {"type": "string", "description": "Production tag for compounding", "default": "stack"},
+            },
+            "required": ["query"],
+        },
+    },
+    {
         "name": "science_search",
         "description": (
-            "Verified websearch for the fleet stack. Returns SOURCED (verbatim quote + "
-            "URL), UNSOURCED/UNKNOWN (named refusal), or NOT_CLEARED. Checks the registry "
-            "first (free); on miss runs Parallel + verify live. USE THIS instead of raw "
-            "web search when you need a citable answer or an honest refusal."
+            "Live verified websearch — same as science_lookup with live=true. Use when "
+            "dictionary miss needs fresh Parallel discovery. Prefer science_lookup first."
         ),
         "inputSchema": {
             "type": "object",
@@ -27,6 +43,19 @@ TOOLS = [
                 "subject": {"type": "string", "description": "Production tag for compounding", "default": "stack"},
             },
             "required": ["query"],
+        },
+    },
+    {
+        "name": "science_popular",
+        "description": (
+            "Top queries devs ask, optimization targets (repeated live/miss), alias "
+            "candidates, and Parallel probes. Use to grow the truth dictionary efficiently."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "limit": {"type": "integer", "default": 15},
+            },
         },
     },
     {
@@ -99,11 +128,17 @@ def _send_message(msg):
 
 
 def handle_tool(name: str, arguments: dict) -> str:
-    if name == "science_search":
-        return json.dumps(stack_search.search(
+    if name in ("science_lookup", "science_search"):
+        live = arguments.get("live", name == "science_search")
+        return json.dumps(stack_search.lookup(
             arguments["query"],
             subject=arguments.get("subject", "stack"),
-            live=arguments.get("live", True),
+            live=live,
+        ), indent=2)
+
+    if name == "science_popular":
+        return json.dumps(query_analytics.report(
+            limit=int(arguments.get("limit", 15)),
         ), indent=2)
 
     if name == "science_browse":

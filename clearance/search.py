@@ -26,6 +26,7 @@ from typing import Optional
 ENDPOINT = "https://api.parallel.ai/v1/search"
 KEY_PATH = Path.home() / ".config" / "keys" / "parallel.key"
 CACHE = Path(__file__).resolve().parent.parent / "cache" / "searches.json"
+RECEIPTS = Path(__file__).resolve().parent.parent / "cache" / "search_receipts.jsonl"
 
 
 # Every live call to Parallel is counted HERE, at the only place one is made. The
@@ -79,6 +80,24 @@ def _cache_save(d: dict) -> None:
     CACHE.write_text(json.dumps(d, indent=2))
 
 
+def log_receipt(*, source: str, objective: str, queries: list[str],
+                candidates: list[Candidate], cache_hit: bool = False) -> None:
+    """Append query → result for optimization analytics. No API keys."""
+    from datetime import datetime, timezone
+    RECEIPTS.parent.mkdir(parents=True, exist_ok=True)
+    row = {
+        "at": datetime.now(timezone.utc).isoformat(),
+        "source": source,
+        "objective": objective[:240],
+        "queries": queries,
+        "cache_hit": cache_hit,
+        "n_candidates": len(candidates),
+        "urls": [c.url for c in candidates[:8]],
+    }
+    with RECEIPTS.open("a", encoding="utf-8") as f:
+        f.write(json.dumps(row, ensure_ascii=False) + "\n")
+
+
 def find_sources(objective: str, queries: list[str], *, mode: str = "advanced",
                  live: bool = False, max_results: int = 6,
                  term: str = "") -> Optional[list[Candidate]]:
@@ -95,10 +114,16 @@ def find_sources(objective: str, queries: list[str], *, mode: str = "advanced",
     ck = json.dumps({"o": objective, "q": sorted(queries), "m": mode}, sort_keys=True)
     cache = _cache_load()
     if ck in cache:
-        return [Candidate(**c) for c in cache[ck][:max_results]]
+        out = [Candidate(**c) for c in cache[ck][:max_results]]
+        log_receipt(source="parallel", objective=objective, queries=queries,
+                    candidates=out, cache_hit=True)
+        return out
     term_key = (term or "").strip().lower()
     if term_key and term_key in cache:
-        return [Candidate(**c) for c in cache[term_key][:max_results]]
+        out = [Candidate(**c) for c in cache[term_key][:max_results]]
+        log_receipt(source="parallel", objective=objective, queries=queries,
+                    candidates=out, cache_hit=True)
+        return out[:max_results]
     if not live:
         return None
 
@@ -123,4 +148,6 @@ def find_sources(objective: str, queries: list[str], *, mode: str = "advanced",
     if term_key:
         cache[term_key] = cache[ck]
     _cache_save(cache)
+    log_receipt(source="parallel", objective=objective, queries=queries,
+                candidates=out[:max_results], cache_hit=False)
     return out[:max_results]

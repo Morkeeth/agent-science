@@ -17,15 +17,44 @@ phrased differently is flagged, never silently served.
 from __future__ import annotations
 
 import json
+import os
 import re
 import sqlite3
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
+from . import corpus_gcs
 from . import semantic as _semantic
 
 DB = Path(__file__).resolve().parent.parent / "cache" / "refusal_log.db"
+_PATHS: dict[int, Path] = {}
+
+
+def _resolve_db(path: Path | str | None) -> Path:
+    if path is not None and Path(path) != DB:
+        return Path(path)
+    env = os.environ.get("REFUSAL_LOG_DB")
+    if env:
+        return Path(env)
+    corpus_db = os.environ.get("CORPUS_DB")
+    if corpus_db:
+        return Path(corpus_db).parent / "refusal_log.db"
+    return DB
+
+
+def _gcs_uri() -> Optional[str]:
+    return os.environ.get("REFUSAL_LOG_GCS_URI") or None
+
+
+def _maybe_push(con: sqlite3.Connection) -> None:
+    uri = _gcs_uri()
+    path = _PATHS.get(id(con))
+    if uri and path is not None:
+        try:
+            corpus_gcs.push(uri, path)
+        except Exception:
+            pass  # shelf still local; hosted may retry next write
 
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS claims (
@@ -122,11 +151,21 @@ _ADDED_COLUMNS = (
     ("refusal_code", "TEXT"),   # the precise mechanism, beside the coarse cause
     ("trail", "TEXT"),          # json: every span considered, and why each was not evidence
 )
+_QUERY_COLUMNS = (
+    ("cost_tier", "TEXT"),      # free | cheap | live — for popular-query analytics
+    ("source", "TEXT"),         # dictionary_exact | registry | live | …
+)
 
 
 def connect(path: Path | str = DB) -> sqlite3.Connection:
-    p = Path(path)
+    p = _resolve_db(path if path != DB else None)
     p.parent.mkdir(parents=True, exist_ok=True)
+    uri = _gcs_uri()
+    if uri and not p.exists():
+        try:
+            corpus_gcs.pull(uri, p)
+        except Exception:
+            pass
     con = sqlite3.connect(p)
     con.row_factory = sqlite3.Row
     con.executescript(_SCHEMA)
@@ -134,7 +173,13 @@ def connect(path: Path | str = DB) -> sqlite3.Connection:
     for name, decl in _ADDED_COLUMNS:
         if name not in have:
             con.execute(f"ALTER TABLE claims ADD COLUMN {name} {decl}")
+    q_have = {r["name"] for r in con.execute("PRAGMA table_info(queries)")}
+    for name, decl in _QUERY_COLUMNS:
+        if name not in q_have:
+            con.execute(f"ALTER TABLE queries ADD COLUMN {name} {decl}")
     con.commit()
+    if p != Path(":memory:"):
+        _PATHS[id(con)] = p
     return con
 
 
@@ -162,6 +207,7 @@ def record(con, *, term: str, assertion: str, verdict: str, production: str,
     con.execute(f"INSERT OR IGNORE INTO claims ({','.join(cols)}) "
                 f"VALUES ({','.join('?' * len(cols))})", vals)
     con.commit()
+    _maybe_push(con)
 
 
 def trail_of(row) -> list:
@@ -210,12 +256,15 @@ def log_query(con, *, query: str, result: dict) -> int:
     """Every query becomes a browsable registry row — the refusal is the product."""
     cur = con.execute(
         "INSERT INTO queries (query_text, result_label, verdict, cause, term, "
-        "citation_url, quoted_terms, resolves_with, asked_at) VALUES (?,?,?,?,?,?,?,?,?)",
+        "citation_url, quoted_terms, resolves_with, asked_at, cost_tier, source) "
+        "VALUES (?,?,?,?,?,?,?,?,?,?,?)",
         (query.strip(), result["label"], result.get("verdict"), result.get("cause"),
          result.get("term"), result.get("citation_url"), result.get("quoted_terms"),
          result.get("resolves_with"),
-         datetime.now(timezone.utc).isoformat(timespec="seconds")))
+         datetime.now(timezone.utc).isoformat(timespec="seconds"),
+         result.get("cost_tier"), result.get("source")))
     con.commit()
+    _maybe_push(con)
     return cur.lastrowid
 
 

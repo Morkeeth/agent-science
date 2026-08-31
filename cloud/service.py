@@ -10,7 +10,9 @@
   GET  /refusal?term=    one refusal opened: every span considered, and why each failed
   GET  /registry         browsable verified-truths registry
   GET  /registry/api?q=  JSON registry query (read-only)
-  GET  /corpus?subject=  remembered count for a subject shelf
+  GET  /stats              dictionary economics + recent queries
+  GET  /popular            top dev queries + optimization targets (JSON)
+  GET  /popular/ui         HTML report for devs
 
 Stdlib in the serving path, except the ADK agent that /clear runs through: Agent
 Builder is a submission requirement and a requirement is not met by a module nobody
@@ -32,7 +34,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer  # noqa: E402
 
 import agent_science  # noqa: E402
 import ask_registry  # noqa: E402
-from clearance import ingest as stack_ingest, stack_search  # noqa: E402
+from clearance import ingest as stack_ingest, query_analytics, stack_search  # noqa: E402
 from clearance import corpus  # noqa: E402
 from cloud import agent as adk_agent  # noqa: E402
 
@@ -91,7 +93,7 @@ button:hover{background:#000}
   <h1 class="brand">Agent Science</h1>
   <p class="thesis">The websearch companion — every claim sourced verbatim from a real document,
   or refused with the reason why. The registry remembers: clear once, reuse for free.</p>
-  <p class="nav"><a href="/front">What this desk refuses, and why that is the product</a> · <a href="/registry">Browse the registry</a> — {registry_stats} verified truths on disk.</p>
+  <p class="nav"><a href="/front">What this desk refuses, and why that is the product</a> · <a href="/registry">Browse the registry</a> · <a href="/popular/ui">Popular queries</a> — {registry_stats} verified truths on disk.</p>
   <form class="desk" method="post" action="/clear">
     <div class="row">
       <div>
@@ -311,6 +313,61 @@ article{{padding:1rem 0;border-bottom:1px solid var(--line)}}
 </body></html>"""
 
 
+def _popular_page(limit: int = 15) -> str:
+    data = query_analytics.report(db=_log_db(), limit=limit)
+    rows = []
+    for r in data.get("popular_queries", [])[:limit]:
+        rows.append(
+            f"<tr><td>{_esc(r['asks'])}</td>"
+            f"<td>{_esc(r.get('example', '')[:80])}</td>"
+            f"<td>{_esc(r.get('sourced', 0))}</td>"
+            f"<td>{_esc(r.get('not_cleared', 0))}</td>"
+            f"<td>{_esc(r.get('live_asks') or 0)}</td></tr>"
+        )
+    targets = []
+    for r in data.get("optimization_targets", [])[:8]:
+        targets.append(
+            f"<li><strong>{_esc(r.get('example', '')[:70])}</strong> "
+            f"({ _esc(r.get('asks'))} asks) — {_esc(r.get('action', ''))}</li>"
+        )
+    aliases = []
+    for r in data.get("alias_candidates", [])[:6]:
+        aliases.append(
+            f"<li><code>{_esc(r['alias'])}</code> → "
+            f"<code>{_esc(r['canonical'][:60])}</code></li>"
+        )
+    return f"""<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Popular queries · Agent Science</title>
+<style>
+body{{font-family:Georgia,serif;background:#e8e6e1;color:#16181d;margin:0;padding:2rem}}
+.wrap{{max-width:52rem;margin:0 auto}}
+h1{{font-size:1.6rem;margin:0 0 .5rem}}
+p.meta{{color:#61656e;font-size:.95rem}}
+a{{color:inherit}}
+table{{width:100%;border-collapse:collapse;margin:1.5rem 0;font-size:.9rem}}
+th,td{{text-align:left;padding:.5rem;border-bottom:1px solid #c9c5bd}}
+th{{font-family:monospace;font-size:.7rem;text-transform:uppercase;letter-spacing:.08em}}
+h2{{font-size:1rem;margin:2rem 0 .5rem}}
+ul{{padding-left:1.2rem}}
+code{{font-size:.85rem}}
+</style></head><body><div class="wrap">
+<p><a href="/">← desk</a> · <a href="/registry">registry</a></p>
+<h1>Popular queries</h1>
+<p class="meta">Truth dictionary analytics — what devs ask, what to pre-clear next.
+JSON: <a href="/popular">/popular</a></p>
+<table>
+<tr><th>Asks</th><th>Query</th><th>Sourced</th><th>Miss</th><th>Live</th></tr>
+{''.join(rows) or '<tr><td colspan="5">No queries logged yet — use science_lookup.</td></tr>'}
+</table>
+<h2>Optimize next</h2>
+<ul>{''.join(targets) or '<li>Nothing flagged yet.</li>'}</ul>
+<h2>Alias candidates</h2>
+<ul>{''.join(aliases) or '<li>Add phrasings to truth-dictionary/aliases.json</li>'}</ul>
+</div></body></html>"""
+
+
 def _run_clearance(script: str, subject: str, model: str) -> dict:
     """Clear through the ADK agent, and say so in the report.
 
@@ -395,6 +452,14 @@ class Handler(BaseHTTPRequestHandler):
 
         if path == "/stats":
             return self._json(200, stack_search.stats(db=_log_db()))
+
+        if path == "/popular":
+            limit = int((qs.get("limit") or ["15"])[0])
+            return self._json(200, query_analytics.report(db=_log_db(), limit=limit))
+
+        if path in ("/popular/ui", "/popular/ui/"):
+            limit = int((qs.get("limit") or ["15"])[0])
+            return self._send(200, _popular_page(limit).encode(), "text/html; charset=utf-8")
 
         if path == "/health":
             gemini_path = "none"

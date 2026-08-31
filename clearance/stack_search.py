@@ -10,7 +10,7 @@ import re
 from pathlib import Path
 from typing import Optional
 
-from clearance import refusal_log, search as _search
+from clearance import dictionary, refusal_log, search as _search
 from clearance.facts import Claim, judge_claim
 from clearance.gemini import GeminiLocator
 from clearance.verdict import FACT, GREEN, Verdict
@@ -75,56 +75,20 @@ def _verdict_to_stack(v: Verdict, *, query: str, source: str,
 
 def search(query: str, *, subject: str = _DEFAULT_SUBJECT, live: bool = True,
            db: Path | str | None = None, model: str = _DEFAULT_MODEL) -> dict:
-    """THE stack websearch entry point. Registry hit = free; miss = live clearance."""
-    q = query.strip()
-    if not q:
-        return {"query": q, "label": "NOT_CLEARED", "cause": "empty_query",
-                "why": "query was empty", "source": "none", "parallel_api_calls": 0}
+    """Live websearch — use dictionary.lookup() for daily free/cheap path first."""
+    return dictionary.lookup(query, subject=subject, live=live, db=db, model=model)
 
-    dbp = Path(db) if db else _db()
-    con = refusal_log.connect(dbp)
 
-    # Import here to avoid circular import at module load
-    import ask_registry
-    cached = ask_registry.ask(q, db=dbp)
-    if cached.get("label") != "NOT_CLEARED":
-        cached["source"] = "registry"
-        cached["parallel_api_calls"] = 0
-        cached["subject"] = subject
-        return cached
-
-    if not live:
-        cached["source"] = "registry_miss"
-        cached["subject"] = subject
-        return cached
-
-    _search.reset_calls()
-    term = _distinctive_term(q)
-    claim = Claim("Q1", q, None, term)
-    try:
-        v = judge_claim(claim, locator=GeminiLocator(model=model),
-                        live_search=True, fetch=True)
-    except RuntimeError as e:
-        return {
-            "query": q, "label": "NOT_CLEARED", "cause": "search_failed",
-            "why": str(e), "source": "live_error", "parallel_api_calls": _search.calls(),
-            "subject": subject,
-        }
-
-    _record_live(con, term=term, query=q, v=v, production=subject)
-    out = _verdict_to_stack(v, query=q, source="live", parallel_api_calls=_search.calls())
-    out["subject"] = subject
-    out["term"] = term
-    return out
+def lookup(query: str, *, subject: str = _DEFAULT_SUBJECT, live: bool = False,
+           db: Path | str | None = None, model: str = _DEFAULT_MODEL) -> dict:
+    """Truth dictionary — free registry, cheap routing, live only when asked."""
+    return dictionary.lookup(query, subject=subject, live=live, db=db, model=model)
 
 
 def stats(*, db: Path | str | None = None) -> dict:
     dbp = Path(db) if db else _db()
     con = refusal_log.connect(dbp)
-    st = refusal_log.stats(con)
+    st = dictionary.economics(db=dbp)
     recent = refusal_log.browse_queries(con, limit=10)
-    return {
-        **st,
-        "recent_queries": recent,
-        "db": str(dbp),
-    }
+    st["recent_queries"] = recent
+    return st

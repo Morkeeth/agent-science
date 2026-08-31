@@ -20,7 +20,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional
 
-from . import instruments, search as _search
+from . import instruments, routing, search as _search
 from .locate import DEFAULT, Locator
 from .independence import assess as assess_independence
 from . import semantic as _semantic
@@ -180,14 +180,21 @@ def judge_claim(claim: Claim, *, fetch: bool = False,
                        reason=reason, cause=cause, **kw)
 
     if not claim.source_url:
-        # THE STEP THAT USED TO BE DONE BY A HUMAN OFF-CAMERA. Parallel proposes
-        # candidate documents; each one still has to survive fetch -> locate -> verify.
-        # A search result is a lead, never evidence.
+        # THE STEP THAT USED TO BE DONE BY A HUMAN OFF-CAMERA. Routing constructs
+        # known-primary URLs (CELEX, rights vocab, arXiv) without a search call;
+        # Parallel proposes the rest. Each candidate still survives fetch -> locate
+        # -> verify. A search result is a lead, never evidence.
         queries = _queries_for(claim)
-        cands = _search.find_sources(
-            objective=f"Find a primary source that states verbatim: {claim.text}",
-            queries=queries, live=live_search, max_results=search_candidates,
-            term=(claim.must_contain or "").strip().lower()[:120])
+        routed = routing.candidates_for(text=claim.text,
+                                        must_contain=claim.must_contain)
+        cands = routed or None
+        probe_note = routing.routed_probe(claim.text, claim.must_contain)
+        if not cands:
+            cands = _search.find_sources(
+                objective=f"Find a primary source that states verbatim: {claim.text}",
+                queries=queries, live=live_search, max_results=search_candidates,
+                term=(claim.must_contain or "").strip().lower()[:120])
+            probe_note = None
         if cands is None:
             return unknown(
                 "no source offered for this claim, and no search was performed "
@@ -244,6 +251,28 @@ def judge_claim(claim: Claim, *, fetch: bool = False,
                     if assess_independence([c.url])["basis"] == "primary":
                         return _green_from_verified(claim, verified, locator)
 
+        # Routed primaries that did not verify — fall back to Parallel once before
+        # reporting empty. CELEX construction can be right while fetch/locate fails.
+        if not verified and routed and live_search:
+            cands = _search.find_sources(
+                objective=f"Find a primary source that states verbatim: {claim.text}",
+                queries=queries, live=True, max_results=search_candidates,
+                term=(claim.must_contain or "").strip().lower()[:120])
+            probe_note = None
+            if cands:
+                for c in cands:
+                    if any(c.url == u for u, _ in verified):
+                        continue
+                    body = instruments.document(c.url, fetch=fetch)
+                    if body is None:
+                        continue
+                    read += 1
+                    proposed, refusal = _admissible(locator, claim, body, semantic, trail)
+                    if refusal is None:
+                        verified.append((c.url, proposed))
+                        if assess_independence([c.url])["basis"] == "primary":
+                            return _green_from_verified(claim, verified, locator)
+
         if verified:
             ind = assess_independence([u for u, _ in verified])
             if not ind["has_independent_support"]:
@@ -259,9 +288,10 @@ def judge_claim(claim: Claim, *, fetch: bool = False,
                     NO_INDEPENDENT_SOURCE)
             return _green_from_verified(claim, verified, locator)
 
+        probe = probe_note or queries
         return unknown(
-            f"searched, read {read} of {len(cands)} candidate document(s), "
-            f"none states this claim; probe was {queries!r}",
+            f"searched, read {read} of {len(cands or [])} candidate document(s), "
+            f"none states this claim; probe was {probe!r}",
             SEARCH_FOUND_NOTHING)
 
     body = instruments.document(claim.source_url, fetch=fetch)

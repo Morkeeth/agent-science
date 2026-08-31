@@ -1,16 +1,20 @@
-# Moonshot memo · agent-science · 2026-08-31
+# Moonshot memo · agent-science · 2026-08-31 (rev 2)
 
 ## GOAL
 
-**Parallel track judge sees, on the hosted URL, Run A → Run B on the same subject with `parallel_calls` dropping and `corpus_hits ≥ 1` — while every claim stays verbatim-or-REFUSE — in under 60 seconds without opening a receipt doc.**
+**Press-release:** *The truth dictionary for agent work — ask once, verify once, free forever; the most-searched things get cheaper for everyone.*
 
-Press-release line: *The clearance desk where the second production about the same subject costs measurably less to verify — and refuses when it cannot cite.*
+**Sep 9 stranger test:** Judge on hosted URL sees Run A → Run B with Parallel API dropping and corpus hits rising — while every claim stays verbatim-or-REFUSE — in under 60 seconds. Video shows compound + refuse, not eval tables.
+
+**Product test (4 weeks):** `dictionary_hit_rate ≥ 0.80`, `queries_logged ≥ 200`, fleet uses `science_lookup` daily — `science_popular` drives alias/ingest fixes.
 
 ---
 
 ## Current model (what we believe)
 
-Depth wins: 109/109 controls, PRIOR LOSS eval gates, ADK default path, partner wiring, and honest ablation docs will differentiate us in a field of vibe-coded Parallel demos. More slices = safer Sep 9 submit.
+The product is a **self-tuning truth dictionary**, not a search API. Adoption → logged queries → `popular` → alias/ingest/route → hit rate ↑ → cheaper → more adoption. Documentary clearance is one vertical; daily dev websearch is the volume.
+
+For Sep 9: **compound economics on screen** beats PeriodCheck's citation table (they have 13/13 live benchmark + hosted + Document AI). Depth/eval gates do not score on Cinema rubric.
 
 ---
 
@@ -18,62 +22,50 @@ Depth wins: 109/109 controls, PRIOR LOSS eval gates, ADK default path, partner w
 
 | Source | What it says | Confidence |
 |--------|--------------|------------|
-| [Agentic Cinema Devpost](https://agentic-cinema.devpost.com/) | 4 **equal** criteria: Tech · Design · Impact · Idea. Stage 1 pass/fail on hosted URL + video + public repo + runtime GCP + partner. **No eval-rigor line.** Parallel judges: Pranay Reddy, Nitin Kesarwani. | high |
-| [Devpost rules](https://agentic-cinema.devpost.com/rules) | Tie-break order: Tech → Design → Impact → Idea. Must be "complete, coherent product experience not just a technical proof of concept." | high |
-| [Parallel track brief](https://info.devpost.com/blog/google-cloud-agentic-cinema-hackathon) | Official use cases include **fact-checking agent** for media content. Runtime Parallel Search API required in code — README mention insufficient. | high |
-| [PeriodCheck](https://github.com/ahsan3274/periodcheck) | **Direct Parallel-track competitor:** historical accuracy for screenwriters. ADK + Gemini + Document AI + Parallel. **13/13 live benchmark**, hosted Cloud Run, line-level citations + confidence + suggested fixes. | high |
-| [CineIntel Engine](https://github.com/AtchayamG/cineintel-engine) | Parallel track. Agent crew + Parallel SDK + Gemini 3.7. Public demo at vercel; deterministic fixtures for repeatability. | medium |
-| [Greenlight](https://github.com/rainingsnow0914tw-ship-it/greenlight) | Different track (ClickHouse) but sets bar: live demo, real data on screen, budget quoted before spend. | medium |
-| `hack.md` PRIOR LOSS · Qwen retro | Four confident loss diagnoses were **wrong**. Eval rigor tendency (65% winners) is post-hoc, p=0.025 — **not an explanation**. Rubric weighted **30/30/25/15 with no eval line**. | high |
-| `docs/AMBITION-AUDIT.md` (2026-08-22) | "Product still sells search." Compounding proven in receipt, **invisible in UI**. Without visible Parallel collapse on second script → "modal Parallel-track entry." | high |
-| `VISION-2026-08.md` | Moat = **registry of verified truths** that compounds. Compliance (A1) is vertical; companion is horizontal. | high |
-| Field size | **8,842** registered · judged **within partner track only** (~1,700 per track if even split). | medium |
+| [Agentic Cinema Devpost](https://agentic-cinema.devpost.com/) | 4 equal criteria: Tech · Design · Impact · Idea. Hosted URL + video + public repo + runtime GCP + partner. **No eval line.** | high |
+| [Parallel track brief](https://info.devpost.com/blog/google-cloud-agentic-cinema-hackathon) | Fact-checking for media content. Parallel Search API **at runtime**. | high |
+| [PeriodCheck](https://github.com/ahsan3274/periodcheck) | **Direct competitor:** 13/13 gold live, hosted Cloud Run, ADK + Parallel + Document AI, line-level citations + confidence + fixes, bounded search cost, `live-evaluation.json`. | high |
+| [PeriodCheck Devpost](https://devpost.com/software/period-check) | Evidence-first UI, stable evidence IDs, citation hydrated from Parallel response — same primitive we share, different wedge. | high |
+| [AttestDB](https://github.com/omic/attest) | Claim-native DB + MCP (106 tools): sourced claims, retraction cascade, popularity/gap detection — **closest product shape** to our dictionary vision; confidence scores not structural refuse. | medium |
+| `VISION-2026-08.md` | Moat = registry of most-searched verified truths + negative space. Flywheel formalized 2026-08-31. | high |
+| `hack.md` PRIOR LOSS | Eval rigor ≠ Cinema placement. Wrong diagnoses retracted. | high |
+| Local stats (2026-08-31) | 180 claims, **7 queries logged**, hit rate **0.57**, **1 reuse** — engine works, **flywheel barely spinning**. | high |
 
 ---
 
 ## Hypotheses (ranked)
 
-### 1. **Live compound exhibit is the winning primitive** ← NET-NEW vs field
+### 1. **Truth dictionary flywheel is the company; compound is the demo** ← NET-NEW vs Attest/PeriodCheck
 
-**Claim:** Judges reward the one demo PeriodCheck and CineIntel do not show: second clearance on the same subject shelf is cheaper (Parallel calls drop) with honest verdicts preserved.
+**Claim:** Nobody in the Parallel track shows **popularity-driven pre-clearing** (free → cheap → live tiers + `science_popular`). PeriodCheck shows first-run accuracy; we show **second-run economics** + honest refusals as first-class rows.
 
-**Kill bar:** Hosted A/B cannot run (keys/deploy) AND video cannot show side-by-side metrics → we are a citation-table fact-checker indistinguishable from PeriodCheck on Design.
+**Kill bar:** After 4 weeks, `queries_logged < 50` — product vision is slide deck only.
 
-**Slot/build cost:** 1 Oscar gate (deploy + keys on hosted) + 1 build slice (UI strip). Sealed prediction already drafted in SUBMISSION-PACK.
+**Cost:** Adoption habit (Oscar + fleet) + 2 build slices (auto-ingest, `/popular` UI).
 
-**Falsifiable before Sep 9:** `POST /clear` twice on orphan-works fixtures → Run B `parallel_calls < Run A` AND `corpus_hits ≥ 1` on **hosted URL**, logged in receipt.
+**Falsifiable:** `python3 -m clearance stats` → hit rate and reuses climb week-over-week.
 
-### 2. **Compounding Desk UI — make the fraction the hero**
+### 2. **Live compound exhibit wins Sep 9** ← NET-NEW vs PeriodCheck on Design
 
-**Claim:** Design criterion breaks ties when Tech is table-stakes (ADK + Parallel + Cloud Run). The product moment is A→B, not a paste box.
+**Claim:** Judges reward visible A→B Parallel drop on hosted URL — PeriodCheck does not demo compounding.
 
-**Kill bar:** Stranger still sees generic search UI; compound lives only in `docs/COMPOUND-EXHIBIT*.md`.
+**Kill bar:** No deploy + video → indistinguishable citation-table entry.
 
-**Cost:** 1 build slice · no outward gate.
+**Cost:** Oscar `deploy.sh` + keys + ≤180s video.
 
-### 3. **Track-brief-first submission copy + video beats**
+**Falsifiable:** Hosted receipt B.parallel < A.parallel AND B.corpus_hits ≥ 1 (offline receipt **passes**; hosted partial).
 
-**Claim:** Impact + Idea score when first screen answers E&O / documentary clearance in **M&E words**, and ≤3 min video shows compound + refuse (not eval tables).
+### 3. **Video + Devpost in M&E words, not pytest**
 
-**Kill bar:** Devpost reads like a benchmark README; video missing on live page (Qwen loss pattern).
+**Claim:** Impact/Idea score when copy opens with E&O/clearance sentence and video shows compound + refuse beats.
 
-**Cost:** Oscar outward gates · prep-only in cloud.
+**Kill bar:** Missing public video on Devpost (Qwen loss pattern).
 
-### 4. **Finish PRIOR LOSS checklist (external anchor, holdout, CIs)**
+**Cost:** Oscar Loop 4 only.
 
-**Claim:** More eval rigor differentiates.
+### 4. **More eval / semantic guard / ClickHouse index**
 
-**Kill bar:** Cinema rubric has no eval line; ablation already ties at 0.833 on n=6; RC5 false-GREEN persists.
-
-**Verdict:** **REFUTED for this event** — correct for fleet science, wrong lever for Sep 9.
-
-### 5. **Semantic guard on RC5**
-
-**Claim:** Fix substring false-GREEN → eval delta > 0.
-
-**Kill bar:** n=6 held-out; judges never see eval doc; build cost ≥ 1 slice with uncertain demo payoff.
-
-**Verdict:** **Defer past submit** unless compound + UI ship early.
+**Verdict:** **REFUTED for Sep 9** — rubric weight zero; Attest already owns claim-DB shape; ClickHouse doesn't replace discovery.
 
 ---
 
@@ -83,15 +75,15 @@ Depth wins: 109/109 controls, PRIOR LOSS eval gates, ADK default path, partner w
 
 | Attack | Result |
 |--------|--------|
-| "109 tests beat PeriodCheck's 13/13 live" | **Kill.** Judges see product + video, not pytest count. PeriodCheck is live-hosted with benchmark JSON. |
-| "Verbatim-or-refuse is unique" | **Partial survive.** PeriodCheck cites + confidence; we refuse structurally (constructor). Differentiation is **insurance/clearance workflow + compounding economics**, not citation alone. |
-| "ADK + four partners = done" | **Kill.** Slice 5 shipped; table stakes. PeriodCheck has ADK + Parallel + Document AI live. |
-| "Eval gates prevent another Qwen loss" | **Kill for wrong reason.** Qwen loss cause unknown; Cinema rubric ≠ Qwen rubric. Gates are **submission craft**, not placement strategy. |
-| "More cloud doc refresh tonight" | **Kill.** `cinema-night` already running; doc refresh without compound UI = plumbing. |
+| "Truth dictionary without usage is real" | **Kill.** 7 queries logged. Vision is correct; **adoption is the blocker**, not architecture. |
+| "AttestDB already won this" | **Partial survive.** Attest = claim store + confidence; we = **verbatim span verify + structural refuse + Parallel compounding demo**. Integrate ideas (content_id, gap detection), don't pivot stack. |
+| "PeriodCheck already shipped the product" | **Kill on clearance UX; survive on dictionary economics.** They bound search cost but don't show shelf reuse across productions. |
+| "Build /popular and auto-ingest before deploy" | **Kill for Sep 9.** Judges don't see CLI. Deploy + video first. |
+| "science_lookup defaults live=true" | **Kill.** Fixed — `science_lookup` defaults `live=false`; flywheel requires cheap path. |
 
-**Surviving hypothesis:** **#1 live compound + #2 Compounding Desk UI** — only pair with zero collision in kill ledger AND direct answer to AMBITION-AUDIT hole.
+**Surviving pair:** **#1 flywheel (post-submit company)** + **#2 compound demo (Sep 9)** — same engine, different surfaces.
 
-**All-green refute check:** NOT all-green — PeriodCheck live benchmark is a real threat on Tech + Design if we submit without hosted compound.
+**All-green check:** NOT all-green — PeriodCheck 13/13 live is real; we must ship hosted compound + video or lose Design/Tech tie-break.
 
 ---
 
@@ -99,57 +91,63 @@ Depth wins: 109/109 controls, PRIOR LOSS eval gates, ADK default path, partner w
 
 | Idea | Already fired? | Verdict |
 |------|----------------|---------|
-| ADK default path | ✅ slice 5 + hosted `/health` | done — not moonshot |
-| Partner integrations doc | ✅ 5/5 offline | done |
-| Eval baseline + ablation | ✅ tied 0.833 | done — no delta |
-| SUBMISSION-PACK count refresh | ✅ 109/109 | done |
-| Cold clone stranger path | ✅ 72/72 | done |
-| **Live compound on hosted** | ❌ BLOCKED keys | **BUILD — Oscar gate** |
-| **Compound strip in UI** | ❌ receipt only | **BUILD** |
-| **Gap report as clearance memo** | partial — `<pre>` markdown | **BUILD** |
-| RC5 semantic guard | ❌ | defer |
-| External eval anchor / holdout | ❌ | defer post-submit |
-| Video + Devpost + public repo | ❌ | Oscar Loop 4 |
+| ADK default + partner runtime | ✅ 5/5 + hosted health | done |
+| Compound UI strip | ✅ cloud lane + service.py | done |
+| Stack product (MCP/CLI/HTTP) | ✅ science_search stack | done |
+| Truth dictionary (`dictionary.py`) | ✅ free/cheap/live | done |
+| URL routing (CELEX, arXiv, rights) | ✅ `routing.py` | done |
+| `science_popular` + query analytics | ✅ 2026-08-31 | done |
+| Live compound hosted receipt | ⚠️ partial — fresh subject pass | **Oscar deploy verify** |
+| Video + Devpost + public repo | ❌ | **Oscar Loop 4** |
+| Auto-ingest after research | ❌ | **BUILD post-deploy** |
+| `/popular` on hosted desk | ❌ | **BUILD post-deploy** |
+| Shared fleet dictionary (GCS) | ❌ | **BUILD week 2** |
+| Attest-style content_id / retraction | ❌ | defer — borrow after flywheel spins |
 
 ---
 
 ## BUILD-PLAN (Loop 2 → hand to /frame)
 
-Risk-first. Front-load the demo primitive judges haven't seen.
+**Sep 9 critical path (Oscar-heavy):**
 
-1. **Compound strip on hosted desk** — after `/clear`, show Run metrics + "run again on same subject" lane; surface `parallel_calls`, `corpus_hits`, delta vs prior run on subject shelf · done when: `tests/test_registry_surface.py` extended OR UI smoke + screenshot in receipt · size M · risk: UI without live keys still useful for video rehearsal
+1. **Deploy + verify hosted compound** — `bash deploy.sh`; curl compound-mini A/B on live URL; fill sealed-prediction table · done when: receipt with hosted transcripts OR honest BLOCKED · size S · **Oscar gate**
 
-2. **Gap report clearance memo format** — structured action list (SOURCED / UNSOURCED / UNKNOWN) readable by clearance lead; not raw log dump · done when: one fixture output matches memo template in VIDEO-SCRIPT beat 0:46 · size S · risk: low
+2. **Video ≤180s** — beats: problem (E&O) → Run A → Run B (metrics on screen) → registry browse → one refusal · done when: public YouTube/Vimeo URL · size XS · **Oscar gate**
 
-3. **Hosted compound A/B receipt** — orphan-works Run A → Run B on **hosted URL** with sealed-prediction table filled · done when: `docs/RECEIPT-live-compound-*.md` with curl transcripts OR honest BLOCKED with named missing key · size S · risk: **Oscar deploy + keys**
+3. **Devpost + public repo** — paste block from SUBMISSION-PACK; flip visibility; OSI licence · done when: submission URL live · size XS · **Oscar gate**
 
-4. **Video + Devpost lock** — script beats 1:30–1:54 (compound) + 1:12 (refuse) as non-negotiable; Devpost paste opens with E&O sentence not test counts · done when: Oscar confirms paste block + ≤180 s script unchanged · size XS · risk: outward gate
+**Product flywheel (build lane — parallel, not blocking video):**
 
-*(Slice order: 2 can ship without keys; 1 partially; 3 blocked on Oscar; 4 Oscar-only.)*
+4. **Fix top-3 `popular` misses** — ingest orphan-works EU + aliases for `2012/28/EU` · done when: `popular` shows 0 misses on those queries · size XS · **shippable now**
+
+5. **Auto-ingest hook** — research skill / ZUP appends `[CLAIM]/[URL]` → `science_ingest` on session end · done when: one fleet repo documents + one end-to-end test · size M
+
+6. **Hosted `/popular` page** — top queries + optimization targets on desk · done when: GET returns JSON + registry nav link · size S
+
+*(Order: 4 today without Oscar; 1–3 Oscar; 5–6 after deploy.)*
 
 ---
 
 ## OPS (Loop 4 — separate)
 
-- **Tonight:** `cinema-night` cloud agent ACTIVE — `bc-2c460298-a88b-499d-9aac-0cf07787e56e`
-- **Scheduler:** launchd every 4h; retry 8h on fail
-- **Oscar gates:** deploy.sh · PARALLEL/GEMINI keys on Cloud Run · public repo flip · YouTube/Vimeo upload · Devpost submit
-- **Tomorrow review:** `node scripts/cloud-harness.js review agent-science` — score ambition vs disk, not agent prose
-- **Do not:** cloud lane spends slices on eval checklist rows or doc-count gates — already green
+- **Oscar today:** rotate leaked keys · `deploy.sh` · restart Cursor for MCP
+- **Oscar this week:** video · Devpost · public repo · seal prediction hash
+- **Fleet habit:** `science_lookup` default · `popular` weekly · `ingest` after research
+- **Review:** `node ~/CODE/zup/scripts/cloud-harness.js review agent-science`
+- **Do not:** eval checklist rows · ClickHouse · cloud doc refresh without outward artifact
 
 ---
 
-## Explicitly NOT doing (effort tradeoff)
+## Explicitly NOT doing
 
 | Could do | Why not now |
 |----------|-------------|
-| RC5 semantic guard | n=6; judges don't see eval; compound UI higher leverage |
-| External benchmark we didn't build | Correct science; zero Cinema rubric weight before Sep 9 |
-| Holdout + CIs on refusal set | Submission craft; defer until compound ships |
-| Rename repo / public flip | Oscar gate; not build lane |
-| Design partner outreach (slice 6) | Oscar; parallel to submit prep |
-| Compete on agent-crew breadth (CineIntel-style) | Collision with our refusal spine; wrong product shape |
+| ClickHouse index | Wrong primitive; popularity already in SQLite |
+| RC5 / more eval gates | Zero rubric weight; compound + video higher |
+| Compete on Document AI PDF ingest | PeriodCheck owns; not our wedge |
+| Pivot to AttestDB | Collision with refuse spine; borrow patterns later |
+| Fleet shared dictionary before deploy | Hosted URL first |
 
 ---
 
-*Loop 0+1+2 complete 2026-08-31. Loop 3 starts at BUILD-PLAN slice 2 (gap memo format) — shippable without keys. Loop 4 ops already running.*
+*Loop 0+1+2 complete 2026-08-31 rev 2. Loop 3 slice 4 (fix popular misses) shippable without Oscar. Loop 4 slices 1–3 are Sep 9 gates.*

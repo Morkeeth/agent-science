@@ -7,7 +7,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from clearance import facts, instruments, search as _search
+from clearance import facts, instruments, routing, search as _search
 from clearance.facts import Claim, judge_claim, _queries_for
 from clearance.locate import DEFAULT
 from clearance.verdict import GREEN
@@ -76,10 +76,42 @@ def t_term_cache_reuses_search_across_query_shapes():
             _search.CACHE = saved
 
 
+def t_routing_skips_parallel_when_celex_in_claim():
+    saved_find = _search.find_sources
+    calls = []
+
+    def spy_find(*a, **kw):
+        calls.append((a, kw))
+        return saved_find(*a, **kw)
+
+    saved_doc = instruments.document
+    eur = "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32012L0028"
+    doc = "The Directive 2012/28/EU was adopted on 25 October 2012."
+
+    def fake_doc(url, fetch=False, **kw):
+        return doc if "eur-lex" in url else None
+
+    _search.find_sources = spy_find
+    instruments.document = fake_doc
+    try:
+        v = judge_claim(
+            Claim("C1", "Directive 2012/28/EU was adopted in 2012.",
+                  None, "Directive 2012/28/EU"),
+            locator=DEFAULT, live_search=True, fetch=True,
+        )
+    finally:
+        _search.find_sources = saved_find
+        instruments.document = saved_doc
+
+    assert v.verdict == GREEN, (v.verdict, v.cause, v.reason)
+    assert calls == [], f"Parallel should not run when CELEX routes, got {len(calls)} calls"
+
+
 if __name__ == "__main__":
     for fn in (t_queries_prefer_distinctive_term,
                t_primary_hit_skips_extra_fetches_and_second_search,
-               t_term_cache_reuses_search_across_query_shapes):
+               t_term_cache_reuses_search_across_query_shapes,
+               t_routing_skips_parallel_when_celex_in_claim):
         fn()
         print(f"PASS  {fn.__name__}")
-    print("\n3/3 passed")
+    print("\n4/4 passed")

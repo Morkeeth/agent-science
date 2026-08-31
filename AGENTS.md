@@ -27,11 +27,35 @@ Or manually in `~/.cursor/mcp.json`:
 
 | Tool | When |
 |------|------|
-| `science_search` | **Default for any factual lookup** — registry first, Parallel+verify on miss |
+| `science_lookup` | **Default for daily factual lookups** — truth dictionary (free → cheap → live only if `live=true`) |
+| `science_search` | When dictionary miss needs **fresh Parallel discovery** (same as lookup with live) |
 | `science_browse` | See what the stack already searched |
-| `science_stats` | Registry size, sourced/refused counts |
-| `science_ingest` | After manual research — verify claim+URL into registry |
+| `science_stats` | Dictionary size, hit rate, sourced/refused counts |
+| `science_popular` | **Top dev queries** — what to alias, ingest, or route next |
+| `science_ingest` | After manual research — verify claim+URL into dictionary |
 | `science_clear` | Full documentary script → gap report |
+
+## Daily workflow (cost-efficient)
+
+```bash
+# 1. Boot dictionary once (or after fleet research)
+python3 scripts/boot_registry.py
+
+# 2. Free lookup — registry + routing, no Parallel
+python3 -m clearance lookup "orphan works directive"
+
+# 3. Only if NOT_CLEARED and you need fresh web results
+python3 -m clearance lookup "obscure claim" --live
+# or: python3 -m clearance search "obscure claim"
+
+# 4. After you find a source manually — grow the dictionary
+python3 -m clearance ingest --claim "..." --url "https://..."
+
+# 5. Weekly — see what devs ask most; optimize dictionary
+python3 -m clearance popular
+```
+
+Add casual phrasings to `truth-dictionary/aliases.json` — they map to canonical queries for free hits.
 
 ## CLI
 
@@ -70,6 +94,12 @@ in this repo. Growing it is a reviewed act: add files, re-run
 ```
 
 Then: `python3 -m clearance ingest --text "$(cat file.md)"` or `science_ingest` MCP.
+
+After research sessions, grow the dictionary automatically:
+
+```bash
+python3 scripts/auto_ingest_inbox.py
+```
 
 ## Keys
 

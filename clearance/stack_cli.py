@@ -14,7 +14,7 @@ import argparse
 import json
 import sys
 
-from clearance import ingest, stack_search
+from clearance import ingest, query_analytics, stack_search
 
 
 def _print_result(res: dict) -> None:
@@ -29,12 +29,31 @@ def _print_result(res: dict) -> None:
         print(f"  {res.get('why') or res.get('cause')}")
     src = res.get("source")
     api = res.get("parallel_api_calls", 0)
-    if src:
-        print(f"  via {src}" + (f" · {api} Parallel API" if api else " · 0 Parallel API"))
+    tier = res.get("cost_tier", "?")
+    if src or tier:
+        bits = [f"tier={tier}"]
+        if src:
+            bits.append(f"via {src}")
+        if api:
+            bits.append(f"{api} Parallel API")
+        else:
+            bits.append("0 Parallel API")
+        print(f"  {' · '.join(bits)}")
+    if res.get("next_step"):
+        print(f"  → {res['next_step']}")
+
+
+def cmd_lookup(args: argparse.Namespace) -> int:
+    res = stack_search.lookup(args.query, live=args.live, subject=args.subject)
+    if args.json:
+        print(json.dumps(res, indent=2))
+    else:
+        _print_result(res)
+    return 0 if res.get("label") not in ("NOT_CLEARED",) or args.live else 1
 
 
 def cmd_search(args: argparse.Namespace) -> int:
-    res = stack_search.search(args.query, live=not args.offline, subject=args.subject)
+    res = stack_search.lookup(args.query, live=not args.offline, subject=args.subject)
     if args.json:
         print(json.dumps(res, indent=2))
     else:
@@ -50,6 +69,32 @@ def cmd_browse(args: argparse.Namespace) -> int:
         return 0
     for r in rows:
         print(f"  [{r['result_label']:12}] {r['query_text'][:55]:55}  {r['asked_at'][:19]}")
+    return 0
+
+
+def cmd_popular(args: argparse.Namespace) -> int:
+    data = query_analytics.report(limit=args.limit)
+    if args.json:
+        print(json.dumps(data, indent=2))
+        return 0
+    print("=== Popular queries (by asks) ===")
+    for r in data["popular_queries"][: args.limit]:
+        print(f"  {r['asks']:3d}x  [{r.get('sourced', 0)} sourced / "
+              f"{r.get('not_cleared', 0)} miss / {r.get('live_asks', 0)} live]  "
+              f"{r['example'][:70]}")
+    print("\n=== Optimize next (live spend or misses) ===")
+    for r in data["optimization_targets"][: args.limit]:
+        print(f"  {r['asks']:3d}x  live={r.get('live_asks', 0)} miss={r.get('not_cleared', 0)}  "
+              f"→ {r['action']}")
+        print(f"         {r['example'][:75]}")
+    if data["alias_candidates"]:
+        print("\n=== Alias candidates (add to truth-dictionary/aliases.json) ===")
+        for r in data["alias_candidates"][:8]:
+            print(f'  "{r["alias"]}" → "{r["canonical"]}"')
+    if data["parallel_probes"]:
+        print("\n=== Parallel probes (from receipts) ===")
+        for r in data["parallel_probes"][:8]:
+            print(f"  {r['asks']:3d}x  {r['probe'][:70]}")
     return 0
 
 
@@ -87,7 +132,14 @@ def main(argv=None) -> int:
     p = argparse.ArgumentParser(description="Agent Science — stack websearch")
     sub = p.add_subparsers(dest="cmd", required=True)
 
-    s = sub.add_parser("search", help="verified websearch (registry → live)")
+    s = sub.add_parser("lookup", help="truth dictionary (free/cheap; live optional)")
+    s.add_argument("query", nargs="+", help="lookup query")
+    s.add_argument("--subject", default="stack")
+    s.add_argument("--live", action="store_true", help="paid Parallel on miss")
+    s.add_argument("--json", action="store_true")
+    s.set_defaults(func=cmd_lookup)
+
+    s = sub.add_parser("search", help="verified websearch (live unless --offline)")
     s.add_argument("query", nargs="+", help="search query")
     s.add_argument("--subject", default="stack")
     s.add_argument("--offline", action="store_true", help="registry only, no Parallel")
@@ -100,6 +152,11 @@ def main(argv=None) -> int:
     b.set_defaults(func=cmd_browse)
 
     sub.add_parser("stats", help="registry stats").set_defaults(func=cmd_stats)
+
+    pop = sub.add_parser("popular", help="top queries + optimization targets for devs")
+    pop.add_argument("--limit", type=int, default=15)
+    pop.add_argument("--json", action="store_true")
+    pop.set_defaults(func=cmd_popular)
 
     ig = sub.add_parser("ingest", help="ingest claim into registry")
     ig.add_argument("--claim")
@@ -115,7 +172,7 @@ def main(argv=None) -> int:
     sub.add_parser("mcp", help="stdio MCP for Cursor").set_defaults(func=cmd_mcp)
 
     args = p.parse_args(argv)
-    if args.cmd == "search":
+    if args.cmd in ("search", "lookup"):
         args.query = " ".join(args.query)
     return args.func(args)
 

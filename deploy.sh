@@ -15,6 +15,7 @@ SERVICE="${GCP_SERVICE:-agent-science}"
 SECRET="${PARALLEL_SECRET:-parallel-api-key}"
 BUCKET="${CORPUS_BUCKET:-hack-fleet-agent-science-corpus}"
 CORPUS_OBJECT="${CORPUS_OBJECT:-corpus.db}"
+REFUSAL_OBJECT="${REFUSAL_OBJECT:-refusal_log.db}"
 
 cd "$ROOT"
 
@@ -44,6 +45,16 @@ fi
 "$GCLOUD" storage buckets add-iam-policy-binding "gs://${BUCKET}" \
   --member="serviceAccount:${RUNTIME_SA}" --role=roles/storage.objectAdmin --quiet
 
+if [[ -f "$ROOT/cache/refusal_log.db" ]]; then
+  echo "3b. Seed truth dictionary to GCS (if local shelf exists)..."
+  "$GCLOUD" storage cp "$ROOT/cache/refusal_log.db" "gs://${BUCKET}/${REFUSAL_OBJECT}" \
+    --project="$PROJECT" --quiet || true
+fi
+if [[ -f "$ROOT/cache/corpus.db" ]]; then
+  "$GCLOUD" storage cp "$ROOT/cache/corpus.db" "gs://${BUCKET}/${CORPUS_OBJECT}" \
+    --project="$PROJECT" --quiet || true
+fi
+
 echo "4. Deploy (replace env — no API keys in the clear; Parallel via secret; corpus via GCS)..."
 # --set-env-vars and --remove-env-vars cannot be combined. Clear first so leaked
 # GEMINI_API_KEY / PARALLEL_API_KEY plaintext cannot survive into the new revision.
@@ -61,12 +72,18 @@ fi
   --memory=512Mi \
   --timeout=300 \
   --service-account="$RUNTIME_SA" \
-  --set-env-vars="GEMINI_MODEL=gemini-3.5-flash,GCP_PROJECT=${PROJECT},CORPUS_DB=/tmp/corpus.db,CORPUS_GCS_URI=gs://${BUCKET}/${CORPUS_OBJECT},AGENT_BUILDER=1,GOOGLE_CLOUD_LOCATION=global" \
+  --set-env-vars="GEMINI_MODEL=gemini-3.5-flash,GCP_PROJECT=${PROJECT},CORPUS_DB=/tmp/corpus.db,CORPUS_GCS_URI=gs://${BUCKET}/${CORPUS_OBJECT},REFUSAL_LOG_DB=/tmp/refusal_log.db,REFUSAL_LOG_GCS_URI=gs://${BUCKET}/${REFUSAL_OBJECT},AGENT_BUILDER=1,GOOGLE_CLOUD_LOCATION=global" \
   --set-secrets="PARALLEL_API_KEY=${SECRET}:latest"
 
 URL="$("$GCLOUD" run services describe "$SERVICE" --project="$PROJECT" --region="$REGION" \
   --format='value(status.url)')"
 echo "HOSTED_URL=$URL"
+echo "Post-deploy checks:"
+echo "  curl -sf \"$URL/health\""
+echo "  curl -sf \"$URL/stats\" | head"
+echo "  curl -sf \"$URL/popular\" | head"
+echo "  curl -sf -X POST \"$URL/clear\" -H 'Content-Type: application/json' \\"
+echo "    -d '{\"script\":\"Directive 2012/28/EU.\",\"subject\":\"compound-prep\"}' | head -c 400"
 curl -sf "$URL/health" | head -c 400
 echo
 echo "NOTE: rotate Parallel/Gemini keys if they were ever in plaintext env (Oscar)."
