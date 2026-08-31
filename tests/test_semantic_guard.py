@@ -170,6 +170,43 @@ def t_identical_claim_and_span_is_never_refused():
         assert f is None, f"guard refused an exact restatement: {f} — {text!r}"
 
 
+def t_a_correction_is_not_a_denial():
+    """"not A but B" AFFIRMS B. Found by measuring, not by thinking about grammar.
+
+    Registry replay, 2026-08-31: the guard refused a real span reading "We find that
+    these files are not static documentation but complex, difficult-to-read artifacts
+    that evolve like configuration code…" — for the claim that they evolve like
+    configuration code, which that sentence states. Two defects in one row: the carrier
+    clause was being found by searching each clause for `must_contain`, which fails
+    whenever the term ends on the punctuation the splitter just consumed; and a `but`
+    boundary was being read as though it were a `;`.
+    """
+    span = ("We find that these files are not static documentation but complex, "
+            "difficultto-read artifacts that evolve like configuration code through "
+            "frequent, small additions. Our content analysis follows.")
+    mc = "evolve like configuration code through frequent, small additions."
+    assert "evolve like configuration code" in S._carrier(span, mc), \
+        f"carrier clause is wrong: {S._carrier(span, mc)[:90]!r}"
+    assert S.inspect(span, claim="agent context files evolve like configuration code "
+                                 "through frequent, small additions",
+                     must_contain=mc) is None, \
+        "a contrastive correction was read as a denial"
+
+
+def t_negators_are_function_words_not_lexical_verbs():
+    """The list must stay the closed class the module claims it is.
+
+    `fails`, `lacks`, `unable` were in it. They are lexical verbs: a product whose
+    subject is failure says "fails" in true sentences. Measured as a false refusal on a
+    span ending "…then fails."
+    """
+    for verb in ("fails", "failed", "lacks", "lacking", "unable", "nothing", "nowhere"):
+        assert verb not in S._NEGATORS, \
+            f"{verb!r} is a lexical verb, not a negation cue — it refuses true prose"
+    for word in ("not", "no", "never", "cannot", "neither", "without", "unlike"):
+        assert word in S._NEGATORS, f"the closed class lost {word!r}"
+
+
 # ----------------------------------------------------------------- the invariants
 
 def t_guard_only_demotes_never_rescues():

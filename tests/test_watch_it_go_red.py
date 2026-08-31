@@ -743,53 +743,43 @@ def t_corpus_path_honours_its_deployment_env():
 
 
 def t_no_deploy_surface_passes_a_secret_in_the_clear():
-    """The control that should have existed before tonight.
+    """The control that should have existed before 2026-08-30.
 
     A rewritten, safe deploy.sh sat in the repo and the OLD one was run anyway, putting
     both API keys into a live Cloud Run service, its revisions and its build logs -
-    places that cannot be un-written. Rotation was the only fix.
+    places that cannot be un-written. Rotation is the only fix and it is Oscar's click.
 
     A rule that lives in a file gets bypassed. A rule that lives in a test gets caught.
-    This scans every deploy surface for a secret being handed over in the clear.
-    """
-    root = Path(__file__).resolve().parents[1]
-    surfaces = [f for f in root.rglob("*")
-                if f.is_file() and "/.git/" not in str(f)
-                and (f.suffix in (".sh", ".yaml", ".yml", ".tf")
-                     or f.name in ("Dockerfile", "cloudbuild.yaml", "Procfile"))]
-    assert surfaces, "UNMEASURABLE: no deploy surface found to scan"
 
-    # An env-var assignment whose NAME looks like a secret. --set-secrets is the safe
-    # form and is deliberately not matched.
-    secretish = re.compile(
-        r"(--set-env-vars|ENV|export)[^\n]*?\b([A-Z0-9_]*(KEY|TOKEN|SECRET|PASSWORD|CREDENTIAL)[A-Z0-9_]*)\s*[=:]",
-        re.I)
-    offences = []
-    for f in surfaces:
-        text = f.read_text(errors="ignore")
-        for m in secretish.finditer(text):
-            line = text[:m.start()].count("\n") + 1
-            offences.append(f"{f.relative_to(root)}:{line} passes {m.group(2)} in the clear")
-    assert not offences, (
+    THE RULE MOVED OUT OF THIS FILE on 2026-08-31, to review/secret_surfaces.py. It was
+    declared here TWICE - once in the scan, once inline in the test below that proves the
+    scan works - so the self-test could pass while the shipped rule was broken. It also
+    could not cross a newline, and so was blind to the `env:` / `- name:` / `value:`
+    block, which is the declarative form of the exact command that leaked. Both fixed
+    there, both watched red first, and graded by tests/test_secret_surfaces.py.
+    """
+    from review import secret_surfaces as _ss
+    root = Path(__file__).resolve().parents[1]
+    assert len(_ss.surfaces(root)) >= 4, "UNMEASURABLE: deploy surfaces not found"
+    leaks = _ss.scan_tree(root)
+    assert not leaks, (
         "a deploy surface hands a secret over in the clear; use --set-secrets or ADC:\n  "
-        + "\n  ".join(offences))
+        + "\n  ".join(l.detail for l in leaks))
 
 
 def t_the_secret_scanner_actually_catches_one():
-    """The control's own control. A scanner that cannot find a planted secret is décor."""
-    import tempfile
-    with tempfile.TemporaryDirectory() as d:
-        bad = Path(d) / "deploy.sh"
-        bad.write_text('gcloud run deploy x --set-env-vars="GEMINI_API_KEY=${K}"\n')
-        secretish = re.compile(
-            r"(--set-env-vars|ENV|export)[^\n]*?\b([A-Z0-9_]*(KEY|TOKEN|SECRET|PASSWORD|CREDENTIAL)[A-Z0-9_]*)\s*[=:]",
-            re.I)
-        assert secretish.search(bad.read_text()), \
-            "the scanner does not catch the exact line that leaked tonight"
-        good = Path(d) / "safe.sh"
-        good.write_text('gcloud run deploy x --set-secrets="PARALLEL_API_KEY=sec:latest"\n')
-        assert not secretish.search(good.read_text()), \
-            "the scanner false-positives on --set-secrets, which is the safe form"
+    """The control's own control - now grading the SHIPPED rule, not a copy of it."""
+    from review import secret_surfaces as _ss
+    bad = 'gcloud run deploy x --set-env-vars="GEMINI_API_KEY=${K}"'
+    assert _ss.scan_text(bad, name="planted"), \
+        "the scanner does not catch the exact line that leaked"
+    declarative = ("        env:\n        - name: PARALLEL_API_KEY\n"
+                   "          value: \"pk-live-abc\"")
+    assert _ss.scan_text(declarative, name="planted"), \
+        "the scanner is blind to the yaml env block - the same leak, declared"
+    good = 'gcloud run deploy x --set-secrets="PARALLEL_API_KEY=sec:latest"'
+    assert not _ss.scan_text(good, name="safe"), \
+        "the scanner false-positives on --set-secrets, which is the safe form"
 
 
 def t_disputed_carries_the_same_citation_burden():

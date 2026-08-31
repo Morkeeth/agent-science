@@ -77,8 +77,13 @@ ENV_FLAG = "CLEARANCE_SEMANTIC_GUARD"
 # and the addition is the bug.
 _NEGATORS_RAW = frozenset("""
 not no never none nor cannot neither without unlike except excluding
-lacks lacked lacking fails failed nothing nowhere unable
 """.split())
+# REMOVED 2026-08-31, by measurement: lacks / lacked / lacking / fails / failed /
+# nothing / nowhere / unable. Those are LEXICAL VERBS, not function words, and the file
+# above claims a closed class of function words — so the list contradicted its own stated
+# principle and nobody noticed until it fired. It refused a real span because the
+# marketing copy in it ended "then fails." A product whose subject matter is failure will
+# say "fails" in every true sentence it publishes.
 
 _STOP_RAW = frozenset("""
 a an the this that these those of in on at to for from by with as is are was were be
@@ -97,6 +102,14 @@ _CLAUSE = re.compile(
     r"|(?:\s+(?:but|however|although|though|whereas|unless|until|except|while|"
     r"rather\s+than|instead\s+of|other\s+than)\s+)",
     re.IGNORECASE)
+
+# A CORRECTING boundary. After a negation, `but` does not extend the denial across it —
+# it replaces the denied element with the affirmed one. "These files are not static
+# documentation BUT artifacts that evolve like configuration code" AFFIRMS the second
+# half. Measured as a false refusal on exactly that sentence; the clause split was right
+# and the polarity check was reading a denial where the grammar marks a correction.
+_CONTRAST = re.compile(r"\b(?:but|however|although|though|whereas|rather\s+than|"
+                       r"instead\s+of)\b", re.IGNORECASE)
 
 _WORD = re.compile(r"[^\W_]+", re.UNICODE)
 
@@ -159,9 +172,24 @@ def negators(text: str) -> set:
     return hits
 
 
+def clause_spans(passage: str) -> list[tuple]:
+    """(offset, text, separator-that-introduced-it) per clause.
+
+    The separator is kept because `;` and `but` are not the same boundary: one coordinates
+    two independent statements, the other corrects the first with the second.
+    """
+    text, out, pos, sep = passage or "", [], 0, ""
+    for m in _CLAUSE.finditer(text):
+        if text[pos:m.start()].strip():
+            out.append((pos, text[pos:m.start()], sep))
+        pos, sep = m.end(), m.group(0)
+    if text[pos:].strip():
+        out.append((pos, text[pos:], sep))
+    return out or [(0, text, "")]
+
+
 def clauses(passage: str) -> list[str]:
-    parts = [c.strip() for c in _CLAUSE.split(passage or "") if c and c.strip()]
-    return parts or [(passage or "").strip()]
+    return [t.strip() for _, t, _sep in clause_spans(passage)]
 
 
 def _carrier(passage: str, must_contain: str) -> str:
@@ -174,13 +202,30 @@ def _carrier(passage: str, must_contain: str) -> str:
     needle = (must_contain or "").strip().lower()
     if not needle:
         return passage
-    for c in clauses(passage):
-        if needle in c.lower():
-            return c
-    # The term straddles a clause boundary: fall back to the whole passage rather than
-    # invent a carrier. Falling back WIDER is the conservative direction — it can only
-    # make the guard refuse less.
+    # BY OFFSET, not by substring search inside each clause. Searching the clause TEXT
+    # failed whenever the term ended on the punctuation the splitter had just consumed:
+    # `must_contain` was "…small additions." and every clause had lost its full stop, so
+    # no clause matched, the whole passage became the carrier, and a "not" from a
+    # NEIGHBOURING clause was read as negating this one. Measured as a false refusal on
+    # "these files are not static documentation but … evolve like configuration code" —
+    # a contrastive negation that AFFIRMS the claim. The clause boundary was right; the
+    # lookup was searching for a string the split had already changed.
+    low = passage.lower()
+    at = low.find(needle)
+    if at < 0:
+        at = low.find(needle.rstrip(".,;:!?"))
+    if at < 0:
+        return passage
+    for start, text, _sep in clause_spans(passage):
+        if start <= at < start + len(text):
+            return text.strip()
     return passage
+
+
+def _corrected_between(spans: list, i: int, j: int) -> bool:
+    """Is a correcting boundary crossed on the way from clause i to clause j?"""
+    lo, hi = sorted((i, j))
+    return any(_CONTRAST.search(spans[k][2] or "") for k in range(lo + 1, hi + 1))
 
 
 def _detail(code: str, text: str) -> Finding:
@@ -215,16 +260,24 @@ def check_polarity(passage: str, *, claim: str, must_contain: str) -> Optional[F
 
     subject = content(claim) - content(must_contain)
     if subject:
-        for c in clauses(passage):
-            if c == carrier:
+        spans = clause_spans(passage)
+        here = next((i for i, (_, t, _s) in enumerate(spans)
+                     if t.strip() == carrier.strip()), None)
+        for i, (_start, text, _sep) in enumerate(spans):
+            if i == here:
                 continue
+            c = text.strip()
             neg = negators(c) - own
-            if neg and (content(c) & subject):
-                return _detail(
-                    CONTRADICTED,
-                    f"a neighbouring clause names the claim's subject "
-                    f"{sorted(content(c) & subject)} and denies it with {sorted(neg)}: "
-                    f"{c[:160]!r}")
+            if not (neg and (content(c) & subject)):
+                continue
+            if here is not None and _corrected_between(spans, i, here):
+                # "not A but B": the denial stops at the correction.
+                continue
+            return _detail(
+                CONTRADICTED,
+                f"a neighbouring clause names the claim's subject "
+                f"{sorted(content(c) & subject)} and denies it with {sorted(neg)}: "
+                f"{c[:160]!r}")
     return None
 
 
