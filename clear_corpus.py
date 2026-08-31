@@ -176,7 +176,12 @@ def verify_corpus(corpus_dir: str, *, fetch: bool = True, live_search: bool = Fa
                      "text": c.text, "must_contain": _must_contain(c.text),
                      "quoted_terms": getattr(v, "quoted_terms", None),
                      "basis": ("primary" if "PRIMARY" in (getattr(v, "reason", "") or "")
-                               else "corroborated") if bucket == "sourced" else None})
+                               else "corroborated") if bucket == "sourced" else None,
+                     # The audit trail rides out with the row. Without it the registry
+                     # can render WHAT was refused and never WHICH spans were weighed,
+                     # and a refusal you must take on trust is a chatbot.
+                     "refusal_code": getattr(v, "refusal_code", None),
+                     "trail": [dict(t) for t in getattr(v, "trail", ()) or ()]})
         if bucket == "sourced":
             sourced += 1
         elif bucket == "unknown":
@@ -229,14 +234,16 @@ def backfill_log(corpus_dir: str, *, log_db=None, fetch: bool = True,
                 con, term=term, assertion=assertion, verdict=_GREEN,
                 production=production, basis=r.get("basis"),
                 citation_url=r.get("url"), quoted_terms=r.get("quoted_terms"),
-                origins=[production])
+                origins=[production], refusal_code=r.get("refusal_code"),
+                trail=r.get("trail"))
             green += 1
         elif include_unsourced and r["verdict"] == "UNSOURCED" and r.get("cause") == _SILENT:
             refusal_log.record(
                 con, term=term, assertion=assertion, verdict="UNKNOWN",
                 production=production, cause=_SILENT,
                 citation_url=r.get("url"), quoted_terms=r.get("quoted_terms"),
-                origins=[production])
+                origins=[production], refusal_code=r.get("refusal_code"),
+                trail=r.get("trail"))
             unsourced += 1
 
     after = refusal_log.stats(con)["n"]

@@ -10,3 +10,4 @@ cache/gemini.json
 
 # local venv for the ADK receipt — never shipped
 .venv-adk/
+cache/run_history.json

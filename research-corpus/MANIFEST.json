@@ -1,0 +1,120 @@
+{
+ "what": "the frozen measurement population every published Agent Science number is computed over",
+ "frozen_at": "2026-08-31",
+ "source": "git ls-files research-corpus/*.md \u2014 committed content only",
+ "written_by": "nothing; clearance.ingest writes to research-inbox/",
+ "n_files": 22,
+ "claims": 312,
+ "files": [
+  {
+   "file": "2026-08-24-execute-and-compare-whitespace.md",
+   "sha256": "e6d2f8bc982e24503e2a7629166f9e30d79bb9e9828fdf4f7e9b1d7fab2f6505",
+   "bytes": 4782
+  },
+  {
+   "file": "2026-08-24-kaggle-ceiling-research.md",
+   "sha256": "d6f7775604c90f7968d6030a77695ea4e2894dd9821febbbea50bf5848832838",
+   "bytes": 15437
+  },
+  {
+   "file": "2026-08-24-kaggle-harmony-claim-corrected.md",
+   "sha256": "18e94b0b721c58eef57c9f26823f9212d1657835a291ada6228bd8e68236a0e3",
+   "bytes": 1459
+  },
+  {
+   "file": "2026-08-24-patent-103-fight.md",
+   "sha256": "a763d757ac272dd8335871cdeb5486377a4fbff6782423587090c1c24431f77e",
+   "bytes": 5753
+  },
+  {
+   "file": "2026-08-24-patent-angle-generation.md",
+   "sha256": "df56ce600d07c06da9cf053aacb92936cbd2eee6a3a9098043202cefb0976501",
+   "bytes": 15893
+  },
+  {
+   "file": "2026-08-24-patent-angle1-draft-ready.md",
+   "sha256": "91bfddceea8932059da8cdb6ed81fa6d4c6d76fdadd017d93cee539274aba2ce",
+   "bytes": 731
+  },
+  {
+   "file": "2026-08-24-patent-authorship-outcome.md",
+   "sha256": "21ab75996485c5a1e86ec69e6901941ada34eb690ae669ead2905fe8a030daff",
+   "bytes": 12817
+  },
+  {
+   "file": "2026-08-24-patent-counsel-priorart.md",
+   "sha256": "6c6e7eb644b40d43899f78629fbb57fae60b11e02cb29ae74824c9e8c00534ba",
+   "bytes": 6579
+  },
+  {
+   "file": "2026-08-24-patent-narrow-angle.md",
+   "sha256": "8322030ab2b64404c5bd888b1047a762f7bef248d0d14d8c4a998544f0de0070",
+   "bytes": 8764
+  },
+  {
+   "file": "2026-08-24-patent-prior-art-composition-honesty.md",
+   "sha256": "750426a340330e0a47d247373328652bf7f02bf99be71a4c4aea87ebba5b1246",
+   "bytes": 2049
+  },
+  {
+   "file": "2026-08-24-prd-agentscience.md",
+   "sha256": "e44c53c03acc783d642add57b360df5e8503d72a56a2781f352e809335ee8923",
+   "bytes": 6005
+  },
+  {
+   "file": "2026-08-24-prd-helicon.md",
+   "sha256": "71d816c040ace5422b04f99ead6c8204057469cbda075cec79f9092091beb771",
+   "bytes": 2343
+  },
+  {
+   "file": "2026-08-24-prd-transcripto.md",
+   "sha256": "84935ae3fd18c111486aebb77e9a18e7a3c9d3beba03c5058911468f1dcfcf94",
+   "bytes": 7567
+  },
+  {
+   "file": "2026-08-24-prd-zup.md",
+   "sha256": "915c4942558213ae9bcfa8df083d284d9a5db80d7d4e7bc21a2fc9dc28c858db",
+   "bytes": 6551
+  },
+  {
+   "file": "2026-08-24-prompting-coach.md",
+   "sha256": "690b4b767968fac50ef94b6ba8e79a5700dd84aec7bd1bdb412d53c258040043",
+   "bytes": 3910
+  },
+  {
+   "file": "2026-08-24-stranger-auditor-checks.md",
+   "sha256": "20b7010d0e44765cecb8104ab3b69e06ffdf5776f6022c3e2d90582e84f1021f",
+   "bytes": 12588
+  },
+  {
+   "file": "2026-08-24-verification-stack-positioning.md",
+   "sha256": "2567ff5fa60a7178c9060deb04838ece3e0d777ebb514590ba1b1ccef86ce346",
+   "bytes": 11406
+  },
+  {
+   "file": "2026-08-25-agentscience-log.md",
+   "sha256": "0b6a21506a6174bb6a55768032437b0d5bf56dd779d2124ce0a1d15fb573bc1c",
+   "bytes": 1836
+  },
+  {
+   "file": "2026-08-25-corpus-verify-full.md",
+   "sha256": "8a7210d16dcbd1d0eadc2ae47199918c479055ce101817631c48bb32c08babb2",
+   "bytes": 18902
+  },
+  {
+   "file": "2026-08-25-helicon-launch.md",
+   "sha256": "3643bbb17cd0ceb8d71e39a3aab3b43f763a666025ae79448a3cb556da2cc961",
+   "bytes": 3768
+  },
+  {
+   "file": "2026-08-25-nightrun-ab-subagents-arm.md",
+   "sha256": "3b2848de77f20d5eb671c468c05c70fe4b7da1c9e0339d1ae5b76f72c3f1492f",
+   "bytes": 7260
+  },
+  {
+   "file": "2026-08-25-zup-onemove.md",
+   "sha256": "df19d8bac03428dd1dc45254a2c7aa59aebc0de848ef5b6656c04a6f9c17bb47",
+   "bytes": 2589
+  }
+ ]
+}

@@ -55,14 +55,170 @@ def test_miss_is_honest_not_cleared():
     assert rows[0]["result_label"] == "NOT_CLEARED"
 
 
-def test_serve_page_renders_without_format_keyerror():
-    """CSS custom properties use {--name}; .format() must not touch the template."""
+def test_the_curve_never_renders_without_its_provenance():
+    """The adjacency trap, bound.
+
+    The curve (0 -> 20 -> 39 -> 46%) is measured on 56 claims across four scripts. The
+    registry rendered beside it is a different population whose live reuse counter has
+    read 0. Printing the curve next to those counters, without saying they are different
+    objects, is a sentence the page's own data contradicts — which is the exact failure
+    that got three of four builds rejected on 2026-08-30.
+    """
     import ask_registry as ar
-    page = (ar._PAGE
-            .replace("{q}", "")
-            .replace("{result}", "")
-            .replace("{browse}", "<p>ok</p>"))
-    assert "Registry" in page and "--paper" in page
+    from clearance import curve
+    with tempfile.TemporaryDirectory() as d:
+        db = Path(d) / "r.db"
+        page = ar.render_page(db=db)
+        assert "46%" in page, "the curve is not on the page at all"
+        assert curve.SOURCE in page, "the curve renders with no source file named"
+        assert "56 claims" in page, "the curve renders without its population"
+        assert "SEPARATE measurement" in page, \
+            "the curve renders without separating itself from the live counters"
+        assert "not comparable" in page
+
+
+def test_the_separation_note_survives_a_non_zero_reuse_counter():
+    """It must not switch itself off the moment someone uses the desk."""
+    import ask_registry as ar
+    with tempfile.TemporaryDirectory() as d:
+        db = Path(d) / "r.db"
+        con = L.connect(db)
+        L.record(con, term="1 April 2024", assertion="The Act came into force on "
+                 "1 April 2024", verdict="GREEN", production="p", basis="primary",
+                 citation_url="https://example.gov/act",
+                 quoted_terms="The Act came into force on 1 April 2024 across England.")
+        for _ in range(3):
+            L.search_registry(con, "1 April 2024")
+        assert L.stats(con)["reuses"] > 0, "premise: the counter should have moved"
+        page = ar.render_page(db=db)
+        assert "SEPARATE measurement" in page and "not comparable" in page, \
+            "the live-vs-cited separation vanished once the desk was used"
+
+
+def test_thin_evidence_is_counted_and_shown_not_hidden():
+    """A cleared claim quoting page furniture is worse than an honest refusal."""
+    import ask_registry as ar
+    with tempfile.TemporaryDirectory() as d:
+        db = Path(d) / "r.db"
+        con = L.connect(db)
+        L.record(con, term="Widget Report", assertion="The Widget Report found that "
+                 "eighty-one per cent of surveyed factories missed their quota in 1998",
+                 verdict="GREEN", production="p", basis="primary",
+                 citation_url="https://example.org/w",
+                 quoted_terms="Home About Contact Widget Report Subscribe Sign in Menu")
+        thin, sourced = L.thin_evidence_count(con)
+        assert (thin, sourced) == (1, 1), f"thin evidence not counted: {thin}/{sourced}"
+        page = ar.render_page(db=db)
+        assert "thin evidence" in page.lower(), "the page hides its own weakest row"
+        assert "rest on thin evidence" in page, "the count is not stated up front"
+
+
+def test_a_full_span_is_not_flagged_thin():
+    """The flag must discriminate, or it is decoration on every row."""
+    with tempfile.TemporaryDirectory() as d:
+        con = L.connect(Path(d) / "r.db")
+        L.record(con, term="1 April 2024",
+                 assertion="The Act came into force on 1 April 2024",
+                 verdict="GREEN", production="p", basis="primary",
+                 citation_url="https://example.gov/act",
+                 quoted_terms="The Act came into force on 1 April 2024 across England "
+                              "and Wales.")
+        assert L.thin_evidence_count(con) == (0, 1)
+
+
+def test_every_refusal_says_what_would_settle_it():
+    """A refusal nobody can act on is a dead end wearing a label."""
+    from clearance.verdict import CAUSES
+    missing = [c for c in CAUSES if not L.explain(c)[1]]
+    assert not missing, \
+        f"engine causes with no plain-English resolution on the surface: {missing}"
+
+
+def test_a_filtered_total_counts_the_SET_not_the_PAGE():
+    """The header must not contradict the counter three inches above it.
+
+    Found by review, live on the shipped surface: the label filter for UNSOURCED and
+    UNKNOWN ran in Python AFTER the SQL LIMIT, and then reported `total = len(rows)`. With
+    149 refusals and a 120-row page, the registry rendered
+
+        counters ->  149 refused
+        header   ->  "The shelf — 120 claims matching"
+
+    one click apart, describing the same set. Two correct-looking numbers asserting a
+    relationship neither supports — which is the failure this whole surface exists to
+    refuse. Every label now resolves in SQL so COUNT(*) counts what the rows come from.
+    """
+    with tempfile.TemporaryDirectory() as d:
+        con = L.connect(Path(d) / "r.db")
+        n = 140                                   # deliberately more than a page
+        for i in range(n):
+            L.record(con, term=f"claim-{i}", assertion=f"assertion number {i} of many",
+                     verdict="UNKNOWN", production="p",
+                     cause="source_does_not_state_it",
+                     citation_url=f"https://example.org/{i}",
+                     quoted_terms="document opened, 100 characters read")
+        assert L.stats(con)["refused"] == n, "premise: the seed did not land"
+        b = L.browse_claims(con, label="UNSOURCED", limit=120)
+        assert len(b["rows"]) == 120, "premise: the page was not actually truncated"
+        assert b["total"] == n, (
+            f"the filtered total reports the PAGE ({b['total']}) and not the SET ({n}) — "
+            "the shelf header would contradict the counter above it")
+        assert L.browse_claims(con, label="UNKNOWN", limit=120)["total"] == 0, \
+            "UNSOURCED rows are leaking into the UNKNOWN filter"
+
+
+def test_thin_total_counts_every_sourced_row_not_just_this_page():
+    """THIN is computed, not stored, so it is the one filter that cannot live in SQL."""
+    with tempfile.TemporaryDirectory() as d:
+        con = L.connect(Path(d) / "r.db")
+        for i in range(130):
+            L.record(con, term=f"widget-{i}",
+                     assertion=f"The Widget Report number {i} found eighty-one per cent "
+                               f"of surveyed factories missed quota in 1998",
+                     verdict="GREEN", production="p", basis="primary",
+                     citation_url=f"https://example.org/{i}",
+                     quoted_terms=f"Home About Contact Widget Report {i} Sign in Menu")
+        b = L.browse_claims(con, label="THIN", limit=120)
+        assert b["total"] == 130, \
+            f"thin total reports the page ({b['total']}), not every sourced row (130)"
+
+
+def test_the_template_is_never_run_through_format():
+    """CSS custom properties look like format fields. `.format()` on this page raises.
+
+    The page carries `--paper`, `--rule`, `--sourced` and friends; `str.format` reads
+    every one of those braces as a replacement field. The template is therefore assembled
+    with explicit `.replace()` of named markers, and this control keeps it that way by
+    proving the rendered page still carries the custom properties AND that no
+    single-brace marker survived into the output.
+    """
+    import ask_registry as ar
+    with tempfile.TemporaryDirectory() as d:
+        page = ar.render_page(db=Path(d) / "r.db")
+    assert "--paper" in page and "--sourced" in page, "the palette did not render"
+    assert "__CSS__" not in page and "__BODY__" not in page, \
+        "a template marker survived into the page"
+    assert "{q}" not in page and "{result}" not in page, \
+        "an unreplaced placeholder is showing on the page"
+    assert page.strip().startswith("<!DOCTYPE html>") and page.rstrip().endswith("</html>")
+
+
+def test_the_shelf_shows_a_refusal_in_the_same_column_as_evidence():
+    """The product's argument, rendered as a layout rather than asserted in prose."""
+    import ask_registry as ar
+    with tempfile.TemporaryDirectory() as d:
+        db = Path(d) / "r.db"
+        con = L.connect(db)
+        L.record(con, term="Dust Bowl", assertion="The Dust Bowl ruined forty million "
+                 "acres of farmland", verdict="UNKNOWN", production="p",
+                 cause="source_does_not_state_it",
+                 citation_url="https://example.org/d",
+                 quoted_terms="document opened, 4,000 characters read")
+        page = ar.render_page(db=db)
+        assert "class=\"refusal\"" in page, "a refusal renders as nothing at all"
+        assert "It does not state this" in page, \
+            "the refusal shows a machine cause and no plain-English meaning"
+        assert "Settled by" in page, "the refusal does not say what would settle it"
 
 
 if __name__ == "__main__":

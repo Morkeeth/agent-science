@@ -1,0 +1,311 @@
+{
+ "gold": {
+  "n": 6,
+  "rows": [
+   {
+    "id": "RC1",
+    "gold": "SUPPORTED",
+    "off": "SUPPORTED",
+    "on": "SUPPORTED",
+    "on_reason": ""
+   },
+   {
+    "id": "RC2",
+    "gold": "SUPPORTED",
+    "off": "SUPPORTED",
+    "on": "SUPPORTED",
+    "on_reason": ""
+   },
+   {
+    "id": "RC3",
+    "gold": "NOT_SUPPORTED",
+    "off": "NOT_SUPPORTED",
+    "on": "NOT_SUPPORTED",
+    "on_reason": "document opened, 615 characters read; the locator proposed nothing"
+   },
+   {
+    "id": "RC4",
+    "gold": "NOT_SUPPORTED",
+    "off": "NOT_SUPPORTED",
+    "on": "NOT_SUPPORTED",
+    "on_reason": "document opened, 192 characters read; the locator proposed nothing"
+   },
+   {
+    "id": "RC5",
+    "gold": "NOT_SUPPORTED",
+    "off": "SUPPORTED",
+    "on": "NOT_SUPPORTED",
+    "on_reason": "document opened, 490 characters read; claim_contradicted_in_span: a neighbouring clause names the claim's subject ['item'] and denies it with ['not']: 'this Item is not\\none of them'"
+   },
+   {
+    "id": "RC6",
+    "gold": "SUPPORTED",
+    "off": "SUPPORTED",
+    "on": "SUPPORTED",
+    "on_reason": ""
+   }
+  ],
+  "labelled_at": "2026-08-22T21:30:00Z",
+  "correct_off": 5,
+  "correct_on": 6
+ },
+ "attribution": {
+  "greens": 27,
+  "per_check": {
+   "polarity": [
+    {
+     "claim": "Linux kernel / Fedora \"Assisted-by:\" commit trailer \u2014 deterministic provenance marker separating human author (accountable) from AI assistance.",
+     "span": "The Linux kernel prescribes an Assisted-by: trailer and is explicit on the line you must not cross: \u201cAI agents MUST NOT add Signed-off-by tags.",
+     "code": "claim_contradicted_in_span",
+     "detail": "claim_contradicted_in_span: a neighbouring clause names the claim's subject ['trailer'] and denies it with ['not']: 'trailer and is explicit on the line you must not cross'"
+    }
+   ],
+   "binding": [
+    {
+     "claim": "\"Security Challenges in AI Agent Deployment: Insights from a Large Scale Public Competition\" (Zou et al., arXiv:2507.20526).",
+     "span": "Artificial Intelligence arXiv:2507.20526 (cs) [Submitted on 28 Jul 2025] Title: Security Challenges in AI Agent Deployment: Insights from a Large Scale Public Competition Authors: Andy Zou , Maxwell Lin , Eliot Jones , Micha Nowak , Mateusz Dziemian , Nick Winter , Alexander Grattan , Valent",
+     "code": "subject_not_bound",
+     "detail": "subject_not_bound: the clause carrying 'Security Challenges in AI Agent Deployment: Insights from a Large Scale Public Competition' shares none of the claim's subject terms ['20526', '2507', 'al', 'arxiv', 'et', 'zou']; clause: 'Security Challenges in AI Agent Deployment'"
+    },
+    {
+     "claim": "\"ChatInject: Abusing Chat Templates for Prompt Injection in LLM Agents\" (arXiv:2509.22830, ICLR 2026 poster).",
+     "span": "Computation and Language arXiv:2509.22830 (cs) [Submitted on 26 Sep 2025 ( v1 ), last revised 13 Apr 2026 (this version, v3)] Title: ChatInject: Abusing Chat Templates for Prompt Injection in LLM Agents Authors: Hwan Chang , Yonghyun Jun , Hwanhee Lee View a PDF of the paper titled ChatInject: Abusing Chat Templates for Prompt",
+     "code": "subject_not_bound",
+     "detail": "subject_not_bound: the clause carrying 'ChatInject: Abusing Chat Templates for Prompt Injection in LLM Agents' shares none of the claim's subject terms ['2026', '22830', '2509', 'arxiv', 'iclr', 'poster']; clause: 'ChatInject'"
+    },
+    {
+     "claim": "Multi-turn variant: 52.33% average ASR on InjecAgent** (highest).",
+     "span": "Building on this foundation, we develop a persuasion-driven Multi-turn variant that primes the agent across conversational turns to accept and execute otherwise suspicious actions.",
+     "code": "subject_not_bound",
+     "detail": "subject_not_bound: the clause carrying 'Multi-turn variant' shares none of the claim's subject terms ['33', '52', 'asr', 'average', 'highest', 'injecagent']; clause: 'Building on this foundation, we develop a persuasion-driven Multi-turn variant that primes the agent across conversational turns to accept and execute otherwise'"
+    },
+    {
+     "claim": "\"Depth-Dependent Indirect Prompt Injection in Tool-Calling ReAct Agents\" (arXiv:2605.30686).",
+     "span": "Depth-Dependent Indirect Prompt Injection in Tool-Calling ReAct Agents: Injection Depth, Payload Framing, and Turn-Budget Sensitivity Report GitHub Issue \u00d7 Title: Content selection saved. Describe the",
+     "code": "subject_not_bound",
+     "detail": "subject_not_bound: the clause carrying 'Depth-Dependent Indirect Prompt Injection in Tool-Calling ReAct Agents' shares none of the claim's subject terms ['2605', '30686', 'arxiv']; clause: 'Depth-Dependent Indirect Prompt Injection in Tool-Calling ReAct Agents'"
+    },
+    {
+     "claim": "Why: 75% ASR best-framing and 100% on file-exfil in the depth paper; it is a one-line pretext change that stacks on #1 and #2 and costs almost nothing to test.",
+     "span": "Learn more \u00d7 Back to arXiv Why HTML?",
+     "code": "subject_not_bound",
+     "detail": "subject_not_bound: the clause carrying 'Why' shares none of the claim's subject terms ['100', '75', 'almost', 'asr', 'best', 'change', 'cost', 'depth']; clause: 'Learn more \u00d7 Back to arXiv Why HTML?'"
+    },
+    {
+     "claim": "US7603267 \u2014   (fetched; parallel, not fallback)",
+     "span": "US7603267B2 - Rules-based grammar for slots and statistical model for preterminals in natural language understanding system - Google",
+     "code": "subject_not_bound",
+     "detail": "subject_not_bound: the clause carrying 'US7603267' shares none of the claim's subject terms ['fallback', 'fetched', 'parallel']; clause: 'US7603267B2 - Rules-based grammar for slots and statistical model for preterminals in natural language understanding system - Google'"
+    },
+    {
+     "claim": "[PRIOR-ART] \"Beyond Red-Teaming: Formal Guarantees of LLM Guardrail Classifiers\" \u2014 formal reachability/coverage over guardrail input regions.",
+     "span": "Machine Learning arXiv:2605.10901 (cs) [Submitted on 11 May 2026] Title: Beyond Red-Teaming: Formal Guarantees of LLM Guardrail Classifiers Authors: Nikita Kezins , Urbas Ekka , Pascal Berrang , Luca Arnaboldi View a PDF of the paper titled Beyond Red-Teaming: Formal",
+     "code": "subject_not_bound",
+     "detail": "subject_not_bound: the clause carrying 'Beyond Red-Teaming: Formal Guarantees of LLM Guardrail Classifiers' shares none of the claim's subject terms ['art', 'coverage', 'input', 'prior', 'reachability', 'region']; clause: 'Beyond Red-Teaming'"
+    },
+    {
+     "claim": "\"Will It Survive? Deciphering the Fate of AI-Generated Code in Open Source\" arXiv 2601.16809 \u2014 survival analysis over 201 repos, 200k+ code units; a line is \"born\" at merge and \"dies\" when git blame attributes it to a different commit SHA at a later timestamp; compares AI-agent vs human survival (hazard of modification, 15.8pp lower mod rate). This IS the durability measure attributed to authorship class.",
+     "span": "Software Engineering arXiv:2601.16809 (cs) [Submitted on 23 Jan 2026] Title: Will It Survive? Deciphering the Fate of AI-Generated Code in Open Source Authors: Musfiqur Rahman , Emad Shihab View a PDF of the paper titled Will It Survive? Deciphering the Fate of AI-Generated Code",
+     "code": "subject_not_bound",
+     "detail": "subject_not_bound: the clause carrying 'Will It Survive? Deciphering the Fate of AI-Generated Code in Open Source' shares none of the claim's subject terms ['15', '16809', '200k', '201', '2601', '8pp', 'agent', 'analysi']; clause: 'Will It Survive'"
+    },
+    {
+     "claim": "UCCI: Calibrated Uncertainty for Cost-Optimal LLM Cascade Routing",
+     "span": "Machine Learning arXiv:2605.18796 (cs) [Submitted on 11 May 2026] Title: UCCI: Calibrated Uncertainty for Cost-Optimal LLM Cascade Routing Authors: Varun Kotte View a PDF of the paper titled UCCI: Calibrated",
+     "code": "subject_not_bound",
+     "detail": "subject_not_bound: the clause carrying 'UCCI' shares none of the claim's subject terms ['calibrated', 'cascade', 'cost', 'llm', 'optimal', 'routing', 'uncertainty']; clause: 'UCCI'"
+    },
+    {
+     "claim": "Conformal Cascade \u2014   (Algorithm 1 fetched)",
+     "span": "Machine Learning arXiv:2607.25018 (cs) [Submitted on 27 Jul 2026 ( v1 ), last revised 31 Jul 2026 (this version, v3)] Title: Conformal Cascade: Distribution-Free Accuracy Guarantees for Multi-Tier LLM Inference Authors: Yifan Dou , Shikan Lian , Shibo Li View a PDF of the",
+     "code": "subject_not_bound",
+     "detail": "subject_not_bound: the clause carrying 'Conformal Cascade' shares none of the claim's subject terms ['algorithm', 'fetched']; clause: 'Conformal Cascade'"
+    },
+    {
+     "claim": "cclint: config quality + conventions + LSP.",
+     "span": "GitHub - carlrannaberg/cclint: Linter for Claude Code project files \u00b7 GitHub Skip to content Navigation Menu Sign in Appearance settings Platform AI CODE",
+     "code": "subject_not_bound",
+     "detail": "subject_not_bound: the clause carrying 'cclint' shares none of the claim's subject terms ['config', 'convention', 'lsp', 'quality']; clause: 'GitHub - carlrannaberg/cclint'"
+    },
+    {
+     "claim": "[measured] 2,303 agent context files across 1,925 repos: test procedures (75.9%), implementation details (70.8%), architecture (68.1%) are the dominant content; files \"evolve like configuration code through frequent, small additions.\" No staleness RATE measured for agent files specifically.",
+     "span": "We find that these files are not static documentation but complex, difficultto-read artifacts that evolve like configuration code through frequent, small additions. Our content analysis of 16 instruction types shows that developers prioritize functional context, such as test procedures",
+     "code": "subject_not_bound",
+     "detail": "subject_not_bound: the clause carrying 'evolve like configuration code through frequent, small additions.' shares none of the claim's subject terms ['303', '68', '70', '75', '925', 'across', 'agent', 'architecture']; clause: 'complex, difficultto-read artifacts that evolve like configuration code through frequent, small additions'"
+    },
+    {
+     "claim": "[verified-source] ctxlint (YawLabs) is the closest competitor: `npx -y @yawlabs/ctxlint@latest` runs 41 context checks incl. `paths`, `commands`, `staleness`, `contradictions`, `tokens`, secrets, plus MCP/session/skill checks; premise verbatim: \"You rename a file, change a build script, or switch from Jest to Vitest \u2014 and your CLAUDE.md still says the old thing.\"",
+     "span": "You rename a file, change a build script, or switch from Jest to Vitest \u2014 and your CLAUDE.md still says the old thing. Your agent follows those stale instructions faithfully, then fails.",
+     "code": "subject_not_bound",
+     "detail": "subject_not_bound: the clause carrying 'You rename a file, change a build script, or switch from Jest to Vitest \u2014 and your CLAUDE.md still says the old thing.' shares none of the claim's subject terms ['41', 'check', 'closest', 'command', 'competitor', 'context', 'contradiction', 'ctxlint']; clause: 'You rename a file, change a build script, or switch from Jest to Vitest \u2014 and your CLAUDE.md still says the old thing'"
+    },
+    {
+     "claim": "Galileo: Luna-2 fine-tuned evaluators, sub-200ms inline blocking of high-risk agent responses at runtime (guardrails category incl. LangSmith, Braintrust, Giskard)",
+     "span": "Solutions in 2026 | Galileo ')\"> Platform Docs Pricing Resources About Login Get Started for Free Book a Demo ')\"> Platform Docs Pricing Resources About",
+     "code": "subject_not_bound",
+     "detail": "subject_not_bound: the clause carrying 'Galileo' shares none of the claim's subject terms ['200m', 'agent', 'blocking', 'braintrust', 'category', 'evaluator', 'fine', 'giskard']; clause: 'Solutions in 2026 | Galileo \\')\"> Platform Docs Pricing Resources About Login Get Started for Free Book a Demo \\')\"> Platform Docs Pricing Resources About'"
+    },
+    {
+     "claim": "\u26a0\ufe0f ENTRY CONSTRAINTS: \"Projects must be newly created during the Submission Period\"; must disclose pre-existing code; mandatory stack = Gemini 3.5+ via Gemini API/Vertex, \u22651 Google agent framework (ADK/GenAI SDK/Antigravity/GenKit), \u22651 GCP service; deliverables incl. hosted URL, architecture diagram, \u22644-min video with GCP proof",
+     "span": "New Projects Only: Projects must be newly created during the Submission Period.",
+     "code": "subject_not_bound",
+     "detail": "subject_not_bound: the clause carrying 'Projects must be newly created during the Submission Period' shares none of the claim's subject terms ['adk', 'agent', 'antigravity', 'api', 'architecture', 'code', 'constraint', 'deliverable']; clause: 'Projects must be newly created during the Submission Period.'"
+    }
+   ],
+   "coverage": [
+    {
+     "claim": "Multi-turn variant: 52.33% average ASR on InjecAgent** (highest).",
+     "span": "Building on this foundation, we develop a persuasion-driven Multi-turn variant that primes the agent across conversational turns to accept and execute otherwise suspicious actions.",
+     "code": "claim_content_not_carried",
+     "detail": "claim_content_not_carried: the span carries 3/9 (33%) of the claim's content terms, below 40%; missing ['33', '52', 'asr', 'average', 'highest', 'injecagent']"
+    },
+    {
+     "claim": "Why: 75% ASR best-framing and 100% on file-exfil in the depth paper; it is a one-line pretext change that stacks on #1 and #2 and costs almost nothing to test.",
+     "span": "Learn more \u00d7 Back to arXiv Why HTML?",
+     "code": "claim_content_not_carried",
+     "detail": "claim_content_not_carried: the span carries 0/17 (0%) of the claim's content terms, below 40%; missing ['100', '75', 'almost', 'asr', 'best', 'change', 'cost', 'depth', 'exfil', 'file']"
+    },
+    {
+     "claim": "US7603267 \u2014   (fetched; parallel, not fallback)",
+     "span": "US7603267B2 - Rules-based grammar for slots and statistical model for preterminals in natural language understanding system - Google",
+     "code": "claim_content_not_carried",
+     "detail": "claim_content_not_carried: the span carries 0/4 (0%) of the claim's content terms, below 40%; missing ['fallback', 'fetched', 'parallel', 'us7603267']"
+    },
+    {
+     "claim": "Linux kernel / Fedora \"Assisted-by:\" commit trailer \u2014 deterministic provenance marker separating human author (accountable) from AI assistance.",
+     "span": "The Linux kernel prescribes an Assisted-by: trailer and is explicit on the line you must not cross: \u201cAI agents MUST NOT add Signed-off-by tags.",
+     "code": "claim_content_not_carried",
+     "detail": "claim_content_not_carried: the span carries 5/15 (33%) of the claim's content terms, below 40%; missing ['accountable', 'assistance', 'author', 'commit', 'deterministic', 'fedora', 'human', 'marker', 'provenance', 'separating']"
+    },
+    {
+     "claim": "PAN CLEF 2026 \"Reasoning Trajectory Detection\" \u2014 given (query, reasoning trajectory, answer), classify whether the trajectory is human-written or AI-generated. This is STATISTICAL INFERENCE on content, the OPPOSITE approach to the candidate's deterministic metadata gate \u2014 so it does not anticipate the candidate's specific mechanism, but it shows human-vs-AI turn separation is a crowded, well-mapped field (adds nothing the candidate can claim as novel; the candidate's deterministic gate is simpler prior art, see Grammarly).",
+     "span": "PAN at CLEF 2026 - Reasoning Trajectory Detection Shared Tasks Events Data Publications Organization Shared Tasks Events Data Publications Organization PAN Shared Tasks Reasoning",
+     "code": "claim_content_not_carried",
+     "detail": "claim_content_not_carried: the span carries 6/44 (14%) of the claim's content terms, below 40%; missing ['add', 'ai', 'answer', 'anticipate', 'approach', 'art', 'candidate', 'claim', 'classify', 'content']"
+    },
+    {
+     "claim": "\"Will It Survive? Deciphering the Fate of AI-Generated Code in Open Source\" arXiv 2601.16809 \u2014 survival analysis over 201 repos, 200k+ code units; a line is \"born\" at merge and \"dies\" when git blame attributes it to a different commit SHA at a later timestamp; compares AI-agent vs human survival (hazard of modification, 15.8pp lower mod rate). This IS the durability measure attributed to authorship class.",
+     "span": "Software Engineering arXiv:2601.16809 (cs) [Submitted on 23 Jan 2026] Title: Will It Survive? Deciphering the Fate of AI-Generated Code in Open Source Authors: Musfiqur Rahman , Emad Shihab View a PDF of the paper titled Will It Survive? Deciphering the Fate of AI-Generated Code",
+     "code": "claim_content_not_carried",
+     "detail": "claim_content_not_carried: the span carries 11/45 (24%) of the claim's content terms, below 40%; missing ['15', '200k', '201', '8pp', 'agent', 'analysi', 'attribute', 'attributed', 'authorship', 'blame']"
+    },
+    {
+     "claim": "cclint: config quality + conventions + LSP.",
+     "span": "GitHub - carlrannaberg/cclint: Linter for Claude Code project files \u00b7 GitHub Skip to content Navigation Menu Sign in Appearance settings Platform AI CODE",
+     "code": "claim_content_not_carried",
+     "detail": "claim_content_not_carried: the span carries 1/5 (20%) of the claim's content terms, below 40%; missing ['config', 'convention', 'lsp', 'quality']"
+    },
+    {
+     "claim": "[verified-source] ctxlint (YawLabs) is the closest competitor: `npx -y @yawlabs/ctxlint@latest` runs 41 context checks incl. `paths`, `commands`, `staleness`, `contradictions`, `tokens`, secrets, plus MCP/session/skill checks; premise verbatim: \"You rename a file, change a build script, or switch from Jest to Vitest \u2014 and your CLAUDE.md still says the old thing.\"",
+     "span": "You rename a file, change a build script, or switch from Jest to Vitest \u2014 and your CLAUDE.md still says the old thing. Your agent follows those stale instructions faithfully, then fails.",
+     "code": "claim_content_not_carried",
+     "detail": "claim_content_not_carried: the span carries 13/38 (34%) of the claim's content terms, below 40%; missing ['41', 'check', 'closest', 'command', 'competitor', 'context', 'contradiction', 'ctxlint', 'incl', 'latest']"
+    },
+    {
+     "claim": "[asserted] claudeaudit (claudeaudit.dev): an installable SKILL (not a CLI) scoring \"agent readiness\" across 14 categories / 2 dimensions (config readiness maturity + ergonomics); LLM-judged, not deterministic doc-vs-live verification.",
+     "span": "claudeaudit - agent readiness for your repo claudeaudit A skill that audits your repository for AI agent readiness. How well can Claude Code understand, run,",
+     "code": "claim_content_not_carried",
+     "detail": "claim_content_not_carried: the span carries 4/23 (17%) of the claim's content terms, below 40%; missing ['14', 'across', 'asserted', 'categorie', 'cli', 'config', 'deterministic', 'dev', 'dimension', 'doc']"
+    },
+    {
+     "claim": "Patronus AI: evaluator models (Lynx) for hallucination detection + agentic debugging; domain failure modes (finance, legal, PII, copyright)",
+     "span": "Best for regulated domains: Patronus AI \u2014 Lynx open-source hallucination detection, FinanceBench, and CopyrightCatcher.",
+     "code": "claim_content_not_carried",
+     "detail": "claim_content_not_carried: the span carries 6/16 (38%) of the claim's content terms, below 40%; missing ['agentic', 'copyright', 'debugging', 'evaluator', 'failure', 'finance', 'legal', 'mode', 'model', 'pii']"
+    },
+    {
+     "claim": "Galileo: Luna-2 fine-tuned evaluators, sub-200ms inline blocking of high-risk agent responses at runtime (guardrails category incl. LangSmith, Braintrust, Giskard)",
+     "span": "Solutions in 2026 | Galileo ')\"> Platform Docs Pricing Resources About Login Get Started for Free Book a Demo ')\"> Platform Docs Pricing Resources About",
+     "code": "claim_content_not_carried",
+     "detail": "claim_content_not_carried: the span carries 1/20 (5%) of the claim's content terms, below 40%; missing ['200m', 'agent', 'blocking', 'braintrust', 'category', 'evaluator', 'fine', 'giskard', 'guardrail', 'high']"
+    },
+    {
+     "claim": "\u26a0\ufe0f ENTRY CONSTRAINTS: \"Projects must be newly created during the Submission Period\"; must disclose pre-existing code; mandatory stack = Gemini 3.5+ via Gemini API/Vertex, \u22651 Google agent framework (ADK/GenAI SDK/Antigravity/GenKit), \u22651 GCP service; deliverables incl. hosted URL, architecture diagram, \u22644-min video with GCP proof",
+     "span": "New Projects Only: Projects must be newly created during the Submission Period.",
+     "code": "claim_content_not_carried",
+     "detail": "claim_content_not_carried: the span carries 6/37 (16%) of the claim's content terms, below 40%; missing ['adk', 'agent', 'antigravity', 'api', 'architecture', 'code', 'constraint', 'deliverable', 'diagram', 'disclose']"
+    }
+   ],
+   "citation": []
+  },
+  "sweep": {
+   "0.3": 8,
+   "0.4": 12,
+   "0.5": 14,
+   "0.6": 17
+  }
+ },
+ "registry": {
+  "total": 312,
+  "off": {
+   "sourced": 27,
+   "refused": 269,
+   "unknown": 16
+  },
+  "on": {
+   "sourced": 27,
+   "refused": 269,
+   "unknown": 16
+  },
+  "flips": [],
+  "respanned": [
+   {
+    "file": "2026-08-24-execute-and-compare-whitespace.md",
+    "line": 44,
+    "claim": "arXiv:2511.12884 \u2014 Agent READMEs",
+    "was": "Search arXiv Press Enter to search \u00b7 Advanced search --> Computer Science > Software Engineering arXiv:2511.12884 (cs) [Submitted on 17 Nov",
+    "now": "Software Engineering arXiv:2511.12884 (cs) [Submitted on 17 Nov 2025 ( v1 ), last revised 9 Aug 2026 (this version, v2)] Title: Agent READMEs: An Empirical"
+   },
+   {
+    "file": "2026-08-24-patent-103-fight.md",
+    "line": 81,
+    "claim": "US7603267 \u2014   (fetched; parallel, not fallback)",
+    "was": "US7603267B2 - Rules-based grammar for slots and statistical model for preterminals in natural language understanding system - Google",
+    "now": "Rules-based grammar for slots and statistical model for preterminals in natural language understanding system Download PDF Info Publication number US7603267B2 US7603267B2 US10/427,604 US42760403A US7603267B2 US 7603267 B2 US7603267 B2 US 7603267B2 US 42760403 A US42760403 A US 42760403A US 7603267 B2 US7603267 B2 US 7603267B2"
+   },
+   {
+    "file": "2026-08-24-patent-authorship-outcome.md",
+    "line": 21,
+    "claim": "US11042599B1 \"Identifying relevant messages in a conversation graph\" \u2014 message records carry an Author Account ID field identifying the author of each message; deterministic per-message authorship in a conversation log.",
+    "was": "US11042599B1 - Identifying relevant messages in a conversation graph - Google Patents US11042599B1 - Identifying relevant messages in a conversation graph - Google Patents Identifying relevant",
+    "now": "US11042599B1 true US11042599B1 ( en ) 2021-06-22 Family ID=54107191 Family Applications (4) Application Number Title Priority Date Filing Date US13/736,634 Expired - Fee Related US9143468B1 ( en ) 2013-01-08 2013-01-08 Identifying relevant messages in a conversation graph US14/824,015 Active 2034-11-10 US10229218B1 ( en ) 2013-01-08 2015-08-11 Identifying relevant messages in a conversation graph"
+   },
+   {
+    "file": "2026-08-24-patent-authorship-outcome.md",
+    "line": 23,
+    "claim": "Linux kernel / Fedora \"Assisted-by:\" commit trailer \u2014 deterministic provenance marker separating human author (accountable) from AI assistance.",
+    "was": "The Linux kernel prescribes an Assisted-by: trailer and is explicit on the line you must not cross: \u201cAI agents MUST NOT add Signed-off-by tags.",
+    "now": "Fedora\u2019s policy uses a similar Assisted-by: trailer and holds that \u201cthe contributor is always the author and is fully accountable\u201d ( Fedora AI-assisted policy )."
+   },
+   {
+    "file": "2026-08-24-patent-authorship-outcome.md",
+    "line": 25,
+    "claim": "PAN CLEF 2026 \"Reasoning Trajectory Detection\" \u2014 given (query, reasoning trajectory, answer), classify whether the trajectory is human-written or AI-generated. This is STATISTICAL INFERENCE on content, the OPPOSITE approach to the candidate's deterministic metadata gate \u2014 so it does not anticipate the candidate's specific mechanism, but it shows human-vs-AI turn separation is a crowded, well-mapped field (adds nothing the candidate can claim as novel; the candidate's deterministic gate is simpler prior art, see Grammarly).",
+    "was": "PAN at CLEF 2026 - Reasoning Trajectory Detection Shared Tasks Events Data Publications Organization Shared Tasks Events Data Publications Organization PAN Shared Tasks Reasoning",
+    "now": "PAN at CLEF 2026 - Reasoning Trajectory Detection Shared Tasks Events Data Publications Organization Shared Tasks Events Data Publications Organization PAN Shared Tasks Reasoning Trajectory Detection 2026 Reasoning Trajectory Detection 2026 Synopsis Task Overview Data Submission Evaluation Baselines Leaderboard Related Work Task Committee Synopsis Task: Given a"
+   },
+   {
+    "file": "2026-08-24-prd-helicon.md",
+    "line": 38,
+    "claim": "cclint: config quality + conventions + LSP.",
+    "was": "GitHub - carlrannaberg/cclint: Linter for Claude Code project files \u00b7 GitHub Skip to content Navigation Menu Sign in Appearance settings Platform AI CODE",
+    "now": "README.md cclint.config.js cclint.config.js package-lock.json package-lock.json package.json package.json tsconfig.json tsconfig.json View all"
+   },
+   {
+    "file": "2026-08-24-stranger-auditor-checks.md",
+    "line": 29,
+    "claim": "[asserted] claudeaudit (claudeaudit.dev): an installable SKILL (not a CLI) scoring \"agent readiness\" across 14 categories / 2 dimensions (config readiness maturity + ergonomics); LLM-judged, not deterministic doc-vs-live verification.",
+    "was": "claudeaudit - agent readiness for your repo claudeaudit A skill that audits your repository for AI agent readiness. How well can Claude Code understand, run,",
+    "now": "A skill that audits your repository for AI agent readiness. How well can Claude Code understand, run, verify, and scale across your codebase? Fourteen categories across two dimensions:"
+   },
+   {
+    "file": "2026-08-24-verification-stack-positioning.md",
+    "line": 16,
+    "claim": "Galileo: Luna-2 fine-tuned evaluators, sub-200ms inline blocking of high-risk agent responses at runtime (guardrails category incl. LangSmith, Braintrust, Giskard)",
+    "was": "Solutions in 2026 | Galileo ')\"> Platform Docs Pricing Resources About Login Get Started for Free Book a Demo ')\"> Platform Docs Pricing Resources About",
+    "now": "Galileo provides the unified foundation for this layered strategy: Runtime Protection : Real-time guardrails blocking unsafe outputs in"
+   }
+  ],
+  "rescued": []
+ }
+}

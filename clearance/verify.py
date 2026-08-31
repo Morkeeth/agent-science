@@ -15,6 +15,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional
 
+from . import semantic as _semantic
+
 MIN_WORDS = 7
 MIN_SENTENCE_WORDS = 4   # a short passage that ENDS as a sentence is still a statement
 MAX_CHARS = 400
@@ -26,8 +28,18 @@ class Refusal:
     detail: str
 
 
-def verify(passage: Optional[str], *, document: str, must_contain: str) -> Optional[Refusal]:
-    """None if the passage is admissible evidence, else why it is refused."""
+def verify(passage: Optional[str], *, document: str, must_contain: str,
+           claim: Optional[str] = None,
+           semantic: Optional[bool] = None) -> Optional[Refusal]:
+    """None if the passage is admissible evidence, else why it is refused.
+
+    `claim` is the assertion the passage is offered in support of. It is OPTIONAL and it
+    defaults to None because for most of this build it did not exist here at all — and
+    that absence, not a missing cleverness, is why a verbatim span whose own sentence
+    disowned the claim was cleared GREEN for eight days. A guard cannot read a claim it
+    is never given. Passing it opens the semantic guard (`clearance.semantic`), which may
+    only ever DEMOTE: every structural refusal above still fires first and unchanged.
+    """
     if passage is None or not passage.strip():
         return Refusal("no_passage", "the locator proposed nothing")
 
@@ -67,5 +79,15 @@ def verify(passage: Optional[str], *, document: str, must_contain: str) -> Optio
                        f"{words} words and no sentence ending — a run of labels")
     if len(p) > MAX_CHARS:
         return Refusal("not_a_statement", f"{len(p)} characters — a page, not a passage")
+
+    # 4. THE SEMANTIC GUARD. Everything above proves the passage is REAL and MENTIONS the
+    #    claim's distinctive term. None of it can prove the passage ASSERTS the claim,
+    #    and no amount of structure ever will: that is a relation between two texts, and
+    #    until this parameter existed only one of them was in the room.
+    use_guard = _semantic.enabled() if semantic is None else semantic
+    if claim and use_guard:
+        finding = _semantic.inspect(p, claim=claim, must_contain=must_contain)
+        if finding is not None:
+            return Refusal(finding.code, finding.detail)
 
     return None

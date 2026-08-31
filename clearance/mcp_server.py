@@ -48,7 +48,9 @@ TOOLS = [
         "name": "science_ingest",
         "description": (
             "Ingest a researched claim+URL into the registry (verify against source, "
-            "append to research-corpus). Pass markdown with [CLAIM]/[URL] or claim+url."
+            "append to research-inbox). Pass markdown with [CLAIM]/[URL] or claim+url. "
+            "The audit trail is the inbox; the frozen measurement population is "
+            "never written to."
         ),
         "inputSchema": {
             "type": "object",

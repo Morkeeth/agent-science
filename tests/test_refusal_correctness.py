@@ -40,7 +40,7 @@ def _doc(rel: str) -> str:
     return (ROOT / rel).read_text()
 
 
-def _with_doc(url: str, body: str, claim: Claim, locator):
+def _with_doc(url: str, body: str, claim: Claim, locator, **kw):
     saved = instruments.document
 
     def fake(u, fetch=False):
@@ -50,7 +50,7 @@ def _with_doc(url: str, body: str, claim: Claim, locator):
 
     instruments.document = fake
     try:
-        return judge_claim(claim, locator=locator)
+        return judge_claim(claim, locator=locator, **kw)
     finally:
         instruments.document = saved
 
@@ -125,7 +125,7 @@ def t_near_miss_and_wrong_doc_must_stay_unknown():
         # a greedy stand-in on those tests behaviour the system never promised, and this
         # loop used to "pass" RC5 only because the greedy slice happened to start
         # mid-word. The shipping-locator pole test below pins RC5 as the documented gap.
-        if it.get("engine_limit"):
+        if it.get("engine_limit"):   # none remain since 2026-08-31; kept for the next one
             continue
 
         def greedy(doc, mc):
@@ -197,17 +197,31 @@ def t_shipping_locator_binds_both_poles_on_held_out_set():
     assert greens > 0 and unknowns > 0, \
         "an all-GREEN or all-UNKNOWN locator would be caught by one of these poles"
 
-    # RC5: the documented, uncloseable gap. Pinned AS A DEFECT so a future locator that
-    # closes it fails HERE with an instruction, rather than the win passing unnoticed.
-    limits = [it for it in SET["items"] if it.get("engine_limit")]
-    assert limits, "RC5 marks the substring-is-not-a-statement gap; it must stay in the set"
-    for it in limits:
-        got = results[it["id"]][0]
-        assert got == it["engine_verdict_today"], (
-            f"{it['id']}: shipping locator now returns {got}, fixture records "
-            f"{it['engine_verdict_today']} for engine_limit={it['engine_limit']!r}. "
-            "If a locator finally REFUSES this negated-claim substring, that is an "
-            "IMPROVEMENT — move RC5's gold into the enforced pole and drop engine_limit.")
+    # RC5 WAS the documented, uncloseable gap — pinned as a defect from 2026-08-22 so a
+    # locator that closed it would fail here with an instruction rather than have the win
+    # pass unnoticed. It fired on 2026-08-31 and the instruction was carried out: RC5 is
+    # enforced above like any other NOT_SUPPORTED item, and `engine_limit` is gone.
+    #
+    # What replaces it is the harder control. A closed gap is easy to un-close by
+    # accident, and the flag that makes the old engine recoverable is exactly the lever
+    # that would do it. So: assert the set carries NO engine limits, and assert that
+    # turning the guard off REPRODUCES the false GREEN. If someone flips the default and
+    # the hole quietly returns, the second half of this fails and names it.
+    assert not [it for it in SET["items"] if it.get("engine_limit")], (
+        "an engine_limit is back in the set — a claim the product cannot judge is being "
+        "carried as a fixture note again; say which, and why it cannot be closed")
+
+    rc5 = next(it for it in SET["items"] if it["id"] == "RC5")
+    url = "fixture://guardoff-RC5"
+    off = _with_doc(url, _doc(rc5["document"]),
+                    Claim("RC5", rc5["claim"], url, rc5["must_contain"]), DEFAULT,
+                    semantic=False)
+    assert off.verdict == GREEN, (
+        "with CLEARANCE_SEMANTIC_GUARD off, RC5 must reproduce the documented false "
+        f"GREEN — got {off.verdict}. Either the flag no longer recovers the old engine, "
+        "or something else changed and the guard is not the thing closing RC5.")
+    assert results["RC5"][0] == UNKNOWN, \
+        "the shipping default no longer refuses RC5 — the closed gap has reopened"
 
 
 if __name__ == "__main__":

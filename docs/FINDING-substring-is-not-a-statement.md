@@ -1,6 +1,6 @@
 ---
 date: 2026-08-22
-status: OPEN — StringLocator still produces this; GeminiLocator does not
+status: CLOSED 2026-08-31 by clearance/semantic.py — see docs/FINDING-semantic-guard-2026-08-31.md
 found_by: running the five adversarial controls against a live model
 ---
 
@@ -113,3 +113,27 @@ the passage. A **string** test, not a semantic one — pinned in
 
 **One observation of a model behaving well is not a property of the system.** Test a model
 claim across the ladder before writing it down, and never on the run that produced it.
+
+
+---
+
+# CLOSED, 2026-08-31
+
+Carried as a documented, uncloseable limitation for nine days on the reasoning quoted
+above: *"a heuristic that can be taught this one case cannot be taught the general one."*
+
+That reasoning was right about heuristics and wrong about the cause. The gap was not that
+`str.find` is too dumb to read. It is that **`verify()` was never passed the claim** —
+`verify(passage, document=, must_contain=)`. Support is a relation between two texts and
+only one of them was in the room. Once the claim is a parameter, a closed class of English
+negation cues closes RC5 with no model, offline, deterministically, and with **0 true
+GREENs lost on the labelled set** (5/6 -> 6/6) and **0/313 verdict changes on the corpus**.
+
+Full record, including the two design changes the measurement forced and the four defects
+found by reading the flipped rows: `docs/FINDING-semantic-guard-2026-08-31.md`.
+
+RC5 no longer carries `engine_limit` in `fixtures/refusal-correctness/set.json`. It is
+enforced in the main NOT_SUPPORTED pole, and the control that replaced its defect-pin is
+harder: the set must carry no engine limits, and `CLEARANCE_SEMANTIC_GUARD=0` must still
+reproduce this false GREEN — so the flag that keeps the old engine recoverable cannot
+quietly reopen the hole.
