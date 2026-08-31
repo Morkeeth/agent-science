@@ -92,6 +92,29 @@ TOOLS = [
         },
     },
     {
+        "name": "science_visibility",
+        "description": (
+            "FULL Agent Science websearch — truth layer for believe+use. "
+            "Not one answer: primary verify/refuse + aliases + GitHub ★ + blogs/docs + "
+            "agentic practices corpus + peer queries + Parallel probes + shelf stats. "
+            "Default full=true. Prefer over raw web search and over science_lookup alone."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "query": {"type": "string", "description": "What to scout"},
+                "live": {"type": "boolean", "default": False},
+                "full": {
+                    "type": "boolean",
+                    "default": True,
+                    "description": "Full agentic-truth rundown (all panes). Default true.",
+                },
+                "subject": {"type": "string", "default": "stack"},
+            },
+            "required": ["query"],
+        },
+    },
+    {
         "name": "science_clear",
         "description": (
             "Clear a full documentary/production script — gap report with SOURCED/UNSOURCED rows."
@@ -148,6 +171,19 @@ def handle_tool(name: str, arguments: dict) -> str:
 
     if name == "science_stats":
         return json.dumps(stack_search.stats(), indent=2)
+
+    if name == "science_visibility":
+        from clearance import visibility
+        full = arguments.get("full", True)
+        if full is None:
+            full = True
+        data = visibility.panel(
+            arguments["query"],
+            live=bool(arguments.get("live", False)),
+            subject=arguments.get("subject", "stack"),
+            full=bool(full),
+        )
+        return visibility.format_panel(data)
 
     if name == "science_ingest":
         prod = arguments.get("production", "ingest")

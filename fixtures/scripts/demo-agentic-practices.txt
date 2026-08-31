@@ -1,0 +1,11 @@
+NARRATOR (V.O.)
+
+The craft of agentic engineering is already being written down by the people doing it.
+
+Karpathy on rules files. Willison on explore, plan, code, commit. Huntley on the Ralph
+loop — one unit of work, commit, exit. Anthropic on context as the scarce resource.
+Ball: an agent is an LLM, a loop, and enough tokens — make the check real.
+
+These are developer truths. Agent Science is where they get verified against the page
+that said them — sourced verbatim, or refused with a cause — and remembered for the
+next agent who asks.

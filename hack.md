@@ -11,7 +11,7 @@ supersedes: docs/PHASE0-LADDER.md ClickHouse-track note (runtime track is Parall
 # hack.md — Agentic Cinema constitution + handbook pass
 
 **Repo:** Morkeeth/agent-science · **Event:** Agentic Cinema · Sep 9 2026 14:00 PDT  
-**Spine:** Agent Science = the websearch companion — a truth dictionary that compounds from what devs actually search.  
+**Spine:** **Agent Science** — the truth layer for what people believe and use. Companion (B) lead; clearance (A) on the same layer. Verify-or-refuse; registry compounds.  
 **Constitution:** verbatim span or REFUSE — never paraphrase. No public repo until keys rotated. No rename. No `--set-env-vars` secrets. Slice 1 deploy/keys/video/Devpost: Oscar only.
 
 > **Handbook:** ladder + judge pack below. **Living status:** `docs/STATUS.md` · `CLAUDE.md`  
@@ -38,7 +38,7 @@ supersedes: docs/PHASE0-LADDER.md ClickHouse-track note (runtime track is Parall
 
 | Slot | Line |
 |------|------|
-| **Category** | Truth dictionary for agent work — verify once, free forever |
+| **Category** | Truth layer for what people believe and use — blogs, docs, stars, research, clearance |
 | **One user** | Fleet dev / agent operator who websearches daily *(volume)*; E&O producer *(paying vertical)* |
 | **Killer demo** | Hosted Run A → Run B: `corpus_hits` rise · `parallel_calls` drop on fresh subject — under 60s |
 | **One visual** | `/popular/ui` hit-rate strip + compound metrics side-by-side on desk |

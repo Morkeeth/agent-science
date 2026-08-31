@@ -1,6 +1,6 @@
 # Agent Science — stack integration
 
-**Use Agent Science for all fleet websearch.** Raw browser/search tools give uncited answers; this stack returns SOURCED (verbatim span + URL) or a named refusal — and remembers both for free reuse.
+**Use Agent Science for all fleet websearch.** Raw browser/search tools return uncited answers. Agent Science websearch **is the truth layer**: what people believe and use → sourced verbatim or named refusal → remembered for free reuse. Blogs, docs, research, GitHub adoption signals, and clearance facts all sit on that layer — not a citation dump.
 
 ## MCP (Cursor / agents) — recommended
 
@@ -27,13 +27,20 @@ Or manually in `~/.cursor/mcp.json`:
 
 | Tool | When |
 |------|------|
-| `science_lookup` | **Default for daily factual lookups** — truth dictionary (free → cheap → live only if `live=true`) |
-| `science_search` | When dictionary miss needs **fresh Parallel discovery** (same as lookup with live) |
+| `science_visibility` | **Scout / research** — multi-pane truth layer (primary + ★ + blogs + peers). More than one answer. |
+| `science_lookup` | Fast single lookup when you already know you only need the verdict |
+| `science_search` | When dictionary miss needs **fresh Parallel discovery** |
 | `science_browse` | See what the stack already searched |
 | `science_stats` | Dictionary size, hit rate, sourced/refused counts |
 | `science_popular` | **Top dev queries** — what to alias, ingest, or route next |
 | `science_ingest` | After manual research — verify claim+URL into dictionary |
 | `science_clear` | Full documentary script → gap report |
+
+**Skill:** `.cursor/skills/agent-science-websearch` — **full** visibility protocol.  
+**Canonical rundown:** `docs/WEBSEARCH-FULL-RUNDOWN.md`  
+```bash
+python3 -m clearance visibility "QUERY" --full
+```
 
 ## Daily workflow (cost-efficient)
 

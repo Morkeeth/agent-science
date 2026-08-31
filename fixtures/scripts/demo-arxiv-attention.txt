@@ -1,0 +1,6 @@
+NARRATOR (V.O.)
+
+In June 2017 Vaswani and colleagues published Attention Is All You Need on arXiv as
+1706.03762. The paper introduced the Transformer, a network architecture based solely
+on attention mechanisms, dispensing with recurrence and convolutions for sequence
+transduction.

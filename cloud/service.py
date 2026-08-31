@@ -52,7 +52,7 @@ ADK_DEFAULT = os.environ.get("AGENT_BUILDER", "1").strip().lower() not in (
 _PAGE = """<!DOCTYPE html>
 <html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Agent Science — clearance desk</title>
+<title>Agent Science — truth companion</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Newsreader:opsz,wght@6..72,400;6..72,600&display=swap" rel="stylesheet">
@@ -92,8 +92,9 @@ button:hover{background:#000}
 </style></head><body>
 <div class="wrap">
   <h1 class="brand">Agent Science</h1>
-  <p class="thesis">The websearch companion — every claim sourced verbatim from a real document,
-  or refused with the reason why. The registry remembers: clear once, reuse for free.</p>
+  <p class="thesis">Agent Science — the truth layer for what people believe and use.
+  Every claim sourced verbatim, or refused with why. The registry remembers.
+  Developer practice and clearance facts live on the same layer.</p>
   <p class="nav"><a href="/front">What this desk refuses, and why that is the product</a> · <a href="/registry">Browse the registry</a> · <a href="/popular/ui">Popular queries</a> — {registry_stats} verified truths on disk.</p>
   <form class="desk" method="post" action="/clear">
     <div class="row">

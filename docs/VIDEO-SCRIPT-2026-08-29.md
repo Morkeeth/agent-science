@@ -12,7 +12,14 @@
 - Browser tab 1: https://agent-science-568004190078.us-central1.run.app/
 - Browser tab 2: hosted `/registry` and `/popular/ui`
 - Script file ready: `fixtures/scripts/compound-mini-A.txt` (fresh subject for compound)
+- **Non-EU demos ready** (pick two — see `docs/USE-CASES-2026-08-31.md`):
+  - `fixtures/scripts/demo-arxiv-attention.txt` (science)
+  - `fixtures/scripts/demo-rights-cne.txt` (archive rights)
+  - `fixtures/scripts/demo-dust-bowl-mini.txt` (US history)
+  - `fixtures/scripts/demo-us-orphan-policy.txt` (US copyright policy)
 - `fixtures/shift-ai-training-vs-noncommercial.md` for buyer flip
+
+**Anti-monoculture:** Do not let every SOURCED beat be EUR-Lex. At least one of arXiv / CNE / dust-bowl must appear on camera.
 
 ---
 
@@ -23,8 +30,8 @@
 | 0:00 | 10 | **Hook — M&E** | Title: *Agent Science — clearance for factual production* | "Every documentary needs two reports before it can be insured: every fact sourced, every asset cleared. Miss one — that's a lawsuit." |
 | 0:10 | 14 | **Problem** | E&O checklist · provenance stall | "Studios and AI labs stall on the same thing: nobody can prove provenance at asset level. Humans do this by hand." |
 | 0:24 | 12 | **Rule** | Constructor rejects uncited verdict (3 s) | "Cite the document, or print that you could not. No citation — no verdict. Enforced in code." |
-| 0:36 | 22 | **Demo — SOURCED** | `GET /search?q=2012/28/EU&live=false` or `/clear` one row — **verbatim span** | "Paste a script or ask a fact. We return the exact sentence from the instrument — not a summary." |
-| 0:58 | 18 | **Demo — refuse** | Registry row: **UNKNOWN** + `cause` + `why` | "When we cannot prove it, we say so — with a named cause. No greenwash." |
+| 0:36 | 22 | **Demo — SOURCED (non-EU first)** | Prefer `/clear` on `demo-arxiv-attention.txt` **or** dust-bowl mini — **verbatim span**. EU lookup only as backup. | "Same desk. A paper id, a film history claim — we return the exact sentence from the source, not a summary." |
+| 0:58 | 18 | **Demo — refuse (second domain)** | `demo-rights-cne.txt` or registry UNKNOWN + `cause` | "Archive code CNE — copyright never evaluated. That is not permission. We refuse with a named cause." |
 | 1:16 | 14 | **Honest marketing** | C5: *search_found_no_admissible_source* on "94% of film archives" | "We pointed the product at our own pitch. It refused our headline. The number was fine — the object was not." |
 | 1:30 | 20 | **Compound** (secondary) | Fresh subject A→B: `corpus_hits` ≥ 1 · `parallel_calls` drop if visible | "Run the same subject twice. The shelf remembers — fewer search calls, same honest verdicts." |
 | 1:50 | 18 | **Second buyer** | `shift-ai-training-vs-noncommercial.md`: **247 / 600 flip** | "One index, two buyers. Forty-one percent of the library changes verdict when the use case changes." |

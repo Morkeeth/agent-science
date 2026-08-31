@@ -19,10 +19,11 @@ deadline: 2026-09-09T14:00:00-07:00
 
 | State | Detail |
 |-------|--------|
+| **Product noun** | **Agent Science** — truth layer for what people believe and use · B lead · A on the same layer |
 | **Product** | LIVE on Cloud Run · public repo · sealed prediction |
-| **Build lane** | **Partner deepen** — `parallel-web` SDK, `/partners`, `search_id` receipts |
-| **Oscar** | **ATA** — video/Devpost deferred; 3 clicks when back |
-| **Film lead** | E&O + refuse first (not compound) — `docs/FALSIFICATION-PERIODCHECK-2026-08-31.md` |
+| **Build lane** | Re-center demos on companion + agentic practices; clearance stays a vertical |
+| **Oscar** | Video + Devpost still open — lead companion, show clearance as one shelf customer |
+| **Film lead** | Ask → sourced/refuse → free on re-ask · ≥2 domains · E&O as *a* truth not the only story |
 
 ---
 
@@ -102,6 +103,16 @@ bash scripts/full_gate.sh
 
 | When (UTC) | What |
 |------------|------|
+| 2026-08-31 21:55 | Competitor research — websearch field map + steal angles → `RESEARCH-WEBSEARCH-COMPETITORS-2026-08-31.md` |
+| 2026-08-31 20:35 | Full websearch rundown — `WEBSEARCH-FULL-RUNDOWN.md` + `visibility --full` (10 panes) |
+| 2026-08-31 20:32 | Skill + `clearance visibility` / `science_visibility` — multi-pane websearch, not one answer |
+| 2026-08-31 20:28 | **RULING:** Agent Science websearch = the truth layer (believe+use), not raw search+citations |
+| 2026-08-31 20:30 | Truth layer > research — blogs + GitHub ★ field-signals + refresh script |
+| 2026-08-31 20:26 | **RULING:** Agent Science = truth layer for what people believe and use (not citation wall) |
+| 2026-08-31 20:25 | **RULING sharpened:** Agent Science = scientific coach with facts · B lead · A works with B on one shelf |
+| 2026-08-31 20:24 | **RULING:** Agent Science = Companion (B) priority; Clearance (A) is a truth inside B — not a rename |
+| 2026-08-31 20:25 | Grinder PRACTICES-CORPUS → Agent Science inspiration + seed claims + aliases |
+| 2026-08-31 20:20 | Use-case pack beyond EU — 4 demo scripts, aliases, USE-CASES doc |
 | 2026-08-31 16:10 | Architecture pack — ARCHITECTURE.md, diagrams, 6 hosted screenshots |
 | 2026-08-31 14:10 | Partner deepen — `parallel-web` SDK, `/partners`, `search_id` receipts, research doc |
 | 2026-08-31 11:30 | Full gate audit while Oscar away — STATUS.md · full_gate.sh · DEVPOST-READY · pack counts 117 |

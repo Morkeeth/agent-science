@@ -1,9 +1,18 @@
 # Scripts
 
-| File | What it is |
-|---|---|
-| `PLUMBING-TEST-do-not-quote.txt` | **NOT A RESULT.** Built FROM the Wikipedia orphan-works article, so Parallel finds that same article and every claim "sources" against its own origin. It produced 5 of 5 SOURCED, and that number is worthless — see `docs/FINDING-circular-sourcing.md`. Kept only as proof the six stages connect. **Never quote its output.** |
-| `documentary-orphan-works.txt` | The real demo input. Narration written from general knowledge about the subject, deliberately **not** from any source document, then checked against primary sources. Some claims are precise, some are loose, exactly as a first-draft script is. Nothing was chosen to force a gap. |
-| `red-scenesetting.txt` | Control: pure scene-setting must extract ZERO claims. |
-| `red-dialogue.txt` | Control: a character speaking is not the film asserting. Must extract ZERO. |
-| `split-sentence.txt` | Control: a claim split across two sentences must be found and rejoined. |
+**Use-case pack (beyond EU):** `docs/USE-CASES-2026-08-31.md` — film **two domains**.
+
+| File | Domain | What it is |
+|---|---|---|
+| `demo-dust-bowl-mini.txt` | US history | Short Pare Lorentz / Dust Bowl claims |
+| `demo-arxiv-attention.txt` | Science | Transformer paper arXiv `1706.03762` |
+| `demo-rights-cne.txt` | Archive rights | CNE is not a licence — expect refuse/clear honesty |
+| `demo-us-orphan-policy.txt` | US copyright policy | No federal orphan licence; 2015 Copyright Office report |
+| `dust-bowl-A.txt` / `dust-bowl-B.txt` | US history | Longer A/B compound subject |
+| `compound-mini-A.txt` / `B` | EU law | Short compound (sealed path) |
+| `documentary-orphan-works.txt` | EU law | Full orphan-works narration (hosted B **503** — do not film full compound) |
+| `powered-A-law.txt` | Multi-jurisdiction | EU + UK + US + Canada policy (too long for video) |
+| `PLUMBING-TEST-do-not-quote.txt` | **NOT A RESULT** | Circular Wikipedia sourcing — see `docs/FINDING-circular-sourcing.md` |
+| `red-scenesetting.txt` | Control | Pure scene-setting → ZERO claims |
+| `red-dialogue.txt` | Control | Character speech → ZERO claims |
+| `split-sentence.txt` | Control | Claim split across sentences must rejoin |

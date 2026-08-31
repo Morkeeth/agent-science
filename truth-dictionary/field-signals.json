@@ -1,0 +1,105 @@
+{
+  "read_at": "2026-08-31T18:28:15Z",
+  "note": "Adoption / use signals for the truth layer. Stars are not proof \u2014 they rank what the field watches and installs. Refresh: python3 scripts/refresh_field_signals.py",
+  "github": [
+    {
+      "repo": "Significant-Gravitas/AutoGPT",
+      "stars": 187035,
+      "pushed_at": "2026-08-31T18:22:23Z",
+      "url": "https://github.com/Significant-Gravitas/AutoGPT",
+      "why": "agent loop adoption"
+    },
+    {
+      "repo": "anthropics/claude-code",
+      "stars": 143565,
+      "pushed_at": "2026-08-28T18:19:32Z",
+      "url": "https://github.com/anthropics/claude-code",
+      "why": "dominant coding-agent surface"
+    },
+    {
+      "repo": "hesreallyhim/awesome-claude-code",
+      "stars": 53287,
+      "pushed_at": "2026-08-31T18:12:22Z",
+      "url": "https://github.com/hesreallyhim/awesome-claude-code",
+      "why": "curated what-people-use index"
+    },
+    {
+      "repo": "Aider-AI/aider",
+      "stars": 48628,
+      "pushed_at": "2026-05-22T14:02:20Z",
+      "url": "https://github.com/Aider-AI/aider",
+      "why": "pair-programming agent"
+    },
+    {
+      "repo": "cursor/cursor",
+      "stars": 33202,
+      "pushed_at": "2026-05-12T15:25:06Z",
+      "url": "https://github.com/cursor/cursor",
+      "why": "editor+agent product signal"
+    },
+    {
+      "repo": "frankbria/ralph-claude-code",
+      "stars": 9612,
+      "pushed_at": "2026-07-18T02:33:21Z",
+      "url": "https://github.com/frankbria/ralph-claude-code",
+      "why": "Ralph loop used in building"
+    },
+    {
+      "repo": "mikeyobrien/ralph-orchestrator",
+      "stars": 3118,
+      "pushed_at": "2026-08-29T02:10:09Z",
+      "url": "https://github.com/mikeyobrien/ralph-orchestrator",
+      "why": "Ralph orchestration active"
+    }
+  ],
+  "blogs_and_docs": [
+    {
+      "title": "Best practices for Claude Code",
+      "url": "https://code.claude.com/docs/en/best-practices",
+      "kind": "official_docs",
+      "when": "living"
+    },
+    {
+      "title": "Effective context engineering for AI agents",
+      "url": "https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents",
+      "kind": "eng_blog",
+      "when": "2025+"
+    },
+    {
+      "title": "Agentic Engineering Patterns",
+      "url": "https://simonwillison.net/2026/Feb/23/agentic-engineering-patterns",
+      "kind": "practitioner_blog",
+      "when": "2026-02"
+    },
+    {
+      "title": "Ralph loop \u2014 Geoffrey Huntley",
+      "url": "https://linearb.io/blog/ralph-loop-agentic-engineering-geoffrey-huntley",
+      "kind": "practitioner_blog",
+      "when": "2026"
+    },
+    {
+      "title": "How to build an agent \u2014 Thorsten Ball",
+      "url": "https://ampcode.com/how-to-build-an-agent",
+      "kind": "practitioner_blog",
+      "when": "living"
+    },
+    {
+      "title": "Loop Engineering in Claude Code",
+      "url": "https://genaiunplugged.substack.com/p/loop-engineering-claude-code",
+      "kind": "latest_blog",
+      "when": "2026"
+    },
+    {
+      "title": "Claude Code Agentic Loops guide",
+      "url": "https://blog.traversaal.ai/claude-code-agentic-loops-developer-guide-loop-engineering/",
+      "kind": "latest_blog",
+      "when": "2026"
+    },
+    {
+      "title": "Agent Loop Guardrails",
+      "url": "https://shipwithai.io/blog/loop-guardrails-unattended/",
+      "kind": "latest_blog",
+      "when": "2026"
+    }
+  ]
+}
