@@ -1,25 +1,224 @@
-# hack.md — Agentic Cinema constitution + 7 slices
+---
+doc: hack
+project: Agent Science
+phase: SHIP
+last-touched: 2026-08-31 13:08 CEST
+canonical: true
+event: Agentic Cinema · Parallel track · deadline 2026-09-09 14:00 PDT
+supersedes: docs/PHASE0-LADDER.md ClickHouse-track note (runtime track is Parallel)
+---
 
-**Repo:** Morkeeth/agent-science · **Event:** Agentic Cinema · Sep 9 2026  
-**Spine:** Agent Science = the websearch companion — a registry of verified truths.  
-**Constitution:** verbatim span or REFUSE — never paraphrase. No public repo. No rename. No `--set-env-vars` secrets. Slice 1 deploy/keys: Oscar only.
+# hack.md — Agentic Cinema constitution + handbook pass
+
+**Repo:** Morkeeth/agent-science · **Event:** Agentic Cinema · Sep 9 2026 14:00 PDT  
+**Spine:** Agent Science = the websearch companion — a truth dictionary that compounds from what devs actually search.  
+**Constitution:** verbatim span or REFUSE — never paraphrase. No public repo until keys rotated. No rename. No `--set-env-vars` secrets. Slice 1 deploy/keys/video/Devpost: Oscar only.
+
+> **Handbook:** ladder + judge pack below. Detail: `docs/MOONSHOT-MEMO-2026-08-31.md` · `VISION-2026-08.md` · `AGENTS.md`  
+> **Next:** EYES panel on §WINNER ANGLES + §ROADMAP (multi-model review queued).
 
 ---
 
-## NORTH STAR
+## 🪜 HANDBOOK LADDER (~70% elapsed · 9 days left)
+
+| Phase | Gate | Status |
+|-------|------|--------|
+| 0 · Entry | Kill condition + hours named | ⚠️ `PHASE0-LADDER` — Oscar hours/kill still open |
+| 1–4 · Spec → Build | Partners + registry + compound + ADK | ✅ slices 1–5 shipped |
+| **5 · Exhibit** | Stranger one-click on hosted URL | ✅ `bash scripts/new_user_trial.sh` PASS |
+| **6 · Freeze** | Oscar cold browser, degraded path, keys rotated | ⛔ video missing · keys not rotated · logged-out Devpost unchecked |
+| **7 · Submit** | Devpost + public repo + sealed prediction | ⛔ `docs/SUBMISSION-PACK-2026-08-29.md` |
+| 8 · Post-result | Winners read, lesson distilled | — |
+
+**#85:** video is the hard-fail artifact — not more build. **#72:** seal prediction before submit button.
+
+---
+
+## 📦 JUDGE PACKAGE (handbook 5-pack)
+
+| Slot | Line |
+|------|------|
+| **Category** | Truth dictionary for agent work — verify once, free forever |
+| **One user** | Fleet dev / agent operator who websearches daily *(volume)*; E&O producer *(paying vertical)* |
+| **Killer demo** | Hosted Run A → Run B: `corpus_hits` rise · `parallel_calls` drop on fresh subject — under 60s |
+| **One visual** | `/popular/ui` hit-rate strip + compound metrics side-by-side on desk |
+| **Why now** | Agentic Cinema + E&O/AI-training handshake stall on asset-level provenance; Parallel track requires runtime search |
+
+**Anti-convergence wedge:** *PeriodCheck proves the first script. Agent Science proves the second one costs less.*
+
+**Track brief first screen (rubric 30/30/25/15):** fact-checking for media content — verbatim evidence or named refusal for every claim in a production script.
+
+---
+
+## ⭐ NORTH STAR
 
 Paste a documentary script; get every checkable claim back as a verbatim quote with its source URL, or UNSOURCED with a named reason — so a production can insure and release without guessing.
 
-## PROMISE LINE
+**Company north star (post-hack):** the truth dictionary for agent work — ask once, verify once, free forever; the most-searched things get cheaper for everyone.
+
+## 📣 PROMISE LINE
 
 **You get:** a gap report where every claim is SOURCED (exact passage + citation) or UNSOURCED (actionable cause).  
 **Constraint:** if the document does not contain the exact passage, refuse — never paraphrase, never infer.
 
-## OPEN QUESTIONS
+**Day-two user:** agent operator who runs `science_lookup` before raw web search; licensing lead who needs the gap report; archive manager who watches the shelf grow from fleet usage.
 
-- **Rotate the leaked Parallel/Gemini keys — OSCAR ONLY, open 8 days.** The plaintext Cloud Run revision cannot be un-written; C3's control now catches 7/7 leak shapes but cannot undo that one.
-- ~~RC5 substring false-GREEN~~ **CLOSED 2026-08-31** by `clearance/semantic.py`: gold 5/6 -> 6/6, 0/313 corpus verdicts changed, 8/27 SOURCED rows got a better span. `docs/FINDING-semantic-guard-2026-08-31.md`.
+---
+
+## 🏁 FIELD — Parallel track (measured 2026-08-31)
+
+| Entry | Threat | Our answer |
+|-------|--------|------------|
+| [PeriodCheck](https://github.com/ahsan3274/periodcheck) | **#1** — 13/13 live, PDF ingest, evidence UI, bounded Parallel, `live-evaluation.json` | Lose first-run UX; **win compound economics + structural refuse** |
+| [Clearance Compass](https://github.com/rumi7911/Clearance-Compass) | Same clearance wedge + ClickHouse agent memory | Win **verbatim-or-REFUSE**; they may win "studio pipeline" narrative |
+| [Genesis OS](https://github.com/MoreSalamander/01-genesis-parallel) | Mission ledger, nested questions, evidence lineage | Different buyer (studio intel); overlap on verification states |
+| [Lienmark](https://github.com/lx-singw/lienmark) | Rights clearance + immutable audit ledger | Collision on clearance; we have dictionary + compound |
+| [AttestDB](https://github.com/omic/attest) | Closest **product shape** — claim DB, popularity, retraction | We have span verify + refuse pole; borrow `content_id` later |
+| [Plotkraft](https://github.com/0xhaz/plotkraft) · [Auteur](https://github.com/sodiq-code/auteur) | Writers' room / continuity — adjacent, not same primitive | Category fit risk if judges bucket all as "script tools" |
+
+**Not in field:** ArkivX, external "truths by agentic coders" feed — **no such ingest exists**; see §WEBSEARCH DATA.
+
+**Published bar:** PeriodCheck has public repo + Devpost + live eval. We have **hosted URL** — still need **video + public repo** to match.
+
+---
+
+## 🔍 WEBSEARCH & TRUTH DICTIONARY
+
+### Flows
+
+| Flow | Entry | Tier | When |
+|------|-------|------|------|
+| Daily lookup | `science_lookup` · `GET /search?live=false` | free → cheap → live | **Default** for fleet |
+| Fresh discovery | `science_search` · `live=true` | live (Parallel) | Dictionary miss |
+| Script clearance | `POST /clear` | live + ADK | Hackathon demo · E&O vertical |
+| Browse shelf | `/registry` · `/popular/ui` | free | Judges · ops |
+| Grow shelf | `zup dictionary ingest` | — | After every research session |
+
+### Cost tiers
+
+1. **free** — registry exact replay + alias hit  
+2. **cheap** — URL routing (CELEX, arXiv, rights vocab) + fetch, no Parallel  
+3. **live** — Parallel + Gemini on miss  
+
+### Data pipeline (where "the science" lives)
+
+```
+fleet websearch → research-corpus/ [CLAIM][URL]
+                → boot_registry.py / zup dictionary ingest
+                → refusal_log.db + GCS dictionary
+                → query_analytics → /popular → alias + routing fixes
+```
+
+| Source | What it is |
+|--------|------------|
+| `research-corpus/*.md` | ~22 fleet research files — each websearch as `[CLAIM]` + `[URL]` |
+| `refusal_log.db` / GCS | Registry of sourced + refused claims — reuse = 0 Parallel |
+| `truth-dictionary/aliases.json` | Casual phrasings → canonical queries |
+| Live clearance | Parallel → fetch → structural verbatim verify |
+
+**Not wired:** ArkivX · ClickHouse (was Phase 0 ideation; **runtime track is Parallel**) · external archive APIs.
+
+### Live stats (hosted, 2026-08-31)
+
+- **185 claims** · hit rate **0.72** · **18 queries logged** · **9 reuses**  
+- Top popular: `2012/28/EU` (8 asks) — alias fragmentation on `Directive 2012/28/EU` still open  
+- Flywheel **architecturally done, adoption-empty** — kill bar: `queries_logged < 50` in 4 weeks = slide deck only
+
+### Known websearch issues
+
+| Issue | Symptom | Mitigation |
+|-------|---------|------------|
+| EUR-Lex 403 | Live fetch blocked | CELEX routing + fixtures; free tier for `2012/28/EU` |
+| Alias fragmentation | Short form SOURCED, long form refused | Fix top `/popular` miss — `aliases.json` |
+| Warm shelf | Reused subject → A=0 Parallel | Video: **fresh subject** or show `corpus_hits` not Parallel drop |
+| Orphan-works hosted B | Run B **503** | Offline receipt authoritative; don't claim full script on video |
+| C5 headline refuse | "94% of film archives" → `search_found_no_admissible_source` | **Video beat** — product refused our own pitch |
+| Keys leaked | Plaintext in old Cloud Run revision | **Oscar only** — rotate before public repo |
+
+### Stranger path (one command)
+
+```bash
+bash scripts/new_user_trial.sh
+# lookup 2012/28/EU → SOURCED free · NOT_CLEARED on miss · corpus_hits ≥ 1 on repeat
+```
+
+---
+
+## 🏆 WINNER ANGLES (Sep 9 + company)
+
+*Queued for EYES multi-model review — claims below are falsifiable.*
+
+### What wins Sep 9 (Parallel track rubric)
+
+| Angle | Claim | Falsify when |
+|-------|-------|--------------|
+| **Compound economics** | Only entry showing A→B Parallel drop + corpus hits on **hosted** URL | PeriodCheck ships same demo |
+| **Honest refuse on camera** | UNKNOWN row with named cause + C5 beat (headline refused) | Judges can't read span on screen |
+| **Truth dictionary flywheel** | `/popular/ui` shows real queries driving free tier | `queries_logged` stays &lt; 20 at submit |
+| **M&E words first** | E&O / clearance / provenance in first 10s of video | Opens with eval tables |
+| **Second buyer** | 247/600 flip when buyer use-case changes (`shift-ai-training` fixture) | Not in video |
+
+### New angles to explore (not yet built — post-submit or stretch)
+
+| Angle | Thesis | Build cost |
+|-------|--------|------------|
+| **Fleet corpus as moat** | "Truths by agentic coders" — shared GCS dictionary across Oscar's repos; every fleet research session grows everyone's free tier | M — GCS shared dict + auth |
+| **Negative space product** | Sell the **refusal map** — "here's what we cannot prove about your library" as the gap report buyers pay for | S — already in registry |
+| **Insurance API** | Export gap report as E&O-ready PDF with stable claim IDs (PeriodCheck has evidence IDs; we have term + cause) | M |
+| **Buyer-context flip** | Same asset, different verdict by licensee intent — already in dust-bowl + shift fixtures; needs UI | S |
+| **Attest bridge** | Emit ClaimReview / Attest-compatible records from sourced rows — interoperability without pivoting stack | M |
+| **Patent / prior-art routing** | Extend `routing.py` for USPTO, EPO, scholar — dev-truth volume beyond M&E | S |
+| **Witness × Science** | Agent Work Record cites Agent Science rows as evidence for "agent said X, corpus said Y" | L — fleet integration |
+| **Anti-slop for agents** | `science_lookup` as fleet policy gate — no raw web without citation attempt | S — habit + hook exists |
+
+### What does NOT win (explicit kills)
+
+- More eval gates / pytest on Devpost — **zero rubric weight** (Qwen lesson)  
+- ClickHouse index — wrong primitive for discovery  
+- Competing on Document AI PDF ingest — PeriodCheck owns  
+- Pivot to confidence scores — collides with refuse spine  
+
+---
+
+## 🗺 ROADMAP
+
+### Sep 9 critical path (Oscar gates — stop building past this)
+
+| # | Slice | Done when | Owner |
+|---|-------|-----------|-------|
+| 1 | **Video ≤180s** | Public YouTube/Vimeo URL on Devpost | Oscar |
+| 2 | **Rotate keys + public repo** | MIT license visible; no secrets in history | Oscar |
+| 3 | **Devpost + sealed prediction** | `docs/SUBMISSION-PACK-2026-08-29.md` pasted; logged-out page verified | Oscar |
+| 4 | **Fix top popular alias** | `Directive 2012/28/EU` → free hit | build (30 min, non-blocking) |
+
+### Week 1 post-submit (product flywheel)
+
+- Fleet habit: `science_lookup` default · `popular` weekly · `zup dictionary ingest` after research  
+- Fix top 3 `/popular` optimization targets  
+- `dictionary_hit_rate ≥ 0.80` · `queries_logged ≥ 200` (4-week product test)
+
+### Month 1 (if flywheel spins)
+
+- Shared fleet dictionary on GCS (multi-repo read, single write path)  
+- Attest-style `content_id` + retraction cascade on sourced rows  
+- Design partner loop (slice 6) — one archive/licensing lead; friction in `docs/DESIGN-PARTNER-LOOP.md`  
+- E&O export format · buyer-context UI for shift flip  
+
+### Month 3+ (company bets)
+
+- Insurance / E&O channel partnership  
+- Witness integration — claims in agent reports cite dictionary rows  
+- Analytics-only ClickHouse *(if ever)* — query logs at fleet scale, not discovery  
+
+---
+
+## ❓ OPEN QUESTIONS
+
+- **Rotate the leaked Parallel/Gemini keys — OSCAR ONLY.** Plaintext Cloud Run revision cannot be un-written; rotate before public repo.
+- ~~RC5 substring false-GREEN~~ **CLOSED 2026-08-31** — `docs/FINDING-semantic-guard-2026-08-31.md`.
 - Design partner session — Oscar outreach (slice 6).
+- **EYES:** do winner angles survive PeriodCheck + Clearance Compass field? (next step)
+- **Alias:** `Directive 2012/28/EU` vs `2012/28/EU` — 4 asks refused on long form.
 
 ## CONSTITUTION
 
@@ -28,18 +227,19 @@ Paste a documentary script; get every checkable claim back as a verbatim quote w
 - No plaintext secrets in repo or deploy surfaces (control scans tree + git log).
 - Outward acts (deploy, public repo, Devpost, video) — Oscar only.
 - Do not tick a box whose done-when was not RUN; say the command.
+- `science_lookup` defaults `live=false` — flywheel requires cheap path first.
 
 ## PLAN (risk-first slices)
 
-| # | Slice | Risk |
-|---|--------|------|
-| 1 | Deploy desk | Keys leak / wrong revision |
-| 2 | Registry face | False SOURCED in browse UI |
-| 3 | Compound exhibit | Compounding claim unproved |
-| 4 | Second subject | Cross-subject collision |
-| **5** | **ADK default path** | **Agent Builder claimed but not on runtime path** |
-| 6 | Design partner loop | Friction unknown |
-| 7 | Submission pack | Outward gates |
+| # | Slice | Risk | Status |
+|---|--------|------|--------|
+| 1 | Deploy desk | Keys leak | ✅ LIVE |
+| 2 | Registry face | False SOURCED in UI | ✅ `/registry` hosted |
+| 3 | Compound exhibit | Compounding unproved | ✅ fresh subject hosted pass |
+| 4 | Second subject | Cross-subject collision | ✅ dust-bowl receipt |
+| 5 | ADK default path | Agent Builder not on path | ✅ `engine_default: adk` |
+| 6 | Design partner loop | Friction unknown | ⛔ Oscar |
+| 7 | Submission pack | Outward gates | ⛔ video · Devpost · public repo |
 
 ---
 
@@ -89,7 +289,7 @@ submission craft, supported by a real tendency, **not** as the explanation of th
 - [ ] **Cost from billing**, with the price card's date stated.
 - [x] **Offline path with no API key.**
 - [x] **Honesty & limitations** section carrying our worst number — README §Honesty & limitations; PITCH first screen
-- [ ] **Answer the track brief in the track's own words on the first screen** — that is what the rubric weights, not eval rigor.
+- [ ] **Answer the track brief in the track's own words on the first screen** — judge pack § above; must land on Devpost ¶1 + video 0:00
 - [ ] **Video verified attached and public on the live entry page, from a logged-out browser** — not in a checklist file, on the page.
 - [ ] **Every artifact claim measured at the submitted commit.** Four retros of that loss failed this row.
 
@@ -98,44 +298,48 @@ Full record: `~/CODE/fleet-ops/retros/QWEN-LOSS-RETRO-2026-08-30.md` (corrected)
 
 ---
 
-## The seven slices
+## 🎯 NOW — Phase 6 freeze + video (not more build)
 
-| # | Slice | Owner | Done when |
-|---|--------|-------|-----------|
-| **1** | **Deploy the desk** | Oscar | **LIVE:** https://agent-science-568004190078.us-central1.run.app (alias: `agent-science-33kamss2jq-uc.a.run.app`) — probed 2026-08-31: `gemini: true` vertex:hack-fleet, `parallel: true`, `engine_default: adk`. Keys via Secret Manager; `deploy.sh` only |
-| **2** | **The registry has a face** | build | Query → SOURCED/UNSOURCED/UNKNOWN; browsable |
-| **3** | **Backfill + compound exhibit** | build | Orphan-works A/B shows Parallel drop |
-| **4** | **A second subject** | build | Dust-bowl chain; receipt honest |
-| **5** | **Agent Builder as default** | build | ADK on default `/clear`; receipt `engine: adk` locally |
-| **6** | **Design partner loop** | Oscar + build | One lead; friction in CURSOR-LOG |
-| **7** | **Submission pack** | Oscar | Public repo, video, Devpost |
+**Slice:** handbook phase 6 — Oscar drives degraded judge path and films compound + refuse.  
+**Hard-fail artifact:** ≤180s video with hosted URL readable · `docs/VIDEO-SCRIPT-2026-08-29.md`
 
----
+### LIVE
 
-## NOW — partner integrations · all four provable (2026-08-31)
+**URL:** https://agent-science-568004190078.us-central1.run.app  
+**Revision:** agent-science-00010-5fd · **185 claims** · hit rate 0.72
 
-**Slice:** partner integrations admissibility — runtime calls, not doc-only.  
-**Done-when:** `python3 tests/test_partner_runtime.py` → **5/5**; hosted `/health` → `engine_default: adk`; `docs/PARTNER-INTEGRATIONS-2026-08-30.md` complete.
+```bash
+bash scripts/new_user_trial.sh          # stranger path PASS
+curl -s …/popular/ui                    # flywheel face for judges
+curl -s …/search?q=2012/28/EU&live=false  # SOURCED free tier
+```
 
-### Verify tonight (one command each)
+**Compound note:** fresh subject → `parallel_calls` drops + `corpus_hits ≥ 1`. Warm dictionary may show A=0 Parallel — still valid if corpus hits rise.
+
+### Oscar (outward acts only)
+
+1. Rotate keys → `bash deploy.sh` if needed  
+2. Record video (`docs/VIDEO-SCRIPT-2026-08-29.md`) — compound + refuse + `/popular/ui`  
+3. Public repo + Devpost (`docs/SUBMISSION-PACK-2026-08-29.md`)  
+4. Logged-out verify: video on live Devpost page  
+
+### Build (non-blocking, ≤30 min)
+
+- Add alias: `Directive 2012/28/EU` → `2012/28/EU` in `truth-dictionary/aliases.json` · redeploy
+
+### Verify (one command each)
 
 ```bash
 python3 scripts/seed_document_cache.py && python3 tests/test_watch_it_go_red.py  # 72/72
 python3 tests/test_partner_runtime.py                                             # 5/5
-curl -s https://agent-science-568004190078.us-central1.run.app/health            # engine_default: adk
 bash scripts/verify_cold_clone.sh                                                 # stranger path
 ```
 
-### Receipts (re-derived 2026-08-31)
+### Receipts
 
-- `docs/PARTNER-INTEGRATIONS-2026-08-30.md` — all four partners
-- `docs/RECEIPT-adk-default-path-2026-08-30.md` — ADK default path
-- `docs/RECEIPT-live-compound-exhibit-2026-08-31.md` — hosted compound (fresh subject pass; orphan-works B 503)
-- `docs/DESIGN-PARTNER-LOOP.md` — slice 6 friction template
-
-### Oscar (outward acts — not agent)
-
-- `bash deploy.sh` · video · Devpost · public repo flip
+- `docs/RECEIPT-live-compound-exhibit-2026-08-31.md` — hosted compound (fresh pass; orphan-works B 503)
+- `docs/PARTNER-INTEGRATIONS-2026-08-30.md` — all four partners on path
+- `docs/MOONSHOT-MEMO-2026-08-31.md` — flywheel + field detail
 
 ---
 
@@ -143,6 +347,7 @@ bash scripts/verify_cold_clone.sh                                               
 
 | When | What | Command | Outcome |
 |------|------|---------|---------|
+| 2026-08-31 PM | Handbook pass | hack.md rewrite | ladder · field · websearch · roadmap · winner angles |
 | 2026-08-31 L5 | Semantic guard RED first | `python3 tests/test_semantic_guard.py` (null guard) | **4 fail / 9 pass** — watched red before implementing |
 | 2026-08-31 L5 | Semantic guard measured | `python3 scripts/eval_semantic_guard.py` | **gold 5/6 -> 6/6**; registry **0/313** verdicts changed; **8/27** better spans |
 | 2026-08-31 L5 | RC5 promoted | `python3 tests/test_refusal_correctness.py` | `engine_limit` dropped; enforced pole; **all passed** |
@@ -151,41 +356,13 @@ bash scripts/verify_cold_clone.sh                                               
 | 2026-08-31 L5 | Registry face | `python3 tests/test_registry_surface.py` + rendered 1280/390 | **11/11**; 12/28 sourced rows marked thin evidence |
 | 2026-08-31 L5 | Full suite | 16x `python3 tests/test_*.py` | **all green** (watch_it_go_red 72/72) |
 | 2026-08-31 | Vision wiring | boot + tests | `/registry` · run_history · 176 registry rows |
+| 2026-08-31 | Deploy + trial | `deploy.sh` · `new_user_trial.sh` | LIVE · compound PASS · 185 claims |
 | 2026-08-30 night | Live compound hosted | cloud lane | RECEIPT-live-compound exhibit |
-| 2026-08-30 start | Baseline claimed 72/72 but cache missing | `python3 tests/test_watch_it_go_red.py` | **13 fail + TypeError** — no `documents.json` |
 | 2026-08-30 | EUR-Lex live fetch | `urllib` to eur-lex | **HTTP 403** — seeded from fixture |
-| 2026-08-30 | Cache seed | `python3 scripts/seed_document_cache.py` | documents + searches on disk |
-| 2026-08-30 | Controls green | `python3 tests/test_watch_it_go_red.py` | **72/72** |
-| 2026-08-30 | ADK engine tests | `python3 tests/test_adk_default_path.py` | **5/5** |
-| 2026-08-30 | Eval gate | `python3 scripts/eval_refusal_baseline.py` | baseline=shipping=5/6; RC5 both false-GREEN |
-| 2026-08-30 | Live compound | env keys | **BLOCKED** — doc written |
-| 2026-08-30 | Cold clone path | `git clone --no-local file://… && seed && test_watch_it_go_red` | **72/72** |
-| 2026-08-30 | google-adk dep | `pip install google-adk==2.7.1 && python3 -c "…version…"` | **2.7.1** (not preinstalled on VM; in `requirements.txt`/Dockerfile) |
-| 2026-08-30 | Full suite | 9× `python3 tests/test_*.py` | **104/104** |
-| 2026-08-30 | Push gate | `git push origin main` | **83d1f7a** on origin/main |
-| 2026-08-30 night | Ablation eval | `python3 scripts/eval_refusal_ablation.py` | **5/6=0.833** tied shipping; RC5 both false-GREEN |
-| 2026-08-30 night | Docs gate | `python3 scripts/bench_check_docs.py` | **109/109** match SUBMISSION-PACK |
-| 2026-08-30 night | Partner runtime | `python3 tests/test_partner_runtime.py` | **5/5** |
-| 2026-08-30 night | Hosted ADK | `curl -s …/health` | **`engine_default: adk`** — slice 5 hosted done |
-| 2026-08-30 night | Cold clone | `git clone file://… && seed && test_watch_it_go_red` | **72/72** |
-| 2026-08-30 night2 | Baseline missing cache | `python3 tests/test_watch_it_go_red.py` | **13 fail + TypeError** — re-seeded |
-| 2026-08-30 night2 | Cache seed | `python3 scripts/seed_document_cache.py` | **72/72** restored |
 | 2026-08-30 night2 | Hosted compound | `POST /clear` compound-mini A/B | **2→1 Parallel, hits=2, pass** |
-| 2026-08-30 night2 | Hosted /clear | dust-bowl one-liner | **engine=adk, parallel_calls=1** |
-| 2026-08-30 night2 | External anchor | `python3 scripts/eval_external_anchor.py` | **2/2 tied** baseline=shipping |
-| 2026-08-30 night2 | Eval stats | `python3 scripts/eval_refusal_baseline.py` | Wilson CI + McNemar p=1.0 |
-| 2026-08-30 night2 | Cold clone script | `bash scripts/verify_cold_clone.sh` | **all gates green** |
-| 2026-08-31 | Baseline missing cache | `python3 tests/test_watch_it_go_red.py` | **13 fail** — re-seeded |
-| 2026-08-31 | Cache seed | `python3 scripts/seed_document_cache.py` | **72/72** restored |
-| 2026-08-31 | Partner runtime | `python3 tests/test_partner_runtime.py` | **5/5** |
-| 2026-08-31 | Hosted /health | `curl -s …568004190078…/health` | **`engine_default: adk`** all four partners |
 | 2026-08-31 | Compound fresh subject | `compound-fresh-c1eb52fe` A/B | **2→1 Parallel, hits=1, pass** |
-| 2026-08-31 | Compound warm subject | reused `compound-mini-live-2026-08-30` | **pass=False** — shelf warm |
 | 2026-08-31 | Orphan-works hosted | `orphan-works-live-66d21d70` | **A ok (9 Parallel); B 503** |
-| 2026-08-31 | Cold clone | `bash scripts/verify_cold_clone.sh` | **all gates green** |
-| 2026-08-31 | Docs gate | `python3 scripts/bench_check_docs.py` | **109/109** |
-| 2026-08-31 | Honesty section | README + PITCH | worst numbers at object |
 
 ---
 
-*Update NOW after every slice. Oscar owns slice 1 deploy and submission gates.*
+*Update NOW after every slice. Oscar owns phase 6–7. Next: EYES on §WINNER ANGLES.*
