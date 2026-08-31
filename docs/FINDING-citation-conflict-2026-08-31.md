@@ -269,11 +269,65 @@ the wave-4 fix the page names it as a different population from the corpus.
 
 1. ~~**A labelled set for this mechanism.**~~ BUILT by the adversarial pass:
    `scripts/probe_citation_heldout.py`, 11 provision-bearing claims labelled before any
-   run — SHIPS 9/11 vs BASE 7/11, zero false refusals introduced. What stays open is its
-   size and the two rows it misses (below).
+   run — SHIPS 9/11 vs BASE 7/11. **GROWN to 23 rows in wave 5** with the same
+   discipline (every label derived from the fetched document, recorded per case), and
+   growing it changed the answer: see "What the 23-row set found" below. What stays open
+   is a second instrument — every row here is the same Regulation.
 2. **A corpus that exercises it.** Legal and regulatory sources are where citations live;
    `research-corpus/` is an AI-industry corpus and contains almost none.
 3. The absence arm stays built, measured and off.
+
+## What the 23-row set found — including the first false refusal
+
+`python3 scripts/probe_citation_heldout.py`, 2026-08-31 ~07:15. SET A is the wave-4
+population, reported unchanged; SET B is 12 rows added in wave 5 because SET A priced the
+shape the gate CLOSES at n=3 and the shapes it cannot see at n=1.
+
+```
+SET A (published wave 4, unchanged)   SHIPS 9/11    BASE 7/11
+FULL SET (A + B, labelled first)      SHIPS 16/23   BASE 13/23
+
+BY CATEGORY — one aggregate hides the only thing this measures:
+  true          12/14 SHIPS · 13/14 BASE   correct citation — a refusal here is a FALSE REFUSAL
+  false-number   4/4  SHIPS ·  0/4  BASE   rival named BY NUMBER — THE SHAPE THE GATE CLOSES
+  false-words    0/3  SHIPS ·  0/3  BASE   rival's subject named in WORDS — known hole
+  false-annex    0/1  SHIPS ·  0/1  BASE   provision is an Annex — known parser hole
+  false-excl     0/1  SHIPS ·  0/1  BASE   carrier names the claim's own article to EXCLUDE it
+```
+
+**The mechanism is stronger than wave 4 could show on its own shape: 4/4 against 0/4.**
+Every row of the error it is built for, closed, with none closed by the engine without it.
+
+**And it costs one false refusal, which wave 4 reported as zero.** T13:
+
+```
+claim : Article 88 gives the Commission "exclusive powers to supervise and enforce Chapter V"
+engine: UNKNOWN  cited_provision_differs
+detail: the claim is about Article 88; the clause carrying 'The Commission shall have
+        exclusive powers to supervise and enforce Chapter V' cites Article 94 and never
+        Article 88
+source: "Article 88 Enforcement of the obligations of providers of general-purpose AI
+        models 1. The Commission shall have exclusive powers to supervise and enforce
+        Chapter V, taking into account the procedural guarantees under Article 94."
+```
+
+The clause **is** Article 88(1). It cross-references Article 94 in passing; the heading
+sits outside the span the locator returns; the gate reads a rival where there is a
+citation. Legal prose cross-references constantly, so this is a structural cost, not a
+freak row. **"Zero false refusals introduced" was a property of an 11-row population, not
+of the mechanism** — which is the whole reason a held-out set is grown rather than quoted.
+
+**A third hole, found by building the set.** `F9`: *"Article 5 breaches are subject to
+'administrative fines of up to EUR 15 000 000'"* is false — Article 5 is the 35M/7 % tier
+— and Article 99(4) reads **"other than those laid down in Articles 5"**. The carrier
+names the claim's own article BY NUMBER, in order to EXCLUDE it. The gate compares
+numerals, finds the same one on both sides, sees no rival, and clears it. An exclusion
+clause is the exact inversion of the mechanism's assumption.
+
+Every surface that sells the check now prints recall AND cost:
+`clearance/wedge.py::RECALL_BOUNDARY`, pinned by
+`t_every_surface_states_the_recall_boundary`, which fails if the words "false refusal"
+leave the sentence or "zero false refusals" re-enters it.
 
 ## Files
 

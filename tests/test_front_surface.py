@@ -347,10 +347,19 @@ def t_every_surface_states_the_recall_boundary():
     with. A surface that sells the mechanism without that sentence sells a recall it
     does not have.
     """
-    assert "shape" in W.RECALL_BOUNDARY.lower(), \
+    b = W.RECALL_BOUNDARY
+    assert "shape" in b.lower(), \
         "the boundary no longer says it refuses one SHAPE of the error"
-    assert "probe_citation_heldout" in W.RECALL_BOUNDARY, \
+    assert "probe_citation_heldout" in b, \
         "the boundary states a limit without the command that measures it"
+    # A recall claim with no cost beside it is half a measurement. The 23-row set found
+    # the first false refusal this gate has produced (T13, a clause that cross-references
+    # another article in passing) and "zero false refusals" was a property of the
+    # 11-row population, not of the mechanism.
+    assert "false refusal" in b, \
+        "the boundary sells recall without printing what the check costs"
+    assert "zero false refusal" not in b.lower(), \
+        "the boundary claims a cost the 23-row held-out set contradicts"
     r = W.receipt()
     if r is None:
         print("    SKIP (no receipt)")

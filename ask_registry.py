@@ -622,7 +622,7 @@ def _measurement_html() -> str:
 
     AND THE STRIP ITSELF CARRIED THE NIGHT'S OWN DEFECT. Until 2026-08-31 05:5x it said
     "its only evidence is the two cases above" — on a page that, one block higher, now
-    prints the 11-claim held-out probe (SHIPS 9/11, BASE 7/11) beside the recall
+    prints the held-out probe's result (grown to 23 rows in wave 5) beside the recall
     boundary. Two correct blocks, one screen apart, one denying the other's existence.
     Pinned by `t_the_measurement_strip_does_not_deny_the_heldout_probe`.
     """
@@ -650,7 +650,7 @@ def _measurement_html() -> str:
         f"evidence of safety, because <b>{a['cite_a_provision']} of the {a['greens']} "
         "claims it clears there cite a provision at all</b>. That corpus cannot "
         "exercise the mechanism. Its evidence is the two cases above, one of which is "
-        "the case it was built for, plus the 11-claim held-out probe stated with the "
+        "the case it was built for, plus the 23-claim held-out probe stated with the "
         "boundary higher up this page. The looser arm — refusing when the span "
         "never names the provision — is built and measured and does NOT ship, for the "
         f"same reason. Reproduce: <code>{html.escape(EVAL_COMMAND)}</code>.</p>")

@@ -101,22 +101,42 @@ PROVENANCE = (
     "shipped at 04:00 on 2026-08-31."
 )
 
-# THE RECALL BOUNDARY, MEASURED — and it must appear wherever the mechanism is sold.
-# `scripts/probe_citation_heldout.py` runs 11 provision-bearing claims labelled before any
-# run: SHIPS 9/11, BASE 7/11, zero false refusals introduced. The row it misses (F3) says
-# "Article 5 breaches attract fines not exceeding 3 % of their annual total worldwide
-# turnover" — false, Article 5 is the 35M/7 % tier — and the shipping engine clears it
-# GREEN on Article 101(1), a paragraph about general-purpose AI models. The gate closes
-# the error only when the rival provision is cited BY NUMBER inside the carrier clause;
-# Article 101 names its subject in words, so there is no numeral to conflict with. The
-# honest sentence is "refuses THIS SHAPE of the error", never "refuses the error".
-# Pinned by `t_every_surface_states_the_recall_boundary`.
+# THE BOUNDARY, MEASURED — recall AND cost — and it must appear wherever the mechanism is
+# sold. `scripts/probe_citation_heldout.py` runs 23 provision-bearing claims against this
+# same Regulation, every label derived from the fetched document before any arm was run.
+#
+# WHAT IT CLOSES: 4/4 of the shape it is for — a carrier clause naming a RIVAL provision
+# BY NUMBER — against 0/4 for the engine without it. That is the whole mechanism.
+#
+# WHAT IT CANNOT SEE (0/5, and expanding the set is what priced them):
+#   words     the rival's subject is named in prose, so there is no numeral to conflict
+#             with. Article 101(1) says "providers of general-purpose AI models" and
+#             clears three different false claims about Articles 5, 16 and 99.
+#   annex     `provisions("Annex III") -> []`. An Annex I claim clears on an Annex III span.
+#   exclusion NEW, found by building this set: Article 99(4) reads "other than those laid
+#             down in Articles 5" — it names the claim's own article BY NUMBER in order to
+#             EXCLUDE it. The gate sees the same numeral on both sides, finds no rival, and
+#             clears a claim the clause explicitly denies.
+#
+# WHAT IT COSTS — and this is the number wave 4 could not have had. On 14 correctly cited
+# claims it refuses ONE: T13, "Article 88 gives the Commission 'exclusive powers to
+# supervise and enforce Chapter V'". The clause IS Article 88(1); it cites Article 94 in
+# passing ("taking into account the procedural guarantees under Article 94"), the heading
+# sits outside the returned span, so the gate reads a rival where there is a
+# cross-reference. Legal prose cross-references constantly. **The earlier claim of "zero
+# false refusals introduced" was true of an 11-row set and is false of a 23-row one** —
+# it was a property of the population, not of the mechanism.
+#
+# The honest sentence is "refuses THIS SHAPE of the error, at this cost", never "refuses
+# the error". Pinned by `t_every_surface_states_the_recall_boundary`.
 RECALL_BOUNDARY = (
     "This check refuses this SHAPE of the error — a carrier clause that names a rival "
-    "provision by number. It is not a claim to catch every miscited provision: on 11 "
-    "provision-bearing claims labelled before the run it closes 9, against 7 for the "
-    "engine without it, and the two it misses cite a rival whose subject is named in "
-    "words rather than by numeral. Reproduce: python3 scripts/probe_citation_heldout.py."
+    "provision by number. Measured on 23 provision-bearing claims labelled before the "
+    "run: it closes 4 of the 4 rows of that shape, against 0 for the engine without it; "
+    "it sees none of the 5 rows where the rival is named in words, sits in an Annex, or "
+    "is named only to be excluded; and it costs 1 false refusal in 14 correctly cited "
+    "claims, on a clause that cross-references another article in passing. Reproduce: "
+    "python3 scripts/probe_citation_heldout.py."
 )
 
 # What a keyword-grounded answer would have done with WEDGE-1, stated as a property of
