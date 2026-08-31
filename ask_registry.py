@@ -20,6 +20,7 @@ import os
 import sys
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
+from typing import Optional
 from urllib.parse import parse_qs, quote, urlencode, urlparse
 
 from clearance import curve, refusal_log
@@ -662,8 +663,11 @@ def _wedge_html() -> str:
         f'<p class="hero-claim">{html.escape(one["claim"])}</p>',
         "</div><div class=\"hero-body\">",
         _nearmiss_html(
-            side="this engine at 04:00 today, and what any keyword-grounded answer "
-                 "returns: a citation, a verbatim quote, a green tick",
+            # Dated from the receipt, never "today": the label would be a sentence the
+            # receipt's own produced_at contradicts within twenty-four hours.
+            side=(f"this engine on {r['produced_at'][:10]} with the check off, and what "
+                  "any keyword-grounded answer returns: a citation, a verbatim quote, "
+                  "a green tick"),
             verdict=one["base"]["label"], passed=one["base"]["verdict"] == "GREEN",
             span=base_span, must_contain=one["must_contain"], claim=one["claim"],
             rivals=rivals,
@@ -800,12 +804,45 @@ def _trail_html(trail: list, *, claim: str, must_contain: str) -> str:
     return "".join(out)
 
 
+def _receipt_row(term: str) -> Optional[dict]:
+    """A shelf-shaped row rebuilt from the committed wedge receipt, or None.
+
+    Not a fixture standing in for a verdict: every field here was produced by
+    `scripts/wedge_receipt.py` running the engine against the fetched instrument. The
+    row is marked with the production it came from so the page never implies the local
+    shelf holds it.
+    """
+    from clearance import wedge as W
+    r = W.receipt()
+    if not r:
+        return None
+    want = refusal_log.norm_term(term)
+    for c in r["cases"]:
+        if refusal_log.norm_term(c["must_contain"]) != want:
+            continue
+        sh = c["ships"]
+        return {"term": c["must_contain"], "established": c["claim"],
+                "verdict": sh["verdict"], "cause": sh["cause"],
+                "refusal_code": sh["refusal_code"], "citation_url": sh["citation_url"],
+                "quoted_terms": sh["quoted_terms"], "basis": None, "reused": 0,
+                "first_seen_in": f"{W.COMMAND} · {r['produced_at'][:10]}",
+                "trail": json.dumps(sh["trail"])}
+    return None
+
+
 def render_refusal(*, term: str, db: Path | str | None = None,
                    home: str = "/") -> str:
     """One row, opened: the claim, every span weighed, and why each was not evidence."""
     con = refusal_log.connect(_db(db))
     row = con.execute("SELECT * FROM claims WHERE term = ? LIMIT 1",
                       (refusal_log.norm_term(term),)).fetchone()
+    if row is None:
+        # COLD CLONE. `cache/refusal_log.db` is gitignored, so a fresh clone has the
+        # committed receipt and an empty shelf — and the front page's one call to action
+        # would dead-end on "Not on the shelf" for exactly the reader it was written for.
+        # The fallback reads the RECEIPT, which is engine output, so the law holds: this
+        # page still cannot print a verdict the engine did not produce.
+        row = _receipt_row(term)
     if row is None:
         return _SHELL.replace("__CSS__", _CSS).replace(
             "__BODY__", "<h1>Not on the shelf</h1><p class=\"lead\">No claim in this "

@@ -54,9 +54,20 @@ WHAT_IS_TRUE = ("Reuse compounds, monotonically: "
                 + f". Cumulative {CUMULATIVE[0]} of {CUMULATIVE[1]} "
                 + f"= {CUMULATIVE[0] / CUMULATIVE[1]:.0%}.")
 
+# "FLAT" WAS THE WORD DOING THE WORK, AND IT WAS NOT QUITE TRUE. This read
+# "$0.00377 → $0.00352, flat" while the chart drawn from these same four numbers shows a
+# visible spread and the panel beside it prints "7% below the first, and not monotonic".
+# Two sentences on one page, describing one set, disagreeing — the defect this product
+# exists to catch, on the product's own front page. The claim that survives measurement
+# is that there is no downward TREND while reuse climbs 46 points, so that is what it
+# says now, with the spread printed rather than smoothed. Corrected 2026-08-31.
+_COSTS = tuple(l.cost_per_claim for l in LEGS)
 WHAT_IS_NOT_TRUE = (
-    f"Cost per claim does NOT fall: ${LEGS[0].cost_per_claim:.5f} → "
-    f"${LEGS[-1].cost_per_claim:.5f}, flat. Searches per claim is flat too "
+    f"Cost per claim does NOT fall with reuse. It moves inside a narrow band and not in "
+    f"one direction: ${min(_COSTS):.5f}–${max(_COSTS):.5f} across the four legs, with "
+    f"the last {abs(_COSTS[-1] / _COSTS[0] - 1):.0%} "
+    f"{'below' if _COSTS[-1] < _COSTS[0] else 'above'} the first and the trend not "
+    f"monotonic. Searches per claim behaves the same way "
     f"({LEGS[0].searches / LEGS[0].claims:.2f} → "
     f"{LEGS[-1].searches / LEGS[-1].claims:.2f}).")
 

@@ -141,13 +141,23 @@ def t_the_curve_cannot_render_without_its_provenance():
     assert curve.WHAT_IS_NOT_TRUE[:40] in page, "only the flattering half is rendered"
 
 
-def t_the_cost_panel_prints_its_range_not_the_word_flat():
-    """'Flat' is the word doing the work, and the four legs are not identical."""
+def t_nothing_on_the_page_calls_the_cost_curve_flat():
+    """The chart and the prose must describe the same four numbers the same way.
+
+    The prose read "$0.00377 -> $0.00352, flat" while the panel drawn from those same
+    numbers printed "7% below the first, and not monotonic". Two sentences on one page,
+    describing one set, disagreeing — on the front page of the product that exists to
+    catch exactly that.
+    """
     page = A.render_front(db=_tmpdb())
     lo = min(l.cost_per_claim for l in curve.LEGS)
     hi = max(l.cost_per_claim for l in curve.LEGS)
     assert f"${lo:.4f}-${hi:.4f}" in page, "the cost panel hides its own spread"
     assert "not monotonic" in page
+    assert ", flat" not in page and " flat." not in page, \
+        "the page smooths a spread it draws"
+    # and the prose carries the real range, from the same numbers as the bars
+    assert f"${lo:.5f}" in curve.WHAT_IS_NOT_TRUE and f"${hi:.5f}" in curve.WHAT_IS_NOT_TRUE
 
 
 def t_the_two_measures_are_never_on_one_axis():
@@ -167,6 +177,43 @@ def t_a_one_cause_negative_space_says_it_is_one_cause():
 
 
 # ------------------------------------------------------------------ the audit page
+
+def t_the_heros_call_to_action_works_on_a_cold_clone():
+    """The registry db is gitignored. The page's one CTA must not dead-end on a clone.
+
+    A fresh clone has the committed receipt and an EMPTY shelf. Rendered against an
+    empty database, the link the front page tells a stranger to click returned "Not on
+    the shelf" — the product's own front door failing for exactly the reader it was
+    written for. The fallback reads the RECEIPT, which is engine output, so the page
+    still cannot print a verdict the engine did not produce.
+    """
+    r = W.receipt()
+    if r is None:
+        print("    SKIP (no receipt)")
+        return
+    case = next(c for c in r["cases"] if c["id"] == "WEDGE-1")
+    page = A.render_refusal(term=case["must_contain"], db=_tmpdb())
+    assert "Not on the shelf" not in page
+    assert case["ships"]["refusal_code"] in page
+    assert W.COMMAND in page, "the fallback must name where the row came from"
+    assert "The spans considered — 1" in page
+
+
+def t_no_surface_string_names_a_script_that_does_not_exist():
+    """A test that SKIPs by naming a nonexistent script is a false sentence in the repo."""
+    for path in sorted(ROOT.glob("tests/test_*.py")) + sorted(ROOT.glob("scripts/*.py")):
+        for m in re.findall(r"scripts/[A-Za-z0-9_]+\.py", path.read_text()):
+            assert (ROOT / m).exists(), f"{path.name} names {m}, which does not exist"
+
+
+def t_the_hero_never_says_today():
+    """A label dated 'today' becomes a sentence the receipt's own timestamp contradicts."""
+    page = A._wedge_html()
+    assert "today" not in page.lower()
+    r = W.receipt()
+    if r:
+        assert r["produced_at"][:10] in page
+
 
 def t_a_row_with_no_trail_says_so_rather_than_rendering_an_empty_audit():
     """'Nothing was considered' and 'nobody wrote it down' are different facts."""

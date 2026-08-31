@@ -250,7 +250,7 @@ def t_the_two_spans_are_verbatim_in_the_fetched_regulation():
     URL = "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32024R1689"
     body = instruments.document(URL, fetch=True)
     if not body:
-        print("    SKIP (no document — run scripts/seed_wedge.py online)")
+        print("    SKIP (no document — run python3 scripts/wedge_receipt.py online)")
         return
     assert SPAN_995 in body, "the 35M span is not verbatim in the fetched Regulation"
     assert "pursuant to Article 50" in body
@@ -266,7 +266,7 @@ def t_the_shipping_engine_refuses_the_near_miss():
     URL = "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32024R1689"
     body = instruments.document(URL, fetch=True)
     if not body:
-        print("    SKIP (no document — run scripts/seed_wedge.py online)")
+        print("    SKIP (no document — run python3 scripts/wedge_receipt.py online)")
         return
     v = judge_claim(Claim("W1", CLAIM_50, URL, MC), fetch=True)
     assert v.verdict != "GREEN", f"the near-miss still clears: {v.quoted_terms!r}"
