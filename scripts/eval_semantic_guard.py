@@ -98,11 +98,28 @@ def registry() -> dict:
                           "claim": a["text"], "must_contain": a["must_contain"],
                           "span": a.get("quoted_terms") or "",
                           "why": b.get("quoted_terms") or ""})
+    # THE EFFECT NOBODY THOUGHT TO COUNT. On this corpus the guard changes almost no
+    # VERDICTS — because when it refuses a span the locator offers the next occurrence,
+    # and a better one usually exists in the same document. So the guard's real output
+    # here is not fewer GREENs, it is BETTER EVIDENCE under the same GREENs. A run that
+    # reported only the verdict delta would have reported ~nothing and concluded the
+    # guard does nothing, which is the wrong object: the verdict was never the thing
+    # that was wrong. The span was.
+    respanned = []
+    for k, a in rows_off.items():
+        b = rows_on.get(k)
+        if not b or a["verdict"] != "SOURCED" or b["verdict"] != "SOURCED":
+            continue
+        if (a.get("quoted_terms") or "") != (b.get("quoted_terms") or ""):
+            respanned.append({"file": a["file"], "line": a["line"], "claim": a["text"],
+                              "was": a.get("quoted_terms") or "",
+                              "now": b.get("quoted_terms") or ""})
     return {
         "total": res["off"]["total"],
         "off": {k: res["off"][k] for k in ("sourced", "refused", "unknown")},
         "on": {k: res["on"][k] for k in ("sourced", "refused", "unknown")},
         "flips": flips,
+        "respanned": respanned,
         "rescued": [f for f in flips if f["to"] == "SOURCED"],
     }
 
@@ -174,6 +191,13 @@ def main() -> int:
           f"({len(r['flips']) / max(1, r['total']):.1%})")
     print(f"  refusals RESCUED to SOURCED: {len(r['rescued'])} "
           f"(must be 0 — the guard may only demote)")
+    print(f"  SOURCED on a DIFFERENT span: {len(r['respanned'])}/{r['off']['sourced']} "
+          f"— same verdict, better evidence")
+    for i, x in enumerate(r["respanned"], 1):
+        print(f"\n  (span {i}) {x['file']}:{x['line']}")
+        print(f"      claim: {x['claim'][:180]}")
+        print(f"      was  : {x['was'][:180]}")
+        print(f"      now  : {x['now'][:180]}")
     for i, f in enumerate(r["flips"], 1):
         print(f"\n  [{i}] {f['from']} -> {f['to']}   {f['file']}:{f['line']}")
         print(f"      claim: {f['claim'][:190]}")

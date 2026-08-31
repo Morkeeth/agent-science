@@ -23,6 +23,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
+from . import semantic as _semantic
+
 DB = Path(__file__).resolve().parent.parent / "cache" / "refusal_log.db"
 
 _SCHEMA = """
@@ -262,3 +264,125 @@ def as_claimreview(con, limit: int = 100) -> list:
                            else (r["resolves_with"] or r["cause"] or "")),
         })
     return out
+
+
+# ---------------------------------------------------------------- the browsable shelf
+
+# What each refusal MEANS, and what would settle it. The engine's causes are precise and
+# unreadable; a refusal nobody can act on is a dead end wearing a label. Every line here
+# is the plain-English form of the definition in clearance/verdict.py — if that file's
+# meaning changes, this is wrong, and a control binds the two sets together.
+CAUSE_ENGLISH = {
+    "no_source_offered": ("Nothing was proposed to support this.",
+                          "name a document, or run a search"),
+    "source_never_fetched": ("A source was named but never opened.",
+                             "fetch it — the URL may be dead or paywalled"),
+    "source_does_not_state_it": ("We opened the document and read it. It does not "
+                                 "state this.",
+                                 "a different source, or a narrower claim the "
+                                 "document does support"),
+    "search_found_no_admissible_source": ("We searched and came back empty.",
+                                          "a source outside the open web: a paid "
+                                          "register, an archive, a rights-holder"),
+    "no_independent_source": ("Documents were found and verified — and every one "
+                              "traces back to the same origin.",
+                              "one source that does not derive from the others"),
+    "no_instrument": ("The holder published no rights statement.",
+                      "ask the holder for terms"),
+    "unruled_instrument": ("They published terms; we have not ruled on them yet.",
+                           "our backlog, not theirs — rule the instrument"),
+    "terms_never_fetched": ("We have a rule for this instrument but never read it.",
+                            "fetch the instrument text"),
+    "holder_states_not_evaluated": ("The instrument's own text says copyright was "
+                                    "never assessed.",
+                                    "an assessment by the holder"),
+    "not_in_registry": ("Nothing in the registry sources this yet.",
+                        "run a clearance, or backfill a corpus"),
+}
+
+
+def explain(cause: str | None) -> tuple:
+    return CAUSE_ENGLISH.get(cause or "", ("", ""))
+
+
+def browse_claims(con, *, label: str | None = None, production: str | None = None,
+                  q: str | None = None, limit: int = 120) -> dict:
+    """Every row on the shelf, filterable. The refusals are the point, so they are here.
+
+    A registry that only lets you search is a lookup. A registry you can BROWSE is an
+    inventory — you can see the shape of what is known and what is not, which is the
+    only way the negative space is visible at all.
+    """
+    where, args = [], []
+    if label in ("SOURCED", "REFUTED"):
+        where.append("verdict = ?")
+        args.append("GREEN" if label == "SOURCED" else "RED")
+    elif label in ("UNSOURCED", "UNKNOWN"):
+        where.append("verdict = 'UNKNOWN'")
+    if production:
+        where.append("first_seen_in = ?")
+        args.append(production)
+    if q:
+        where.append("(lower(term) LIKE ? OR lower(established) LIKE ? "
+                     "OR lower(quoted_terms) LIKE ?)")
+        args += [f"%{norm_term(q)}%"] * 3
+    clause = (" WHERE " + " AND ".join(where)) if where else ""
+
+    total = con.execute(f"SELECT COUNT(*) c FROM claims{clause}", args).fetchone()["c"]
+    rows = []
+    for r in con.execute(
+            f"SELECT * FROM claims{clause} ORDER BY (verdict='GREEN') DESC, "
+            f"reused DESC, term LIMIT ?", args + [limit]):
+        d = dict(r)
+        d["label"] = surface_label(verdict=d["verdict"], cause=d.get("cause"))
+        d["meaning"], d["settles_it"] = explain(d.get("cause"))
+        # THIN EVIDENCE. Not a refusal — measured 2026-08-31, a coverage gate refuses
+        # ordinary paraphrase and this repo has lost a day to refusing too much. But a
+        # SOURCED row whose span carries almost none of the claim is the product quoting
+        # page furniture under the word "sourced", and that is worse than an honest
+        # UNKNOWN. So it is neither hidden nor refused: it is counted, on the row, in the
+        # buyer's face, with the fraction printed so they can judge it themselves.
+        d["coverage"] = (_semantic.coverage(d.get("quoted_terms") or "",
+                                            d.get("established") or "")
+                         if d["label"] == "SOURCED" else None)
+        d["thin"] = (d["coverage"] is not None
+                     and d["coverage"] < _semantic.DEFAULT_MIN_COVERAGE)
+        rows.append(d)
+    # A label filter that maps to more than one verdict has to be applied after
+    # surface_label, or UNSOURCED and UNKNOWN would return each other's rows.
+    if label in ("UNSOURCED", "UNKNOWN"):
+        rows = [r for r in rows if r["label"] == label]
+        total = len(rows)
+    elif label == "THIN":
+        rows = [r for r in rows if r["thin"]]
+        total = len(rows)
+    return {"rows": rows, "total": total, "limit": limit}
+
+
+def thin_evidence_count(con) -> tuple:
+    """(rows resting on thin evidence, sourced rows). Printed on the desk, not buried."""
+    sourced = [dict(r) for r in con.execute("SELECT * FROM claims WHERE verdict='GREEN'")]
+    thin = sum(1 for r in sourced
+               if _semantic.coverage(r.get("quoted_terms") or "",
+                                     r.get("established") or "")
+               < _semantic.DEFAULT_MIN_COVERAGE)
+    return thin, len(sourced)
+
+
+def by_cause(con) -> list:
+    """The negative space, counted. Nobody else accumulates this."""
+    out = []
+    for r in con.execute(
+            "SELECT verdict, cause, COUNT(*) n FROM claims GROUP BY verdict, cause "
+            "ORDER BY n DESC"):
+        label = surface_label(verdict=r["verdict"], cause=r["cause"])
+        meaning, settles = explain(r["cause"])
+        out.append({"label": label, "cause": r["cause"] or "", "n": r["n"],
+                    "meaning": meaning, "settles_it": settles})
+    return out
+
+
+def productions(con) -> list:
+    return [dict(r) for r in con.execute(
+        "SELECT first_seen_in p, COUNT(*) n, SUM(verdict='GREEN') cleared "
+        "FROM claims GROUP BY first_seen_in ORDER BY n DESC")]
