@@ -21,7 +21,7 @@ deadline: 2026-09-09T14:00:00-07:00
 |-------|--------|
 | **Product noun** | **Agent Science** — truth layer for what people believe and use · B lead · A on the same layer |
 | **Product** | LIVE on Cloud Run · public repo · sealed prediction |
-| **Build lane** | Re-center demos on companion + agentic practices; clearance stays a vertical |
+| **Build lane** | Personal truth DB + Magnet bridge stub · visibility expands websearch |
 | **Oscar** | Video + Devpost still open — lead companion, show clearance as one shelf customer |
 | **Film lead** | Ask → sourced/refuse → free on re-ask · ≥2 domains · E&O as *a* truth not the only story |
 
@@ -103,6 +103,7 @@ bash scripts/full_gate.sh
 
 | When (UTC) | What |
 |------------|------|
+| 2026-08-31 22:05 | Personal truth DB stub + Magnet skill bridge · push ambition after competitor research |
 | 2026-08-31 21:55 | Competitor research — websearch field map + steal angles → `RESEARCH-WEBSEARCH-COMPETITORS-2026-08-31.md` |
 | 2026-08-31 20:35 | Full websearch rundown — `WEBSEARCH-FULL-RUNDOWN.md` + `visibility --full` (10 panes) |
 | 2026-08-31 20:32 | Skill + `clearance visibility` / `science_visibility` — multi-pane websearch, not one answer |

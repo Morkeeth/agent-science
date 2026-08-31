@@ -119,13 +119,30 @@ def panel(
     live: bool = False,
     subject: str = "stack",
     full: bool = False,
+    personal: bool = True,
 ) -> dict[str, Any]:
-    """Visibility panel — full=True for complete agentic-truth rundown."""
+    """Visibility panel — full=True for complete agentic-truth rundown.
+
+    When personal=True (default), indexes the ask into ~/.agent-science/truth.db.
+    """
+    from clearance import personal_truth
+
+    local = personal_truth.lookup_local(query) if personal else None
     primary = stack_search.lookup(query, live=live, subject=subject)
     out: dict[str, Any] = {
         "query": query,
         "mode": "full" if full else "standard",
         "primary": primary,
+        "personal_prior": (
+            {
+                "label": local.get("result_label"),
+                "asked_at": local.get("asked_at"),
+                "citation_url": local.get("citation_url"),
+                "cause": local.get("cause"),
+            }
+            if local
+            else None
+        ),
         "aliases": _alias_hits(query),
         "field": _field_hits(query, full=full),
         "agentic_practices": _practices_hits(query, full=full),
@@ -143,7 +160,8 @@ def panel(
         "discipline": (
             "Agent Science websearch = truth layer for believe+use. "
             "Primary is one pane; ★/blogs/practices/peers are visibility. "
-            "Stars never author SOURCED. Full rundown: docs/WEBSEARCH-FULL-RUNDOWN.md"
+            "Personal DB indexes your asks. Stars never author SOURCED. "
+            "Full rundown: docs/WEBSEARCH-FULL-RUNDOWN.md"
         ),
     }
     if full:
@@ -152,6 +170,19 @@ def panel(
             "top_reused": query_analytics.top_terms(limit=8),
             "alias_candidates": query_analytics.alias_candidates(limit=8),
         }
+        if personal:
+            out["personal_stats"] = personal_truth.stats()
+    if personal:
+        slim = {
+            "mode": out.get("mode"),
+            "aliases": out.get("aliases"),
+            "field_github": [g.get("repo") for g in (out.get("field") or {}).get("github") or []],
+            "practices": [h.get("who") for h in out.get("agentic_practices") or []],
+        }
+        ask_id = personal_truth.record_ask(
+            query, primary, panel=slim, source="visibility"
+        )
+        out["personal_ask_id"] = ask_id
     return out
 
 
@@ -161,6 +192,21 @@ def format_panel(data: dict) -> str:
     lines = [
         f"# Agent Science websearch · {mode} visibility",
         f"# Query · {data.get('query')}",
+        "",
+        "## 0 · Personal prior (your truth DB)",
+    ]
+    prior = data.get("personal_prior")
+    if prior:
+        lines.append(
+            f"  earlier={prior.get('label')}  at={prior.get('asked_at')}  "
+            f"url={prior.get('citation_url') or prior.get('cause') or '—'}"
+        )
+    else:
+        lines.append("  (first ask on this machine — will index into ~/.agent-science/truth.db)")
+    if data.get("personal_ask_id"):
+        lines.append(f"  indexed_ask_id={data['personal_ask_id']}")
+
+    lines += [
         "",
         "## 1 · Primary (dictionary — verify or refuse)",
         f"  label={p.get('label') or p.get('result_label')}  "
@@ -236,10 +282,19 @@ def format_panel(data: dict) -> str:
         s = data["shelf_stats"]
         lines += [
             "",
-            "## 9 · Shelf stats",
+            "## 9 · Fleet shelf stats",
             f"  claims={s.get('n')} cleared={s.get('cleared')} "
             f"refused={s.get('refused')} queries={s.get('queries_logged')} "
             f"hit_rate={s.get('dictionary_hit_rate')}",
+        ]
+    if data.get("personal_stats"):
+        ps = data["personal_stats"]
+        lines += [
+            "",
+            "## 9b · Personal truth DB",
+            f"  db={ps.get('db')}  asks={ps.get('asks')}  "
+            f"truths={ps.get('truths')}  skills={ps.get('skills')}  "
+            f"fetches={ps.get('fetches')}",
         ]
 
     if data.get("popular_bundle"):

@@ -106,13 +106,44 @@ def cmd_stats(_args: argparse.Namespace) -> int:
 def cmd_visibility(args: argparse.Namespace) -> int:
     from clearance import visibility
     data = visibility.panel(
-        args.query, live=args.live, subject=args.subject, full=args.full,
+        args.query,
+        live=args.live,
+        subject=args.subject,
+        full=args.full,
+        personal=not args.no_personal,
     )
     if args.json:
         print(json.dumps(data, indent=2, default=str))
     else:
         print(visibility.format_panel(data), end="")
     return 0
+
+
+def cmd_truth(args: argparse.Namespace) -> int:
+    from clearance import personal_truth
+    if args.action == "stats":
+        print(json.dumps(personal_truth.stats(), indent=2))
+        return 0
+    if args.action == "recent":
+        print(json.dumps(personal_truth.recent_asks(limit=args.limit), indent=2, default=str))
+        return 0
+    if args.action == "truths":
+        print(json.dumps(
+            personal_truth.recent_truths(kind=args.kind, limit=args.limit),
+            indent=2, default=str,
+        ))
+        return 0
+    if args.action == "fetch-field":
+        print(json.dumps(personal_truth.ingest_field_signals(), indent=2))
+        return 0
+    if args.action == "skill":
+        tid = personal_truth.record_skill_truth(
+            args.skill, args.verdict, probe=args.probe, note=args.note,
+        )
+        print(json.dumps({"id": tid, **personal_truth.stats()}, indent=2))
+        return 0
+    print("unknown truth action", file=sys.stderr)
+    return 1
 
 
 def cmd_ingest(args: argparse.Namespace) -> int:
@@ -179,8 +210,30 @@ def main(argv=None) -> int:
     vis.add_argument("--live", action="store_true")
     vis.add_argument("--full", action="store_true",
                      help="full agentic-truth rundown (all panes)")
+    vis.add_argument("--no-personal", action="store_true",
+                     help="do not write ~/.agent-science/truth.db")
     vis.add_argument("--json", action="store_true")
     vis.set_defaults(func=cmd_visibility)
+
+    tr = sub.add_parser("truth", help="personal truth DB (~/.agent-science/truth.db)")
+    tr_sub = tr.add_subparsers(dest="action", required=True)
+    tr_sub.add_parser("stats", help="personal shelf counts").set_defaults(func=cmd_truth)
+    tr_r = tr_sub.add_parser("recent", help="recent personal asks")
+    tr_r.add_argument("--limit", type=int, default=20)
+    tr_r.set_defaults(func=cmd_truth)
+    tr_t = tr_sub.add_parser("truths", help="recent personal truths")
+    tr_t.add_argument("--kind", choices=["claim", "skill", "field_fetch"])
+    tr_t.add_argument("--limit", type=int, default=20)
+    tr_t.set_defaults(func=cmd_truth)
+    tr_sub.add_parser(
+        "fetch-field", help="pull field-signals URLs into personal fetches"
+    ).set_defaults(func=cmd_truth)
+    tr_s = tr_sub.add_parser("skill", help="record Magnet skill verdict as truth")
+    tr_s.add_argument("skill")
+    tr_s.add_argument("verdict", choices=["helped", "hurt", "baseline"])
+    tr_s.add_argument("--probe")
+    tr_s.add_argument("--note")
+    tr_s.set_defaults(func=cmd_truth)
 
     ig = sub.add_parser("ingest", help="ingest claim into registry")
     ig.add_argument("--claim")

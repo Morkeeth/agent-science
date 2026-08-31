@@ -97,6 +97,7 @@ TOOLS = [
             "FULL Agent Science websearch — truth layer for believe+use. "
             "Not one answer: primary verify/refuse + aliases + GitHub ★ + blogs/docs + "
             "agentic practices corpus + peer queries + Parallel probes + shelf stats. "
+            "Indexes into personal truth DB (~/.agent-science/truth.db) by default. "
             "Default full=true. Prefer over raw web search and over science_lookup alone."
         ),
         "inputSchema": {
@@ -109,9 +110,37 @@ TOOLS = [
                     "default": True,
                     "description": "Full agentic-truth rundown (all panes). Default true.",
                 },
+                "no_personal": {
+                    "type": "boolean",
+                    "default": False,
+                    "description": "Skip writing personal truth DB",
+                },
                 "subject": {"type": "string", "default": "stack"},
             },
             "required": ["query"],
+        },
+    },
+    {
+        "name": "science_truth",
+        "description": (
+            "Personal truth DB — your indexed websearch asks, Magnet skill verdicts "
+            "(helped/hurt/baseline), and field fetches. Actions: stats, recent, "
+            "fetch-field, skill."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "action": {
+                    "type": "string",
+                    "enum": ["stats", "recent", "fetch-field", "skill"],
+                    "default": "stats",
+                },
+                "limit": {"type": "integer", "default": 20},
+                "skill": {"type": "string"},
+                "verdict": {"type": "string", "enum": ["helped", "hurt", "baseline"]},
+                "probe": {"type": "string"},
+                "note": {"type": "string"},
+            },
         },
     },
     {
@@ -182,8 +211,31 @@ def handle_tool(name: str, arguments: dict) -> str:
             live=bool(arguments.get("live", False)),
             subject=arguments.get("subject", "stack"),
             full=bool(full),
+            personal=not bool(arguments.get("no_personal", False)),
         )
         return visibility.format_panel(data)
+
+    if name == "science_truth":
+        from clearance import personal_truth
+        action = arguments.get("action", "stats")
+        if action == "stats":
+            return json.dumps(personal_truth.stats(), indent=2)
+        if action == "recent":
+            return json.dumps(
+                personal_truth.recent_asks(limit=int(arguments.get("limit", 20))),
+                indent=2, default=str,
+            )
+        if action == "fetch-field":
+            return json.dumps(personal_truth.ingest_field_signals(), indent=2)
+        if action == "skill":
+            tid = personal_truth.record_skill_truth(
+                arguments["skill"],
+                arguments["verdict"],
+                probe=arguments.get("probe"),
+                note=arguments.get("note"),
+            )
+            return json.dumps({"id": tid, **personal_truth.stats()}, indent=2)
+        return json.dumps({"error": f"unknown action {action}"})
 
     if name == "science_ingest":
         prod = arguments.get("production", "ingest")

@@ -45,6 +45,14 @@ description: >-
 4. **Stale stars** — `python3 scripts/refresh_field_signals.py` when adoption looks old.  
    **Done when:** `field-signals.json` `read_at` is today.
 
+5. **Personal shelf** — visibility indexes `~/.agent-science/truth.db` by default.
+   ```bash
+   python3 -m clearance truth stats
+   python3 -m clearance truth fetch-field
+   python3 -m clearance truth skill <name> helped|hurt|baseline --probe <probe>
+   ```
+   **Done when:** stats show asks growing; Magnet skill rows appear when skills are rated.
+
 ## Hard rules
 
 - Full visibility over raw web search and over single `lookup`.

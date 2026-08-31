@@ -27,7 +27,8 @@ Or manually in `~/.cursor/mcp.json`:
 
 | Tool | When |
 |------|------|
-| `science_visibility` | **Scout / research** — multi-pane truth layer (primary + ★ + blogs + peers). More than one answer. |
+| `science_visibility` | **Scout / research** — multi-pane truth layer; indexes personal DB |
+| `science_truth` | Personal truth DB — stats, recent asks, fetch-field, Magnet skill verdicts |
 | `science_lookup` | Fast single lookup when you already know you only need the verdict |
 | `science_search` | When dictionary miss needs **fresh Parallel discovery** |
 | `science_browse` | See what the stack already searched |
