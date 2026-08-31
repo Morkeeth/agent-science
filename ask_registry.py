@@ -1009,7 +1009,7 @@ def render_front(*, db: Path | str | None = None, registry_href: str = "/registr
          f"other {_spell(len(verdict.CAUSES) - len(refusal_rows))} causes are "
          "rare. The engine's refusal vocabulary is a closed set of "
          f"{len(verdict.CAUSES)}; this shelf has exercised "
-         f"{len(refusal_rows)} of them.</p>") if len(refusal_rows) < 2 else "",
+         f"{len(refusal_rows)} of them.</p>") if len(refusal_rows) == 1 else "",
         f'<p class="meta" style="margin-top:2.4rem">'
         f'<a class="rowlink" href="{html.escape(registry_href, quote=True)}">'
         "browse every claim on the shelf →</a></p>",

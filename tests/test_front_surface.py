@@ -445,11 +445,19 @@ def t_the_declared_cause_vocabulary_is_the_engines_not_the_renderers():
          numerator and the denominator are counted over the same vocabulary.
     """
     from clearance import verdict as V
+    # AND IT MUST NOT SPEAK FOR AN EMPTY SHELF. The box fired at `len(rows) < 2`, so a
+    # COLD CLONE — the stranger's first /front, before `scripts/boot_registry.py` seeds
+    # anything — read "Every refusal on this desk currently carries the same cause …
+    # this shelf has exercised 0 of them": a sentence about every refusal, on a shelf
+    # with none, true only by vacuity. Now `== 1`.
+    empty = A.render_front(db=_tmpdb())
+    assert "refusal vocabulary is a closed set of" not in empty, \
+        "the one-cause box speaks for a shelf with no refusals on it"
     page = A.render_front()
     m = re.search(r"refusal vocabulary is a closed set of (\d+); this shelf has "
                   r"exercised (\d+) of them", page)
     if m is None:
-        print("    SKIP (shelf shows more than one refusal cause; the box is off)")
+        print("    SKIP (the shelf does not show exactly one refusal cause)")
         return
     declared, exercised = int(m.group(1)), int(m.group(2))
     assert declared == len(V.CAUSES), (
