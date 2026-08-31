@@ -24,14 +24,15 @@
 **Product:** Agent Science websearch returns a **full visibility panel** — primary verdict, transparency (angles searched, shallow-route warning, imbalance), field adoption (★), blogs, fleet peers, and **stack-fit**: does this truth fit *your* repo, and what improves if you adopt it?
 
 **Proof on camera:**
-1. `visibility "ralph loop agentic" --full` → pane 1b transparency + `CONTRARY_TO_RESEARCH`
-2. `/truths/ui` on hosted — ranked queries, 265 claims, hit rate at object
+1. **Hosted** `/visibility/ui?q=ralph+loop+agentic` — transparency pane + CONTRARY stamp (no CLI needed)
+2. `/truths/ui` — ranked queries, 265+ claims
 3. Compound: same subject twice → `parallel_calls` drop, `corpus_hits` rise
 
 **Moat:** Positive truths + negative truths (named refusal) + popularity → self-tuning dictionary. Competitors prove the first script. We prove the **second costs less** — and we show *how we searched*.
 
 **Hosted:** https://agent-science-568004190078.us-central1.run.app  
-**Revision:** `agent-science-00018-n4s` · `/truths/ui` live
+**Film URL:** https://agent-science-568004190078.us-central1.run.app/visibility/ui?q=ralph+loop+agentic  
+**Revision:** deployed with `/visibility` + `/truths/ui`
 
 ---
 

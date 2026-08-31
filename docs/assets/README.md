@@ -22,6 +22,7 @@ Captured from https://agent-science-568004190078.us-central1.run.app
 | [screens/03-registry-shelf.png](./screens/03-registry-shelf.png) | `/registry` | Browsable truth shelf |
 | [screens/04-registry-search.png](./screens/04-registry-search.png) | `/registry?q=2012/28/EU` | EU directive registry hit |
 | [screens/05-popular-ui.png](./screens/05-popular-ui.png) | `/popular/ui` | Dev query analytics |
+| [screens/08-visibility-ui.png](./screens/08-visibility-ui.png) | `/visibility/ui` | Full websearch panel — transparency WOW |
 | [screens/07-truths-dashboard.png](./screens/07-truths-dashboard.png) | `/truths/ui` | Truths dashboard — ranked queries + ★ strip |
 | [screens/06-partners-json.png](./screens/06-partners-json.png) | `/partners` | Partner track manifest |
 

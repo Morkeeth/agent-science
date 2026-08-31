@@ -203,6 +203,22 @@ def test_the_template_is_never_run_through_format():
     assert page.strip().startswith("<!DOCTYPE html>") and page.rstrip().endswith("</html>")
 
 
+def test_visibility_ui_renders_transparency():
+    """Hosted /visibility/ui — full websearch panel for judges."""
+    from cloud.service import _visibility_page
+    page = _visibility_page("ralph loop agentic", full=True)
+    assert "Transparency" in page
+    assert "ralph loop agentic" in page
+    assert "Websearch visibility" in page
+
+
+def test_visibility_json_panel_shape():
+    from cloud.service import _visibility_panel
+    data = _visibility_panel("ralph loop", full=True)
+    assert "primary" in data or "query" in data
+    assert data.get("transparency") or "transparency" in str(data)
+
+
 def test_truths_dashboard_page_renders():
     """Hosted /truths/ui — popular queries + field strip."""
     from cloud.service import _truths_page

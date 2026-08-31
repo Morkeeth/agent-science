@@ -13,6 +13,9 @@
   GET  /stats              dictionary economics + recent queries
   GET  /popular            top dev queries + optimization targets (JSON)
   GET  /popular/ui         HTML report for devs
+  GET  /truths/ui          truths dashboard — ranked queries + field ★
+  GET  /visibility?q=      full truth-layer panel (JSON)
+  GET  /visibility/ui?q=     HTML visibility — transparency WOW for judges
 
 Stdlib in the serving path, except the ADK agent that /clear runs through: Agent
 Builder is a submission requirement and a requirement is not met by a module nobody
@@ -95,7 +98,7 @@ button:hover{background:#000}
   <p class="thesis">Agent Science — the truth layer for what people believe and use.
   Every claim sourced verbatim, or refused with why. The registry remembers.
   Developer practice and clearance facts live on the same layer.</p>
-  <p class="nav"><a href="/front">What this desk refuses, and why that is the product</a> · <a href="/registry">Browse the registry</a> · <a href="/truths/ui">Truths dashboard</a> · <a href="/popular/ui">Popular queries</a> — {registry_stats} verified truths on disk.</p>
+<p class="nav"><a href="/front">What this desk refuses, and why that is the product</a> · <a href="/visibility/ui?q=ralph+loop+agentic">Websearch visibility</a> · <a href="/registry">Browse the registry</a> · <a href="/truths/ui">Truths dashboard</a> · <a href="/popular/ui">Popular queries</a> — {registry_stats} verified truths on disk.</p>
   <form class="desk" method="post" action="/clear">
     <div class="row">
       <div>
@@ -434,6 +437,44 @@ th{{font-family:monospace;font-size:.7rem;text-transform:uppercase;letter-spacin
 </div></body></html>"""
 
 
+def _visibility_panel(query: str, *, live: bool = False, full: bool = True) -> dict:
+    from clearance import visibility
+    return visibility.panel(query, live=live, full=full, personal=False)
+
+
+def _visibility_page(query: str, *, live: bool = False, full: bool = True) -> str:
+    """Full websearch visibility — truth layer HTML for judges."""
+    from clearance import visibility
+    q = query.strip() or "ralph loop agentic"
+    data = _visibility_panel(q, live=live, full=full)
+    body = visibility.format_panel(data)
+    esc_q = _esc(q)
+    return f"""<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Visibility · Agent Science</title>
+<style>
+body{{font-family:"IBM Plex Mono",monospace;background:#e8e6e1;color:#16181d;margin:0;padding:1.5rem;font-size:.82rem;line-height:1.45}}
+.wrap{{max-width:52rem;margin:0 auto}}
+h1{{font-family:Georgia,serif;font-size:1.5rem;margin:0 0 .5rem}}
+p.meta{{color:#61656e;font-size:.9rem;font-family:Georgia,serif}}
+a{{color:inherit}}
+form{{margin:1rem 0;display:flex;gap:.5rem;flex-wrap:wrap}}
+input[type=text]{{flex:1;min-width:12rem;padding:.5rem;border:1px solid #c9c5bd;font:inherit}}
+button{{font:inherit;padding:.5rem 1rem;background:#16181d;color:#e8e6e1;border:0;cursor:pointer}}
+pre{{white-space:pre-wrap;word-break:break-word;background:#fff;border:1px solid #c9c5bd;padding:1rem;margin:1rem 0}}
+</style></head><body><div class="wrap">
+<p><a href="/">← desk</a> · <a href="/truths/ui">truths</a> · <a href="/registry">registry</a></p>
+<h1>Websearch visibility</h1>
+<p class="meta">Truth layer for what builders believe and use — not one answer. Pane 1b shows what was searched.</p>
+<form method="get" action="/visibility/ui">
+  <input type="text" name="q" value="{esc_q}" placeholder="e.g. ralph loop agentic" required>
+  <button type="submit">Run full visibility</button>
+</form>
+<pre>{_esc(body)}</pre>
+</div></body></html>"""
+
+
 def _run_clearance(script: str, subject: str, model: str) -> dict:
     """Clear through the ADK agent, and say so in the report.
 
@@ -530,6 +571,19 @@ class Handler(BaseHTTPRequestHandler):
         if path in ("/truths/ui", "/truths/ui/"):
             limit = int((qs.get("limit") or ["15"])[0])
             return self._send(200, _truths_page(limit).encode(), "text/html; charset=utf-8")
+
+        if path == "/visibility":
+            q = (qs.get("q") or ["ralph loop agentic"])[0]
+            live = (qs.get("live") or ["false"])[0].lower() in ("1", "true", "yes")
+            full = (qs.get("full") or ["true"])[0].lower() not in ("0", "false", "no")
+            return self._json(200, _visibility_panel(q, live=live, full=full))
+
+        if path in ("/visibility/ui", "/visibility/ui/"):
+            q = (qs.get("q") or ["ralph loop agentic"])[0]
+            live = (qs.get("live") or ["false"])[0].lower() in ("1", "true", "yes")
+            full = (qs.get("full") or ["true"])[0].lower() not in ("0", "false", "no")
+            return self._send(200, _visibility_page(q, live=live, full=full).encode(),
+                              "text/html; charset=utf-8")
 
         if path == "/health":
             gemini_path = "none"

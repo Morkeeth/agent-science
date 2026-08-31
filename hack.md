@@ -386,7 +386,8 @@ bash scripts/verify_cold_clone.sh                                               
 
 | When | What | Command | Outcome |
 |------|------|---------|---------|
-| 2026-09-01 overnight | Deploy + pitch pack | `./deploy.sh` · `docs/PITCH-TOMORROW.md` | **rev 00018-n4s** · `/truths/ui` live · Oscar films transparency WOW |
+| 2026-09-01 hammer | Hosted visibility + demo | `./deploy.sh` · `demo_truth_layer.sh` | `/visibility/ui` live · 127/127 gate |
+| 2026-09-01 overnight | Deploy + pitch pack | `./deploy.sh` | rev 00018 · PITCH-TOMORROW |
 | 2026-08-31 night | Truth layer night S1–S8 | `bash scripts/full_gate.sh` | **FULL GATE OK** · transparency · CONTRARY · stack-fit · notes · receipt |
 | 2026-08-31 11:27Z | Full gate | `bash scripts/full_gate.sh` | **FULL GATE OK** · STATUS.md · DEVPOST-READY · CLAUDE.md |
 | 2026-08-31 PM | Handbook pass | hack.md rewrite | ladder · field · websearch · roadmap · winner angles |

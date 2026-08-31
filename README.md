@@ -1,13 +1,41 @@
 # Agent Science
 
-**LIVE:** https://agent-science-568004190078.us-central1.run.app · [registry](https://agent-science-568004190078.us-central1.run.app/registry) · [popular](https://agent-science-568004190078.us-central1.run.app/popular/ui)  
-**Status:** `docs/STATUS.md` · **Deadline:** Agentic Cinema · Sep 9 2026 · Parallel track
+**The truth layer for what agentic builders believe and use.**
+
+**LIVE:** https://agent-science-568004190078.us-central1.run.app  
+· [visibility](https://agent-science-568004190078.us-central1.run.app/visibility/ui?q=ralph+loop+agentic) · [truths](https://agent-science-568004190078.us-central1.run.app/truths/ui) · [registry](https://agent-science-568004190078.us-central1.run.app/registry)
+
+**Status:** `docs/STATUS.md` · **Pitch:** `docs/PITCH-TOMORROW.md` · **Deadline:** Agentic Cinema · Sep 9 2026
+
+---
+
+## What it is
+
+Not another answer engine. Agent Science websearch returns:
+
+- **Primary verdict** — sourced verbatim, refused with cause, or **CONTRARY TO RESEARCH** when the field outruns papers
+- **Transparency** — angles searched, shallow-route warning, source imbalance
+- **Field context** — GitHub ★, blogs, practitioner corpus, peer queries
+- **Stack-fit** — does this truth fit *your* repo; what improves if you adopt it
+- **Memory** — ask once; shelf compounds; second ask is free
+
+Clearance and E&O? One vertical on the same layer — not the whole product.
+
+```bash
+bash scripts/demo_truth_layer.sh                    # film-ready demo
+python3 -m clearance.stack_cli visibility "ralph loop agentic" --full
+open https://agent-science-568004190078.us-central1.run.app/visibility/ui
+```
+
+**Proof:** `bash scripts/full_gate.sh` → FULL GATE OK · **125/125** controls
+
+---
+
+## Clearance desk (vertical A)
 
 **Paste a documentary script. Get back every checkable claim with the document that
 supports it — quoted verbatim — and every claim you cannot source, with the reason
 you cannot.**
-
-**Proof:** `python3 scripts/seed_document_cache.py && python3 tests/test_watch_it_go_red.py` → **72/72** mutation controls; orphan-works A/B **2 → 1** Parallel calls offline (`docs/COMPOUND-EXHIBIT-2026-08-29.md`).
 
 **Constraint:** a model may only **locate** evidence. If the proposed passage is not
 **verbatim** in the fetched document, the verdict is UNSOURCED — never paraphrase,
@@ -17,13 +45,13 @@ Built for [Agentic Cinema](https://agentic-cinema.devpost.com/) · Parallel trac
 
 **Architecture:** [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) · diagrams + [screenshots](docs/assets/README.md)
 
-## Stack websearch (use this for all fleet research)
+## Stack websearch (fleet)
 
 ```bash
 python3 scripts/boot_registry.py              # once: fleet corpus → registry
-python3 scripts/install-mcp.sh                # Cursor: science_search tool
-python3 -m clearance search "your query"      # CLI
-python3 -m clearance serve                    # HTTP :8080 — /search /registry /clear
+python3 scripts/install-mcp.sh                # Cursor: science_visibility tool
+python3 -m clearance.stack_cli visibility "…" --full
+python3 -m clearance serve                    # HTTP :8080 — /visibility /truths/ui
 ```
 
 See **`AGENTS.md`** — route every agent websearch through Agent Science, not raw search.
@@ -31,7 +59,7 @@ See **`AGENTS.md`** — route every agent websearch through Agent Science, not r
 ```bash
 python3 scripts/seed_document_cache.py   # offline document cache (cold clone)
 python3 agent_science.py fixtures/scripts/documentary-orphan-works.txt
-./demo.sh          # the whole story in one command (live keys required)
+./demo.sh          # clearance story (live keys required)
 ```
 
 ## The one rule

@@ -15,6 +15,7 @@ PAGES = [
     ("/registry", "03-registry-shelf.png", 1280, 1400),
     ("/registry?q=2012%2F28%2FEU", "04-registry-search.png", 1280, 1200),
     ("/popular/ui", "05-popular-ui.png", 1280, 1400),
+    ("/visibility/ui", "08-visibility-ui.png", 1280, 2000),
     ("/truths/ui", "07-truths-dashboard.png", 1280, 1400),
     ("/partners", "06-partners-json.png", 1280, 900),
 ]

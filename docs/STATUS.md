@@ -11,7 +11,7 @@ deadline: 2026-09-09T14:00:00-07:00
 > **For Claude / fleet:** this file is the single “where we are” surface.  
 > `hack.md` = process · `CLAUDE.md` = entry · this file = gates + evidence.
 
-**Last gate run:** 2026-08-31T21:39:43Z — `bash scripts/full_gate.sh` → **FULL GATE OK** (deploy 00018 · 125/125 · 19/19 long run)
+**Last gate run:** 2026-08-31T21:46:02Z — `bash scripts/full_gate.sh` → **FULL GATE OK** (127/127 · visibility hosted · 19/19 long run)
 
 ---
 
@@ -43,11 +43,11 @@ deadline: 2026-09-09T14:00:00-07:00
 | Gate | Result | Command / doc |
 |------|--------|----------------|
 | Mutation controls | **72/72** | `test_watch_it_go_red.py` |
-| All test suites | **125/125** + truth-layer suites | `bench_check_docs.py` + `full_gate.sh` |
+| All test suites | **127/127** + truth-layer suites | `bench_check_docs.py` + `full_gate.sh` |
 | Secret scan | **6/6** | `test_secret_surfaces.py` |
 | Partner runtime | **6/6** | `test_partner_runtime.py` + `test_parallel_integration.py` |
 | ADK default | **5/5** | `test_adk_default_path.py` |
-| Registry surface | **14/14** | `test_registry_surface.py` |
+| Registry surface | **16/16** | `test_registry_surface.py` |
 | Cold clone | ✅ | `verify_cold_clone.sh` |
 | Hosted long run | **19/19** | `long_run_goal.sh` |
 | Stranger trial | ✅ | `new_user_trial.sh` |
@@ -66,7 +66,8 @@ deadline: 2026-09-09T14:00:00-07:00
 | **URL** | https://agent-science-568004190078.us-central1.run.app |
 | **Revision** | `agent-science-00018-n4s` · `parallel_sdk: true` · **`/truths/ui` live** |
 | **Health** | `engine_default: adk` · 265 claims · hit rate ~0.80 |
-| **New** | `GET /truths/ui` — truths dashboard (deployed overnight) |
+| **New** | `GET /visibility/ui` — full websearch panel for judges (film this) |
+| **New** | `GET /truths/ui` — truths dashboard |
 | **Stats** | 265 claims · hit rate ~0.80 · queries logged growing |
 
 **Compound (sealed):** `longrun-0831-1320` A=**1** → B=**0** Parallel · B `corpus_hits=1`
@@ -103,7 +104,7 @@ bash scripts/full_gate.sh
 
 | When (UTC) | What |
 |------------|------|
-| 2026-09-01 05:45 | **Overnight** — deploy `00018-n4s` · `/truths/ui` live · PITCH-TOMORROW · DEVPOST truth-layer copy |
+| 2026-09-01 06:00 | **Hammer** — `/visibility/ui` hosted · demo_truth_layer.sh · README truth-layer lead · Devpost §0 |
 | 2026-08-31 21:23 | Truth layer night — transparency, CONTRARY, stack-fit, community notes, `/truths/ui` (branch) |
 | 2026-08-31 21:55 | Competitor research — websearch field map + steal angles → `RESEARCH-WEBSEARCH-COMPETITORS-2026-08-31.md` |
 | 2026-08-31 20:35 | Full websearch rundown — `WEBSEARCH-FULL-RUNDOWN.md` + `visibility --full` (10 panes) |

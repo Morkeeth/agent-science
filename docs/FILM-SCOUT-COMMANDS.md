@@ -30,18 +30,14 @@ Expect `[CONTRARY_TO_RESEARCH]` when field outruns paper — plus full visibilit
 python3 -m clearance.stack_cli stack-fit "science_lookup MCP fleet agents"
 ```
 
-## Beat 5 · Truths dashboard (hosted after deploy)
+## Beat 5 · Hosted visibility (film in browser — no CLI)
 
-Local:
-```bash
-python3 -m clearance.stack_cli serve &
-open http://127.0.0.1:8080/truths/ui
 ```
-
-Hosted (after Oscar deploy):
-```
+https://agent-science-568004190078.us-central1.run.app/visibility/ui?q=ralph+loop+agentic
 https://agent-science-568004190078.us-central1.run.app/truths/ui
 ```
+
+Or one command: `bash scripts/demo_truth_layer.sh`
 
 ## Beat 6 · Compound (free re-ask)
 

@@ -34,7 +34,7 @@ python3 ask_registry.py "agentlint" | head -5
 |-------|---------|--------|
 | watch_it_go_red | `python3 tests/test_watch_it_go_red.py` | **72/72** |
 | adk_default_path | `python3 tests/test_adk_default_path.py` | **5/5** |
-| registry_surface | `python3 tests/test_registry_surface.py` | **14/14** |
+| registry_surface | `python3 tests/test_registry_surface.py` | **16/16** |
 | cross_subject_reuse | `python3 tests/test_cross_subject_reuse.py` | **2/2** |
 | backfill_seeds_reuse | `python3 tests/test_backfill_seeds_reuse.py` | **2/2** |
 | clear_corpus | `python3 tests/test_clear_corpus.py` | **4/4** |
@@ -43,8 +43,8 @@ python3 ask_registry.py "agentlint" | head -5
 | refusal_correctness | `python3 tests/test_refusal_correctness.py` | **6/6** |
 | partner_runtime | `python3 tests/test_partner_runtime.py` | **6/6** |
 | parallel_integration | `python3 tests/test_parallel_integration.py` | **6/6** |
-| **Total** | 11 suites | **125/125** |
-| docs gate | `python3 scripts/bench_check_docs.py` | **125/125 match** |
+| **Total** | 11 suites | **127/127** |
+| docs gate | `python3 scripts/bench_check_docs.py` | **127/127 match** |
 
 **Compound exhibit (live hosted, 2026-08-31 PM):** `long_run_goal.sh` · A=**1**→B=**0** Parallel · B corpus hits=**1** — `docs/LONG-RUN-RECEIPT-2026-08-31.md` · sealed `docs/SEALED-PREDICTION-2026-08-31.md`. Prior: compound-mini A=**2**→B=**1**. Orphan-works full script: run B **503** — do not claim on video.
 
@@ -72,6 +72,17 @@ python3 ask_registry.py "agentlint" | head -5
 Copy everything between the lines into Devpost project description / inspiration / built-with fields as needed.
 
 ---BEGIN DEVPOST PASTE---
+
+## 0 · TRUTH LAYER (lead with this)
+
+> **Agent Science is the truth layer for what agentic builders believe and use** — not another answer engine.
+
+When you or your agent websearches, you get a **full visibility panel**: what was searched (every angle, every tier), what the field runs (GitHub ★, blogs, peers), and a primary verdict — **sourced verbatim**, **refused with cause**, or **CONTRARY TO RESEARCH** when practitioners outrun papers. Stack-fit scores whether a truth fits *your* repo. The shelf compounds: ask once, free forever.
+
+**Try it:** https://agent-science-568004190078.us-central1.run.app/visibility/ui?q=ralph+loop+agentic  
+**Truths dashboard:** `/truths/ui` · **265+ claims** on disk
+
+Clearance and E&O insurance? One paying vertical on the same layer — sections below.
 
 ## 1 · THE COMPANY
 
