@@ -217,12 +217,27 @@ for cat, english in CAT_ENGLISH.items():
     s_ok, b_ok, n = score(ids)
     print(f"  {cat:13} {s_ok}/{n} SHIPS · {b_ok}/{n} BASE   {english}")
 
+# THE COST IS MARGINAL, NOT ABSOLUTE, AND THE FIRST VERSION OF THIS BLOCK GOT IT WRONG.
+# It printed `nt - s_true` = 2, which counts every TRUE row SHIPS refuses — including T3,
+# which BASE refuses too (`not_a_statement`, a locator failure that predates this check).
+# The surface said 1 and the command the surface tells a reader to run said 2: a sentence
+# contradicted by its own cited source, on the pair of sentences this product sells.
+# The cost OF THIS CHECK is the rows it takes from BASE: correct under BASE, wrong under
+# SHIPS. Both numbers are printed, because a reader reconciling them should not have to
+# derive the difference.
 print("\nTHE SENTENCE THIS PROBE LICENSES, and no stronger one:")
 n_num = [c for c, e, cl, m, k, w in CASES if k == "false-number"]
 s_num, b_num, _ = score(n_num)
 n_true = [c for c, e, cl, m, k, w in CASES if k == "true"]
-s_true, _, nt = score(n_true)
+s_true, b_true, nt = score(n_true)
+introduced = [c for c, e, cl, m, k, w in CASES
+              if k == "true" and got_b[c] == e and got[c] != e]
+both = [c for c, e, cl, m, k, w in CASES
+        if k == "true" and got_b[c] != e and got[c] != e]
 print(f"  It refuses THIS SHAPE of the error — a carrier clause naming a rival provision")
 print(f"  by number: {s_num}/{len(n_num)} closed, against {b_num}/{len(n_num)} without the check,")
-print(f"  at a cost of {nt - s_true} false refusal(s) on {nt} correctly cited claims.")
+print(f"  at a cost of {len(introduced)} false refusal(s) INTRODUCED on {nt} correctly")
+print(f"  cited claims {sorted(introduced)} — the rows BASE gets right and SHIPS gets wrong.")
+print(f"  A further {len(both)} true row(s) {sorted(both)} are refused by BOTH arms and are")
+print(f"  NOT this check's cost: {nt - s_true} of {nt} refused under SHIPS in total.")
 print(f"  It does not see a rival named in words, an Annex, or an exclusion clause.")

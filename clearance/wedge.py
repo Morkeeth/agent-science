@@ -119,7 +119,8 @@ PROVENANCE = (
 #             clears a claim the clause explicitly denies.
 #
 # WHAT IT COSTS — and this is the number wave 4 could not have had. On 14 correctly cited
-# claims it refuses ONE: T13, "Article 88 gives the Commission 'exclusive powers to
+# claims it refuses ONE that BASE gets right: T13, "Article 88 gives the Commission
+# 'exclusive powers to
 # supervise and enforce Chapter V'". The clause IS Article 88(1); it cites Article 94 in
 # passing ("taking into account the procedural guarantees under Article 94"), the heading
 # sits outside the returned span, so the gate reads a rival where there is a
@@ -134,8 +135,10 @@ RECALL_BOUNDARY = (
     "provision by number. Measured on 23 provision-bearing claims labelled before the "
     "run: it closes 4 of the 4 rows of that shape, against 0 for the engine without it; "
     "it sees none of the 5 rows where the rival is named in words, sits in an Annex, or "
-    "is named only to be excluded; and it costs 1 false refusal in 14 correctly cited "
-    "claims, on a clause that cross-references another article in passing. Reproduce: "
+    "is named only to be excluded; and it costs 1 false refusal INTRODUCED in 14 "
+    "correctly cited claims (T13, a clause that cross-references another article in "
+    "passing). A second true row is refused by both arms and is not this check's cost, "
+    "so the probe prints 2 of 14 refused in total. Reproduce: "
     "python3 scripts/probe_citation_heldout.py."
 )
 
