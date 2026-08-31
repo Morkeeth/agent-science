@@ -167,13 +167,28 @@ def t_the_two_measures_are_never_on_one_axis():
 
 
 def t_a_one_cause_negative_space_says_it_is_one_cause():
+    """A shelf showing one cause must say so, and say how many it has NOT shown.
+
+    THIS CONTROL WAS GREEN ON THE WRONG SENTENCE (rewritten 2026-08-31 ~09:00,
+    adversarial pass). It asserted the literal string "the other nine causes are rare",
+    which was the page's off-by-one: nine was `len(CAUSE_ENGLISH) - 1`, and
+    CAUSE_ENGLISH is the rendering dictionary — the engine's nine causes plus
+    `not_in_registry`, which lives in the `queries` table and can never appear in the
+    `claims` table this box counts. So the test defended the defect against the fix:
+    correcting the page turned this line red. The remainder is now DERIVED from the
+    engine's closed set, so the control cannot pin a stale literal again.
+    """
+    from clearance import verdict as V
     db = _tmpdb()
     con = refusal_log.connect(db)
     refusal_log.record(con, term="only cause", assertion="a claim about 2019",
                        verdict="UNKNOWN", production="p", cause="source_does_not_state_it",
                        citation_url="https://example.gov/x", quoted_terms="read it")
     page = A.render_front(db=db)
-    assert "not a claim that the other nine causes are rare" in page
+    expected = A._spell(len(V.CAUSES) - 1)
+    assert f"not a claim that the other {expected} causes are rare" in page, (
+        f"a one-cause shelf must say the other {expected} of "
+        f"{len(V.CAUSES)} engine causes are not shown to be rare")
 
 
 # ------------------------------------------------------------------ the audit page
@@ -410,6 +425,49 @@ def t_the_measurement_strip_does_not_deny_the_heldout_probe():
     page = A.render_front()
     assert "SHAPE of the error" in page and "only evidence is the two cases" not in page, \
         "one page states the held-out result and denies it"
+
+
+def t_the_declared_cause_vocabulary_is_the_engines_not_the_renderers():
+    """"A closed set of 10" was counted over a dictionary that is not the engine's set.
+
+    FOUND 2026-08-31 ~09:00, adversarial pass. The warn box read the denominator from
+    `refusal_log.CAUSE_ENGLISH` — which is the RENDERING dictionary, the engine's nine
+    causes PLUS `not_in_registry`. That tenth entry is returned by `refusal_log.ask()`
+    for a query that matches nothing and written by `log_query` into the `queries`
+    table; `by_cause` counts the `claims` table, which it can never enter. So the page
+    sold "a closed set of 10" for a vocabulary of 9, over a population that can only
+    ever exercise 9 — a number correct about the wrong object, in the one paragraph on
+    the page whose job is to stop a reader inferring a number the data does not support.
+
+    Two properties, because either alone passes the defect:
+      1. the declared size IS the engine's closed set, `clearance.verdict.CAUSES`;
+      2. every cause the shelf actually shows is a member of that set, so the
+         numerator and the denominator are counted over the same vocabulary.
+    """
+    from clearance import verdict as V
+    page = A.render_front()
+    m = re.search(r"refusal vocabulary is a closed set of (\d+); this shelf has "
+                  r"exercised (\d+) of them", page)
+    if m is None:
+        print("    SKIP (shelf shows more than one refusal cause; the box is off)")
+        return
+    declared, exercised = int(m.group(1)), int(m.group(2))
+    assert declared == len(V.CAUSES), (
+        f"the page declares a closed set of {declared}; the engine's closed set "
+        f"clearance/verdict.py::CAUSES has {len(V.CAUSES)}")
+    others = re.search(r"the other (\w+) causes are rare", page)
+    assert others, "the warn box no longer names the unexercised remainder"
+    assert others.group(1) == A._spell(declared - exercised), (
+        f"'the other {others.group(1)}' does not equal {declared} - {exercised}")
+    # The numerator's vocabulary must be the denominator's, or the ratio is over two
+    # different sets: exactly the adjacency defect this test was written for.
+    con = refusal_log.connect(A._db(None))
+    shown = {c["cause"] for c in refusal_log.by_cause(con)
+             if c["label"] != "SOURCED" and c["cause"]}
+    stray = sorted(shown - set(V.CAUSES))
+    assert not stray, (
+        f"the shelf shows refusal causes that are not in the declared closed set: "
+        f"{stray} — the ratio counts two different vocabularies")
 
 
 if __name__ == "__main__":

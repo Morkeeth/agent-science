@@ -23,7 +23,7 @@ from pathlib import Path
 from typing import Optional
 from urllib.parse import parse_qs, quote, urlencode, urlparse
 
-from clearance import curve, refusal_log
+from clearance import curve, refusal_log, verdict
 
 DB = Path(os.environ.get("REFUSAL_LOG_DB", refusal_log.DB))
 
@@ -993,12 +993,22 @@ def render_front(*, db: Path | str | None = None, registry_href: str = "/registr
         # tenth cause and the sentence reads "the other nine ... a closed set of 11":
         # one paragraph contradicting itself, in the warn box that exists to stop the
         # reader inferring a number the data does not support. Derived 2026-08-31.
+        #
+        # AND THE DERIVED NUMBER WAS STILL WRONG, because it was derived from the wrong
+        # object (found 2026-08-31 ~09:00, adversarial pass). `CAUSE_ENGLISH` is the
+        # RENDERING dictionary: it carries the engine's nine causes PLUS
+        # `not_in_registry`, which `refusal_log.ask()` returns for a query that matches
+        # nothing and `log_query` writes to the `queries` table. `by_cause` counts the
+        # `claims` table, which that cause can never enter — so the sentence sold a
+        # denominator of 10 for a vocabulary of 9, over a population that can only ever
+        # exercise 9. The engine's closed set is `clearance.verdict.CAUSES`; read it
+        # from there, and pinned by `t_the_declared_cause_vocabulary_is_the_engines`.
         ('<p class="warn">Every refusal on this desk currently carries the same cause. '
          "That is a property of how the shelf was filled — a corpus backfill seeds only "
          "the one refusal that carries the document it read — and not a claim that the "
-         f"other {_spell(len(refusal_log.CAUSE_ENGLISH) - len(refusal_rows))} causes are "
+         f"other {_spell(len(verdict.CAUSES) - len(refusal_rows))} causes are "
          "rare. The engine's refusal vocabulary is a closed set of "
-         f"{len(refusal_log.CAUSE_ENGLISH)}; this shelf has exercised "
+         f"{len(verdict.CAUSES)}; this shelf has exercised "
          f"{len(refusal_rows)} of them.</p>") if len(refusal_rows) < 2 else "",
         f'<p class="meta" style="margin-top:2.4rem">'
         f'<a class="rowlink" href="{html.escape(registry_href, quote=True)}">'
