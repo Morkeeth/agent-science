@@ -26,10 +26,12 @@ one thing, and every similarity path in the guard splits them and then drops the
 tokenisation at all. What is left is `article`, and `article` matches `article`. The
 check was not too weak. It was reading the wrong object.
 
-WHAT THIS MODULE IS. Inputs and provenance ONLY — the claim, the source, the anchor, and
-what the answer should be. It holds no verdict, no span and no number. Those are
-produced by `scripts/wedge_receipt.py` running the shipping engine against the fetched
-document, and the surface renders that receipt. Writing the outcome down here and
+WHAT THIS MODULE IS. Inputs, provenance, and a labelled reading — the claim, the source,
+the anchor, what the answer should be, and `Case.note`, a hand-written reading of the
+instrument. It holds NO ENGINE OUTPUT: no verdict the engine returned, no span it
+selected, no coverage it measured. Those are produced by `scripts/wedge_receipt.py`
+running the shipping engine against the fetched document, and the surface renders that
+receipt. `Case.note` is the boundary, and `PROVENANCE` names it on the page. Writing the outcome down here and
 rendering it as though the engine had said it is the exact failure this product sells
 against, and it would be committed inside the exhibit that sells it.
 """
@@ -81,12 +83,22 @@ CASES = (
          "point (g). The same mechanism must let this one through."),
 )
 
+# "NOTHING ON THIS PAGE IS WRITTEN BY HAND" WAS FALSE, ON THE ONE PAGE THAT MAY NOT
+# PRINT A FALSE SENTENCE. Every verdict, span, refusal code and coverage figure IS
+# engine output — but `Case.note` renders beside each reading and makes a substantive
+# assertion about the instrument ("Article 99(4) sets EUR 15 000 000 / 3 % and reaches
+# Article 50 at point (g)"), and so does the sentence `_wedge_html` appends after it.
+# Both are true. The sentence claiming neither existed was not, and an absolute claim
+# about provenance is the one a reader checks. Corrected 2026-08-31 by an adversarial
+# pass; pinned by `t_the_provenance_line_does_not_overclaim`.
 PROVENANCE = (
     f"Produced by `{COMMAND}` running the shipping engine (clearance.facts.judge_claim) "
-    f"against {INSTRUMENT}, fetched live from EUR-Lex. The verdicts, spans and refusal "
-    "reasons below are the engine's output, read from that receipt — nothing on this "
-    "page is written by hand. BASE is the engine with the citation check off, which is "
-    "exactly the engine that shipped at 04:00 on 2026-08-31."
+    f"against {INSTRUMENT}, fetched live from EUR-Lex. Every verdict, span, refusal code "
+    "and coverage figure below is the engine's output, read from that receipt: this page "
+    "cannot print a verdict the engine did not produce. The reading of the instrument in "
+    "the note beside each row is written by hand, and it is the only thing here that is. "
+    "BASE is the engine with the citation check off, which is exactly the engine that "
+    "shipped at 04:00 on 2026-08-31."
 )
 
 # What a keyword-grounded answer would have done with WEDGE-1, stated as a property of

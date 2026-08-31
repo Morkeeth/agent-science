@@ -112,8 +112,12 @@ form.ask button{padding:.62rem 1.1rem;background:var(--ink);color:var(--paper);
   border:0;cursor:pointer;font:inherit;font-size:.9rem}
 .filters{font-size:.74rem;color:var(--mute);margin:0 0 1.6rem;
   font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace}
+/* inline-block, not inline: at 390px the two-word chip "thin evidence" broke across
+   two lines, which made its box span 21px->390px and run its underline flush into the
+   viewport edge. bodyScrollWidth stayed 390 the whole time, so the measurement said the
+   page was clean and only looking at it said otherwise. */
 .filters a{margin-right:.7rem;text-decoration:none;border-bottom:1px solid var(--rule);
-  padding-bottom:1px}
+  padding-bottom:1px;display:inline-block}
 .filters a.on{border-bottom:2px solid var(--ink);font-weight:600}
 
 /* THE SHELF. One row per claim. The refusal sits in the SAME column as the evidence —
@@ -248,6 +252,12 @@ form.ask button{padding:.62rem 1.1rem;background:var(--ink);color:var(--paper);
   .hero-head,.hero-body,.hero-foot{padding-left:.9rem;padding-right:.9rem}
   .nm-span{font-size:.88rem;line-height:1.55}
   .hero-claim{font-size:1rem}
+  /* THE SHELF WAS NEVER PHONE-CHECKED, ONLY THE FRONT PAGE WAS. Measured with real
+     device emulation 2026-08-31: /registry read clientWidth 390 and bodyScrollWidth
+     486 — a 96px horizontal scroll on the one page the front surface sends a stranger
+     to. Long unbreakable source URLs in .meta and unhyphenated claim text pushed the
+     body; the row text is prose, not a table, so it wraps rather than scrolls. */
+  .claim,.refusal,.meta,.settles,.row{overflow-wrap:anywhere;word-break:break-word}
 }
 
 """
@@ -588,9 +598,17 @@ def _measurement_html() -> str:
     """What this mechanism has and has not been shown to cost. Read from the eval file.
 
     THE SENTENCE THIS EXISTS TO PREVENT. "Measured on 314 claims, zero false refusals"
-    is true and it is the wrong object: zero of the 27 cleared claims on this shelf cite
-    a provision at all, so the population contains no case the check could have got
-    wrong. A number produced by a population that cannot exercise the mechanism is not
+    is true and it is the wrong object: zero of the 27 claims it clears on research-corpus/
+    cite a provision at all, so the population contains no case the check could have got
+    wrong.
+
+    AND THE WORD "SHELF" WAS DOING A SECOND JOB IT WAS NOT ENTITLED TO. This paragraph
+    counted research-corpus/ (314 claims, 27 cleared) and called it "this shelf"; a
+    thousand pixels below, "the negative space, counted" prints the registry database
+    (179 claims, 29 cleared) and calls that the shelf too. Two correct numbers, one
+    screen apart, under one noun — the adjacency defect `clearance/curve.py` has a
+    whole docstring about, committed one paragraph away from the disclaimer that
+    prevented it for the curve. Corrected 2026-08-31: the population is named. A number produced by a population that cannot exercise the mechanism is not
     evidence the mechanism is safe — it is evidence nobody has looked yet, and it reads
     identically. So the count that matters is printed FIRST, and it is a count of
     eligible rows, not of verdicts unchanged.
@@ -609,10 +627,11 @@ def _measurement_html() -> str:
     return (
         '<p class="warn"><b>What this check has been shown to cost, and what it '
         "has not.</b> On the labelled held-out set it costs nothing: "
-        f"{html.escape(gold_line)}, unchanged. On the live shelf it changes "
-        f"{changed} of {r['total']} verdicts — and that number is not evidence of "
-        f"safety, because <b>{a['cite_a_provision']} of the {a['greens']} cleared "
-        "claims on this shelf cite a provision at all</b>. This corpus cannot "
+        f"{html.escape(gold_line)}, unchanged. Replayed over <code>research-corpus/</code>"
+        f" — {r['total']} claims, a DIFFERENT population from the registry counted lower "
+        f"down this page — it changes {changed} verdicts, and that number is not "
+        f"evidence of safety, because <b>{a['cite_a_provision']} of the {a['greens']} "
+        "claims it clears there cite a provision at all</b>. That corpus cannot "
         "exercise the mechanism. Its only evidence is the two cases above, one of "
         "which is the case it was built for. The looser arm — refusing when the span "
         "never names the provision — is built and measured and does NOT ship, for the "
@@ -898,6 +917,15 @@ def render_refusal(*, term: str, db: Path | str | None = None,
 
 # ================================================================== THE FRONT PAGE
 
+_NUMBER_WORDS = ("zero", "one", "two", "three", "four", "five", "six", "seven",
+                 "eight", "nine", "ten", "eleven", "twelve")
+
+
+def _spell(n: int) -> str:
+    """Small integers as English, so a count and its word can never disagree."""
+    return _NUMBER_WORDS[n] if 0 <= n < len(_NUMBER_WORDS) else str(n)
+
+
 def render_front(*, db: Path | str | None = None, registry_href: str = "/registry") -> str:
     """What a stranger meets. The refusal first, the economics second, the desk third."""
     con = refusal_log.connect(_db(db))
@@ -941,10 +969,15 @@ def render_front(*, db: Path | str | None = None, registry_href: str = "/registr
                   f"<td>{html.escape(c['settles_it'] or '—')}</td></tr>"
                   for c in refusal_rows)
         + "</table></div>",
+        # "the other NINE" was a literal beside a count read from CAUSE_ENGLISH. Add a
+        # tenth cause and the sentence reads "the other nine ... a closed set of 11":
+        # one paragraph contradicting itself, in the warn box that exists to stop the
+        # reader inferring a number the data does not support. Derived 2026-08-31.
         ('<p class="warn">Every refusal on this desk currently carries the same cause. '
          "That is a property of how the shelf was filled — a corpus backfill seeds only "
          "the one refusal that carries the document it read — and not a claim that the "
-         "other nine causes are rare. The engine's refusal vocabulary is a closed set of "
+         f"other {_spell(len(refusal_log.CAUSE_ENGLISH) - len(refusal_rows))} causes are "
+         "rare. The engine's refusal vocabulary is a closed set of "
          f"{len(refusal_log.CAUSE_ENGLISH)}; this shelf has exercised "
          f"{len(refusal_rows)} of them.</p>") if len(refusal_rows) < 2 else "",
         f'<p class="meta" style="margin-top:2.4rem">'
@@ -968,7 +1001,12 @@ class _Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         u = urlparse(self.path)
         qs = parse_qs(u.query)
-        if u.path in ("/", "/index.html"):
+        # `/front` is named in the lane brief, in NIGHTRUN and in the footer of the
+        # shelf — and it 404'd, because the handler only ever answered "/". The same
+        # defect as `serve()` referencing a `_Handler` that did not exist, one level
+        # down: a route nobody requested is a route nobody ran. Pinned by
+        # `t_every_internal_link_resolves_to_a_served_route`.
+        if u.path.rstrip("/") in ("", "/index.html", "/front"):
             page = render_front()
         elif u.path.rstrip("/") == "/refusal":
             page = render_refusal(term=(qs.get("term") or [""])[0])

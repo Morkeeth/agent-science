@@ -436,7 +436,9 @@ def check_citation(passage: str, *, claim: str, must_contain: str,
     regulation (the exhibit and its provenance live in clearance/wedge.py, so no
     document this guard was tuned against is named inside the guard). A claim about
     Article 50 was cleared GREEN on a penalties paragraph about Article 5: verbatim,
-    in the cited document, carrying 75%% of the claim's content terms. Every existing
+    in the cited document, carrying 73 % of the claim's content terms (the engine's
+    own coverage on that span, 0.7273 — this docstring said 75 % until an
+    adversarial pass read it against the receipt on 2026-08-31). Every existing
     check returned None. A keyword grounder returns a citation and a URL.
 
     ASYMMETRIC, AND BOTH DIRECTIONS BIAS AWAY FROM REFUSING.

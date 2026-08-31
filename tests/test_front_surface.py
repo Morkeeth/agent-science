@@ -273,6 +273,71 @@ def t_the_shelf_still_renders_after_the_schema_grew():
     assert "The shelf" in page
 
 
+# ------------------------------------------------------------- the routes, requested
+
+def t_every_internal_link_resolves_to_a_served_route():
+    """A link nobody clicked is a route nobody ran.
+
+    `/front` was named in the lane brief, in NIGHTRUN, in the FINDING and in the footer
+    of the shelf, and the handler answered 404 on it: the branch list was `/`,
+    `/index.html`, `/refusal`, `/registry`. It is the same defect as `serve()` calling a
+    `_Handler` that did not exist for a week, one level down — and the same reason it
+    survived, which is that rendering a page is not requesting it.
+
+    So this control does not read the branch list. It starts the real server and GETs
+    every internal href the three pages emit.
+    """
+    import threading
+    import urllib.error
+    import urllib.request
+    from http.server import HTTPServer
+
+    srv = HTTPServer(("127.0.0.1", 0), A._Handler)
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    base = "http://127.0.0.1:%d" % srv.server_address[1]
+    try:
+        seen, dead = set(), []
+        for path in ("/", "/registry"):
+            page = urllib.request.urlopen(base + path).read().decode()
+            for href in re.findall(r'href="(/[^"]*)"', page):
+                if href in seen:
+                    continue
+                seen.add(href)
+                try:
+                    urllib.request.urlopen(base + href).read()
+                except urllib.error.HTTPError as e:
+                    dead.append(f"{href} -> {e.code} (linked from {path})")
+        assert seen, "no internal links were found to check"
+        assert not dead, "the surface links to routes it does not serve: " + "; ".join(dead)
+    finally:
+        srv.shutdown()
+        srv.server_close()
+
+
+def t_the_provenance_line_does_not_overclaim():
+    """The exhibit's provenance may not claim more than the exhibit can show.
+
+    It read "nothing on this page is written by hand" while `wedge.CASES[].note` — a
+    substantive reading of the instrument, "Article 99(4) sets EUR 15 000 000 / 3 % and
+    reaches Article 50 at point (g)" — rendered two lines below it, and `_wedge_html`
+    appended another hand-written sentence after that. Both are TRUE. The provenance
+    claim about them was not, on the front page of the product that sells against
+    exactly that.
+    """
+    r = W.receipt()
+    if r is None:
+        print("    SKIP (no receipt)")
+        return
+    page = A._wedge_html()
+    hand = [c.note for c in W.CASES if c.note in page or c.note in page.replace("&#x27;", "'")]
+    assert hand, "the exhibit no longer renders a hand-written note — retire this control"
+    assert "nothing on this page is written by hand" not in page.lower(), \
+        "the provenance denies hand-written prose the page is printing"
+    low = W.PROVENANCE.lower()
+    assert "written by hand" in low and "only thing" in low, \
+        "the provenance no longer discloses the hand-written reading"
+
+
 if __name__ == "__main__":
     failed = 0
     names = [n for n in globals() if n.startswith("t_")]
