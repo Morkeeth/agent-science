@@ -128,6 +128,25 @@ def test_the_written_instructions_point_at_the_sink_not_the_population():
                     f"{line.strip()[:120]}  (the sink is {sink}/)")
 
 
+def test_the_receipt_every_surface_reads_from_is_committed():
+    """A skip is not a pass, and a deleted receipt would disarm four controls silently.
+
+    Found while proving the strip control red: with `docs/EVAL-*.json` absent,
+    `_measurement_html()` returns "" and every assertion over it passes vacuously. The
+    receipt is committed, so the skip branch can only fire on a broken tree — say so
+    here rather than let four green lines mean nothing.
+    """
+    import subprocess
+    import ask_registry as A
+    tracked = subprocess.run(["git", "-C", str(ROOT), "ls-files", "--error-unmatch",
+                              str(A.EVAL_PATH.relative_to(ROOT))],
+                             capture_output=True, text=True)
+    assert A.EVAL_PATH.is_file(), f"{A.EVAL_PATH.name} is missing — surface controls skip"
+    assert tracked.returncode == 0, \
+        f"{A.EVAL_PATH.name} is not committed; a clean checkout would skip every " \
+        "control that reads the measurement strip"
+
+
 if __name__ == "__main__":
     fns = [v for k, v in sorted(globals().items())
            if k.startswith("test_") and callable(v)]

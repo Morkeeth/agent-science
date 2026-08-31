@@ -225,7 +225,8 @@
      "code": "claim_content_not_carried",
      "detail": "claim_content_not_carried: the span carries 6/37 (16%) of the claim's content terms, below 40%; missing ['adk', 'agent', 'antigravity', 'api', 'architecture', 'code', 'constraint', 'deliverable', 'diagram', 'disclose']"
     }
-   ]
+   ],
+   "citation": []
   },
   "sweep": {
    "0.3": 8,
@@ -235,15 +236,15 @@
   }
  },
  "registry": {
-  "total": 314,
+  "total": 312,
   "off": {
    "sourced": 27,
-   "refused": 271,
+   "refused": 269,
    "unknown": 16
   },
   "on": {
    "sourced": 27,
-   "refused": 271,
+   "refused": 269,
    "unknown": 16
   },
   "flips": [],

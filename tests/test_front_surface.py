@@ -381,6 +381,28 @@ def t_the_measured_population_is_named_frozen_on_the_page():
         "the published number and the frozen manifest disagree about the population"
 
 
+def t_the_measurement_strip_does_not_deny_the_heldout_probe():
+    """The page must not say "its only evidence is the two cases" while printing eleven.
+
+    The strip was written when n=2 was true. The adversarial pass built the held-out
+    probe and this wave put its result on the same page, one block above — so the word
+    "only" became a sentence the page's own neighbour contradicts. That is the exact
+    defect this product exists to catch, printed on its own front page.
+    """
+    strip = A._measurement_html()
+    if not strip:
+        print("    SKIP (no eval file)")
+        return
+    assert "only evidence is the two cases" not in strip, \
+        "the strip denies the held-out probe the same page prints"
+    r = W.receipt()
+    if r is None:
+        return
+    page = A.render_front()
+    assert "SHAPE of the error" in page and "only evidence is the two cases" not in page, \
+        "one page states the held-out result and denies it"
+
+
 if __name__ == "__main__":
     failed = 0
     names = [n for n in globals() if n.startswith("t_")]

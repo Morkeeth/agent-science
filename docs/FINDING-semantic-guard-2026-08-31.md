@@ -123,17 +123,25 @@ before any engine run.
 
 **1 false GREEN closed. 0 true GREENs lost.**
 
-**REGISTRY** — every claim in `research-corpus/`, re-cleared offline against the document
-cache; same command, same parser, same locator as the shipped registry. Re-run after the
-aside fix, 03:2x:
+**REGISTRY** — every claim in the FROZEN population `research-corpus/`, re-cleared
+offline against the document cache; same command, same parser, same locator as the
+shipped registry. Re-run 2026-08-31 ~05:55 against the frozen population (the earlier
+readings, n=313 then n=314, were taken while the product could still write into its own
+measurement directory — see below):
 
 ```
-  guard OFF  {'sourced': 27, 'refused': 271, 'unknown': 16}
-  guard ON   {'sourced': 27, 'refused': 271, 'unknown': 16}
-  verdicts changed: 0/314 (0.0%)
-  refusals RESCUED to SOURCED: 0
+$ python3 scripts/eval_semantic_guard.py
+REGISTRY  frozen population research-corpus/ (22 files, manifest frozen 2026-08-31),
+          n=312 claims, offline replay
+  guard OFF  {'sourced': 27, 'refused': 269, 'unknown': 16}
+  guard ON   {'sourced': 27, 'refused': 269, 'unknown': 16}
+  verdicts changed: 0/312 (0.0%)
+  refusals RESCUED to SOURCED: 0 (must be 0 — the guard may only demote)
   SOURCED on a DIFFERENT span: 8/27 — same verdict, better evidence
 ```
+
+Every conclusion is the one the 314-run reached; only the denominator is now
+reproducible from a clean checkout.
 
 **The effect on this corpus is not fewer GREENs. It is better evidence under the same
 GREENs.** When the guard refuses a span the locator offers the next occurrence, and a
@@ -191,7 +199,7 @@ substitution this product exists to refuse, performed on the product's own score
 It is **not** true by construction at `judge_claim` level: with the guard on, the locator
 offers more candidate spans than with it off, so a claim the old engine refused could in
 principle come back GREEN on a later occurrence the old engine never looked at. Measured
-on this corpus it does not happen — `refusals RESCUED to SOURCED: 0` of 313, and the eval
+on this corpus it does not happen — `refusals RESCUED to SOURCED: 0` of 312, and the eval
 exits non-zero if that number is ever anything else. The invariant is enforced where it
 holds and measured where it does not.
 
@@ -205,12 +213,17 @@ holds and measured where it does not.
 - **This is not comprehension.** Three narrow checks over negation and subject binding.
   It will not catch a false GREEN that is fluent, on-topic, positively phrased and simply
   about a different fact. Nothing here should be sold as reading.
-- **The population is LIVE and it moved under the measurement.** The first run read
-  n=313; the re-run after the aside fix read **n=314**, because another lane wrote a file
-  into `research-corpus/` while this one was working. Nothing was smoothed: both readings
-  are stated with their time, and the shipped numbers are the later ones. A corpus that
-  other agents write to is not a frozen holdout and must never be quoted as one.
+- ~~**The population is LIVE and it moved under the measurement.**~~ **CLOSED 2026-08-31
+  (wave 5).** The first run read n=313; the re-run after the aside fix read **n=314**,
+  because another lane wrote a file into `research-corpus/` while this one was working —
+  and the root cause was the product itself: `clearance/ingest.py` wrote its audit trail
+  into the directory this eval replays. `research-corpus/` is now frozen and hashed
+  (`MANIFEST.json`, 22 files, 312 claims), ingest writes to `research-inbox/`, and both
+  evals resolve their population through `clearance.population.frozen_dir()`, which
+  raises rather than measure a drifted directory. The reproducible number is **312** and
+  a clean clone prints it. Pinned by `tests/test_frozen_population.py`, which was run RED
+  against the old layout first.
 
 - **n=6 on the only labelled population.** The gold result is 6/6 on six items. The
-  313-claim replay is unlabelled and every changed row was printed and adjudicated by
+  312-claim replay is unlabelled and every changed row was printed and adjudicated by
   hand; that is a weaker instrument than a label set and is not a substitute for one.
