@@ -2,7 +2,7 @@
 doc: hack
 project: Agent Science
 phase: SHIP
-last-touched: 2026-08-31 13:08 CEST
+last-touched: 2026-08-31 13:25 CEST
 canonical: true
 event: Agentic Cinema · Parallel track · deadline 2026-09-09 14:00 PDT
 supersedes: docs/PHASE0-LADDER.md ClickHouse-track note (runtime track is Parallel)
@@ -218,7 +218,7 @@ bash scripts/new_user_trial.sh
 - ~~RC5 substring false-GREEN~~ **CLOSED 2026-08-31** — `docs/FINDING-semantic-guard-2026-08-31.md`.
 - Design partner session — Oscar outreach (slice 6).
 - **EYES:** do winner angles survive PeriodCheck + Clearance Compass field? (next step)
-- **Alias:** `Directive 2012/28/EU` vs `2012/28/EU` — 4 asks refused on long form.
+- **Alias:** `Directive 2012/28/EU` — **CLOSED 2026-08-31** (aliases + SOURCED-only replay).
 
 ## CONSTITUTION
 
@@ -306,26 +306,30 @@ Full record: `~/CODE/fleet-ops/retros/QWEN-LOSS-RETRO-2026-08-30.md` (corrected)
 ### LIVE
 
 **URL:** https://agent-science-568004190078.us-central1.run.app  
-**Revision:** agent-science-00010-5fd · **185 claims** · hit rate 0.72
+**Revision:** agent-science-00012-98d · **182 claims** · hit rate 0.75
 
 ```bash
 bash scripts/new_user_trial.sh          # stranger path PASS
 curl -s …/popular/ui                    # flywheel face for judges
-curl -s …/search?q=2012/28/EU&live=false  # SOURCED free tier
+curl -s '…/search?q=Directive+2012/28/EU&live=false'  # SOURCED free tier
 ```
 
 **Compound note:** fresh subject → `parallel_calls` drops + `corpus_hits ≥ 1`. Warm dictionary may show A=0 Parallel — still valid if corpus hits rise.
 
 ### Oscar (outward acts only)
 
-1. Rotate keys → `bash deploy.sh` if needed  
-2. Record video (`docs/VIDEO-SCRIPT-2026-08-29.md`) — compound + refuse + `/popular/ui`  
-3. Public repo + Devpost (`docs/SUBMISSION-PACK-2026-08-29.md`)  
+**Checklist:** `docs/OSCAR-SUBMIT-CHECKLIST-2026-08-31.md` · **EYES:** `docs/EYES-HACK-PASS-2026-08-31.md`
+
+1. 30-min PeriodCheck falsification → decide refuse vs compound lead  
+2. Record video (`docs/VIDEO-SCRIPT-2026-08-29.md` — EYES beat order)  
+3. Rotate keys → public repo + Devpost (`docs/SUBMISSION-PACK-2026-08-29.md`)  
 4. Logged-out verify: video on live Devpost page  
 
-### Build (non-blocking, ≤30 min)
+### Build (shipped 2026-08-31 PM)
 
-- Add alias: `Directive 2012/28/EU` → `2012/28/EU` in `truth-dictionary/aliases.json` · redeploy
+- [x] Alias canonical `2012/28/EU` + SOURCED-only exact replay (`clearance/dictionary.py`)
+- [x] Deploy `agent-science-00012-98d` — `Directive 2012/28/EU` SOURCED free on hosted
+- [x] EYES receipt · video script reorder · Oscar checklist
 
 ### Verify (one command each)
 
@@ -347,6 +351,7 @@ bash scripts/verify_cold_clone.sh                                               
 
 | When | What | Command | Outcome |
 |------|------|---------|---------|
+| 2026-08-31 PM | EYES + alias + deploy | dictionary fix · `00012-98d` | Directive SOURCED free · trial PASS · hit 0.75 |
 | 2026-08-31 PM | Handbook pass | hack.md rewrite | ladder · field · websearch · roadmap · winner angles |
 | 2026-08-31 L5 | Semantic guard RED first | `python3 tests/test_semantic_guard.py` (null guard) | **4 fail / 9 pass** — watched red before implementing |
 | 2026-08-31 L5 | Semantic guard measured | `python3 scripts/eval_semantic_guard.py` | **gold 5/6 -> 6/6**; registry **0/313** verdicts changed; **8/27** better spans |
