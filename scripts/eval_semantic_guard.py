@@ -13,11 +13,15 @@ on two populations:
 
   GOLD      fixtures/refusal-correctness/set.json, n=6, labelled 2026-08-22 by Cursor
             BEFORE any engine run — the only population here with a right answer.
-  REGISTRY  every claim in research-corpus/, re-cleared offline against the document
-            cache. This is the population the shipped registry was built from: same
-            command, same parser, same locator. It is UNLABELLED, so every verdict that
-            changes is PRINTED IN FULL for a human to adjudicate. A count of flips is
-            not a count of defects closed and this script never calls it one.
+  REGISTRY  every claim in the FROZEN population `research-corpus/`, re-cleared offline
+            against the document cache. This is the population the shipped registry was
+            built from: same command, same parser, same locator. It is PINNED by
+            `research-corpus/MANIFEST.json` and resolved through
+            `clearance.population.frozen_dir()` — it used to be the directory
+            `clearance.ingest` wrote into, so the denominator moved whenever the product
+            was used. It is UNLABELLED, so every verdict that changes is PRINTED IN FULL
+            for a human to adjudicate. A count of flips is not a count of defects closed
+            and this script never calls it one.
 
 Per-check attribution is separate: each of the three mechanisms is run alone, so no
 mechanism can hide inside the total. The coverage threshold is swept, not chosen.
@@ -31,6 +35,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
+
+from clearance import population as P  # noqa: E402
 
 GUARD_ENV = "CLEARANCE_SEMANTIC_GUARD"
 SWEEP = (0.30, 0.40, 0.50, 0.60)
@@ -78,13 +84,14 @@ def gold() -> dict:
 # -------------------------------------------------------------- registry population
 
 def registry() -> dict:
-    """Re-clear the whole research corpus in both arms, offline, from the doc cache."""
+    """Re-clear the FROZEN population in both arms, offline, from the doc cache."""
     import clear_corpus as C
 
+    pop = P.frozen_dir()          # raises if the directory drifted from its manifest
     res = {}
     for name, on in (("off", False), ("on", True)):
         _arm(on)
-        r = C.verify_corpus("research-corpus", fetch=False)
+        r = C.verify_corpus(pop, fetch=False)
         res[name] = r
     rows_off = {(r["file"], r["line"]): r for r in res["off"]["rows"]}
     rows_on = {(r["file"], r["line"]): r for r in res["on"]["rows"]}
@@ -132,7 +139,7 @@ def attribution() -> dict:
     import clear_corpus as C
 
     _arm(False)
-    base = C.verify_corpus("research-corpus", fetch=False)
+    base = C.verify_corpus(P.frozen_dir(), fetch=False)
     greens = [r for r in base["rows"]
               if r["verdict"] == "SOURCED" and (r.get("quoted_terms") or "")]
 
@@ -176,7 +183,7 @@ def main() -> int:
 
     a = attribution()
     print(f"\nATTRIBUTION  over the {a['greens']} GREEN verdicts the shipping engine "
-          f"produces on research-corpus/")
+          f"produces on the frozen population")
     for check, hits in a["per_check"].items():
         print(f"  {check:9} fires on {len(hits):3}/{a['greens']}")
     print(f"  coverage threshold sweep (GREENs refused):")
@@ -184,7 +191,10 @@ def main() -> int:
         print(f"    min_coverage={th:.2f} -> {n:3}/{a['greens']}")
 
     r = registry()
-    print(f"\nREGISTRY  research-corpus/, n={r['total']} claims, offline replay")
+    _m = P.manifest()
+    print(f"\nREGISTRY  frozen population research-corpus/ "
+          f"({_m['n_files']} files, manifest frozen {_m['frozen_at']}), "
+          f"n={r['total']} claims, offline replay")
     print(f"  guard OFF  {r['off']}")
     print(f"  guard ON   {r['on']}")
     print(f"  verdicts changed: {len(r['flips'])}/{r['total']} "

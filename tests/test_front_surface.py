@@ -115,7 +115,7 @@ def t_the_mark_cannot_alter_the_span():
 # ---------------------------------------------------- the numbers carry their command
 
 def t_the_measurement_strip_leads_with_eligible_rows_not_verdicts_changed():
-    """The sentence this page must never print is 'measured on 314 claims, no cost'.
+    """The sentence this page must never print is 'measured on 312 claims, no cost'.
 
     Zero of the cleared claims on this shelf cite a provision, so the population cannot
     exercise the check. A flip count over a population with no eligible rows reads
@@ -336,6 +336,49 @@ def t_the_provenance_line_does_not_overclaim():
     low = W.PROVENANCE.lower()
     assert "written by hand" in low and "only thing" in low, \
         "the provenance no longer discloses the hand-written reading"
+
+
+def t_every_surface_states_the_recall_boundary():
+    """"Refuses the error" would be an overclaim; the gate refuses one SHAPE of it.
+
+    The held-out probe (`scripts/probe_citation_heldout.py`, 11 claims labelled before
+    the run) closes 9 against BASE's 7 — and the rows it misses cite a rival provision
+    whose subject is named in words, so there is no numeral for the gate to conflict
+    with. A surface that sells the mechanism without that sentence sells a recall it
+    does not have.
+    """
+    assert "shape" in W.RECALL_BOUNDARY.lower(), \
+        "the boundary no longer says it refuses one SHAPE of the error"
+    assert "probe_citation_heldout" in W.RECALL_BOUNDARY, \
+        "the boundary states a limit without the command that measures it"
+    r = W.receipt()
+    if r is None:
+        print("    SKIP (no receipt)")
+        return
+    page = A._wedge_html()
+    assert "SHAPE of the error" in page.replace("&#x27;", "'"), \
+        "the exhibit sells the mechanism without stating what it does not refuse"
+
+
+def t_the_measured_population_is_named_frozen_on_the_page():
+    """The denominator used to move when the product was used. Say so where it prints.
+
+    The number is read from the eval receipt, and the receipt now carries the population
+    block (files + the day it was frozen), so a hand-typed count cannot drift back in.
+    """
+    if not A.EVAL_PATH.exists():
+        print("    SKIP (no eval file)")
+        return
+    e = json.loads(A.EVAL_PATH.read_text())
+    pop = e["registry"].get("population")
+    assert pop, "the eval receipt no longer names its population"
+    strip = A._measurement_html()
+    assert str(e["registry"]["total"]) in strip, "the page's claim count is not the receipt's"
+    assert pop["frozen_at"] in strip and "MANIFEST" in strip, \
+        "the page prints a denominator without saying it is frozen or where"
+    from clearance import population as P
+    assert e["registry"]["total"] == P.manifest()["claims"], \
+        "the published number and the frozen manifest disagree about the population"
 
 
 if __name__ == "__main__":

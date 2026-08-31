@@ -99,14 +99,15 @@ GOLD  fixtures/refusal-correctness/set.json  n=6  labelled 2026-08-22T21:30:00Z
   correct CONFLICT  6/6
   correct ABSENCE   6/6
 
-ATTRIBUTION  over the 27 GREEN verdicts the BASE engine produces on research-corpus/,
+ATTRIBUTION  over the 27 GREEN verdicts the BASE engine produces on the frozen population,
              0 of which cite a provision at all
   CONFLICT  would refuse 0 of those 0
   ABSENCE   would refuse 0 of those 0
 
-REGISTRY  research-corpus/, 314 claims, offline, doc cache
-  BASE      sourced   27  refused  271  unknown   16
-  CONFLICT  sourced   27  refused  271  unknown   16
+REGISTRY  frozen population research-corpus/ (22 files, manifest frozen 2026-08-31), 312 claims, offline, doc cache
+  BASE      sourced   27  refused  269  unknown   16
+  CONFLICT  sourced   27  refused  269  unknown   16
+  ABSENCE   sourced   27  refused  269  unknown   16
   CONFLICT changes 0 verdict(s) vs BASE — the corpus does not exercise it
 
 WEDGE  via judge_claim, live document (590,271 characters fetched)
@@ -114,7 +115,7 @@ WEDGE  via judge_claim, live document (590,271 characters fetched)
   WEDGE-2 expect SOURCED  BASE GREEN  SHIPS GREEN                             OK
 ```
 
-**"Measured on 314 claims, zero false refusals" would be true and it would be the wrong
+**"Measured on 312 claims, zero false refusals" would be true and it would be the wrong
 object.** Zero of the 27 cleared claims on this shelf cite a provision at all, so the
 population contains no case the check could have got wrong. A flip count over a
 population with no eligible rows reads exactly like a safety result and is not one.
@@ -122,7 +123,7 @@ population with no eligible rows reads exactly like a safety result and is not o
 So the honest statement, and the one printed on the front surface:
 
 > On the labelled held-out set it costs nothing: base 6/6, conflict 6/6, absence 6/6,
-> unchanged. On the live shelf it changes 0 of 314 verdicts — and **that number is not
+> unchanged. On the frozen shelf it changes 0 of 312 verdicts — and **that number is not
 > evidence of safety, because 0 of the 27 cleared claims on this shelf cite a provision
 > at all.** This corpus cannot exercise the mechanism. Its only evidence is two cases, one
 > of which is the case it was built for.
@@ -201,31 +202,75 @@ high-risk list is **Annex III** and the technical documentation is **Annex IV**.
 about one, cleared on a span about the other, is the identical error and this mechanism
 cannot see it.
 
-## The population is a mutable write target, and the 314 is machine-local
+## The population was a mutable write target — CLOSED 2026-08-31 (wave 5)
 
-`clearance/ingest.py::append_markdown` writes dated claim files **into
+`clearance/ingest.py::append_markdown` wrote dated claim files **into
 `research-corpus/`** — the same directory `eval_citation_conflict.py` replays as its
-measurement population. Two such files were sitting untracked when this eval ran:
+measurement population. So using the product changed its own published denominator: the
+night read n=313, then n=314 an hour later when a parallel lane ingested a claim, and a
+clean checkout read 312, because two of "the 314" were untracked files the product had
+written to itself.
+
+**The control was written first and watched go red against that layout:**
 
 ```
-$ git status --short research-corpus/
-?? research-corpus/2026-08-30-claim.md
-?? research-corpus/2026-08-31-claim.md
-$ # with them moved aside:
-CLEAN-CHECKOUT total 312 sourced 27 refused 269 unknown 16
+$ python3 tests/test_frozen_population.py          # 2026-08-31 ~05:50, before the fix
+FAIL  test_using_the_product_does_not_move_its_own_denominator:
+      one append_markdown() call changed the frozen population: 312 -> 313 claims
+      (extra: ['2026-08-31-t-frozen-population-probe.md'])
+FAIL  test_ingest_does_not_write_into_the_measurement_population:
+      ingest writes into the measured population: .../cleared/research-corpus
+FAIL  test_no_published_number_is_computed_over_the_live_sink:
+      ['eval_citation_conflict.py', 'eval_semantic_guard.py', 'clear_corpus.py']
+FAIL  test_the_written_instructions_point_at_the_sink_not_the_population:
+      AGENTS.md tells a writer to append to the FROZEN population
+FAIL  test_the_evals_resolve_their_population_through_the_frozen_gate
+3/8 passed
 ```
 
-**From a clean checkout the REGISTRY line reads 312, not 314.** The conclusion is
-untouched — still 27 cleared, still 0 of them citing a provision, still 0 flips — but a
-published denominator that any `ingest_claim()` call moves is a live baseline, not a
-frozen one. The honest fix is a frozen manifest for the eval population, separate from
-the directory ingest writes into.
+The fix separates the two directories and pins the frozen one by hash:
+
+| | |
+|---|---|
+| `research-corpus/` | **FROZEN.** Committed, hashed in `MANIFEST.json` (22 files, 312 claims, frozen 2026-08-31). Replayed by both evals through `clearance.population.frozen_dir()`, which raises rather than measure a drifted directory. Nothing in the product writes here. |
+| `research-inbox/` | **LIVE.** Where `clearance.ingest` writes. No published number is computed over it. |
+
+Three writers had to be closed, not one: `ingest.py`, **`AGENTS.md`** (which told the
+fleet to append research to `research-corpus/`) and the `science_ingest` MCP tool
+description. An agent recontaminates a frozen corpus by following prose, so the prose is
+pinned by a control too. The manifest is generated from `git ls-files`, so it can only
+ever freeze content a clean checkout also has — which is the property that failed.
+
+**The honest number, with its command and its population:**
+
+```
+$ python3 scripts/eval_citation_conflict.py                    2026-08-31 ~05:45
+REGISTRY  frozen population research-corpus/ (22 files, manifest frozen 2026-08-31),
+          312 claims, offline, doc cache
+  BASE / CONFLICT / ABSENCE   sourced 27   refused 269   unknown 16
+  CONFLICT changes 0 verdict(s) vs BASE — the corpus does not exercise it
+GOLD  base 6/6  conflict 6/6  absence 6/6
+```
+
+Every conclusion is untouched: still 27 cleared, still 0 of them citing a provision,
+still 0 flips. Only the denominator is now reproducible — and it reads 312 everywhere it
+is printed, because the surface reads it from the receipt rather than from a literal.
+
+**The sweep for the same pattern.** `eval_semantic_guard.py` had the identical
+contamination and is fixed the same way. Every other eval (`eval_refusal_baseline`,
+`eval_refusal_ablation`, `eval_stats`, `eval_external_anchor`) computes over
+`fixtures/refusal-correctness/set.json`, a committed labelled file. The receipts
+(`compound_exhibit_receipt`, `second_subject_receipt`, `wedge_receipt`) compute over
+named fixture scripts. The one remaining figure over a growing directory is the registry
+database itself — **that is the live shelf by design**, it is allowed to grow, and after
+the wave-4 fix the page names it as a different population from the corpus.
 
 ## What is open
 
-1. **A labelled set for this mechanism.** n=2 and one of them is the motivating case. The
-   honest next object is a held-out set of provision-bearing claims — near-misses,
-   correct citations, and sub-paragraph cases — labelled before any run.
+1. ~~**A labelled set for this mechanism.**~~ BUILT by the adversarial pass:
+   `scripts/probe_citation_heldout.py`, 11 provision-bearing claims labelled before any
+   run — SHIPS 9/11 vs BASE 7/11, zero false refusals introduced. What stays open is its
+   size and the two rows it misses (below).
 2. **A corpus that exercises it.** Legal and regulatory sources are where citations live;
    `research-corpus/` is an AI-industry corpus and contains almost none.
 3. The absence arm stays built, measured and off.

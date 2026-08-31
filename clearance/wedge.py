@@ -101,6 +101,24 @@ PROVENANCE = (
     "shipped at 04:00 on 2026-08-31."
 )
 
+# THE RECALL BOUNDARY, MEASURED — and it must appear wherever the mechanism is sold.
+# `scripts/probe_citation_heldout.py` runs 11 provision-bearing claims labelled before any
+# run: SHIPS 9/11, BASE 7/11, zero false refusals introduced. The row it misses (F3) says
+# "Article 5 breaches attract fines not exceeding 3 % of their annual total worldwide
+# turnover" — false, Article 5 is the 35M/7 % tier — and the shipping engine clears it
+# GREEN on Article 101(1), a paragraph about general-purpose AI models. The gate closes
+# the error only when the rival provision is cited BY NUMBER inside the carrier clause;
+# Article 101 names its subject in words, so there is no numeral to conflict with. The
+# honest sentence is "refuses THIS SHAPE of the error", never "refuses the error".
+# Pinned by `t_every_surface_states_the_recall_boundary`.
+RECALL_BOUNDARY = (
+    "This check refuses this SHAPE of the error — a carrier clause that names a rival "
+    "provision by number. It is not a claim to catch every miscited provision: on 11 "
+    "provision-bearing claims labelled before the run it closes 9, against 7 for the "
+    "engine without it, and the two it misses cite a rival whose subject is named in "
+    "words rather than by numeral. Reproduce: python3 scripts/probe_citation_heldout.py."
+)
+
 # What a keyword-grounded answer would have done with WEDGE-1, stated as a property of
 # the span rather than as an insult to a competitor: it is verbatim, it is in the cited
 # document, and it carries most of the claim's content terms. Those are the three tests

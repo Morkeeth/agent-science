@@ -55,7 +55,14 @@ python3 -m clearance serve                          # desk :8080 + /registry + /
 
 ## Research skill contract
 
-When the fleet saves research, append to `research-corpus/YYYY-MM-DD-<slug>.md`:
+When the fleet saves research, append to `research-inbox/YYYY-MM-DD-<slug>.md`:
+
+**Never write into `research-corpus/`.** That directory is the FROZEN measurement
+population every published number is computed over; it is hashed in
+`research-corpus/MANIFEST.json` and a write there moves the denominator of every eval
+in this repo. Growing it is a reviewed act: add files, re-run
+`python3 scripts/freeze_population.py`, commit the manifest, and say which numbers moved.
+
 
 ```markdown
 [CLAIM] The EU orphan works directive is Directive 2012/28/EU.

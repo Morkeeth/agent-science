@@ -19,8 +19,13 @@ POPULATIONS
   GOLD      fixtures/refusal-correctness/set.json, n=6, labelled 2026-08-22 BEFORE any
             engine run. The only population here with a right answer. A new gate that
             moves this number is rejected outright.
-  REGISTRY  every claim in research-corpus/, re-cleared offline against the document
-            cache — the population the shipped registry was built from. UNLABELLED, so
+  REGISTRY  every claim in the FROZEN population `research-corpus/`, re-cleared offline
+            against the document cache — the population the shipped registry was built
+            from. PINNED by `research-corpus/MANIFEST.json` and resolved through
+            `clearance.population.frozen_dir()`, which fails loudly if the directory has
+            drifted from its hashes. It is frozen because it used to be the directory
+            `clearance.ingest` WROTE INTO: the denominator moved every time anyone used
+            the product (313 -> 314 mid-run; 312 from a clean checkout). UNLABELLED, so
             every changed verdict is PRINTED IN FULL for a human to adjudicate. A count
             of flips is not a count of defects closed and this script never calls it one.
   WEDGE     the one case the mechanism was built for, run through judge_claim against
@@ -36,6 +41,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
+from clearance import population as P  # noqa: E402
 from clearance import semantic as S  # noqa: E402
 
 BASE = ("polarity",)
@@ -107,17 +113,21 @@ def gold() -> dict:
 # -------------------------------------------------------------- registry population
 
 def registry() -> dict:
-    """Re-clear research-corpus/ in every arm, offline, from the document cache."""
+    """Re-clear the FROZEN population in every arm, offline, from the document cache."""
     import clear_corpus as C
 
+    pop = P.frozen_dir()          # raises if the directory drifted from its manifest
     res = {}
     for name in ARMS:
         with arm(name):
-            res[name] = C.verify_corpus("research-corpus", fetch=False)
+            res[name] = C.verify_corpus(pop, fetch=False)
     key = lambda r: (r["file"], r["line"])  # noqa: E731
     base = {key(r): r for r in res["BASE"]["rows"]}
 
+    m = P.manifest()
     out = {"total": res["BASE"]["total"],
+           "population": {"dir": "research-corpus/", "frozen_at": m["frozen_at"],
+                          "files": m["n_files"], "manifest_claims": m["claims"]},
            "counts": {n: {k: res[n][k] for k in ("sourced", "refused", "unknown")}
                       for n in ARMS},
            "flips": {}}
@@ -146,7 +156,7 @@ def attribution() -> dict:
     import clear_corpus as C
 
     with arm("BASE"):
-        base = C.verify_corpus("research-corpus", fetch=False)
+        base = C.verify_corpus(P.frozen_dir(), fetch=False)
     greens = [r for r in base["rows"]
               if r["verdict"] == "SOURCED" and (r.get("quoted_terms") or "")]
     cites = [r for r in greens if S.provisions(r["text"])]
@@ -200,7 +210,7 @@ def main() -> int:
 
     a = attribution()
     print(f"\nATTRIBUTION  over the {a['greens']} GREEN verdicts the BASE engine "
-          f"produces on research-corpus/,")
+          f"produces on the frozen population,")
     print(f"             {a['cite_a_provision']} of which cite a provision at all")
     for name, hits in a["hits"].items():
         print(f"  {name:9} would refuse {len(hits)} of those {a['cite_a_provision']}")
@@ -209,7 +219,10 @@ def main() -> int:
             print(f"      why  : {h['detail'][:150]}")
 
     r = registry()
-    print(f"\nREGISTRY  research-corpus/, {r['total']} claims, offline, doc cache")
+    pop = r["population"]
+    print(f"\nREGISTRY  frozen population research-corpus/ "
+          f"({pop['files']} files, manifest frozen {pop['frozen_at']}), "
+          f"{r['total']} claims, offline, doc cache")
     for n in ARMS:
         c = r["counts"][n]
         print(f"  {n:9} sourced {c['sourced']:4}  refused {c['refused']:4}  "

@@ -77,21 +77,27 @@
   }
  },
  "registry": {
-  "total": 314,
+  "total": 312,
+  "population": {
+   "dir": "research-corpus/",
+   "frozen_at": "2026-08-31",
+   "files": 22,
+   "manifest_claims": 312
+  },
   "counts": {
    "BASE": {
     "sourced": 27,
-    "refused": 271,
+    "refused": 269,
     "unknown": 16
    },
    "CONFLICT": {
     "sourced": 27,
-    "refused": 271,
+    "refused": 269,
     "unknown": 16
    },
    "ABSENCE": {
     "sourced": 27,
-    "refused": 271,
+    "refused": 269,
     "unknown": 16
    }
   },

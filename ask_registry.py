@@ -597,13 +597,20 @@ EVAL_COMMAND = "python3 scripts/eval_citation_conflict.py"
 def _measurement_html() -> str:
     """What this mechanism has and has not been shown to cost. Read from the eval file.
 
-    THE SENTENCE THIS EXISTS TO PREVENT. "Measured on 314 claims, zero false refusals"
+    THE SENTENCE THIS EXISTS TO PREVENT. "Measured on 312 claims, zero false refusals"
     is true and it is the wrong object: zero of the 27 claims it clears on research-corpus/
     cite a provision at all, so the population contains no case the check could have got
     wrong.
 
+    AND THAT DENOMINATOR USED TO MOVE ON ITS OWN. It read 314 until 2026-08-31 because
+    `clearance.ingest` wrote claim files INTO `research-corpus/` — the directory the eval
+    replays — so using the product changed its own published population, and a clean
+    checkout read 312. The corpus is now frozen and hashed (`research-corpus/MANIFEST.json`),
+    ingest writes to `research-inbox/`, and the number here is read from the eval receipt,
+    which names the population and the day it was frozen.
+
     AND THE WORD "SHELF" WAS DOING A SECOND JOB IT WAS NOT ENTITLED TO. This paragraph
-    counted research-corpus/ (314 claims, 27 cleared) and called it "this shelf"; a
+    counted research-corpus/ (312 claims, 27 cleared) and called it "this shelf"; a
     thousand pixels below, "the negative space, counted" prints the registry database
     (179 claims, 29 cleared) and calls that the shelf too. Two correct numbers, one
     screen apart, under one noun — the adjacency defect `clearance/curve.py` has a
@@ -624,11 +631,15 @@ def _measurement_html() -> str:
     arms = [k for k in ("BASE", "CONFLICT", "ABSENCE") if f"correct_{k}" in g]
     gold_line = "; ".join(f"{k.lower()} {g['correct_' + k]}/{g['n']}" for k in arms)
     changed = len(r["flips"].get("CONFLICT", []))
+    pop = r.get("population") or {}
     return (
         '<p class="warn"><b>What this check has been shown to cost, and what it '
         "has not.</b> On the labelled held-out set it costs nothing: "
         f"{html.escape(gold_line)}, unchanged. Replayed over <code>research-corpus/</code>"
-        f" — {r['total']} claims, a DIFFERENT population from the registry counted lower "
+        f" — {r['total']} claims across {pop.get('files', '?')} files, FROZEN "
+        f"{html.escape(str(pop.get('frozen_at', 'unknown')))} and hashed in "
+        "<code>research-corpus/MANIFEST.json</code> so this denominator cannot move when "
+        "the product is used; a DIFFERENT population from the registry counted lower "
         f"down this page — it changes {changed} verdicts, and that number is not "
         f"evidence of safety, because <b>{a['cite_a_provision']} of the {a['greens']} "
         "claims it clears there cite a provision at all</b>. That corpus cannot "
@@ -709,6 +720,8 @@ def _wedge_html() -> str:
                   "nothing in the clause it quotes claims a different article, and "
                   "absence alone is not a refusal here."))
     out.append("</div>")
+    out.append('<p class="hero-foot"><b>What this refuses, and what it does not.</b> '
+               + html.escape(W.RECALL_BOUNDARY) + "</p>")
     out.append('<p class="hero-foot">'
                + html.escape(W.PROVENANCE)
                + f' Document: <a href="{html.escape(W.URL, quote=True)}">'

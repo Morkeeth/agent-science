@@ -1,4 +1,13 @@
-"""Ingest fleet research into the registry — markdown or single claim+url."""
+"""Ingest fleet research into the registry — markdown or single claim+url.
+
+WHERE THIS WRITES, AND WHY IT IS NOT research-corpus/. Until 2026-08-31 this module
+appended dated claim files into `research-corpus/`, the directory the evals replay as
+their measurement population. Every ingest therefore moved the published denominator:
+n=313 became n=314 mid-run, and a clean checkout read 312. The sink is now
+`research-inbox/` — a live audit trail that no published number is computed over. The
+frozen population and the rule are in `clearance/population.py`; the control that fails
+if the two are ever the same directory is `tests/test_frozen_population.py`.
+"""
 from __future__ import annotations
 
 import os
@@ -9,17 +18,21 @@ from pathlib import Path
 from clearance import refusal_log
 
 _ROOT = Path(__file__).resolve().parent.parent
-_CORPUS = _ROOT / "research-corpus"
+_INBOX = _ROOT / "research-inbox"   # LIVE sink. Never the eval population.
 _URL = re.compile(r"https?://[^\s)\]]+")
 
 
 def append_markdown(body: str, *, slug: str | None = None) -> Path:
-    """Write [CLAIM]/[URL] markdown to research-corpus/ for audit trail."""
-    _CORPUS.mkdir(parents=True, exist_ok=True)
+    """Write [CLAIM]/[URL] markdown to research-inbox/ for audit trail.
+
+    NOT research-corpus/: that is the frozen measurement population and writing into it
+    would move every number this product publishes. See clearance/population.py.
+    """
+    _INBOX.mkdir(parents=True, exist_ok=True)
     day = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     name = slug or f"ingest-{datetime.now(timezone.utc).strftime('%H%M%S')}"
     safe = re.sub(r"[^a-zA-Z0-9_-]+", "-", name).strip("-")[:48]
-    path = _CORPUS / f"{day}-{safe}.md"
+    path = _INBOX / f"{day}-{safe}.md"
     path.write_text(body.rstrip() + "\n", encoding="utf-8")
     return path
 
