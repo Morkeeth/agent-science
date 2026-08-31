@@ -15,7 +15,7 @@ SET A is reported UNCHANGED and separately, because SHIPS 9/11 vs BASE 7/11 is a
 published on the front surface and in the FINDING. Growing a set is not a licence to
 restate its old score.
 
-SET B, n=11, added 2026-08-31 wave 5, labelled the same way and for a stated reason: SET A
+SET B, n=12, added 2026-08-31 wave 5, labelled the same way and for a stated reason: SET A
 priced the shape the gate CLOSES at n=3 and the shapes it CANNOT SEE at n=1, so the
 boundary sentence rested on a single row. Every SET B label is derived from the fetched
 document, not from memory: each case carries the article heading and the sentence the
@@ -74,7 +74,7 @@ CASES = [
   "fines not exceeding 3 % of their annual total worldwide turnover", "false-words",
   "the anchor sits in Article 101(1), which names its subject as 'providers of "
   "general-purpose AI models' and carries no numeral"),
- # ------------------------------------------------- SET B (wave 5, n=11, same discipline)
+ # ------------------------------------------------- SET B (wave 5, n=12, same discipline)
  ("T9","SOURCED",'Article 4 requires providers and deployers to ensure "a sufficient level of AI literacy" of their staff',
   "a sufficient level of AI literacy", "true",
   "'Article 4 AI literacy Providers and deployers of AI systems shall take measures to "
@@ -132,16 +132,22 @@ CASES = [
 #: the population already published as SHIPS 9/11 vs BASE 7/11. Reported unchanged.
 SET_A = {"T1","T2","T3","T4","T5","T6","T7","T8","F1","F2","F3"}
 
-# A FOURTH FALSE CASE WAS WRITTEN AND WITHDRAWN, AND THE LABEL WAS MINE, NOT THE ENGINE'S.
-#   F4  "Annex IV sets out the 'technical documentation referred to in Article 11(1)'
-#        for GPAI models"           labelled REFUSED, engine says SOURCED
-# The engine is right and the label was wrong: the span it returned IS Annex IV. It was
-# written to demonstrate the roman-numeral blind spot and does not, because nothing in
-# it conflicts. The blind spot is real and is demonstrated at the parser instead:
-#   >>> semantic.provisions("Annex III")  ->  []
-# Scoring a probe against a label I got wrong would be this repo's own founding defect,
-# committed inside the probe built to find it.
-
+# THE HEADER'S OWN ARITHMETIC, CHECKED AGAINST THE ROWS (added 2026-08-31, adversarial
+# pass). The docstring above said "SET B, n=11" while the list below carried twelve rows
+# — T9-T14 and F5-F10 — so the file that grew the set to 23 could not add its own halves
+# to 23. A prose count beside the data it describes is the defect this whole repo exists
+# to catch; here it is checked rather than typed.
+_SET_B = {c[0] for c in CASES} - SET_A
+_DECLARED = {int(n) for n in __import__("re").findall(
+    r"SET B, n=(\d+),", __doc__ or "")} | {int(n) for n in __import__("re").findall(
+    r"SET A, n=(\d+),", __doc__ or "")}
+assert {c[0] for c in CASES} >= SET_A, "SET_A names a row the case list does not have"
+assert len(SET_A) == 11 and len(_SET_B) == 12 and len(CASES) == 23, (
+    f"the sets no longer add up: SET A {len(SET_A)} + SET B {len(_SET_B)} "
+    f"!= {len(CASES)} rows")
+assert _DECLARED == {11, 12}, (
+    f"the docstring declares set sizes {sorted(_DECLARED)}; the rows are "
+    f"SET A {len(SET_A)}, SET B {len(_SET_B)}")
 
 # A FOURTH FALSE CASE WAS WRITTEN AND WITHDRAWN, AND THE LABEL WAS MINE, NOT THE ENGINE'S.
 #   F4  "Annex IV sets out the 'technical documentation referred to in Article 11(1)'
