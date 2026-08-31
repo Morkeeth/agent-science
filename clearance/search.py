@@ -1,17 +1,11 @@
 """Parallel Search — the missing first step of the pipeline.
 
-Until now a Claim arrived with `source_url` already filled in BY HAND. That was the
-largest piece of hand-waving left in the product: every demo claim had a human-chosen
-source, so the hard part — finding the document that might carry an assertion — was
-done off-camera by a person.
+Uses the official `parallel-web` SDK when installed (Parallel track requirement);
+falls back to the same REST endpoint via urllib. Every live call records a
+`search_id` when the API returns one — PeriodCheck-style evidence lineage.
 
-This module fills that field. It proposes candidate documents and nothing more; every
-candidate still goes through fetch -> locate -> verify, so a search result can no more
-become a verdict than a model can.
-
-THE KEY IS NEVER IN THIS REPO. It is read at runtime from a 0600 file outside the tree,
-captured once and never copied. It is not logged, not echoed, not put in a cache file,
-and not included in any error message.
+THE KEY IS NEVER IN THIS REPO. It is read at runtime from env or a 0600 file
+outside the tree. It is not logged, not echoed, and not included in error messages.
 """
 from __future__ import annotations
 
@@ -21,28 +15,29 @@ import urllib.error
 import urllib.request
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 ENDPOINT = "https://api.parallel.ai/v1/search"
 KEY_PATH = Path.home() / ".config" / "keys" / "parallel.key"
 CACHE = Path(__file__).resolve().parent.parent / "cache" / "searches.json"
 RECEIPTS = Path(__file__).resolve().parent.parent / "cache" / "search_receipts.jsonl"
 
-
-# Every live call to Parallel is counted HERE, at the only place one is made. The
-# per-claim counter in agent_science.py missed escalation searches entirely, because
-# those happen inside the engine below it - so the reported cost undercounted the real
-# spend. A meter that only sees one of two call sites is not a meter.
 LIVE_CALLS = 0
+LAST_SEARCH_ID: Optional[str] = None
 
 
 def calls() -> int:
     return LIVE_CALLS
 
 
+def last_search_id() -> Optional[str]:
+    return LAST_SEARCH_ID
+
+
 def reset_calls() -> None:
-    global LIVE_CALLS
+    global LIVE_CALLS, LAST_SEARCH_ID
     LIVE_CALLS = 0
+    LAST_SEARCH_ID = None
 
 
 class NoKey(RuntimeError):
@@ -56,8 +51,41 @@ class Candidate:
     excerpt: str
 
 
+def sdk_available() -> bool:
+    try:
+        import parallel  # noqa: F401
+        return True
+    except ImportError:
+        return False
+
+
+def sdk_version() -> Optional[str]:
+    if not sdk_available():
+        return None
+    try:
+        from importlib.metadata import version
+        return version("parallel-web")
+    except Exception:
+        return None
+
+
+def integration_info() -> dict:
+    """Runtime shape for /health and /partners — how Parallel is wired."""
+    return {
+        "partner": "parallel",
+        "track_requirement": "Search API at runtime via parallel-web SDK or REST",
+        "sdk_package": "parallel-web",
+        "sdk_installed": sdk_available(),
+        "sdk_version": sdk_version(),
+        "transport": "parallel-web" if sdk_available() else "urllib-rest",
+        "endpoint": ENDPOINT,
+        "live_calls": LIVE_CALLS,
+        "last_search_id": LAST_SEARCH_ID,
+        "receipts_log": str(RECEIPTS),
+    }
+
+
 def load_key() -> str:
-    """The one place the key is read. Env var wins so CI can inject it."""
     env = os.environ.get("PARALLEL_API_KEY")
     if env:
         return env.strip()
@@ -80,9 +108,24 @@ def _cache_save(d: dict) -> None:
     CACHE.write_text(json.dumps(d, indent=2))
 
 
+def _candidates_from_payload(payload: dict) -> list[Candidate]:
+    out: list[Candidate] = []
+    for x in payload.get("results") or []:
+        url = x.get("url") if isinstance(x, dict) else getattr(x, "url", None)
+        if not url:
+            continue
+        title = (x.get("title") if isinstance(x, dict) else getattr(x, "title", None)) or "(untitled)"
+        excerpts = x.get("excerpts") if isinstance(x, dict) else getattr(x, "excerpts", None)
+        excerpt = ""
+        if excerpts:
+            excerpt = (excerpts[0] if isinstance(excerpts, list) else str(excerpts))[:400]
+        out.append(Candidate(url=url, title=title, excerpt=excerpt))
+    return out
+
+
 def log_receipt(*, source: str, objective: str, queries: list[str],
-                candidates: list[Candidate], cache_hit: bool = False) -> None:
-    """Append query → result for optimization analytics. No API keys."""
+                candidates: list[Candidate], cache_hit: bool = False,
+                search_id: Optional[str] = None) -> None:
     from datetime import datetime, timezone
     RECEIPTS.parent.mkdir(parents=True, exist_ok=True)
     row = {
@@ -93,24 +136,56 @@ def log_receipt(*, source: str, objective: str, queries: list[str],
         "cache_hit": cache_hit,
         "n_candidates": len(candidates),
         "urls": [c.url for c in candidates[:8]],
+        "search_id": search_id,
     }
     with RECEIPTS.open("a", encoding="utf-8") as f:
         f.write(json.dumps(row, ensure_ascii=False) + "\n")
 
 
+def _live_search_urllib(objective: str, queries: list[str], *, mode: str) -> tuple[dict, str | None]:
+    body = json.dumps({"objective": objective, "search_queries": queries,
+                       "mode": mode}).encode()
+    req = urllib.request.Request(
+        ENDPOINT, data=body, method="POST",
+        headers={"Content-Type": "application/json", "x-api-key": load_key()})
+    try:
+        with urllib.request.urlopen(req, timeout=45) as r:
+            payload = json.load(r)
+    except urllib.error.HTTPError as e:
+        raise RuntimeError(f"Parallel search failed: HTTP {e.code} {e.reason}") from None
+    return payload, payload.get("search_id")
+
+
+def _live_search_sdk(objective: str, queries: list[str], *, mode: str) -> tuple[dict, str | None]:
+    from parallel import Parallel
+
+    client = Parallel(api_key=load_key())
+    search = client.search(objective=objective, search_queries=queries, mode=mode)
+    sid = getattr(search, "search_id", None)
+    results = []
+    for r in search.results or []:
+        results.append({
+            "url": getattr(r, "url", None),
+            "title": getattr(r, "title", None),
+            "excerpts": list(getattr(r, "excerpts", None) or []),
+        })
+    return {"search_id": sid, "results": results}, sid
+
+
+def _live_search(objective: str, queries: list[str], *, mode: str) -> tuple[dict, str | None]:
+    global LIVE_CALLS, LAST_SEARCH_ID
+    LIVE_CALLS += 1
+    if sdk_available():
+        payload, sid = _live_search_sdk(objective, queries, mode=mode)
+    else:
+        payload, sid = _live_search_urllib(objective, queries, mode=mode)
+    LAST_SEARCH_ID = sid
+    return payload, sid
+
+
 def find_sources(objective: str, queries: list[str], *, mode: str = "advanced",
                  live: bool = False, max_results: int = 6,
                  term: str = "") -> Optional[list[Candidate]]:
-    """Candidate documents that MIGHT carry the claim. Never evidence by itself.
-
-    Returns [] when a search RAN and came back empty.
-    Returns None when NO SEARCH WAS PERFORMED — cache miss with live=False.
-
-    The distinction is not pedantry. Collapsing them let the engine report
-    "searched and found nothing" about a search it never ran, which is a false claim
-    about a probe: the exact class this product exists to catch, committed by the
-    product, one layer up from the string-matching version of it.
-    """
     ck = json.dumps({"o": objective, "q": sorted(queries), "m": mode}, sort_keys=True)
     cache = _cache_load()
     if ck in cache:
@@ -127,27 +202,12 @@ def find_sources(objective: str, queries: list[str], *, mode: str = "advanced",
     if not live:
         return None
 
-    body = json.dumps({"objective": objective, "search_queries": queries,
-                       "mode": mode}).encode()
-    req = urllib.request.Request(
-        ENDPOINT, data=body, method="POST",
-        headers={"Content-Type": "application/json", "x-api-key": load_key()})
-    global LIVE_CALLS
-    LIVE_CALLS += 1
-    try:
-        with urllib.request.urlopen(req, timeout=45) as r:
-            payload = json.load(r)
-    except urllib.error.HTTPError as e:
-        # Never let a key reach a log line. Status and reason only.
-        raise RuntimeError(f"Parallel search failed: HTTP {e.code} {e.reason}") from None
-
-    out = [Candidate(url=x.get("url", ""), title=x.get("title", "") or "(untitled)",
-                     excerpt=(x.get("excerpts") or [""])[0][:400])
-           for x in payload.get("results", []) if x.get("url")]
+    payload, sid = _live_search(objective, queries, mode=mode)
+    out = _candidates_from_payload(payload)
     cache[ck] = [c.__dict__ for c in out]
     if term_key:
         cache[term_key] = cache[ck]
     _cache_save(cache)
     log_receipt(source="parallel", objective=objective, queries=queries,
-                candidates=out[:max_results], cache_hit=False)
+                candidates=out[:max_results], cache_hit=False, search_id=sid)
     return out[:max_results]

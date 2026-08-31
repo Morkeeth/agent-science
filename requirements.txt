@@ -3,3 +3,4 @@
 # not by a module sitting in the tree. Pinned so the deployed revision and the
 # `env -u` receipt are the same software.
 google-adk==2.7.1
+parallel-web==1.3.2

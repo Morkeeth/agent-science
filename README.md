@@ -15,6 +15,8 @@ never infer.
 
 Built for [Agentic Cinema](https://agentic-cinema.devpost.com/) · Parallel track.
 
+**Architecture:** [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) · diagrams + [screenshots](docs/assets/README.md)
+
 ## Stack websearch (use this for all fleet research)
 
 ```bash

@@ -37,6 +37,7 @@ import ask_registry  # noqa: E402
 from clearance import ingest as stack_ingest, query_analytics, stack_search  # noqa: E402
 from clearance import corpus  # noqa: E402
 from cloud import agent as adk_agent  # noqa: E402
+from cloud import partners as partner_manifest  # noqa: E402
 
 # ADK is the default path. Setting this to "0" serves the direct pipeline instead and
 # is for controls only — a run with the agent switched off is a different product and
@@ -482,18 +483,36 @@ class Handler(BaseHTTPRequestHandler):
                     except Exception:
                         pass
             adk_ok = adk_agent.adk_available()
+            adk_default = ADK_DEFAULT and adk_ok
+            from clearance import search as _parallel
             return self._json(200, {
                 "ok": True,
                 "service": "agent-science",
                 "gemini": gemini_path != "none",
                 "gemini_path": gemini_path,
                 "parallel": bool(os.environ.get("PARALLEL_API_KEY")),
-                # Importable is not the same as used. `engine_default` is what a
-                # /clear on this revision will actually run.
+                "parallel_sdk": _parallel.sdk_available(),
+                "parallel_sdk_version": _parallel.sdk_version(),
+                "parallel_transport": _parallel.integration_info()["transport"],
+                "last_parallel_search_id": _parallel.last_search_id(),
                 "agent_builder": adk_ok,
                 "adk_version": adk_agent.adk_version(),
-                "engine_default": "adk" if (ADK_DEFAULT and adk_ok) else "direct",
+                "engine_default": "adk" if adk_default else "direct",
             })
+
+        if path == "/partners":
+            gemini_path = "none"
+            if os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY"):
+                gemini_path = "api-key"
+            else:
+                proj = os.environ.get("GCP_PROJECT") or os.environ.get("GOOGLE_CLOUD_PROJECT")
+                if proj:
+                    gemini_path = f"vertex:{proj}"
+            adk_ok = adk_agent.adk_available()
+            return self._json(200, partner_manifest.manifest(
+                gemini_path=gemini_path,
+                adk_default=ADK_DEFAULT and adk_ok,
+            ))
 
         if path == "/corpus":
             subject = (qs.get("subject") or ["default"])[0].strip() or "default"

@@ -24,7 +24,8 @@ SUITES = [
     ("test_search_path.py", "search_path", 5),
     ("test_source_map.py", "source_map", 3),
     ("test_refusal_correctness.py", "refusal_correctness", 6),
-    ("test_partner_runtime.py", "partner_runtime", 5),
+    ("test_partner_runtime.py", "partner_runtime", 6),
+    ("test_parallel_integration.py", "parallel_integration", 6),
 ]
 
 
@@ -62,7 +63,7 @@ def _doc_claims() -> dict[str, int]:
         m = re.search(rf"\|\s*{re.escape(key)}\s*\|[^|]*\|\s*\*\*(\d+)/(\d+)\*\*", text)
         if m:
             claims[key] = int(m.group(1))
-    total = re.search(r"\|\s*\*\*Total\*\*\s*\|\s*10 suites\s*\|\s*\*\*(\d+)/(\d+)\*\*", text)
+    total = re.search(r"\|\s*\*\*Total\*\*\s*\|\s*\d+ suites\s*\|\s*\*\*(\d+)/(\d+)\*\*", text)
     if total:
         claims["__total__"] = int(total.group(1))
     return claims

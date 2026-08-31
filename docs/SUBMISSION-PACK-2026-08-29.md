@@ -41,9 +41,10 @@ python3 ask_registry.py "agentlint" | head -5
 | search_path | `python3 tests/test_search_path.py` | **5/5** |
 | source_map | `python3 tests/test_source_map.py` | **3/3** |
 | refusal_correctness | `python3 tests/test_refusal_correctness.py` | **6/6** |
-| partner_runtime | `python3 tests/test_partner_runtime.py` | **5/5** |
-| **Total** | 10 suites | **117/117** |
-| docs gate | `python3 scripts/bench_check_docs.py` | **117/117 match** |
+| partner_runtime | `python3 tests/test_partner_runtime.py` | **6/6** |
+| parallel_integration | `python3 tests/test_parallel_integration.py` | **6/6** |
+| **Total** | 11 suites | **124/124** |
+| docs gate | `python3 scripts/bench_check_docs.py` | **124/124 match** |
 
 **Compound exhibit (live hosted, 2026-08-31 PM):** `long_run_goal.sh` · A=**1**→B=**0** Parallel · B corpus hits=**1** — `docs/LONG-RUN-RECEIPT-2026-08-31.md` · sealed `docs/SEALED-PREDICTION-2026-08-31.md`. Prior: compound-mini A=**2**→B=**1**. Orphan-works full script: run B **503** — do not claim on video.
 

@@ -27,6 +27,8 @@ def t_gemini_entrypoint_exists():
 def t_parallel_entrypoint_wired_in_facts():
     from clearance import facts, search
     assert hasattr(search, "find_sources")
+    assert hasattr(search, "integration_info")
+    assert hasattr(search, "last_search_id")
     src = inspect.getsource(facts.judge_claim)
     assert "find_sources" in src
     assert "_search.find_sources" in src or "search.find_sources" in src
@@ -67,6 +69,12 @@ def t_deploy_sh_secret_manager_not_plaintext_env():
     assert "parallel-api-key" in deploy or "PARALLEL_SECRET" in deploy
     # Gemini via ADC — no plaintext key in deploy env vars
     assert "GEMINI_API_KEY" not in deploy.split("--set-env-vars")[1].split("--set-secrets")[0]
+
+
+def t_requirements_pins_parallel_web():
+    req = (ROOT / "requirements.txt").read_text()
+    assert "parallel-web==" in req
+    assert "google-adk==" in req
 
 
 if __name__ == "__main__":

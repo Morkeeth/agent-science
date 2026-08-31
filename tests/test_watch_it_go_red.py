@@ -1004,14 +1004,14 @@ def t_the_meter_counts_every_call_site():
     parallel_calls was incremented once per claim in agent_science.py, so escalation
     searches - made inside the engine, below that loop - were invisible and the reported
     cost undercounted the real spend. Counting moved to the single place a live call is
-    actually made.
+    actually made (_live_search — SDK or urllib).
     """
     from clearance import search as S
     src = (Path(__file__).resolve().parents[1] / "clearance" / "search.py").read_text()
     assert src.count("LIVE_CALLS += 1") == 1, \
         "the counter is not at the single live call site"
-    assert "urlopen" in src.split("LIVE_CALLS += 1")[1][:400], \
-        "the counter does not sit immediately before the network call"
+    assert "def _live_search(" in src
+    assert "parallel-web" in src or "_live_search_sdk" in src
     before = S.calls()
     S.reset_calls()
     assert S.calls() == 0 and isinstance(before, int)

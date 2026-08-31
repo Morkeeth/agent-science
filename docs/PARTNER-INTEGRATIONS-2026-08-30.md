@@ -54,6 +54,8 @@ env -u GEMINI_API_KEY -u GOOGLE_API_KEY python3 agent_science.py fixtures/script
 |-------|-------|
 | **Role** | Find candidate source URLs when a claim has no `source_url` |
 | **SDK entrypoint** | `clearance/search.py` — `find_sources()` |
+| **SDK package** | `parallel-web==1.3.2` (`requirements.txt`, Docker image) — primary transport |
+| **Fallback** | Same REST endpoint via urllib if SDK import fails (cold clone without pip) |
 | **Called from** | `clearance/facts.py` → `agent_science.py` on every live `/clear` |
 | **Env vars** | `PARALLEL_API_KEY` (injected from Secret Manager on Cloud Run) |
 | **Secret Manager name** | `parallel-api-key` (override: `PARALLEL_SECRET` in `deploy.sh`) |
@@ -74,7 +76,13 @@ curl -s -X POST https://api.parallel.ai/v1/search \
 
 **Offline:** `cache/searches.json` — seeded by `python3 scripts/seed_document_cache.py`.
 
-**Meter:** `clearance/search.py` `LIVE_CALLS` — single increment at `urlopen`.
+**Receipts:** `cache/search_receipts.jsonl` — each live call logs `search_id` when returned.
+
+**Meter:** `clearance/search.py` `LIVE_CALLS` — single increment in `_live_search()` (SDK or REST).
+
+**Judge manifest:** `GET /partners` — full track checklist + module map.
+
+**Live probe:** `python3 scripts/partner_probe.py` → `docs/RECEIPT-partner-probe-*.md`
 
 ---
 
@@ -98,6 +106,10 @@ curl -s -X POST https://api.parallel.ai/v1/search \
   "gemini": true,
   "gemini_path": "vertex:hack-fleet",
   "parallel": true,
+  "parallel_sdk": true,
+  "parallel_sdk_version": "1.3.2",
+  "parallel_transport": "parallel-web",
+  "last_parallel_search_id": "srch_…",
   "agent_builder": true,
   "adk_version": "2.7.1",
   "engine_default": "adk"
@@ -116,6 +128,7 @@ curl -s -X POST https://api.parallel.ai/v1/search \
 | Method | Path | Body | Response |
 |--------|------|------|----------|
 | GET | `/health` | — | JSON above |
+| GET | `/partners` | — | Track manifest — all four partners + checklist |
 | GET | `/` | — | Desk UI (HTML form → POST /clear) |
 | GET | `/corpus?subject=` | — | `{subject, remembered, total}` |
 | POST | `/clear` | `{"script","subject"}` | Gap report JSON; `engine` field stamped |

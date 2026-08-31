@@ -1,6 +1,6 @@
 # Agent Science — agent context
 
-**Read first:** `docs/STATUS.md` (living gate board — updated each session)  
+**Read first:** `docs/STATUS.md` (living gate board) · `docs/ARCHITECTURE.md` (full flow + diagrams + screens)  
 **Build process:** `hack.md` (canonical hackathon state)  
 **Oscar gates:** `docs/SUBMIT-FOLLOW-UP-2026-08-31.md`
 

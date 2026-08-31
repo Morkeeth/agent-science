@@ -2,7 +2,7 @@
 doc: hack
 project: Agent Science
 phase: SHIP
-last-touched: 2026-08-31 13:25 CEST
+last-touched: 2026-08-31 14:10 CEST
 canonical: true
 event: Agentic Cinema · Parallel track · deadline 2026-09-09 14:00 PDT
 supersedes: docs/PHASE0-LADDER.md ClickHouse-track note (runtime track is Parallel)
@@ -335,7 +335,9 @@ curl -s '…/search?q=Directive+2012/28/EU&live=false'  # SOURCED free tier
 
 ```bash
 python3 scripts/seed_document_cache.py && python3 tests/test_watch_it_go_red.py  # 72/72
-python3 tests/test_partner_runtime.py                                             # 5/5
+python3 tests/test_partner_runtime.py                                             # 6/6
+python3 tests/test_parallel_integration.py                                        # 6/6
+curl -s https://agent-science-568004190078.us-central1.run.app/partners          # judge manifest
 bash scripts/verify_cold_clone.sh                                                 # stranger path
 ```
 
@@ -343,6 +345,7 @@ bash scripts/verify_cold_clone.sh                                               
 
 - `docs/RECEIPT-live-compound-exhibit-2026-08-31.md` — hosted compound (fresh pass; orphan-works B 503)
 - `docs/PARTNER-INTEGRATIONS-2026-08-30.md` — all four partners on path
+- `docs/PARTNER-INTEGRATION-RESEARCH-2026-08-31.md` — field comparison + judge playbook
 - `docs/MOONSHOT-MEMO-2026-08-31.md` — flywheel + field detail
 
 ---

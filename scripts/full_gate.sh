@@ -19,6 +19,7 @@ python3 tests/test_watch_it_go_red.py
 
 echo "--- 3. Partner + ADK ---"
 python3 tests/test_partner_runtime.py
+python3 tests/test_parallel_integration.py
 python3 tests/test_adk_default_path.py
 
 echo "--- 4. Product suites ---"

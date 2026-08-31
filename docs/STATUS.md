@@ -2,7 +2,7 @@
 doc: status
 project: Agent Science
 canonical: true
-last-updated: 2026-08-31T11:28:00Z
+last-updated: 2026-08-31T14:10:00Z
 deadline: 2026-09-09T14:00:00-07:00
 ---
 
@@ -11,7 +11,7 @@ deadline: 2026-09-09T14:00:00-07:00
 > **For Claude / fleet:** this file is the single “where we are” surface.  
 > `hack.md` = process · `CLAUDE.md` = entry · this file = gates + evidence.
 
-**Last gate run:** 2026-08-31T11:27:44Z — `bash scripts/full_gate.sh` → **FULL GATE OK** (117/117 · 19/19 long run · trial OK)
+**Last gate run:** 2026-08-31T14:01:03Z — `bash scripts/full_gate.sh` → **FULL GATE OK** (124/124 · 19/19 long run · trial OK · partner SDK deepen)
 
 ---
 
@@ -20,8 +20,8 @@ deadline: 2026-09-09T14:00:00-07:00
 | State | Detail |
 |-------|--------|
 | **Product** | LIVE on Cloud Run · public repo · sealed prediction |
-| **Build lane** | **IDLE** — nothing left before video |
-| **Oscar** | **3 clicks:** record video → Devpost + video URL → logged-out verify |
+| **Build lane** | **Partner deepen** — `parallel-web` SDK, `/partners`, `search_id` receipts |
+| **Oscar** | **ATA** — video/Devpost deferred; 3 clicks when back |
 | **Film lead** | E&O + refuse first (not compound) — `docs/FALSIFICATION-PERIODCHECK-2026-08-31.md` |
 
 ---
@@ -42,9 +42,9 @@ deadline: 2026-09-09T14:00:00-07:00
 | Gate | Result | Command / doc |
 |------|--------|----------------|
 | Mutation controls | **72/72** | `test_watch_it_go_red.py` |
-| All test suites | **117/117** | `tests/test_*.py` (see full_gate log) |
+| All test suites | **124/124** | `bench_check_docs.py` suites (see full_gate log) |
 | Secret scan | **6/6** | `test_secret_surfaces.py` |
-| Partner runtime | **5/5** | `test_partner_runtime.py` |
+| Partner runtime | **6/6** | `test_partner_runtime.py` + `test_parallel_integration.py` |
 | ADK default | **5/5** | `test_adk_default_path.py` |
 | Registry surface | **13/13** | `test_registry_surface.py` |
 | Cold clone | ✅ | `verify_cold_clone.sh` |
@@ -53,6 +53,7 @@ deadline: 2026-09-09T14:00:00-07:00
 | Sealed prediction | ✅ | `SEALED-PREDICTION-2026-08-31.md` |
 | Public repo | ✅ | github.com/Morkeeth/agent-science |
 | Video | ⛔ | `VIDEO-SCRIPT-2026-08-29.md` |
+| Architecture pack | ✅ | `docs/ARCHITECTURE.md` + `docs/assets/` |
 | Devpost | ⛔ | `DEVPOST-READY.md` + paste pack |
 
 ---
@@ -62,8 +63,9 @@ deadline: 2026-09-09T14:00:00-07:00
 | | |
 |---|---|
 | **URL** | https://agent-science-568004190078.us-central1.run.app |
-| **Revision** | `agent-science-00014-p56` (re-deploy if unsure: `bash deploy.sh`) |
-| **Health** | `engine_default: adk` · Parallel · Gemini |
+| **Revision** | `agent-science-00016-pm7` · `parallel_sdk: true` |
+| **Health** | `engine_default: adk` · `parallel_transport: parallel-web` · Gemini |
+| **New** | `GET /partners` — judge manifest (live) |
 | **Stats** | ~183 claims · hit rate ~0.70 · queries logged growing |
 
 **Compound (sealed):** `longrun-0831-1320` A=**1** → B=**0** Parallel · B `corpus_hits=1`
@@ -100,6 +102,8 @@ bash scripts/full_gate.sh
 
 | When (UTC) | What |
 |------------|------|
+| 2026-08-31 16:10 | Architecture pack — ARCHITECTURE.md, diagrams, 6 hosted screenshots |
+| 2026-08-31 14:10 | Partner deepen — `parallel-web` SDK, `/partners`, `search_id` receipts, research doc |
 | 2026-08-31 11:30 | Full gate audit while Oscar away — STATUS.md · full_gate.sh · DEVPOST-READY · pack counts 117 |
 | 2026-08-31 11:25 | Submit pass — sealed · public repo · falsification doc |
 | 2026-08-31 11:22 | Long run goal 19/19 · Cursor goal complete |
