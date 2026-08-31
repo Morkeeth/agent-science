@@ -1,6 +1,6 @@
 # SUBMISSION PACK — Agentic Cinema · slice 7
 
-**Date:** 2026-08-30 · **Repo:** https://github.com/Morkeeth/agent-science @ `main`  
+**Date:** 2026-08-31 · **Repo:** https://github.com/Morkeeth/agent-science @ `main`  
 **Hosted:** https://agent-science-568004190078.us-central1.run.app · **Deadline:** 2026-09-09 14:00 PT  
 **Scope:** docs + offline controls — no public repo flip, no video upload, no Devpost submit, no `deploy.sh`
 
@@ -28,7 +28,7 @@ python3 ask_registry.py "agentlint" | head -5
 | Partner integrations | All four called at runtime | [x] docs | `docs/PARTNER-INTEGRATIONS-2026-08-30.md` |
 | ADK default path | `engine_default: adk` | [x] local / [x] hosted | `docs/RECEIPT-adk-default-path-2026-08-30.md` |
 
-**Controls re-measured 2026-08-30** (run each at object):
+**Controls re-measured 2026-08-31** (run each at object):
 
 | Suite | Command | Result |
 |-------|---------|--------|
@@ -45,7 +45,7 @@ python3 ask_registry.py "agentlint" | head -5
 | **Total** | 10 suites | **109/109** |
 | docs gate | `python3 scripts/bench_check_docs.py` | **109/109 match** |
 
-**Compound exhibit (live hosted, 2026-08-30):** compound-mini A/B · A=**2** Parallel → B=**1** Parallel · B corpus hits=**2** — `docs/RECEIPT-live-compound-exhibit-2026-08-30.md`. Offline: `docs/COMPOUND-EXHIBIT-2026-08-29.md`. Local VM: **BLOCKED** — `docs/BLOCKED-live-compound-exhibit-2026-08-30.md`.
+**Compound exhibit (live hosted, 2026-08-31):** compound-mini fresh subject · A=**2** Parallel → B=**1** Parallel · B corpus hits=**1** — `docs/RECEIPT-live-compound-exhibit-2026-08-31.md`. Orphan-works full script: run A ok, run B **503**. Offline: `docs/COMPOUND-EXHIBIT-2026-08-29.md`. Local VM: **BLOCKED** — `docs/BLOCKED-live-compound-exhibit-2026-08-30.md`.
 
 **Eval gate:** `docs/QWEN-EVAL-GATE-2026-08-30.md` — baseline vs shipping **5/6 = 0.833** tie; RC5 false-GREEN both arms.
 

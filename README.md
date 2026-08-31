@@ -157,6 +157,19 @@ that fails the build if any deploy surface passes a secret in the clear, and —
 that matters most — a check that a **refuse-everything** locator fails the suite.
 A guard that only watches one direction is not a guard.
 
+## Honesty & limitations (worst numbers first)
+
+| Finding | Number | Command |
+|---------|--------|---------|
+| Eval tie vs naive substring baseline | **5/6 = 0.833** — shipping adds **+0** delta | `python3 scripts/eval_refusal_baseline.py` |
+| RC5 substring trap | **Both arms false-GREEN** on the same item | same script, row RC5 |
+| Ablation (verify off) | **+0** vs shipping on n=6 | `python3 scripts/eval_refusal_ablation.py` |
+| External anchor (live rightsstatements.org) | **2/2 tied** — no delta vs baseline | `python3 scripts/eval_external_anchor.py` |
+| Hosted compound (warm subject) | **pass=False** if shelf reused | `docs/RECEIPT-live-compound-exhibit-2026-08-31.md` §2 |
+| Hosted orphan-works B | **503** after A succeeded (~5 min) | same receipt §3 |
+
+The verifier wins on independence demotion, transport propagation, and forced-lie refusal — not on the 6-item accuracy score alone. See `docs/QWEN-EVAL-GATE-2026-08-30.md`.
+
 ## Known open, deliberately
 
 - `docs/FINDING-refusal-correctness.md` — nothing yet catches a **wrong refusal**

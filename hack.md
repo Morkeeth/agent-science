@@ -88,7 +88,7 @@ submission craft, supported by a real tendency, **not** as the explanation of th
 - [ ] **Scorer symmetrical** — nothing only our system can emit; judge from delivered output for every arm.
 - [ ] **Cost from billing**, with the price card's date stated.
 - [x] **Offline path with no API key.**
-- [ ] **"Honesty & limitations" section carrying our worst number.**
+- [x] **Honesty & limitations** section carrying our worst number — README §Honesty & limitations; PITCH first screen
 - [ ] **Answer the track brief in the track's own words on the first screen** — that is what the rubric weights, not eval rigor.
 - [ ] **Video verified attached and public on the live entry page, from a logged-out browser** — not in a checklist file, on the page.
 - [ ] **Every artifact claim measured at the submitted commit.** Four retros of that loss failed this row.
@@ -102,7 +102,7 @@ Full record: `~/CODE/fleet-ops/retros/QWEN-LOSS-RETRO-2026-08-30.md` (corrected)
 
 | # | Slice | Owner | Done when |
 |---|--------|-------|-----------|
-| **1** | **Deploy the desk** | Oscar | **LIVE: https://agent-science-33kamss2jq-uc.a.run.app** (probed 2026-08-30: `gemini: true` vertex:hack-fleet, `parallel: true`, `engine_default: adk`). Hosted URL; keys via Secret Manager; `deploy.sh` only |
+| **1** | **Deploy the desk** | Oscar | **LIVE:** https://agent-science-568004190078.us-central1.run.app (alias: `agent-science-33kamss2jq-uc.a.run.app`) — probed 2026-08-31: `gemini: true` vertex:hack-fleet, `parallel: true`, `engine_default: adk`. Keys via Secret Manager; `deploy.sh` only |
 | **2** | **The registry has a face** | build | Query → SOURCED/UNSOURCED/UNKNOWN; browsable |
 | **3** | **Backfill + compound exhibit** | build | Orphan-works A/B shows Parallel drop |
 | **4** | **A second subject** | build | Dust-bowl chain; receipt honest |
@@ -112,30 +112,30 @@ Full record: `~/CODE/fleet-ops/retros/QWEN-LOSS-RETRO-2026-08-30.md` (corrected)
 
 ---
 
-## NOW — stack product · all websearch routes here (2026-08-31)
+## NOW — partner integrations · all four provable (2026-08-31)
 
-**Product:** verified websearch companion for the whole fleet — registry first, Parallel+verify on miss.
+**Slice:** partner integrations admissibility — runtime calls, not doc-only.  
+**Done-when:** `python3 tests/test_partner_runtime.py` → **5/5**; hosted `/health` → `engine_default: adk`; `docs/PARTNER-INTEGRATIONS-2026-08-30.md` complete.
 
-### Surfaces (pick one)
-| Surface | Command |
-|---------|---------|
-| **MCP** | `science_search` — installed in `~/.cursor/mcp.json` via `scripts/install-mcp.sh` |
-| **CLI** | `python3 -m clearance search "query"` |
-| **HTTP** | `GET/POST /search` · `/registry` · `/ingest` · `/stats` |
-| **Desk** | `python3 -m clearance serve` or hosted `/` |
+### Verify tonight (one command each)
 
-### Boot once
 ```bash
-python3 scripts/boot_registry.py   # fleet research-corpus → 176 registry rows
+python3 scripts/seed_document_cache.py && python3 tests/test_watch_it_go_red.py  # 72/72
+python3 tests/test_partner_runtime.py                                             # 5/5
+curl -s https://agent-science-568004190078.us-central1.run.app/health            # engine_default: adk
+bash scripts/verify_cold_clone.sh                                                 # stranger path
 ```
 
-### Docs
-- `AGENTS.md` — fleet rule: use Agent Science instead of raw web search
-- Hosted compound + eval gates shipped (cloud lane)
+### Receipts (re-derived 2026-08-31)
 
-### Oscar
-- `bash deploy.sh` — ships `/search` + MCP stack to Cloud Run
-- Video · Devpost · public repo
+- `docs/PARTNER-INTEGRATIONS-2026-08-30.md` — all four partners
+- `docs/RECEIPT-adk-default-path-2026-08-30.md` — ADK default path
+- `docs/RECEIPT-live-compound-exhibit-2026-08-31.md` — hosted compound (fresh subject pass; orphan-works B 503)
+- `docs/DESIGN-PARTNER-LOOP.md` — slice 6 friction template
+
+### Oscar (outward acts — not agent)
+
+- `bash deploy.sh` · video · Devpost · public repo flip
 
 ---
 
@@ -168,6 +168,16 @@ python3 scripts/boot_registry.py   # fleet research-corpus → 176 registry rows
 | 2026-08-30 night2 | External anchor | `python3 scripts/eval_external_anchor.py` | **2/2 tied** baseline=shipping |
 | 2026-08-30 night2 | Eval stats | `python3 scripts/eval_refusal_baseline.py` | Wilson CI + McNemar p=1.0 |
 | 2026-08-30 night2 | Cold clone script | `bash scripts/verify_cold_clone.sh` | **all gates green** |
+| 2026-08-31 | Baseline missing cache | `python3 tests/test_watch_it_go_red.py` | **13 fail** — re-seeded |
+| 2026-08-31 | Cache seed | `python3 scripts/seed_document_cache.py` | **72/72** restored |
+| 2026-08-31 | Partner runtime | `python3 tests/test_partner_runtime.py` | **5/5** |
+| 2026-08-31 | Hosted /health | `curl -s …568004190078…/health` | **`engine_default: adk`** all four partners |
+| 2026-08-31 | Compound fresh subject | `compound-fresh-c1eb52fe` A/B | **2→1 Parallel, hits=1, pass** |
+| 2026-08-31 | Compound warm subject | reused `compound-mini-live-2026-08-30` | **pass=False** — shelf warm |
+| 2026-08-31 | Orphan-works hosted | `orphan-works-live-66d21d70` | **A ok (9 Parallel); B 503** |
+| 2026-08-31 | Cold clone | `bash scripts/verify_cold_clone.sh` | **all gates green** |
+| 2026-08-31 | Docs gate | `python3 scripts/bench_check_docs.py` | **109/109** |
+| 2026-08-31 | Honesty section | README + PITCH | worst numbers at object |
 
 ---
 
