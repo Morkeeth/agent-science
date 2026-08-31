@@ -2,7 +2,7 @@
 doc: status
 project: Agent Science
 canonical: true
-last-updated: 2026-08-31T14:10:00Z
+last-updated: 2026-08-31T21:31:00Z
 deadline: 2026-09-09T14:00:00-07:00
 ---
 
@@ -11,7 +11,7 @@ deadline: 2026-09-09T14:00:00-07:00
 > **For Claude / fleet:** this file is the single “where we are” surface.  
 > `hack.md` = process · `CLAUDE.md` = entry · this file = gates + evidence.
 
-**Last gate run:** 2026-08-31T21:23:08Z — `bash scripts/full_gate.sh` → **FULL GATE OK** (139 product tests in gate loop · 19/19 long run · trial OK)
+**Last gate run:** 2026-08-31T21:31:31Z — `bash scripts/full_gate.sh` → **FULL GATE OK** (truth-layer shape · 265 claims · 19/19 long run · trial OK)
 
 ---
 
@@ -22,7 +22,7 @@ deadline: 2026-09-09T14:00:00-07:00
 | **Product noun** | **Agent Science** — truth layer for what people believe and use · B lead · A on the same layer |
 | **Product** | LIVE on Cloud Run · public repo · sealed prediction |
 | **Build lane** | WOW websearch transparency · CONTRARY stamp · stack-fit · community notes · `/truths/ui` |
-| **Oscar** | Video + Devpost still open — lead companion, show clearance as one shelf customer |
+| **Oscar** | Deploy `./deploy.sh` for `/truths/ui` on hosted · film via `docs/FILM-SCOUT-COMMANDS.md` |
 | **Film lead** | Ask → sourced/refuse → free on re-ask · ≥2 domains · E&O as *a* truth not the only story |
 
 ---
@@ -103,7 +103,8 @@ bash scripts/full_gate.sh
 
 | When (UTC) | What |
 |------------|------|
-| 2026-08-31 22:05 | Personal truth DB stub + Magnet skill bridge · push ambition after competitor research |
+| 2026-08-31 21:31 | **Shape pass** — merge truth-layer to main path · 52 inbox ingests · FILM-SCOUT + DEPLOY-CLICK-LIST · desk links `/truths/ui` |
+| 2026-08-31 21:23 | Truth layer night — transparency, CONTRARY, stack-fit, community notes, `/truths/ui` (branch) |
 | 2026-08-31 21:55 | Competitor research — websearch field map + steal angles → `RESEARCH-WEBSEARCH-COMPETITORS-2026-08-31.md` |
 | 2026-08-31 20:35 | Full websearch rundown — `WEBSEARCH-FULL-RUNDOWN.md` + `visibility --full` (10 panes) |
 | 2026-08-31 20:32 | Skill + `clearance visibility` / `science_visibility` — multi-pane websearch, not one answer |

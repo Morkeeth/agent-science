@@ -95,7 +95,7 @@ button:hover{background:#000}
   <p class="thesis">Agent Science — the truth layer for what people believe and use.
   Every claim sourced verbatim, or refused with why. The registry remembers.
   Developer practice and clearance facts live on the same layer.</p>
-  <p class="nav"><a href="/front">What this desk refuses, and why that is the product</a> · <a href="/registry">Browse the registry</a> · <a href="/popular/ui">Popular queries</a> — {registry_stats} verified truths on disk.</p>
+  <p class="nav"><a href="/front">What this desk refuses, and why that is the product</a> · <a href="/registry">Browse the registry</a> · <a href="/truths/ui">Truths dashboard</a> · <a href="/popular/ui">Popular queries</a> — {registry_stats} verified truths on disk.</p>
   <form class="desk" method="post" action="/clear">
     <div class="row">
       <div>

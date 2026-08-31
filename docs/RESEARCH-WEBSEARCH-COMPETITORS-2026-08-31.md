@@ -1,5 +1,7 @@
 # Competitor & adjacent research: Agent Science “truth-layer websearch”
 
+**Only Agent Science:** finds the latest truths across the agentic stack *and* shows how it searched (angles, imbalance, stack-fit) — not one verified badge.
+
 **Date:** 2026-08-31  
 **Scope:** Primary sources only (product pages, GitHub, first-party docs/blogs). Secondary comparisons used only as discovery pointers, never as facts.  
 **Lens:** Agent Science websearch = *believe + use → verify verbatim or refuse → remember → multi-pane visibility*; personal truth DB; not raw Google; not one summarized answer.  
