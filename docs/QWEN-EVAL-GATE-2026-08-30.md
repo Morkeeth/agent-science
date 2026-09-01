@@ -5,6 +5,8 @@
 > reports a tie, and still NOT significant at n=6). Re-run:
 > `python3 scripts/eval_refusal_baseline.py` and `..._ablation.py`.
 > Full record: `docs/FINDING-semantic-guard-2026-08-31.md`.
+>
+> **Re-verified 2026-09-01:** same delta +1; see `docs/RECEIPT-partner-integrations-night-2026-09-01.md` §6.
 
 # QWEN EVAL GATE — alternative arm · 2026-08-30
 

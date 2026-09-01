@@ -2,7 +2,7 @@
 doc: hack
 project: Agent Science
 phase: SHIP
-last-touched: 2026-08-31 14:10 CEST
+last-touched: 2026-09-01 00:20 UTC
 canonical: true
 event: Agentic Cinema · Parallel track · deadline 2026-09-09 14:00 PDT
 supersedes: docs/PHASE0-LADDER.md ClickHouse-track note (runtime track is Parallel)
@@ -298,7 +298,41 @@ Full record: `~/CODE/fleet-ops/retros/QWEN-LOSS-RETRO-2026-08-30.md` (corrected)
 
 ---
 
-## 🎯 NOW — Night wave: WOW websearch transparency (build lane)
+## 🎯 NOW — Partner integrations night wave (build lane)
+
+**Slice:** P1–P7 partner integrations + promise line + eval gate + compound exhibit — all four partners provable at runtime.
+
+### Build (shipped 2026-09-01 night)
+
+- [x] P1 Promise line — README opening + PITCH first screen (outcome · proof · constraint)
+- [x] P2 Partner doc verified — `docs/PARTNER-INTEGRATIONS-2026-08-30.md` + hosted `/health` + `/partners`
+- [x] P3 ADK default path — `engine_default: adk` on hosted `/health`
+- [x] P4 Qwen eval gate re-run — baseline 5/6 vs shipping 6/6, delta +1
+- [x] P5 Compound exhibit — compound-mini PASS (A=2→B=1 Parallel, corpus_hits=1)
+- [x] P6 SUBMISSION-PACK truth refresh — `bench_check_docs.py` 127/127 match
+- [x] P7 Design partner loop — `docs/DESIGN-PARTNER-LOOP.md` (slice 6 prep, pre-existing)
+
+### Verify (one command each)
+
+```bash
+python3 scripts/seed_document_cache.py && python3 tests/test_watch_it_go_red.py   # 72/72
+curl -s https://agent-science-568004190078.us-central1.run.app/health | python3 -m json.tool
+python3 scripts/bench_check_docs.py                                                # 127/127
+python3 scripts/eval_refusal_baseline.py && python3 scripts/eval_refusal_ablation.py
+bash scripts/full_gate.sh                                                          # FULL GATE OK
+```
+
+### Receipt
+
+- `docs/RECEIPT-partner-integrations-night-2026-09-01.md`
+
+### BLOCKED
+
+- Orphan-works full script Run B — **504 Gateway Timeout** at 300s (Run A ok, 7 Parallel). Do not claim on video.
+
+---
+
+## 🎯 NOW (prior) — WOW websearch transparency (build lane)
 
 **Slice:** S1–S8 truth layer night — transparency panes, CONTRARY stamp, stack-fit, community notes, truths dashboard.  
 **Oscar film:** `python3 -m clearance.stack_cli visibility "ralph loop agentic" --full` → pane 1b + CONTRARY stamp.
@@ -386,6 +420,7 @@ bash scripts/verify_cold_clone.sh                                               
 
 | When | What | Command | Outcome |
 |------|------|---------|---------|
+| 2026-09-01 night | Partner integrations wave | `curl …/health` · compound-mini · `full_gate.sh` | **4/4 partners** on hosted · compound PASS · 127/127 · promise line shipped |
 | 2026-09-01 hammer | Hosted visibility + demo | `./deploy.sh` · `demo_truth_layer.sh` | `/visibility/ui` live · 127/127 gate |
 | 2026-09-01 overnight | Deploy + pitch pack | `./deploy.sh` | rev 00018 · PITCH-TOMORROW |
 | 2026-08-31 night | Truth layer night S1–S8 | `bash scripts/full_gate.sh` | **FULL GATE OK** · transparency · CONTRARY · stack-fit · notes · receipt |

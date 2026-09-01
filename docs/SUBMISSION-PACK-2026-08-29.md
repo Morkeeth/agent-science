@@ -1,6 +1,6 @@
 # SUBMISSION PACK — Agentic Cinema · slice 7
 
-**Date:** 2026-08-31 · **Repo:** https://github.com/Morkeeth/agent-science @ `main`  
+**Date:** 2026-09-01 · **Repo:** https://github.com/Morkeeth/agent-science @ `main`  
 **Hosted:** https://agent-science-568004190078.us-central1.run.app · **Deadline:** 2026-09-09 14:00 PT  
 **Scope:** docs + offline controls — no public repo flip, no video upload, no Devpost submit, no `deploy.sh`
 
@@ -28,7 +28,7 @@ python3 ask_registry.py "agentlint" | head -5
 | Partner integrations | All four called at runtime | [x] docs | `docs/PARTNER-INTEGRATIONS-2026-08-30.md` |
 | ADK default path | `engine_default: adk` | [x] local / [x] hosted | `docs/RECEIPT-adk-default-path-2026-08-30.md` |
 
-**Controls re-measured 2026-08-31** (run each at object):
+**Controls re-measured 2026-09-01** (run each at object):
 
 | Suite | Command | Result |
 |-------|---------|--------|
@@ -48,7 +48,7 @@ python3 ask_registry.py "agentlint" | head -5
 
 **Compound exhibit (live hosted, 2026-08-31 PM):** `long_run_goal.sh` · A=**1**→B=**0** Parallel · B corpus hits=**1** — `docs/LONG-RUN-RECEIPT-2026-08-31.md` · sealed `docs/SEALED-PREDICTION-2026-08-31.md`. Prior: compound-mini A=**2**→B=**1**. Orphan-works full script: run B **503** — do not claim on video.
 
-**Eval gate:** `docs/QWEN-EVAL-GATE-2026-08-30.md` — baseline vs shipping **5/6 = 0.833** tie; RC5 false-GREEN both arms.
+**Eval gate:** `docs/QWEN-EVAL-GATE-2026-08-30.md` — baseline **5/6 = 0.833** vs shipping **6/6 = 1.000**, delta +1 (RC5); McNemar p=1.0000 at n=6. Re-run 2026-09-01: `docs/RECEIPT-partner-integrations-night-2026-09-01.md` §6.
 
 ---
 

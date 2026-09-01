@@ -1,6 +1,14 @@
 # Agent Science
 
-**The truth layer for what agentic builders believe and use.**
+**You get:** every checkable claim back as a verbatim quote with its source URL, or
+UNSOURCED with a named reason — and a truth shelf that compounds so the second ask is
+free.
+
+**Proof:** `bash scripts/full_gate.sh` → FULL GATE OK · **127/127** controls · hosted
+compound A→B Parallel drop measured live (`docs/RECEIPT-partner-integrations-night-2026-09-01.md`).
+
+**Constraint:** if the document does not contain the exact passage, refuse — never
+paraphrase, never infer.
 
 **LIVE:** https://agent-science-568004190078.us-central1.run.app  
 · [visibility](https://agent-science-568004190078.us-central1.run.app/visibility/ui?q=ralph+loop+agentic) · [truths](https://agent-science-568004190078.us-central1.run.app/truths/ui) · [registry](https://agent-science-568004190078.us-central1.run.app/registry)
@@ -27,7 +35,7 @@ python3 -m clearance.stack_cli visibility "ralph loop agentic" --full
 open https://agent-science-568004190078.us-central1.run.app/visibility/ui
 ```
 
-**Proof:** `bash scripts/full_gate.sh` → FULL GATE OK · **125/125** controls
+**Proof:** `bash scripts/full_gate.sh` → FULL GATE OK · **127/127** controls
 
 ---
 

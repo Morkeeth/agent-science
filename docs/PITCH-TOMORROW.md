@@ -7,13 +7,16 @@
 
 ## 30-second pitch (say this first)
 
-> **Agent Science is the truth layer for what agentic builders believe and use.**
+> **You get:** every checkable claim back as a verbatim quote with its source URL, or
+> UNSOURCED with a named reason — plus a truth shelf that compounds so the second ask is free.
 >
-> Not another answer engine. When you or your agent websearches, you see **what was searched** — every angle, every tier — plus what the field actually runs: GitHub stars, practitioner blogs, peer queries. Claims come back **sourced verbatim** or **refused with why**. When the field outruns the literature, we stamp **CONTRARY TO RESEARCH**.
+> **Proof:** hosted compound exhibit — Run A **2** Parallel calls, Run B **1** with
+> `corpus_hits=1` on repeat. Four partners wired at runtime: Vertex, Parallel, Cloud Run, ADK.
 >
-> Ask once. The shelf remembers. The second ask is free.
+> **Constraint:** if the document does not contain the exact passage, refuse — never paraphrase,
+> never infer. We refused our own pitch headline on camera because of this rule.
 >
-> Clearance and EU regulation? That's one vertical on the same layer — not the whole product.
+> Clearance and EU regulation? One vertical on the same layer — not the whole product.
 
 ---
 
