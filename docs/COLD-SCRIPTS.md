@@ -3,14 +3,14 @@
 Three **public** documentary transcripts (not fixtures), run through the live clearance
 pipeline, with sourced / refused / **wrong** counts re-derived at the source object.
 
-**Measured:** 2026-09-01 · hosted `POST /clear` · receipts in `cold-scripts/receipts/`
+**Measured:** 2026-09-02 · hosted `POST /clear` · receipts in `cold-scripts/receipts/`
 
 | Script | Type | Claims | SOURCED | REFUSED | WRONG |
 |--------|------|--------|---------|---------|-------|
-| 1 · Apollo 11 post-landing | historical / archival | 3 | 2 | 1 | 1 |
-| 2 · NOVA *Dimming the Sun* | science explainer | 4 | 0 | 4 | 3 |
-| 3 · EU orphan works policy | policy / regulatory | 8 | 4 | 4 | 2 |
-| **Total** | | **15** | **6** | **9** | **6** |
+| 1 · Apollo 11 post-landing | historical / archival | 4 | 2 | 2 | 2 |
+| 2 · NOVA *Dimming the Sun* | science explainer | 3 | 0 | 3 | 2 |
+| 3 · EU orphan works policy | policy / regulatory | 8 | 4 | 4 | 1 |
+| **Total** | | **15** | **6** | **9** | **5** |
 
 REFUSED = UNSOURCED + UNVERIFIED INDEPENDENCE. WRONG = auditor opened the script's
 source URL and found the passage the product refused, or opened the cited URL and the
@@ -22,8 +22,8 @@ quoted span was absent (none of the latter this run).
 
 | Meter | Value | How derived |
 |-------|-------|-------------|
-| Wall clock | **433.8 s** (~7.2 min) | `python3 scripts/run_cold_scripts.py` — sum of `_wall_seconds` in receipts |
-| Parallel API calls (metered) | **13** | 2 + 5 + 6 from receipt JSON |
+| Wall clock | **325.4 s** (~5.4 min) | `python3 scripts/run_cold_scripts.py` — sum of `_wall_seconds` in receipts |
+| Parallel API calls (metered) | **11** | 3 + 1 + 7 from receipt JSON |
 | Parallel cost estimate | **~$0.05–0.10** | 13 searches × ~$0.004–0.008/search (README compound curve band; no billing export on this run) |
 | Gemini / Vertex | hosted ADC | Not separately metered in receipts; extraction + locate on every claim |
 
@@ -39,7 +39,7 @@ python3 scripts/seed_document_cache.py          # optional; offline controls onl
 # Run all three against hosted clearance (no local API keys required)
 python3 scripts/run_cold_scripts.py
 
-# Re-derive wrong count at source URLs — must print wrong_count=6
+# Re-derive wrong count at source URLs — must print wrong_count=5
 python3 scripts/audit_cold_wrong.py
 
 # Single script via hosted curl (example)

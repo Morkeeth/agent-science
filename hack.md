@@ -289,7 +289,7 @@ submission craft, supported by a real tendency, **not** as the explanation of th
 - [ ] **Cost from billing**, with the price card's date stated.
 - [x] **Offline path with no API key.**
 - [x] **Honesty & limitations** section carrying our worst number — README §Honesty & limitations; PITCH first screen
-- [ ] **Answer the track brief in the track's own words on the first screen** — judge pack § above; must land on Devpost ¶1 + video 0:00
+- [x] **Answer the track brief in the track's own words on the first screen** — judge pack § above; Devpost §0 rewritten 2026-09-02 (`docs/SUBMISSION-PACK-2026-08-29.md` §0: M&E fact-check lead → truth-layer pivot)
 - [ ] **Video verified attached and public on the live entry page, from a logged-out browser** — not in a checklist file, on the page.
 - [ ] **Every artifact claim measured at the submitted commit.** Four retros of that loss failed this row.
 
@@ -298,33 +298,37 @@ Full record: `fleet-ops (internal)/retros/QWEN-LOSS-RETRO-2026-08-30.md` (correc
 
 ---
 
-## 🎯 NOW — AS-SHIP-3 judge UX (build lane)
+## 🎯 NOW — WIN lane judge submission final mile (build lane)
 
-**Slice:** Replace monospace `<pre>` dump on `/visibility/ui` with judge-facing HTML panel.
+**Slice:** Merge AS-SHIP-1..4 · land `JUDGE-CRITERIA.md` + `DEVPOST-WIN.md` + receipt · rebuild video · full gate.
 
 ### Build
 
-- [x] Verdict badge (SOURCED / UNSOURCED / CONTRARY_TO_RESEARCH)
-- [x] Transparency section above fold (angles, shallow route, imbalance)
-- [x] Track-brief hook + hosted URL + `/truths/ui` link
-- [x] Tests extended
+- [x] Merge `cursor/as-ship-*` branches into `cursor/as-win-judge-2026-09-02-1d44`
+- [x] `docs/JUDGE-CRITERIA.md` — rubric map executed on hosted URL + video beats
+- [x] `docs/COLD-SCRIPTS.md` — 3 public scripts measured (AS-SHIP-2 receipts; re-run in progress)
+- [x] `docs/DEVPOST-WIN.md` — track hook ¶1 + truth-layer paste block
+- [x] `docs/RECEIPT-ship-2026-09-02.md` — SHIPPED / VERIFIED / WRONG / OSCAR_GATES
+- [x] `./film/build.sh` if frame0 still SCOUT — merged video already truth-layer (103.6s)
+- [x] `bash scripts/full_gate.sh` → FULL GATE OK
 
-### Verify
+### Verify (one command each)
 
 ```bash
-python3 tests/test_visibility_transparency.py   # 5/5
-python3 tests/test_registry_surface.py          # 17/17 (visibility UI tests)
-curl -s 'http://localhost:8080/visibility/ui?q=ralph+loop+agentic' | grep -c 'badge contrary'
-curl -s 'http://localhost:8080/visibility?q=ralph+loop+agentic' | python3 -c "import sys,json; print(json.load(sys.stdin)['primary']['label'])"
+bash scripts/privacy_grep.sh
+bash scripts/full_gate.sh
+python3 scripts/run_cold_scripts.py && python3 scripts/audit_cold_wrong.py
+ffmpeg -ss 0 -i demo/demo-final.mp4 -frames:v 1 /tmp/f0.png   # no SCOUT
+python3 tests/test_visibility_transparency.py
 ```
 
 ### Receipt
 
 - `docs/RECEIPT-ship-2026-09-02.md`
 
-### BLOCKED
+### BLOCKED (Oscar outward)
 
-- Hosted deploy — Oscar click (`./deploy.sh`)
+- Deploy · Devpost submit · video upload · logged-out verify
 
 ---
 
@@ -450,6 +454,7 @@ bash scripts/verify_cold_clone.sh                                               
 
 | When | What | Command | Outcome |
 |------|------|---------|---------|
+| 2026-09-02 | AS-SHIP-4 submit pack | `full_gate.sh` · `privacy_grep.sh` · `rg A=2` | **FULL GATE OK** · 0 privacy hits · Devpost §0 track-brief lead · receipt |
 | 2026-09-01 night | Partner integrations wave | `curl …/health` · compound-mini · `full_gate.sh` | **4/4 partners** on hosted · compound PASS · 127/127 · promise line shipped |
 | 2026-09-01 hammer | Hosted visibility + demo | `./deploy.sh` · `demo_truth_layer.sh` | `/visibility/ui` live · 127/127 gate |
 | 2026-09-01 overnight | Deploy + pitch pack | `./deploy.sh` | rev 00018 · PITCH-TOMORROW |

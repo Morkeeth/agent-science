@@ -2,7 +2,7 @@
 doc: status
 project: Agent Science
 canonical: true
-last-updated: 2026-09-01T05:45:00Z
+last-updated: 2026-09-02T00:30:00Z
 deadline: 2026-09-09T14:00:00-07:00
 ---
 
@@ -11,7 +11,7 @@ deadline: 2026-09-09T14:00:00-07:00
 > **For Claude / fleet:** this file is the single “where we are” surface.  
 > `hack.md` = process · `CLAUDE.md` = entry · this file = gates + evidence.
 
-**Last gate run:** 2026-08-31T21:46:02Z — `bash scripts/full_gate.sh` → **FULL GATE OK** (127/127 · visibility hosted · 19/19 long run)
+**Last gate run:** 2026-09-01T20:24:08Z — `bash scripts/full_gate.sh` → **FULL GATE OK** (127/127 · 19/19 long run · stranger trial OK)
 
 ---
 
@@ -21,9 +21,9 @@ deadline: 2026-09-09T14:00:00-07:00
 |-------|--------|
 | **Product noun** | **Agent Science** — truth layer for what people believe and use · B lead · A on the same layer |
 | **Product** | LIVE on Cloud Run · public repo · sealed prediction |
-| **Build lane** | WOW websearch transparency · CONTRARY stamp · stack-fit · community notes · `/truths/ui` |
-| **Oscar** | **Film 30 min** — `docs/PITCH-TOMORROW.md` · transparency WOW first · Devpost paste ready |
-| **Film lead** | Ask → sourced/refuse → free on re-ask · ≥2 domains · E&O as *a* truth not the only story |
+| **Build lane** | AS-SHIP-4 submit pack — Devpost paste §0 track-brief lead · compound **A=1→B=0** unified |
+| **Oscar** | **Upload video + Devpost** — `demo/demo-final.mp4` built · paste from `SUBMISSION-PACK` §0 |
+| **Film lead** | M&E fact-check first → truth layer pivot · hosted `/visibility/ui` |
 
 ---
 
@@ -33,8 +33,8 @@ deadline: 2026-09-09T14:00:00-07:00
 |-------|------|--------|
 | 0–4 Build | Partners, registry, compound, ADK | ✅ |
 | 5 Exhibit | Stranger one-click hosted | ✅ `long_run_goal.sh` 19/19 |
-| 6 Freeze | Oscar cold browser + film | ⛔ **video** |
-| 7 Submit | Devpost + sealed + public repo | ⚠️ repo public · sealed ✅ · **Devpost + video** ⛔ |
+| 6 Freeze | Oscar cold browser + film | ⚠️ **video built** (`demo/demo-final.mp4`) · Oscar uploads + logged-out verify ⛔ |
+| 7 Submit | Devpost + sealed + public repo | ⚠️ repo public · sealed ✅ · paste pack ready · **Devpost submit + video URL** ⛔ |
 
 ---
 
@@ -51,11 +51,13 @@ deadline: 2026-09-09T14:00:00-07:00
 | Cold clone | ✅ | `verify_cold_clone.sh` |
 | Hosted long run | **19/19** | `long_run_goal.sh` |
 | Stranger trial | ✅ | `new_user_trial.sh` |
-| Sealed prediction | ✅ | `SEALED-PREDICTION-2026-08-31.md` |
+| Sealed prediction | ✅ A=1→B=0 | `SEALED-PREDICTION-2026-08-31.md` |
 | Public repo | ✅ | github.com/Morkeeth/agent-science |
-| Video | ⛔ | `VIDEO-SCRIPT-2026-08-29.md` |
+| Privacy grep | **0 hits** | `bash scripts/privacy_grep.sh` |
+| Video | ✅ built · Oscar uploads | `demo/demo-final.mp4` (2.6 MB) |
+| Devpost paste | ✅ §0 track-brief lead | `SUBMISSION-PACK-2026-08-29.md` §0 · `DEVPOST-READY.md` |
 | Architecture pack | ✅ | `docs/ARCHITECTURE.md` + `docs/assets/` |
-| Devpost | ⛔ | `DEVPOST-READY.md` + paste pack |
+| Devpost submit | ⛔ | Oscar outward act |
 
 ---
 
@@ -76,10 +78,9 @@ deadline: 2026-09-09T14:00:00-07:00
 
 ## Oscar checklist (only human work left)
 
-1. **Read** `docs/PITCH-TOMORROW.md` — 30s pitch + morning plan
-2. **Record** ≤180s — transparency WOW first · `docs/FILM-SCOUT-COMMANDS.md`
-3. **Devpost** — `docs/DEVPOST-READY.md` (elevator pitch updated)
-4. **Verify** logged-out: video on live entry page
+1. **Upload** `demo/demo-final.mp4` to YouTube/Vimeo (≤180s)
+2. **Devpost** — paste from `docs/SUBMISSION-PACK-2026-08-29.md` §0 · `docs/DEVPOST-READY.md` form fields
+3. **Verify** logged-out: video on live Devpost entry page
 
 ---
 
@@ -104,6 +105,7 @@ bash scripts/full_gate.sh
 
 | When (UTC) | What |
 |------------|------|
+| 2026-09-02 00:30 | **AS-SHIP-4** — Devpost §0 track-brief lead · compound A=1→B=0 unified · SUBMISSION.md video built · receipt |
 | 2026-09-01 06:00 | **Hammer** — `/visibility/ui` hosted · demo_truth_layer.sh · README truth-layer lead · Devpost §0 |
 | 2026-08-31 21:23 | Truth layer night — transparency, CONTRARY, stack-fit, community notes, `/truths/ui` (branch) |
 | 2026-08-31 21:55 | Competitor research — websearch field map + steal angles → `RESEARCH-WEBSEARCH-COMPETITORS-2026-08-31.md` |

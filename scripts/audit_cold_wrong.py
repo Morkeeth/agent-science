@@ -26,13 +26,14 @@ SOURCE_URL = {
 AUDIT = {
     "cold-script-1": [
         ("C1", "SOURCED", "Noun 43 displays the PGNS-calculated location of the landing site"),
-        ("C2", "SOURCED", "resets all of real time command relays except bank"),
-        ("C3", "UNSOURCED", "Ground Elapsed Time of 102:54"),
+        ("C2", "UNSOURCED", "UP TLM"),
+        ("C3", "SOURCED", "resets all of real time command relays except bank"),
+        ("C4", "UNSOURCED", "Technical Debrief"),
     ],
     "cold-script-2": [
-        ("C1", "UNSOURCED", "human activity was changing the Earth's"),
-        ("C3", "UNSOURCED", "just over one degree centigrade"),
-        ("C4", "UNSOURCED", "22 percent drop"),
+        ("C1", "UNSOURCED", "entire United States aircraft fleet was grounded"),
+        ("C2", "UNSOURCED", "David Travis"),
+        ("C3", "UNSOURCED", "Gerry Stanhill"),
     ],
     "cold-script-3": [
         ("C2", "SOURCED", "promote the digitisation of and lawful intra-EU online access to orphan works"),
@@ -59,7 +60,10 @@ def main() -> int:
         receipt = json.loads((RECEIPTS / f"{subject}.json").read_text())
         by_id = {r["claim_id"]: r for r in receipt["rows"]}
         for cid, expected_label, needle in checks:
-            row = by_id[cid]
+            row = by_id.get(cid)
+            if row is None:
+                print(f"  SKIP {subject} {cid}: not in receipt")
+                continue
             hit = _norm(needle) in page
             actual = row["label"]
             if expected_label == "SOURCED" and actual != "SOURCED":

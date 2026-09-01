@@ -7,11 +7,11 @@
   "sourced": 4,
   "unsourced": 4,
   "parallel_calls": 6,
-  "parallel_api_calls": 6,
+  "parallel_api_calls": 7,
   "prior_run": null,
   "corpus_hits": 0,
   "log_hits": 2,
-  "log_size": 297,
+  "log_size": 313,
   "corpus_remembered": 8,
   "rows": [
     {
@@ -51,33 +51,33 @@
       "reused_from": null,
       "claim_id": "C3",
       "text": "The directive applies to works protected by copyright that are first published or, in the absence of publication, broadcast in an EU country.",
-      "label": "UNSOURCED",
+      "label": "SOURCED",
+      "engine_verdict": "GREEN",
+      "cause": null,
+      "reason": "passage verified verbatim; basis: PRIMARY (1 primary, 1 non-derived origin(s) of 1) (locator: gemini-3.5-flash (vertex:hack-fleet))",
+      "why": "passage verified verbatim; basis: PRIMARY (1 primary, 1 non-derived origin(s) of 1) (locator: gemini-3.5-flash (vertex:hack-fleet))",
+      "citation_url": "https://eur-lex.europa.eu/EN/legal-content/summary/wider-access-to-copyright-material-orphan-works.html",
+      "quoted_terms": "The directive applies to works protected by copyright that are first published or, in the absence of publication, broadcast (shown on television or online, i.e. visual media, rather than written media) in a EU country.",
+      "source_class": "primary",
+      "source_note": "source class: PRIMARY (EU primary law)",
+      "corpus_hit": false,
+      "probe": "gemini-3.5-flash (vertex:hack-fleet))"
+    },
+    {
+      "reused_from": null,
+      "claim_id": "C4",
+      "text": "Organisations covered by the directive must ensure that a diligent search for rightsholders is carried out in good faith by consulting the appropriate sources.",
+      "label": "UNVERIFIED INDEPENDENCE",
       "engine_verdict": "UNKNOWN",
-      "cause": "search_found_no_admissible_source",
-      "reason": "searched, read 3 of 3 candidate document(s), none states this claim; probe was ['broadcast in an EU country']",
-      "why": "we searched and no document we read states it",
+      "cause": "no_independent_source",
+      "reason": "1 document(s) verified but they collapse to 1 non-independent origin(s) [wolterskluwer.com]; derived or unclassified sources are not independent support",
+      "why": "documents state this, and every one traces to a derived or unclassified origin \u2014 a human must judge whether that is independent support",
       "citation_url": null,
       "quoted_terms": null,
       "source_class": null,
       "source_note": null,
       "corpus_hit": false,
       "probe": "parallel:web_search"
-    },
-    {
-      "reused_from": null,
-      "claim_id": "C4",
-      "text": "Organisations covered by the directive must ensure that a diligent search for rightsholders is carried out in good faith by consulting the appropriate sources.",
-      "label": "SOURCED",
-      "engine_verdict": "GREEN",
-      "cause": null,
-      "reason": "passage verified verbatim; basis: PRIMARY (1 primary, 1 non-derived origin(s) of 1) (locator: gemini-3.5-flash (vertex:hack-fleet))",
-      "why": "passage verified verbatim; basis: PRIMARY (1 primary, 1 non-derived origin(s) of 1) (locator: gemini-3.5-flash (vertex:hack-fleet))",
-      "citation_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=legissum%3Ami0084",
-      "quoted_terms": "The organisations covered by the directive must ensure that a diligent search for rightsholders is carried out in good faith by consulting the appropriate sources to verify the orphan work status .",
-      "source_class": "primary",
-      "source_note": "source class: PRIMARY (EU primary law)",
-      "corpus_hit": false,
-      "probe": "gemini-3.5-flash (vertex:hack-fleet))"
     },
     {
       "reused_from": null,
@@ -118,7 +118,7 @@
       "label": "UNSOURCED",
       "engine_verdict": "UNKNOWN",
       "cause": "search_found_no_admissible_source",
-      "reason": "searched, read 2 of 3 candidate document(s), none states this claim; probe was ['public-interest missions']",
+      "reason": "searched, read 3 of 3 candidate document(s), none states this claim; probe was ['public-interest missions']",
       "why": "we searched and no document we read states it",
       "citation_url": null,
       "quoted_terms": null,
@@ -145,13 +145,13 @@
       "cross_subject": true
     }
   ],
-  "markdown": "# GAP REPORT \u2014 subject `cold-script-3`\n\n| Claims | 8 |\n| SOURCED | 4 (50%) |\n| UNSOURCED | 4 (50%) |\n| Claims searched (no corpus/log hit) | 6 |\n| Parallel API calls (metered) | 6 |\n| Corpus hits (same subject) | 0 |\n| Log hits (cross subject) | 2 |\n| Remembered on this subject | 8 |\n| Claims established across all subjects | 297 |\n\n**2 claim(s) reused from ANOTHER subject's clearance \u2014 no Parallel call.** A claim proven (or proven-unprovable) once is free for every subject afterward; that is the cross-production moat.\n\n## Claims requiring action\n\n- **C1** \u2014 UNVERIFIED INDEPENDENCE (no_independent_source)\n  documents state this, and every one traces to a derived or unclassified origin \u2014 a human must judge whether that is independent support\n- **C3** \u2014 UNSOURCED (search_found_no_admissible_source)\n  we searched and no document we read states it\n- **C7** \u2014 UNSOURCED (search_found_no_admissible_source)\n  we searched and no document we read states it\n- **C8** \u2014 UNVERIFIED INDEPENDENCE (no_independent_source)\n  documents state this, and every one traces to a derived or unclassified origin \u2014 a human must judge whether that is independent support\n\n### C2 \u2014 SOURCED\n- https://eur-lex.europa.eu/EN/legal-content/summary/wider-access-to-copyright-material-orphan-works.html\n> \"It is designed to promote the digitisation of and lawful intra-EU online access to orphan works 1 contained in the collections of libraries, educational establishments, museums, archives, audiovisual \"\n- source class: PRIMARY (EU primary law)\n\n### C4 \u2014 SOURCED\n- https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=legissum%3Ami0084\n> \"The organisations covered by the directive must ensure that a diligent search for rightsholders is carried out in good faith by consulting the appropriate sources to verify the orphan work status .\"\n- source class: PRIMARY (EU primary law)\n\n### C5 \u2014 SOURCED\n- https://eur-lex.europa.eu/EN/legal-content/summary/wider-access-to-copyright-material-orphan-works.html\n> \"Material that is considered as orphaned in one EU country has the same status in all other EU countries.\"\n- source class: PRIMARY (EU primary law)\n\n### C6 \u2014 SOURCED\n- https://eur-lex.europa.eu/EN/legal-content/summary/wider-access-to-copyright-material-orphan-works.html\n> \"In an event if rightsholder of what is considered to be an orphan work reappears, the directive envisages the possibility of putting an end to the orphan work status and receiving fair compensation.\"\n- source class: PRIMARY (EU primary law)\n",
+  "markdown": "# GAP REPORT \u2014 subject `cold-script-3`\n\n| Claims | 8 |\n| SOURCED | 4 (50%) |\n| UNSOURCED | 4 (50%) |\n| Claims searched (no corpus/log hit) | 6 |\n| Parallel API calls (metered) | 7 |\n| Corpus hits (same subject) | 0 |\n| Log hits (cross subject) | 2 |\n| Remembered on this subject | 8 |\n| Claims established across all subjects | 313 |\n\n**2 claim(s) reused from ANOTHER subject's clearance \u2014 no Parallel call.** A claim proven (or proven-unprovable) once is free for every subject afterward; that is the cross-production moat.\n\n## Claims requiring action\n\n- **C1** \u2014 UNVERIFIED INDEPENDENCE (no_independent_source)\n  documents state this, and every one traces to a derived or unclassified origin \u2014 a human must judge whether that is independent support\n- **C4** \u2014 UNVERIFIED INDEPENDENCE (no_independent_source)\n  documents state this, and every one traces to a derived or unclassified origin \u2014 a human must judge whether that is independent support\n- **C7** \u2014 UNSOURCED (search_found_no_admissible_source)\n  we searched and no document we read states it\n- **C8** \u2014 UNVERIFIED INDEPENDENCE (no_independent_source)\n  documents state this, and every one traces to a derived or unclassified origin \u2014 a human must judge whether that is independent support\n\n### C2 \u2014 SOURCED\n- https://eur-lex.europa.eu/EN/legal-content/summary/wider-access-to-copyright-material-orphan-works.html\n> \"It is designed to promote the digitisation of and lawful intra-EU online access to orphan works 1 contained in the collections of libraries, educational establishments, museums, archives, audiovisual \"\n- source class: PRIMARY (EU primary law)\n\n### C3 \u2014 SOURCED\n- https://eur-lex.europa.eu/EN/legal-content/summary/wider-access-to-copyright-material-orphan-works.html\n> \"The directive applies to works protected by copyright that are first published or, in the absence of publication, broadcast (shown on television or online, i.e. visual media, rather than written media\"\n- source class: PRIMARY (EU primary law)\n\n### C5 \u2014 SOURCED\n- https://eur-lex.europa.eu/EN/legal-content/summary/wider-access-to-copyright-material-orphan-works.html\n> \"Material that is considered as orphaned in one EU country has the same status in all other EU countries.\"\n- source class: PRIMARY (EU primary law)\n\n### C6 \u2014 SOURCED\n- https://eur-lex.europa.eu/EN/legal-content/summary/wider-access-to-copyright-material-orphan-works.html\n> \"In an event if rightsholder of what is considered to be an orphan work reappears, the directive envisages the possibility of putting an end to the orphan work status and receiving fair compensation.\"\n- source class: PRIMARY (EU primary law)\n",
   "engine": "adk",
   "adk_version": "2.7.1",
   "model_routing": "vertex:hack-fleet",
   "adk_tool_calls": [
     "clear_script_tool"
   ],
-  "_wall_seconds": 173.2,
+  "_wall_seconds": 186.4,
   "_script_file": "03-eu-orphan-works-policy.txt"
 }
