@@ -289,7 +289,7 @@ submission craft, supported by a real tendency, **not** as the explanation of th
 - [ ] **Cost from billing**, with the price card's date stated.
 - [x] **Offline path with no API key.**
 - [x] **Honesty & limitations** section carrying our worst number — README §Honesty & limitations; PITCH first screen
-- [ ] **Answer the track brief in the track's own words on the first screen** — judge pack § above; must land on Devpost ¶1 + video 0:00
+- [x] **Answer the track brief in the track's own words on the first screen** — judge pack § above; Devpost §0 rewritten 2026-09-02 (`docs/SUBMISSION-PACK-2026-08-29.md` §0: M&E fact-check lead → truth-layer pivot)
 - [ ] **Video verified attached and public on the live entry page, from a logged-out browser** — not in a checklist file, on the page.
 - [ ] **Every artifact claim measured at the submitted commit.** Four retros of that loss failed this row.
 
@@ -298,7 +298,34 @@ Full record: `fleet-ops (internal)/retros/QWEN-LOSS-RETRO-2026-08-30.md` (correc
 
 ---
 
-## 🎯 NOW — Partner integrations night wave (build lane)
+## 🎯 NOW — AS-SHIP-4 submit pack + gate + receipt (build lane)
+
+**Slice:** Freeze Devpost submission pack · fix compound number contradictions · run full gate · write ship receipt.
+
+### Build
+
+- [x] Devpost paste §0 — track brief (M&E fact-check / E&O) **then** truth-layer pivot
+- [x] Compound numbers unified to **A=1 → B=0** in pitch docs (`PITCH.md`, `PITCH-TOMORROW.md`, `SUBMISSION-PACK` §3)
+- [x] `SUBMISSION.md` — video marked built, Oscar uploads (`demo/demo-final.mp4`)
+- [x] `docs/STATUS.md` — phase 6/7 gates honest
+- [x] `bash scripts/full_gate.sh` → **FULL GATE OK** (2026-09-01T20:24:08Z)
+- [x] `docs/RECEIPT-ship-2026-09-02.md`
+
+### Verify (one command each)
+
+```bash
+rg 'A=2|2 Parallel' docs/ PITCH.md SUBMISSION.md README.md   # pitch docs clean
+bash scripts/privacy_grep.sh                                    # 0 hits
+bash scripts/full_gate.sh                                       # FULL GATE OK
+```
+
+### BLOCKED (Oscar outward)
+
+- Video upload · Devpost submit · logged-out verify
+
+---
+
+## 🎯 NOW (prior) — Partner integrations night wave (build lane)
 
 **Slice:** P1–P7 partner integrations + promise line + eval gate + compound exhibit — all four partners provable at runtime.
 
@@ -420,6 +447,7 @@ bash scripts/verify_cold_clone.sh                                               
 
 | When | What | Command | Outcome |
 |------|------|---------|---------|
+| 2026-09-02 | AS-SHIP-4 submit pack | `full_gate.sh` · `privacy_grep.sh` · `rg A=2` | **FULL GATE OK** · 0 privacy hits · Devpost §0 track-brief lead · receipt |
 | 2026-09-01 night | Partner integrations wave | `curl …/health` · compound-mini · `full_gate.sh` | **4/4 partners** on hosted · compound PASS · 127/127 · promise line shipped |
 | 2026-09-01 hammer | Hosted visibility + demo | `./deploy.sh` · `demo_truth_layer.sh` | `/visibility/ui` live · 127/127 gate |
 | 2026-09-01 overnight | Deploy + pitch pack | `./deploy.sh` | rev 00018 · PITCH-TOMORROW |

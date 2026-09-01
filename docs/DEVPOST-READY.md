@@ -25,7 +25,9 @@ Fill the form, then paste description from `SUBMISSION-PACK-2026-08-29.md` § De
 
 ## Inspiration (short — or use full paste block)
 
-Agentic builders websearch daily — RAG vs Obsidian, memory, loops, tools — and get one summarized answer. Agent Science is the **truth layer**: show what was searched, what the field believes and uses (★, blogs, peers), stack-fit for your repo, and sourced-or-refuse verdicts. When practitioners outrun papers, we stamp CONTRARY TO RESEARCH. Clearance and E&O are one paying vertical on the same shelf.
+**Track brief first:** Fact-checking for media content — every checkable claim in a production script comes back as a verbatim quote with its source URL, or UNSOURCED with a named reason. Proof: hosted compound **A=1 → B=0** Parallel + `/visibility/ui` transparency. Constraint: refuse without cause beats demoting a source.
+
+Agentic builders websearch daily — RAG vs Obsidian, memory, loops, tools — and get one summarized answer. Agent Science is the **truth layer** on the same engine: show what was searched, what the field believes and uses (★, blogs, peers), stack-fit for your repo, and sourced-or-refuse verdicts. When practitioners outrun papers, we stamp CONTRARY TO RESEARCH. Clearance and E&O are one paying vertical on the same shelf.
 
 ## What we predicted (sealed)
 

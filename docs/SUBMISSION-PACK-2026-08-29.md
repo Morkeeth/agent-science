@@ -74,16 +74,17 @@ Copy everything between the lines into Devpost project description / inspiration
 
 ---BEGIN DEVPOST PASTE---
 
-## 0 · TRUTH LAYER (lead with this)
+## 0 · TRACK BRIEF (lead with this)
 
-> **Agent Science is the truth layer for what agentic builders believe and use** — not another answer engine.
+> **Fact-checking for media content:** every checkable claim in a production script comes back as a **verbatim quote with its source URL**, or **UNSOURCED with a named reason** — so E&O underwriters and producers can insure and release without guessing.
 
-When you or your agent websearches, you get a **full visibility panel**: what was searched (every angle, every tier), what the field runs (GitHub ★, blogs, peers), and a primary verdict — **sourced verbatim**, **refused with cause**, or **CONTRARY TO RESEARCH** when practitioners outrun papers. Stack-fit scores whether a truth fits *your* repo. The shelf compounds: ask once, free forever.
+**Proof (hosted, measured):** compound exhibit **A=1 → B=0** Parallel calls, `corpus_hits=1` on repeat — `docs/SEALED-PREDICTION-2026-08-31.md`. Transparency panel: https://agent-science-568004190078.us-central1.run.app/visibility/ui?q=ralph+loop+agentic
 
-**Try it:** https://agent-science-568004190078.us-central1.run.app/visibility/ui?q=ralph+loop+agentic  
-**Truths dashboard:** `/truths/ui` · **265+ claims** on disk
+**Constraint:** refusing without cause is worse than demoting a source — if the fetched document does not contain the exact passage, we print UNSOURCED. No paraphrase. No verdict without a citation (enforced in the constructor).
 
-Clearance and E&O insurance? One paying vertical on the same layer — sections below.
+**Truth layer (same engine, broader shelf):** Agent Science is also the truth layer for what agentic builders believe and use — full visibility panel (angles searched, field ★, blogs, peers), **CONTRARY TO RESEARCH** when practitioners outrun papers, stack-fit for your repo. Ask once; shelf compounds free forever. **Truths dashboard:** `/truths/ui` · **265+ claims** on disk.
+
+EU clearance and orphan-works regulation? **One vertical on the same shelf** — sections below.
 
 ## 1 · THE COMPANY
 
@@ -130,7 +131,7 @@ market.
 | Repo | `https://github.com/Morkeeth/agent-science` @ `e6793ab` |
 | Entry point | `python3 agent_science.py <script.txt>` — Gemini + Parallel **live by default** |
 | Hosted | https://agent-science-568004190078.us-central1.run.app — `POST /clear` · `GET /corpus` |
-| Controls | registry **13/13** · cross-subject reuse **2/2** · compound exhibit B **1** Parallel vs A **2** (offline) |
+| Controls | registry **13/13** · cross-subject reuse **2/2** · compound exhibit **A=1 → B=0** Parallel (hosted) |
 | License | `LICENSE` (MIT) |
 | Gap report | `fixtures/gap-report-600.md` — **561 of 600 (94%)** not sellable as-is |
 | Second question | `fixtures/shift-ai-training-vs-noncommercial.md` — 247 of 600 flip |

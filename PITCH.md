@@ -15,7 +15,7 @@ status: LIVE · public repo · sealed · video + Devpost pending Oscar
 or **UNSOURCED** (named cause). Second script on the same subject shelf compounds:
 Parallel calls drop because the corpus remembers prior clears.
 
-**Proof on disk:** `python3 scripts/seed_document_cache.py && python3 tests/test_watch_it_go_red.py` → **72/72** · ADK engine selection **5/5** · compound exhibit **2→1** Parallel offline.
+**Proof on disk:** `python3 scripts/seed_document_cache.py && python3 tests/test_watch_it_go_red.py` → **72/72** · ADK engine selection **5/5** · compound exhibit **A=1→B=0** Parallel hosted (`docs/SEALED-PREDICTION-2026-08-31.md`).
 
 **Honesty (worst first):** eval baseline ties shipping at **5/6 = 0.833** with **+0** delta; RC5 false-GREEN on **both** arms; hosted orphan-works run B returned **503** after run A — `docs/RECEIPT-live-compound-exhibit-2026-08-31.md`.
 

@@ -10,7 +10,7 @@
 > **You get:** every checkable claim back as a verbatim quote with its source URL, or
 > UNSOURCED with a named reason — plus a truth shelf that compounds so the second ask is free.
 >
-> **Proof:** hosted compound exhibit — Run A **2** Parallel calls, Run B **1** with
+> **Proof:** hosted compound exhibit — **A=1 → B=0** Parallel calls with
 > `corpus_hits=1` on repeat. Four partners wired at runtime: Vertex, Parallel, Cloud Run, ADK.
 >
 > **Constraint:** if the document does not contain the exact passage, refuse — never paraphrase,
