@@ -298,7 +298,37 @@ Full record: `fleet-ops (internal)/retros/QWEN-LOSS-RETRO-2026-08-30.md` (correc
 
 ---
 
-## 🎯 NOW — Partner integrations night wave (build lane)
+## 🎯 NOW — AS-SHIP-3 judge UX (build lane)
+
+**Slice:** Replace monospace `<pre>` dump on `/visibility/ui` with judge-facing HTML panel.
+
+### Build
+
+- [x] Verdict badge (SOURCED / UNSOURCED / CONTRARY_TO_RESEARCH)
+- [x] Transparency section above fold (angles, shallow route, imbalance)
+- [x] Track-brief hook + hosted URL + `/truths/ui` link
+- [x] Tests extended
+
+### Verify
+
+```bash
+python3 tests/test_visibility_transparency.py   # 5/5
+python3 tests/test_registry_surface.py          # 17/17 (visibility UI tests)
+curl -s 'http://localhost:8080/visibility/ui?q=ralph+loop+agentic' | grep -c 'badge contrary'
+curl -s 'http://localhost:8080/visibility?q=ralph+loop+agentic' | python3 -c "import sys,json; print(json.load(sys.stdin)['primary']['label'])"
+```
+
+### Receipt
+
+- `docs/RECEIPT-ship-2026-09-02.md`
+
+### BLOCKED
+
+- Hosted deploy — Oscar click (`./deploy.sh`)
+
+---
+
+## 🎯 NOW (prior) — Partner integrations night wave (build lane)
 
 **Slice:** P1–P7 partner integrations + promise line + eval gate + compound exhibit — all four partners provable at runtime.
 

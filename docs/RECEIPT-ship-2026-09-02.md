@@ -22,14 +22,15 @@
 
 | Claim | Command | Result |
 |-------|---------|--------|
-| Privacy grep | `bash scripts/privacy_grep.sh` | `PRIVACY OK: 0 hits` |
-| Full gate | `bash scripts/full_gate.sh` | *(run at end of lane — see below)* |
+| Privacy grep | `bash scripts/privacy_grep.sh` | *(run at end of lane)* |
+| Full gate | `bash scripts/full_gate.sh` | *(run at end of lane)* |
 | Hosted health | `curl -s …/health \| python3 -m json.tool` | `ok: true`, `engine_default: adk` |
 | Cold scripts (3/3) | `python3 scripts/run_cold_scripts.py` | *(re-run tonight)* |
 | Wrong audit | `python3 scripts/audit_cold_wrong.py` | *(re-run tonight)* |
 | Video not SCOUT | `ffmpeg -ss 0 -i demo/demo-final.mp4 -frames:v 1 /tmp/f0.png` | *(after `./film/build.sh`)* |
 | Video ≤180s | `ffprobe -v error -show_entries format=duration -of csv=p=0 demo/demo-final.mp4` | *(after build)* |
-| Visibility tests | `python3 tests/test_visibility_transparency.py` | *(after judge-ux merge)* |
+| Visibility tests | `python3 tests/test_visibility_transparency.py` | *(run after merge)* |
+| Registry surface | `python3 tests/test_registry_surface.py` | *(run after merge)* |
 | Docs gate | `python3 scripts/bench_check_docs.py` | *(after JUDGE-CRITERIA added)* |
 
 ---
