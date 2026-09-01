@@ -2,4 +2,4 @@
 @lang b
 @pause 400
 
-Two hundred sixty-five claims live on the shelf today. The truths dashboard ranks what builders actually ask — GitHub stars, blogs, peer queries — a dictionary, not a chat log.
+Two hundred sixty-five claims on the shelf. The most-asked truths get cheaper for everyone.

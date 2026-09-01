@@ -2,4 +2,4 @@
 @lang b
 @pause 400
 
-Under the hood: Parallel search with the official SDK, Gemini on Vertex, Cloud Run, and the Agent Development Kit as the default clearance engine. Judges can read GET slash partners for the manifest.
+Parallel, Gemini, Cloud Run, ADK — all on the default path. GET slash partners is the judge manifest.

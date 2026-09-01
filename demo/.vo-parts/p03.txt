@@ -2,4 +2,4 @@
 @lang b
 @pause 400
 
-When practitioner adoption outruns a generalized paper, we stamp CONTRARY TO RESEARCH. The Ralph loop beat on this desk is an example: the field moved faster than the literature. We say so, with why.
+When the field outruns the paper, we stamp CONTRARY TO RESEARCH, with a named why.

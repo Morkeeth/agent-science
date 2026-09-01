@@ -31,8 +31,8 @@ def main() -> int:
         for path, name, w, h in PAGES:
             url = f"{BASE.rstrip('/')}{path}"
             page.set_viewport_size({"width": w, "height": h})
-            page.goto(url, wait_until="networkidle", timeout=60_000)
-            page.wait_for_timeout(800)
+            page.goto(url, wait_until="domcontentloaded", timeout=90_000)
+            page.wait_for_timeout(2500)
             dest = OUT / name
             page.screenshot(path=str(dest), full_page=True)
             print(f"wrote {dest.relative_to(ROOT)}")

@@ -298,7 +298,41 @@ Full record: `fleet-ops (internal)/retros/QWEN-LOSS-RETRO-2026-08-30.md` (correc
 
 ---
 
-## 🎯 NOW — Partner integrations night wave (build lane)
+## 🎯 NOW — AS-SHIP-1 film rebuild (build lane)
+
+**Slice:** Rebuild `demo/demo-final.mp4` — truth-layer hook, visibility WOW, CONTRARY beat; kill SCOUT/EU-insurance frames.
+
+### Build (shipped 2026-09-01 night)
+
+- [x] Confirm SCOUT bug at 0:05 — `ffmpeg -ss 5 -i demo/demo-final.mp4 -frames:v 1 /tmp/before.png`
+- [x] Refresh hosted screens — `python3 scripts/capture_screens.py` (domcontentloaded)
+- [x] Local film renderer — `film/render_local.py` + `film/agent-science.json` (flipbook sibling absent)
+- [x] Rebuild video — `./film/build.sh` → **107.0s**
+- [x] Frame checks — hook @ 0:00, visibility @ 0:15, no SCOUT/documentary/insured @ 0:05
+- [x] PITCH compound A=1→B=0 — `docs/PITCH-TOMORROW.md` + `film/voiceover.txt`
+- [x] `submission/demo-final.mp4` copied · `./film/preflight.sh` **PASS**
+
+### Verify (one command each)
+
+```bash
+./film/build.sh
+./film/preflight.sh
+ffmpeg -ss 5 -i demo/demo-final.mp4 -frames:v 1 /tmp/f5.png
+ffmpeg -ss 15 -i demo/demo-final.mp4 -frames:v 1 /tmp/f15.png
+ffprobe -v error -show_entries format=duration -of csv=p=0 demo/demo-final.mp4
+```
+
+### Receipt
+
+- `docs/RECEIPT-ship-2026-09-02.md` § AS-SHIP-1
+
+### BLOCKED (Oscar outward)
+
+- YouTube/Vimeo upload · Devpost submit · logged-out video verify
+
+---
+
+## 🎯 NOW (prior) — Partner integrations night wave (build lane)
 
 **Slice:** P1–P7 partner integrations + promise line + eval gate + compound exhibit — all four partners provable at runtime.
 
@@ -420,6 +454,7 @@ bash scripts/verify_cold_clone.sh                                               
 
 | When | What | Command | Outcome |
 |------|------|---------|---------|
+| 2026-09-01 night | AS-SHIP-1 film rebuild | `./film/build.sh` · `preflight.sh` | **107s** truth-layer reel · SCOUT frames killed · local render fallback |
 | 2026-09-01 night | Partner integrations wave | `curl …/health` · compound-mini · `full_gate.sh` | **4/4 partners** on hosted · compound PASS · 127/127 · promise line shipped |
 | 2026-09-01 hammer | Hosted visibility + demo | `./deploy.sh` · `demo_truth_layer.sh` | `/visibility/ui` live · 127/127 gate |
 | 2026-09-01 overnight | Deploy + pitch pack | `./deploy.sh` | rev 00018 · PITCH-TOMORROW |

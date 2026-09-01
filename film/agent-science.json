@@ -1,0 +1,117 @@
+{
+  "id": "agent-science",
+  "title": "Agent Science — truth layer",
+  "brand": "AGENT SCIENCE · AGENTIC CINEMA",
+  "aspect": "16x9",
+  "scenes": [
+    {
+      "id": "hook",
+      "label": "00 · hook",
+      "time": "0:00",
+      "duration": 7.0,
+      "type": "title",
+      "headline": ["Your agent websearches.", "You get one answer."],
+      "subline": "You never see what was skipped."
+    },
+    {
+      "id": "truth-layer",
+      "label": "01 · truth layer",
+      "time": "0:07",
+      "duration": 8.0,
+      "type": "title",
+      "headline": ["Truth layer for what builders", "believe and use."],
+      "subline": "Not another answer engine — full visibility."
+    },
+    {
+      "id": "visibility",
+      "label": "02 · visibility",
+      "time": "0:15",
+      "duration": 12.0,
+      "type": "screenshot",
+      "asset": "08-visibility-ui.png",
+      "caption": "Pane 1b — angles searched, every tier tried"
+    },
+    {
+      "id": "contrary",
+      "label": "03 · contrary",
+      "time": "0:34",
+      "duration": 10.0,
+      "type": "stamp",
+      "headline": ["CONTRARY TO RESEARCH"],
+      "subline": "When the field outruns the paper — named why."
+    },
+    {
+      "id": "rule",
+      "label": "04 · rule",
+      "time": "0:44",
+      "duration": 9.0,
+      "type": "title",
+      "headline": ["Cite the document,", "or print that you could not."],
+      "subline": "No citation — no verdict. Enforced in code."
+    },
+    {
+      "id": "sourced",
+      "label": "05 · sourced",
+      "time": "0:53",
+      "duration": 10.0,
+      "type": "screenshot",
+      "asset": "04-registry-search.png",
+      "caption": "Exact sentence from the source — not a summary"
+    },
+    {
+      "id": "refuse",
+      "label": "06 · refuse",
+      "time": "1:03",
+      "duration": 9.0,
+      "type": "title",
+      "headline": ["Copyright never evaluated", "is not permission."],
+      "subline": "Refuse with a named cause — not permission."
+    },
+    {
+      "id": "honest",
+      "label": "07 · honest",
+      "time": "1:12",
+      "duration": 8.0,
+      "type": "screenshot",
+      "asset": "02-front-wedge.png",
+      "caption": "We refused our own headline — the object was not."
+    },
+    {
+      "id": "compound",
+      "label": "08 · compound",
+      "time": "1:20",
+      "duration": 10.0,
+      "type": "compound",
+      "headline": ["Shelf remembers.", "Parallel drops."],
+      "subline": "RUN A: 1 Parallel · RUN B: 0 Parallel · 1 corpus hit — sealed."
+    },
+    {
+      "id": "truths",
+      "label": "09 · truths",
+      "time": "1:30",
+      "duration": 8.0,
+      "type": "screenshot",
+      "asset": "07-truths-dashboard.png",
+      "caption": "265+ claims — ranked queries, field signals"
+    },
+    {
+      "id": "partners",
+      "label": "10 · partners",
+      "time": "1:38",
+      "duration": 6.0,
+      "type": "screenshot",
+      "asset": "06-partners-json.png",
+      "caption": "Parallel · Gemini · Cloud Run · ADK"
+    },
+    {
+      "id": "close",
+      "label": "11 · close",
+      "time": "1:44",
+      "duration": 10.0,
+      "type": "title",
+      "headline": ["Agent Science."],
+      "subline": "agent-science-568004190078.us-central1.run.app",
+      "footer": "Ask once. Shelf compounds. Link in description."
+    }
+  ]
+}

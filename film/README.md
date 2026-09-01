@@ -11,4 +11,4 @@ chmod +x film/*.sh
 
 **Spine:** `docs/VIDEO-SCRIPT-2026-08-29.md` · truth-layer WOW first.
 
-**Flipbook JSON:** bundled via `film/build.sh` (syncs screens + renders reel)
+**Flipbook JSON:** `film/agent-science.json` — rendered by sibling flipbook if present, else `film/render_local.py`
