@@ -133,7 +133,7 @@ For Sep 9: **compound economics on screen** beats PeriodCheck's citation table (
 - **Oscar today:** rotate leaked keys · `deploy.sh` · restart Cursor for MCP
 - **Oscar this week:** video · Devpost · public repo · seal prediction hash
 - **Fleet habit:** `science_lookup` default · `popular` weekly · `ingest` after research
-- **Review:** `node ~/CODE/zup/scripts/cloud-harness.js review agent-science`
+- **Review:** `node scripts/cloud-harness.js review agent-science`
 - **Do not:** eval checklist rows · ClickHouse · cloud doc refresh without outward artifact
 
 ---

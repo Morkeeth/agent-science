@@ -1,0 +1,5 @@
+@voice am_michael
+@lang b
+@pause 400
+
+Your agent websearches. You get one answer and a green check. You never see what was skipped.

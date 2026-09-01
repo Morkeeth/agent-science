@@ -40,6 +40,7 @@ Second `/clear` on same subject: `corpus_hits ≥ 1` and Run B `parallel_api_cal
 ```bash
 git clone https://github.com/Morkeeth/agent-science.git && cd agent-science
 bash scripts/verify_cold_clone.sh
+bash scripts/demo_truth_layer.sh
 open https://agent-science-568004190078.us-central1.run.app/truths/ui
 ```
 

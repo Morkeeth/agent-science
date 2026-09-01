@@ -11,13 +11,13 @@ description: >-
 
 **Product:** Agent Science = truth layer for believe + use.  
 **Websearch:** the full visibility rundown — not one citation.  
-**Doc:** `~/CODE/cleared/docs/WEBSEARCH-FULL-RUNDOWN.md`
+**Doc:** `agent-science/docs/WEBSEARCH-FULL-RUNDOWN.md`
 
 ## Steps (complete protocol)
 
 1. **Run full visibility**
    ```bash
-   cd ~/CODE/cleared
+   cd agent-science
    python3 -m clearance visibility "QUERY" --full
    # MCP: science_visibility { "query": "QUERY", "full": true }
    ```

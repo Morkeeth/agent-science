@@ -78,7 +78,7 @@ Always try free → cheap before live. Visibility shows the tier on the primary 
 Run:
 
 ```bash
-cd ~/CODE/cleared
+cd agent-science
 python3 -m clearance visibility "QUERY" --full
 # MCP: science_visibility  { "query": "QUERY", "full": true }
 ```

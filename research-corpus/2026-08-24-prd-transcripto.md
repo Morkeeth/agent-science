@@ -1,6 +1,6 @@
 # TRANSCRIPTO / hack-fleet-ata — PRD grounding facts (2026-08-24)
 
-Facts gathered at the object for `~/CODE/hack-fleet-ata/PRD-2026-08.md`. Every claim
+Facts gathered at the object for `github.com/Morkeeth/hack-fleet-ata/PRD-2026-08.md`. Every claim
 here is either a file+line citation, a command output, or a web-cited source. No claim
 is repeated from another doc without naming that doc as the author.
 

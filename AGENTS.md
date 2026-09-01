@@ -5,7 +5,7 @@
 ## MCP (Cursor / agents) — recommended
 
 ```bash
-python3 ~/CODE/cleared/scripts/install-mcp.sh
+python3 scripts/install-mcp.sh
 # Restart Cursor. Tool: science_search
 ```
 
@@ -15,7 +15,7 @@ Or manually in `~/.cursor/mcp.json`:
 "agent-science": {
   "command": "python3",
   "args": ["-m", "clearance.mcp_server"],
-  "cwd": "/Users/morkeeth/CODE/cleared",
+  "cwd": "<path-to-your-clone>",
   "env": {
     "PARALLEL_API_KEY": "<from ~/.config/keys/parallel.key or env>",
     "GEMINI_API_KEY": "<optional; else Vertex ADC>"
@@ -68,7 +68,7 @@ Add casual phrasings to `truth-dictionary/aliases.json` — they map to canonica
 ## CLI
 
 ```bash
-cd ~/CODE/cleared
+cd agent-science   # after git clone
 python3 scripts/boot_registry.py                    # cold start from fleet corpus
 python3 -m clearance search "Directive 2012/28/EU"  # verified lookup
 python3 -m clearance browse

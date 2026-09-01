@@ -1,38 +1,76 @@
 # SUBMISSION — Agent Science · Agentic Cinema
 
-**Event:** Agentic Cinema · Devpost · Sep 9 2026 2:00pm PDT  
-**Code:** https://github.com/Morkeeth/agent-science (private until submit)  
-**Docs:** https://github.com/Morkeeth/hack-agent-science (private)  
-**License:** MIT (`LICENSE`)
+**Event:** [Agentic Cinema](https://agentic-cinema.devpost.com/) · **Deadline:** Sep 9 2026 14:00 PDT  
+**Track:** Parallel  
+**Repo:** https://github.com/Morkeeth/agent-science (MIT)  
+**Hosted:** https://agent-science-568004190078.us-central1.run.app
 
-## Hosted URL
+---
 
-**https://agent-science-568004190078.us-central1.run.app**
+## Stranger path (< 5 min, no keys)
 
-- Desk UI: `/`
-- API: `POST /clear` with `{"script": "...", "subject": "orphan-works"}`
-- Health: `GET /health`
-- Shelf: `GET /corpus?subject=orphan-works`
+```bash
+git clone https://github.com/Morkeeth/agent-science.git && cd agent-science
+bash scripts/verify_cold_clone.sh
+bash scripts/demo_truth_layer.sh
+```
 
-## Runtime integrations (honest)
+**See it in the browser (no clone):**
 
-| Integration | Status | Receipt |
+https://agent-science-568004190078.us-central1.run.app/visibility/ui?q=ralph+loop+agentic
+
+| Surface | URL |
+|---------|-----|
+| Truth layer WOW | `/visibility/ui?q=ralph+loop+agentic` |
+| Truths dashboard | `/truths/ui` |
+| Registry | `/registry` |
+| Health / partners | `/health` · `/partners` |
+
+---
+
+## Ship checklist
+
+| # | Item | Status | Where |
+|---|------|--------|-------|
+| 1 | Hosted URL live | ✅ | above |
+| 2 | Public repo + MIT | ✅ | GitHub |
+| 3 | Controls 127/127 | ✅ | `bash scripts/full_gate.sh` |
+| 4 | Sealed compound A=1→B=0 | ✅ | `docs/SEALED-PREDICTION-2026-08-31.md` |
+| 5 | Demo video ≤180s | [ ] | `demo/demo-final.mp4` · `submission/README.md` |
+| 6 | Devpost submit | [ ] | `docs/DEVPOST-READY.md` |
+| 7 | Privacy grep = 0 | ✅ | `bash scripts/privacy_grep.sh` |
+
+---
+
+## Runtime integrations
+
+| Integration | Hosted | Receipt |
 |-------------|--------|---------|
-| Gemini (extract + locate) | ✅ | live default path |
-| Parallel Search | ✅ | live default path |
-| Google Cloud (Cloud Run) | ✅ | URL above · project `hack-fleet` |
-| Agent Builder (ADK) | ⬜ **wired as the default `/clear` path and proved LOCALLY** under `env -u GEMINI_API_KEY` (`engine: adk`, `adk_tool_calls: [clear_script_tool]`, `vertex:hack-fleet`) — receipt in `docs/RECEIPT-agent-builder.md`. Stays ⬜ until the hosted URL returns `"engine_default": "adk"`; that needs `deploy.sh`, which is Oscar's click |
-| Corpus compounding | ✅ local full orphan A/B **43% search avoided** · GCS shelf in `deploy.sh` |
+| Parallel Search (SDK) | ✅ | `/health` → `parallel_sdk: true` |
+| Gemini (Vertex) | ✅ | `/health` → `gemini_path: vertex:…` |
+| Google Cloud Run | ✅ | hosted URL |
+| Agent Development Kit | ✅ | `/health` → `engine_default: adk` |
 
-## Checklist
+---
 
-- [x] Hosted project URL
-- [ ] Public repo — private now; flip at submit
-- [x] OSS license (MIT)
-- [ ] Demo video ≤3 min — **PARKED**
-- [ ] Devpost text — parked
-- [ ] Sealed prediction — after exhibit is on the live URL with durable corpus
+## Pitch (30s)
 
-## Sealed prediction (draft)
+> Agent Science is the truth layer for what agentic builders believe and use. Transparent websearch — angles searched, field signals, sourced or refused — and CONTRARY TO RESEARCH when the field outruns papers. Ask once; shelf compounds.
 
-Second `POST /clear` same subject + overlapping claim → `corpus_hits ≥ 1` and fewer `parallel_calls` than first run on a shared corpus shelf.
+Full: `docs/PITCH-TOMORROW.md` · film teleprompter: `demo/FILM-AND-SUBMIT.md`
+
+---
+
+## Sealed prediction
+
+Second `/clear` on the same subject: `corpus_hits ≥ 1` and Run B `parallel_calls` < Run A.
+
+**Measured (hosted):** A=**1** → B=**0** Parallel · corpus_hits=**1**  
+**Doc:** `docs/SEALED-PREDICTION-2026-08-31.md`
+
+---
+
+## Do not claim on video
+
+- Orphan-works full compound when Run B returns **503**
+- Flywheel headline without showing transparency panel first

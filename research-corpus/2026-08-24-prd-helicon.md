@@ -1,6 +1,6 @@
 # Research corpus — HELICON PRD cited facts (2026-08-24)
 
-Two load-bearing facts behind the HELICON PRD (`~/CODE/mountain-of-helicon/PRD-2026-08.md`).
+Two load-bearing facts behind the HELICON PRD (`github.com/Morkeeth/mountain-of-helicon/PRD-2026-08.md`).
 Both verified via web search 2026-08-24. Note the second fact's exact wording — the PRD
 corrects a misquote that ships in `helicon/review.py`'s `_BASIS` footer.
 

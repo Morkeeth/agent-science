@@ -9,11 +9,11 @@ status: admissibility is the whole lane · **slice 5 DONE 2026-08-30** · slice 
 
 ## 0 · TREE RULING (mine, reasoning stated, neither tree deleted)
 
-**Consolidate into this tree (`~/CODE/cleared`), carry the docs across, rename before public.**
+**Consolidate into this tree (`agent-science`), carry the docs across, rename before public.**
 
 The code is the expensive half and it is all here — engine, citation guard, corpus, gap
 report, locator/verifier split, both nouns, 31 controls, **and the FACT leg already built
-and tested, which IS Agent Science's engine.** `hack-agent-science` holds the portable
+and tested, which IS Agent Science's engine.** `agent-science` holds the portable
 half: ORIENT, the 7-slice queue, PHASE-0, the EYES panel, the pre-build fixture. Documents
 move in an afternoon; a tested engine does not.
 

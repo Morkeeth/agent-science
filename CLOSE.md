@@ -21,7 +21,7 @@ engine, with the instrument or the passage quoted verbatim. Marketplaces sell pr
 data. Nobody proves clearance on material you already hold — and nobody else can tell you
 a claim is **unsourceable**, because absence is not something you find by searching harder.
 
-**PROOF** — repo `/Users/morkeeth/CODE/cleared` @ `0586f25`, pushed to a PRIVATE remote at
+**PROOF** — repo `agent-science` @ `0586f25`, pushed to a PRIVATE remote at
 github.com/Morkeeth/agent-science. Nothing public, nothing deployed.
 - `python3 tests/test_watch_it_go_red.py` → **71 passed, 0 failed**, every control
   watched going red before it was trusted green

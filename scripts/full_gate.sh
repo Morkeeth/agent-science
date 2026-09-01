@@ -33,6 +33,9 @@ done
 echo "--- 5. Docs gate ---"
 python3 scripts/bench_check_docs.py
 
+echo "--- 5b. Privacy (no home/~/CODE paths in tracked files) ---"
+bash scripts/privacy_grep.sh
+
 echo "--- 6. Cold clone ---"
 bash scripts/verify_cold_clone.sh
 

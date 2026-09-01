@@ -9,7 +9,7 @@ status: kill condition DOES NOT FIRE
 # PROBE — the kill condition tested against the object
 
 ## The gate being tested
-`~/CODE/hack-agent-science/ORIENT.md`, verbatim:
+`github.com/Morkeeth/agent-science/ORIENT.md`, verbatim:
 > *"If the only way to demo a RED rights verdict is an **invented contract**, the demo is wrong.
 > Fabricated evidence inside an evidence-not-claims pitch is the crack a judge pushes on."*
 

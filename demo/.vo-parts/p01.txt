@@ -1,0 +1,5 @@
+@voice am_michael
+@lang b
+@pause 400
+
+Agent Science is the truth layer for what builders believe and use. Not another answer engine. When you ask, you should see what was searched — every alias route, every tier — plus what the field actually runs.

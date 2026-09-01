@@ -27,7 +27,7 @@
       "endpoint": "https://api.parallel.ai/v1/search",
       "live_calls": 0,
       "last_search_id": null,
-      "receipts_log": "/Users/morkeeth/CODE/cleared/cache/search_receipts.jsonl",
+      "receipts_log": "agent-science/cache/search_receipts.jsonl",
       "runtime": false,
       "module": "clearance/search.py",
       "called_from": "clearance/facts.py \u2192 judge_claim"
@@ -61,7 +61,7 @@
     "docs/PARTNER-INTEGRATION-RESEARCH-2026-08-31.md",
     "docs/RECEIPT-adk-default-path-2026-08-30.md"
   ],
-  "repo_root": "/Users/morkeeth/CODE/cleared"
+  "repo_root": "agent-science"
 }
 ```
 
@@ -78,7 +78,7 @@
   "endpoint": "https://api.parallel.ai/v1/search",
   "live_calls": 0,
   "last_search_id": null,
-  "receipts_log": "/Users/morkeeth/CODE/cleared/cache/search_receipts.jsonl",
+  "receipts_log": "agent-science/cache/search_receipts.jsonl",
   "key_present": true,
   "live_probe": {
     "ok": true,

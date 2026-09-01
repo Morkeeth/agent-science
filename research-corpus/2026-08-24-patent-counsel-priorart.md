@@ -1,6 +1,6 @@
 # Prior-art probes — ANGLE 1 (structural-deferral cascade) provisional
 
-**Date:** 2026-08-24 · **Role:** patent counsel · **For:** `~/CODE/hack-fleet-ata/PROVISIONAL-SPEC-ANGLE1.md`
+**Date:** 2026-08-24 · **Role:** patent counsel · **For:** `github.com/Morkeeth/hack-fleet-ata/PROVISIONAL-SPEC-ANGLE1.md`
 **Question probed:** does anything anticipate the *no-score, closed-form structural* deferral
 limitation — defer to an LLM **only** on `disjoint objects + compatible intents`, with the
 deterministically-decided cases carrying **no confidence score**?

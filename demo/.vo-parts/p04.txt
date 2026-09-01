@@ -1,0 +1,5 @@
+@voice am_michael
+@lang b
+@pause 400
+
+The rule never bends. Cite the document verbatim, or print that you could not. No citation — no verdict. That is enforced in code, not by prompt.

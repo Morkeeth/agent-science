@@ -40,7 +40,7 @@ client needs `GOOGLE_CLOUD_LOCATION=global`, and `deploy.sh` now sets it.
 
 ## The receipt — keys stripped, not merely absent
 
-    cd ~/CODE/cleared
+    cd agent-science
     export GCP_PROJECT=hack-fleet GEMINI_MODEL=gemini-3.5-flash PORT=8099
     export PARALLEL_API_KEY="$(cat ~/.config/keys/parallel.key)"
     env -u GEMINI_API_KEY -u GOOGLE_API_KEY .venv-adk/bin/python cloud/service.py

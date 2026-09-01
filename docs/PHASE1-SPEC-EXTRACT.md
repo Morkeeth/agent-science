@@ -78,7 +78,7 @@ MCP scores twice. A feature beside it scores once.
 ## SELF-AUDIT vs THIS SPEC — 2026-08-22, after the engine was built
 Checked the repo against the clause above rather than against my own summary of it.
 
-| Requirement | `~/CODE/cleared` @ 23f29fe | Verdict |
+| Requirement | `agent-science` @ 23f29fe | Verdict |
 |---|---|---|
 | Gemini called at runtime | absent — `urllib` + `str.find` only | **FAIL** |
 | Google Cloud Agent Builder | absent | **FAIL** |

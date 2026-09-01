@@ -1,6 +1,6 @@
 # Agentic engineering practices → Agent Science dictionary
 
-**Origin:** `~/CODE/aistrava/docs/PRACTICES-CORPUS.md` (Agent Grinder coach corpus)  
+**Origin:** `aistrava (external corpus)/docs/PRACTICES-CORPUS.md` (Agent Grinder coach corpus)  
 **Imported:** 2026-08-31 · **Why:** re-center Agent Science on developer / agentic truths — the companion vision — not only EU clearance demos.
 
 Grinder already did the hard part: named practitioners, named practices, named URLs. Agent Science’s job is the other half — **verify the claim against the document, remember SOURCED and REFUSED, serve free on re-ask.**

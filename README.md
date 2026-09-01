@@ -17,6 +17,18 @@ paraphrase, never infer.
 
 ---
 
+## Quick start (< 5 min · no keys)
+
+```bash
+git clone https://github.com/Morkeeth/agent-science.git && cd agent-science
+bash scripts/verify_cold_clone.sh    # offline controls (~10s)
+bash scripts/demo_truth_layer.sh     # truth layer: CONTRARY + transparency (~7s)
+```
+
+**Browser only:** [visibility panel](https://agent-science-568004190078.us-central1.run.app/visibility/ui?q=ralph+loop+agentic) · [truths dashboard](https://agent-science-568004190078.us-central1.run.app/truths/ui)
+
+---
+
 ## What it is
 
 Not another answer engine. Agent Science websearch returns:

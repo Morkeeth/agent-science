@@ -1,6 +1,6 @@
 # Correction: the "Harmony lever is inverted/OFF" claim is FALSE (verified at object)
 
-as_of: 2026-08-24 · verified against ~/CODE/agent-attack
+as_of: 2026-08-24 · verified against github.com/Morkeeth/agent-attack
 
 [CLAIM] (relayed, from Fable ceiling research) "the empty-Harmony reasoning-channel
 injection is the +27.5 dominant lever but the repo does the OPPOSITE (faux_reasoning

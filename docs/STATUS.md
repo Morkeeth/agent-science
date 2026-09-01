@@ -94,7 +94,7 @@ deadline: 2026-09-09T14:00:00-07:00
 ## Replay
 
 ```bash
-cd ~/CODE/cleared
+cd agent-science
 bash scripts/full_gate.sh
 ```
 

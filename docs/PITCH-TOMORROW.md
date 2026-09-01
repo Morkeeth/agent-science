@@ -27,9 +27,9 @@
 **Product:** Agent Science websearch returns a **full visibility panel** — primary verdict, transparency (angles searched, shallow-route warning, imbalance), field adoption (★), blogs, fleet peers, and **stack-fit**: does this truth fit *your* repo, and what improves if you adopt it?
 
 **Proof on camera:**
-1. **Hosted** `/visibility/ui?q=ralph+loop+agentic` — transparency pane + CONTRARY stamp (no CLI needed)
-2. `/truths/ui` — ranked queries, 265+ claims
-3. Compound: same subject twice → `parallel_calls` drop, `corpus_hits` rise
+1. **Hosted** `/visibility/ui?q=ralph+loop+agentic` — transparency pane + CONTRARY stamp (no CLI needed) · live: primary `CONTRARY_TO_RESEARCH`, transparency keys `angles_searched`, `shallow_route`, `imbalance`
+2. `/truths/ui` — ranked queries, **284 claims** (live 2026-09-01; was 265+ at seal)
+3. Compound: same subject twice → `parallel_calls` drop, `corpus_hits` rise — `docs/SEALED-PREDICTION-2026-08-31.md` (A=1→B=0)
 
 **Moat:** Positive truths + negative truths (named refusal) + popularity → self-tuning dictionary. Competitors prove the first script. We prove the **second costs less** — and we show *how we searched*.
 
@@ -43,11 +43,11 @@
 
 | Shipped | Evidence |
 |---------|----------|
-| Truth layer code on `main` | transparency, CONTRARY, stack-fit, community notes |
-| **265 claims** on shelf | hosted `/truths/ui` |
-| **Deployed** | `./deploy.sh` → rev `00018-n4s` |
+| Truth layer code on `main` | `clearance/visibility.py`, `contrary.py`, `stack_fit.py` |
+| **284 claims** on shelf (live) | hosted `/truths/ui` · `curl -s …/truths/ui` |
+| **Deployed** | `GET /health` → `engine_default: adk`, `parallel_sdk: true` |
 | `/truths/ui` live | `curl …/truths/ui` → dashboard HTML |
-| 52 inbox ingests | competitor + agentic research rows |
+| 52 inbox ingests | `python3 scripts/auto_ingest_inbox.py` → receipt `docs/RECEIPT-agent-science-shape-2026-09-01.md` |
 | Film scout | `docs/FILM-SCOUT-COMMANDS.md` |
 | Full gate | `bash scripts/full_gate.sh` OK |
 

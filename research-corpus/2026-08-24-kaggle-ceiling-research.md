@@ -2,7 +2,7 @@
 
 **Lane:** RESEARCH (theory, not attack code). **Author:** Fable (fresh-eyes). **Date:** 2026-08-24.
 **Question:** how does Oscar's submission break past its current ceiling (best measured ~37, relayed 58.050 normalized) toward the leader (~138) and beyond?
-**Format:** one claim per line, each with its source. `[REPO]` = verified against `~/CODE/agent-attack`; `[URL]` = external, cited. `[MATH]` = derived here from cited constants.
+**Format:** one claim per line, each with its source. `[REPO]` = verified against `github.com/Morkeeth/agent-attack`; `[URL]` = external, cited. `[MATH]` = derived here from cited constants.
 
 ---
 

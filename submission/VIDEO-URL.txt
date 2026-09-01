@@ -1,0 +1,2 @@
+# Paste your public YouTube/Vimeo URL here after upload.
+# Example: https://youtu.be/xxxxxxxxxxx

@@ -1,0 +1,5 @@
+@voice am_michael
+@lang b
+@pause 400
+
+The same engine clears a documentary script. Paste narration about a paper or a historical claim — you get the exact sentence from the instrument, not a summary. Or you get UNSOURCED with a named cause.

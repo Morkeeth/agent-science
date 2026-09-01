@@ -61,7 +61,7 @@ market. *(Competitor names sourced by cross-review 2026-08-22; re-verify before 
 
 | | |
 |---|---|
-| Repo | `/Users/morkeeth/CODE/cleared` @ `ab03e3a` |
+| Repo | `agent-science` @ `ab03e3a` |
 | Entry point | `python3 agent_science.py <script.txt>` — Gemini + Parallel **live by default** |
 | Controls | `python3 tests/test_watch_it_go_red.py` → **41 passed, 0 failed** |
 | License | `LICENSE` (MIT) |

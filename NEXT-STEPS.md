@@ -43,7 +43,7 @@ minus the deploy.
 - Defect found: the ADK client 404s on any regional Vertex endpoint. Only `global`
   publishes these models — `clearance/gemini.py:51` already knew, `deploy.sh` now sets it.
 
-**LEFT FOR OSCAR (one command):** `bash deploy.sh` in `~/CODE/cleared`. It writes a
+**LEFT FOR OSCAR (one command):** `bash deploy.sh` in `agent-science`. It writes a
 Secret Manager version, edits IAM and ships a billed public revision, so it is his click
 by the script's own header. Rotate the Parallel/Gemini keys first if that is still open.
 Then: `curl -s <hosted>/health | grep '"engine_default": "adk"'` → 3/3.

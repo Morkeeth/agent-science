@@ -61,7 +61,7 @@ first: a contradiction verdict that cites the contradicting passage verbatim, th
 same verifier. Until that exists, the word does not appear on screen.
 
 ### Open, and yours if you want it
-`fixtures/gap-report-sample.md` in `hack-agent-science` uses the presentation vocabulary.
+`fixtures/gap-report-sample.md` in `agent-science` uses the presentation vocabulary.
 Since the mapping now exists, that fixture does not need rewriting — but nothing renders
 it yet. Writing `gap_report.present()` against the table above is a clean, self-contained
 piece that does not touch `clearance/` internals. Say so here before you start and it is
@@ -89,7 +89,7 @@ a control for that (`transport failure must not become a refusal`).
 
 **Command:**
 ```bash
-cd ~/CODE/cleared && python3 review/adversarial_proposers.py
+cd agent-science && python3 review/adversarial_proposers.py
 # 8/8 OK — paraphrase-wrong-year, concat fragments, whitespace cheat, negated-with-terms,
 # two-sentence span, sibling doc, unicode homoglyph, missing must_contain
 ```
@@ -315,7 +315,7 @@ day per model**. Not a rate limit. Use `GeminiLocator(model=...)` down the ladde
 - Verified live: `python3 agent_science.py fixtures/scripts/split-sentence.txt` → 1 claim, 1 SOURCED (~13s)
 - Added `LICENSE` (MIT)
 - Refreshed `NEXT-STEPS.md`, `PITCH.md` (41 controls, runtime 2/3, corpus 50/50 receipt path, C3/C5 nuance)
-- Synced `hack-agent-science/WORK-QUEUE.md`, `ORIENT.md`, `README.md` → canonical tree `~/CODE/cleared`
+- Synced `agent-science/WORK-QUEUE.md`, `ORIENT.md`, `README.md` → canonical tree `agent-science`
 - Fixed `review/binding_audit.py` MIN_WORDS false positive
 
 **Tests:** 41 passed @ `ab03e3a`
@@ -323,7 +323,7 @@ day per model**. Not a rate limit. Use `GeminiLocator(model=...)` down the ladde
 **Still blocked:**
 1. **Oscar:** GCP + Agent Builder + Cloud Run hosted URL
 2. **Build:** corpus compounding wired into `agent_science.py` (script B)
-3. **Oscar:** Phase 0 hours in hack-agent-science; git push both repos
+3. **Oscar:** Phase 0 hours in agent-science; git push both repos
 
 **Handoff:** Oscar provisions GCP → build lane wraps pipeline in Agent Builder.
 
@@ -422,7 +422,7 @@ that path is not `none`. Matches Vertex-primary deploy (no key in env).
 
 **Oscar click (this turn):** "latest, analysis, push and merge" — remotes + push authorised.
 `origin` → `https://github.com/Morkeeth/agent-science.git` (private). Docs tree pushed as
-`Morkeeth/hack-agent-science`.
+`Morkeeth/agent-science`.
 
 **Still open (not this commit):** live Cloud Run still has plaintext `GEMINI_API_KEY` /
 `PARALLEL_API_KEY` env (pre–Secret-Manager revision). Redeploy via current `deploy.sh`

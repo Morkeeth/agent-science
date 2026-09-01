@@ -5,8 +5,8 @@ Format: each line = claim + source URL, tagged [ELEMENT]/[PRIOR-ART]/[DIFF]/[VER
 Scope note: two angles are pre-killed and NOT re-proposed — composition-honesty (true parts / false whole = Simpson's Paradox; killed by bmdpat blog + arXiv 2607.07405 / 2608.04066, see 2026-08-24-patent-narrow-angle.md) and the authorship→outcome pipeline (DOES-NOT-SURVIVE, see 2026-08-24-patent-authorship-outcome.md).
 
 ## Object-level verification of the numbers the task handed me
-- [MEASURED] confident-set precision claim VERIFIED at object: `python3 ~/CODE/hack-fleet-ata/contract/test_confidence.py` → 5/5 PASS, incl. `test_confident_answers_are_never_wrong` and `test_every_floor_error_is_deferred_not_asserted` (run 2026-08-24). Source: repo test, not a doc claim.
-- [SOURCE] 95.1% agent-authored / 537 real prompts / 10,866 records: PITCH.md line 58-61, `~/CODE/hack-fleet-ata/PITCH.md` — Oscar's own corpus, single-machine, NOT externally reproduced. Treat as internal-unverified.
+- [MEASURED] confident-set precision claim VERIFIED at object: `python3 hack-fleet-ata/contract/test_confidence.py` → 5/5 PASS, incl. `test_confident_answers_are_never_wrong` and `test_every_floor_error_is_deferred_not_asserted` (run 2026-08-24). Source: repo test, not a doc claim.
+- [SOURCE] 95.1% agent-authored / 537 real prompts / 10,866 records: PITCH.md line 58-61, `github.com/Morkeeth/hack-fleet-ata/PITCH.md` — Oscar's own corpus, single-machine, NOT externally reproduced. Treat as internal-unverified.
 
 ## DISCLOSURE STATUS (bears on DEFENSIBLE — public disclosure is prior art against Oscar himself)
 - [DISCLOSURE] hack-fleet-ata, cleared (agent-science), agent-attack, helicon (mount-helicon) all have PUBLIC GitHub remotes (`git remote -v`, 2026-08-24). Several were hackathon submissions.
@@ -18,7 +18,7 @@ Scope note: two angles are pre-killed and NOT re-proposed — composition-honest
 ## ANGLE 1 — Structural-deferral cascade (deterministic predicate marks the provably-sole-undecidable region)
 Method: a rule-based classifier computes object-token sets + intent bucket for two NL inputs; it answers deterministically in every case EXCEPT the single cell {objects disjoint AND intents compatible} (the synonym-suspect zone), which it defers to an LLM — so deferral is triggered by a closed-form structural predicate, not a tuned confidence score, and the non-deferred "confident" set is empirically error-free.
 Most-novel element: the deferral region is a NAMED, closed-form lexical-structural cell that is provably the model's only undecidable region — no probability threshold, no calibration set.
-- [ELEMENT] source: `~/CODE/hack-fleet-ata/contract/deterministic.py::classify_with_confidence` — confident unless disjoint-objects ∧ compatible-intents; `classify_cascade` escalates only that tail.
+- [ELEMENT] source: `github.com/Morkeeth/hack-fleet-ata/contract/deterministic.py::classify_with_confidence` — confident unless disjoint-objects ∧ compatible-intents; `classify_cascade` escalates only that tail.
 - [PRIOR-ART] FrugalGPT and the cascade literature defer on a CONFIDENCE SCORE below a learned threshold. https://arxiv.org/html/2506.11887 (Cascaded LLMs for cost-effective decisions)
 - [PRIOR-ART] UCCI — calibrated uncertainty for cost-optimal LLM cascade routing; deferral by calibrated uncertainty threshold. https://arxiv.org/html/2605.18796
 - [PRIOR-ART] Learning-to-Defer generalizes selective prediction: abstain/defer on uncertain inputs to an expert. https://arxiv.org/pdf/2502.01459 (Learning to Partially Defer for Sequences)
@@ -30,7 +30,7 @@ Most-novel element: the deferral region is a NAMED, closed-form lexical-structur
 ## ANGLE 2 — Independence-refusal verdict taxonomy (refuse to round a derived source up to primary)
 Method: for a factual claim, classify each supporting source as primary / derived-or-mirror / unclassified by structural signals; and emit a THREE-WAY verdict that treats "documents state it but every one traces to a single derived/unclassified origin" as a DISTINCT non-cleared verdict from "no source at all" — refusing to clear rather than producing a weighted consensus score.
 Most-novel element: independence failure is a REFUSAL (a distinct verdict a human must resolve), not a down-weight into a blended score.
-- [ELEMENT] source: `~/CODE/cleared/clearance/independence.py` + `agent_science.py` LABEL/WHY maps — `no_independent_source` ("documents state this, every one derived") is a separate verdict from `no_source_offered`.
+- [ELEMENT] source: `agent-science/clearance/independence.py` + `agent_science.py` LABEL/WHY maps — `no_independent_source` ("documents state this, every one derived") is a separate verdict from `no_source_offered`.
 - [PRIOR-ART] Automated fact-checking already rates source independence High/Med/Low (bibliometric/citation-graph overlap) and DOWN-WEIGHTS low-independence sources into a consensus score. https://arxiv.org/abs/2404.18971 (Credible, Unreliable or Leaked? Evidence Verification)
 - [PRIOR-ART] Circular reporting / citogenesis is a named, well-mapped problem; dedup mirrored sources when counting independent evidence. https://en.wikipedia.org/wiki/Circular_reporting
 - [PRIOR-ART] Source credibility scoring patented (score ∝ how often a source agrees with others). https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/10331682 (Secondary profiles with credibility scores, unverified)
@@ -41,7 +41,7 @@ Most-novel element: independence failure is a REFUSAL (a distinct verdict a huma
 ## ANGLE 3 — Verbatim witnessed prompt propagation (no LLM rewrite)
 Method: rank operator prompts within a task class by fewest corrective follow-up turns, then propagate the LITERAL winning text into the shared instruction file with an on-disk/Firestore witness hash — no model rewrite.
 Most-novel element: verbatim copy + cryptographic witness, explicitly no optimization/rewrite step.
-- [ELEMENT] source: `~/CODE/hack-fleet-ata/fleet/propagate.py`, `fleet/org_proof.py`, README ("propagate the literal text ... No LLM rewrite").
+- [ELEMENT] source: `github.com/Morkeeth/hack-fleet-ata/fleet/propagate.py`, `fleet/org_proof.py`, README ("propagate the literal text ... No LLM rewrite").
 - [PRIOR-ART] DSPy / GEPA optimize a prompt against a downstream metric and write the OPTIMIZED (rewritten) prompt back automatically. https://arxiv.org/abs/2507.03620 (GEPA)
 - [PRIOR-ART] Prompt registries (PromptLayer/Braintrust/MLflow) version prompts and promote-the-winner through review. (see 2026-08-24-patent-authorship-outcome.md E3)
 - [PRIOR-ART] Selecting the best prompt by fewest user re-phrasings = rephrase-as-dissatisfaction, already patented as an implicit-quality signal. https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/9633674 (detect repeated input as dissatisfaction, unverified)
@@ -71,7 +71,7 @@ Method: deterministically gate a mixed human/agent transcript on per-record prov
 
 ## ANGLE 7 — Reachability positional-impossibility proof (agent-attack)
 Method: given a guardrail decide(tool,args,context), enumerate predicates and prove which are provably unreachable under any taint window K≥2 — a combinatorial impossibility, not a heuristic to evade.
-- [ELEMENT] source: `~/CODE/agent-attack/jed/reachability.py`, WRITEUP.md §3.
+- [ELEMENT] source: `github.com/Morkeeth/agent-attack/jed/reachability.py`, WRITEUP.md §3.
 - [PRIOR-ART] AWS Zelkova translates IAM policies to SMT and proves properties over ALL possible requests, incl. proving a formula CANNOT be satisfied (unreachable). https://www.amazon.science/blog/custom-policy-checks-help-democratize-automated-reasoning
 - [PRIOR-ART] "Beyond Red-Teaming: Formal Guarantees of LLM Guardrail Classifiers" — formal reachability/coverage over guardrail input regions. https://arxiv.org/abs/2605.10901
 - [VERDICT] DEAD as a patent. It is a benchmark FINDING about one guardrail, and formal reachability/policy-property proving is exactly Zelkova's established method. Not patentable subject matter as framed.

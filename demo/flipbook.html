@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Agent Science — demo flipbook</title>
+<style>
+  :root{
+    --bg:#0b0d10; --panel:#12161c; --line:#232a33; --ink:#e9edf2; --muted:#8b95a3;
+    --accent:#B42318; --track:#1a2028;
+    --mono:"SF Mono",ui-monospace,Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  }
+  *{box-sizing:border-box} html,body{height:100%}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden}
+  .stage{width:min(960px,94vw);aspect-ratio:16/9;background:var(--panel);
+    border:1px solid var(--line);border-radius:0;position:relative;overflow:hidden;
+    box-shadow:0 24px 80px rgba(0,0,0,.5)}
+  .frame{position:absolute;inset:0;padding:44px 52px;display:none;flex-direction:column}
+  .frame.on{display:flex;animation:fade .45s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.18em;color:var(--muted);
+    text-transform:uppercase;display:flex;gap:14px;align-items:center}
+  .kicker .tc{color:var(--accent)}
+  .head{font-size:34px;font-weight:600;line-height:1.12;margin:14px 0 6px;letter-spacing:-.02em}
+  .on-cam{color:var(--muted);font-size:15px;max-width:60ch}
+  .spacer{flex:1}
+  .vo{font-family:var(--mono);font-size:14px;color:var(--ink);border-left:2px solid var(--accent);
+    padding:8px 0 8px 16px;max-width:70ch;line-height:1.55}
+  .vo b{color:var(--accent);font-weight:600}
+  .big{font-size:52px;font-weight:600;letter-spacing:-.02em;line-height:1.05}
+  .line{font-family:var(--mono);color:var(--accent);font-size:16px;margin-top:10px}
+  .brand{position:absolute;top:20px;right:24px;font-family:var(--mono);font-size:11px;
+    letter-spacing:.16em;color:var(--muted)}
+  .bar{position:absolute;left:0;right:0;bottom:0;height:4px;background:var(--track)}
+  .bar i{display:block;height:100%;background:var(--accent);transition:width .3s}
+  .ui{width:min(960px,94vw);display:flex;align-items:center;gap:16px;margin-top:16px;
+    font-family:var(--mono);font-size:12.5px;color:var(--muted)}
+  button{font-family:var(--mono);font-size:12.5px;background:var(--panel);color:var(--ink);
+    border:1px solid var(--line);border-radius:8px;padding:8px 14px;cursor:pointer}
+  button:hover{border-color:var(--accent)}
+  .dots{display:flex;gap:6px;margin-left:auto}
+  .dots i{width:8px;height:8px;border-radius:50%;background:var(--line);cursor:pointer}
+  .dots i.on{background:var(--accent)}
+  audio{height:30px}
+</style></head>
+<body>
+  <div class="stage" id="stage">
+    <div class="brand">AGENT SCIENCE · AGENTIC CINEMA</div>
+
+    <div class="frame">
+      <div class="kicker"><span>00 · hook</span><span class="tc">0:00</span></div>
+      <div class="spacer"></div>
+      <div class="big">Your agent websearches.<br>You get one answer.</div>
+      <div class="line">You never see what was skipped.</div>
+      <div class="spacer"></div>
+    </div>
+
+    <div class="frame">
+      <div class="kicker"><span>01 · visibility</span><span class="tc">0:10</span></div>
+      <div class="head">Full visibility — angles searched, not just verified.</div>
+      <div class="on-cam">/visibility/ui — pane 1b · SHALLOW_ROUTE · imbalance</div>
+      <div class="spacer"></div>
+      <div class="vo">Every angle searched. <b>Not just verified.</b> Transparency is the product — not a debug panel.</div>
+    </div>
+
+    <div class="frame">
+      <div class="kicker"><span>02 · contrary</span><span class="tc">0:22</span></div>
+      <div class="head">When the field outruns the paper.</div>
+      <div class="on-cam">CONTRARY TO RESEARCH — named why, not a shrug.</div>
+      <div class="spacer"></div>
+      <div class="vo">When builders move faster than papers, we stamp <b>CONTRARY TO RESEARCH</b> — with a named reason.</div>
+    </div>
+
+    <div class="frame">
+      <div class="kicker"><span>03 · rule</span><span class="tc">0:32</span></div>
+      <div class="head">Cite the document, or print that you could not.</div>
+      <div class="on-cam">LOCATE → VERIFY → STAMP</div>
+      <div class="spacer"></div>
+      <div class="vo">Gemini proposes. Structural proof verifies. <b>Refuse with a named cause</b> — not permission.</div>
+    </div>
+
+    <div class="frame">
+      <div class="kicker"><span>04 · compound</span><span class="tc">1:08</span></div>
+      <div class="head">Shelf remembers. Parallel drops.</div>
+      <div class="on-cam">RUN A: 1 Parallel · RUN B: 0 Parallel · 1 corpus hit — sealed.</div>
+      <div class="spacer"></div>
+      <div class="vo">Ask once. The shelf compounds. <b>A=1, B=0</b> — discovery paid once.</div>
+    </div>
+
+    <div class="frame">
+      <div class="kicker"><span>05 · truths</span><span class="tc">1:18</span></div>
+      <div class="head">265+ claims. Ranked queries. Field signals.</div>
+      <div class="on-cam">/truths/ui — personal truth DB for builders</div>
+      <div class="spacer"></div>
+      <div class="vo">The truth layer for what agentic builders <b>believe and use</b>.</div>
+    </div>
+
+    <div class="frame">
+      <div class="kicker"><span>06 · close</span><span class="tc">1:32</span></div>
+      <div class="head">Agent Science.</div>
+      <div class="on-cam">agent-science-568004190078.us-central1.run.app</div>
+      <div class="spacer"></div>
+      <div class="big" style="font-size:38px">Ask once.<br>Shelf compounds.</div>
+      <div class="line">Link in description.</div>
+    </div>
+
+    <div class="bar"><i id="bar"></i></div>
+  </div>
+
+  <div class="ui">
+    <button id="prev">← prev</button>
+    <button id="next">next →</button>
+    <audio id="vo" controls src="voiceover.mp3"></audio>
+    <span id="count"></span>
+    <span class="dots" id="dots"></span>
+  </div>
+
+<script>
+  const frames=[...document.querySelectorAll('.frame')];
+  const dots=document.getElementById('dots');
+  let i=0;
+  frames.forEach((_,k)=>{const d=document.createElement('i');d.onclick=()=>go(k);dots.appendChild(d);});
+  function go(n){
+    i=Math.max(0,Math.min(frames.length-1,n));
+    frames.forEach((f,k)=>f.classList.toggle('on',k===i));
+    [...dots.children].forEach((d,k)=>d.classList.toggle('on',k===i));
+    document.getElementById('bar').style.width=((i)/(frames.length-1)*100)+'%';
+    document.getElementById('count').textContent=(i+1)+' / '+frames.length;
+  }
+  document.getElementById('next').onclick=()=>go(i+1);
+  document.getElementById('prev').onclick=()=>go(i-1);
+  addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key===' ')go(i+1);if(e.key==='ArrowLeft')go(i-1);});
+  const qf=new URLSearchParams(location.search).get('f');
+  go(qf!==null?parseInt(qf,10)||0:0);
+</script>
+</body></html>

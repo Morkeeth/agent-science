@@ -5,7 +5,7 @@ Copy-paste for flipbook scout or terminal recording. **No video file produced he
 ## Beat 1 · Ask (agentic question)
 
 ```bash
-cd ~/CODE/cleared   # or clone Morkeeth/agent-science
+cd agent-science   # or clone Morkeeth/agent-science
 python3 -m clearance.stack_cli visibility "ralph loop vs vibe coding for agentic engineering" --full --no-personal
 ```
 

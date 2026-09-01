@@ -8,7 +8,7 @@ status: TWO LINES BLOCKED ON OSCAR
 
 # Phase 0 · THE LADDER
 
-Source of the idea: vault `01 Projects/Hackathons/hack-ideation-2026-08-22.md` § II. CLEARED.
+Source of the idea: hackathon ideation notes (2026-08-22) § II. CLEARED.
 Harvested, not redrafted. Oscar already ruled the idea and the track.
 
 ## 1 · Day-two user named — and it must be a MARKET

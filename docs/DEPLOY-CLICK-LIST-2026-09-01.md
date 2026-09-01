@@ -5,7 +5,7 @@
 ## Pre-flight
 
 ```bash
-cd ~/CODE/cleared
+cd agent-science
 git checkout main && git pull
 bash scripts/full_gate.sh
 ```

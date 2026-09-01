@@ -3,7 +3,7 @@
 This is one arm of Oscar's experiment: does a single coordinator terminal spawning
 background subagents ship as much, per token, as a multi-terminal fleet? This file records
 ONLY the arm that ran tonight (background agents, one terminal). The fleet arm's numbers
-live in prior `~/CODE/fleet-ops/runs/SNAPSHOT-*.md`; the A/B verdict is completed in the
+live in prior `fleet-ops (internal)/runs/SNAPSHOT-*.md`; the A/B verdict is completed in the
 morning wrap-up email, not here — this is the measured input to it, not the conclusion.
 
 Grounded at the object 2026-08-25: every "shipped" line below is a real commit sha, and
@@ -12,7 +12,7 @@ Grounded at the object 2026-08-25: every "shipped" line below is a real commit s
 ## Arm: background subagents, one coordinator terminal
 
 [CLAIM] Five substance/outward lanes shipped and pushed in one night from one terminal, spawning background subagents per lane.
-[REPO] ~/CODE/cleared ~/CODE/zup ~/CODE/mountain-of-helicon ~/CODE/hack-fleet-ata
+[REPO] agent-science github.com/Morkeeth/zup github.com/Morkeeth/mountain-of-helicon github.com/Morkeeth/hack-fleet-ata
 
 | lane | repo | done-when proof | commit(s) |
 |---|---|---|---|
@@ -54,7 +54,7 @@ but got one in front of a stranger would win the A/B on the only axis that count
 ## THE A/B VERDICT — subagents-in-one-terminal vs the fleet
 
 The comparison arm is the fleet's OWN measured 3-day scoreboard, lifted from
-`~/CODE/fleet-ops/runs/SNAPSHOT-2026-08-13.md` (its honest self-report, not my relay).
+`fleet-ops (internal)/runs/SNAPSHOT-2026-08-13.md` (its honest self-report, not my relay).
 
 | axis | FLEET arm (3-day, measured) | SUBAGENTS arm (this session, ~10h) |
 |---|---|---|

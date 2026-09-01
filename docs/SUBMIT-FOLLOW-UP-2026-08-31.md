@@ -28,7 +28,7 @@
 ```bash
 open https://agent-science-568004190078.us-central1.run.app/
 open https://agent-science-568004190078.us-central1.run.app/popular/ui
-open ~/CODE/cleared/fixtures/shift-ai-training-vs-noncommercial.md
+open agent-science/fixtures/shift-ai-training-vs-noncommercial.md
 # Script: docs/VIDEO-SCRIPT-2026-08-29.md
 ```
 
@@ -74,9 +74,9 @@ Parallel key rotated on last `deploy.sh` (Secret Manager v7). **Vertex/Gemini:**
 ## Replay commands
 
 ```bash
-bash ~/CODE/cleared/scripts/long_run_goal.sh
-bash ~/CODE/cleared/scripts/new_user_trial.sh
-bash ~/CODE/cleared/scripts/verify_cold_clone.sh
+bash agent-science/scripts/long_run_goal.sh
+bash agent-science/scripts/new_user_trial.sh
+bash agent-science/scripts/verify_cold_clone.sh
 ```
 
 **Deadline:** 2026-09-09 14:00 PDT

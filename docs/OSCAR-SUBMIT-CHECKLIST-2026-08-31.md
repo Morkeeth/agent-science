@@ -9,8 +9,8 @@
 ## Before you record (30 min)
 
 - [x] **Falsification doc** — `docs/FALSIFICATION-PERIODCHECK-2026-08-31.md` (film refuse + E&O lead)
-- [x] `bash ~/CODE/cleared/scripts/new_user_trial.sh` → OK
-- [x] `bash ~/CODE/cleared/scripts/long_run_goal.sh` → 19/19
+- [x] `bash agent-science/scripts/new_user_trial.sh` → OK
+- [x] `bash agent-science/scripts/long_run_goal.sh` → 19/19
 - [ ] **Live 90s/90s** — PeriodCheck vs Agent Science in browser (Oscar eyes)
 
 ---
