@@ -35,6 +35,18 @@ def t_stack_fit_in_full_panel():
     assert data["stack_fit"].get("fit") in ("fits", "partial", "mismatch")
 
 
+def t_visibility_html_panel():
+    from cloud.service import _visibility_page, _visibility_panel_html, _visibility_panel
+    data = _visibility_panel("ralph loop agentic", full=True)
+    html = _visibility_panel_html(data)
+    assert "SHALLOW_ROUTE" in html
+    assert "angles" in html.lower() or "dictionary_exact" in html
+    assert "IMBALANCE" in html
+    page = _visibility_page("ralph loop agentic", full=True)
+    assert "<pre>" not in page
+    assert "Paste a script" in page
+
+
 def t_angles_include_tiers():
     from clearance import visibility
     data = visibility.panel("orphan works directive", full=False, personal=False)

@@ -210,6 +210,23 @@ def test_visibility_ui_renders_transparency():
     assert "Transparency" in page
     assert "ralph loop agentic" in page
     assert "Websearch visibility" in page
+    assert 'class="badge contrary"' in page or 'class="badge sourced"' in page
+    assert "CONTRARY_TO_RESEARCH" in page or "SOURCED" in page
+    assert "SHALLOW_ROUTE" in page
+    assert "angles" in page.lower() or "dictionary_exact" in page
+    assert "IMBALANCE" in page
+    assert "Paste a script" in page
+    assert "/truths/ui" in page
+    assert "agent-science-568004190078.us-central1.run.app" in page
+    assert "<pre>" not in page
+
+
+def test_visibility_ui_sourced_badge():
+    """Directive lookup renders SOURCED badge."""
+    from cloud.service import _visibility_page
+    page = _visibility_page("Directive 2012/28/EU", full=True)
+    assert 'class="badge sourced"' in page
+    assert "SOURCED" in page
 
 
 def test_visibility_json_panel_shape():

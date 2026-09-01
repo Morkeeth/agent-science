@@ -442,36 +442,225 @@ def _visibility_panel(query: str, *, live: bool = False, full: bool = True) -> d
     return visibility.panel(query, live=live, full=full, personal=False)
 
 
+_HOSTED_URL = os.environ.get(
+    "AGENT_SCIENCE_URL",
+    "https://agent-science-568004190078.us-central1.run.app",
+).rstrip("/")
+
+
+def _verdict_badge_class(label: str) -> str:
+    lab = (label or "").upper()
+    if lab == "SOURCED":
+        return "sourced"
+    if lab == "CONTRARY_TO_RESEARCH":
+        return "contrary"
+    if lab in ("UNSOURCED", "REFUTED"):
+        return "unsourced"
+    if lab in ("UNKNOWN", "NOT_CLEARED"):
+        return "unknown"
+    return "unknown"
+
+
+def _visibility_panel_html(data: dict) -> str:
+    """Structured judge panel — verdict badge + transparency above the fold."""
+    p = data.get("primary") or {}
+    label = p.get("label") or p.get("result_label") or "UNKNOWN"
+    badge_cls = _verdict_badge_class(label)
+    trans = data.get("transparency") or {}
+    shallow = trans.get("shallow_route")
+    shallow_txt = "yes" if shallow else "no"
+    shallow_cls = "warn" if shallow else "ok"
+
+    # Primary evidence block
+    primary_bits = []
+    if p.get("quoted_terms"):
+        primary_bits.append(
+            f'<blockquote class="span">{_esc(p["quoted_terms"])}</blockquote>'
+        )
+    if p.get("citation_url"):
+        primary_bits.append(
+            f'<p class="cite"><a href="{_esc(p["citation_url"])}" '
+            f'rel="noopener">{_esc(p["citation_url"])}</a></p>'
+        )
+    if p.get("why"):
+        primary_bits.append(f'<p class="why">{_esc(p["why"])}</p>')
+    if p.get("cause"):
+        primary_bits.append(
+            f'<p class="cause mono">cause: {_esc(p["cause"])}</p>'
+        )
+    tier = p.get("cost_tier") or "—"
+    parallel = p.get("parallel_api_calls", 0)
+    primary_bits.append(
+        f'<p class="meta mono">tier={_esc(tier)} · parallel={_esc(parallel)}</p>'
+    )
+
+    # Angles table
+    angle_rows = []
+    for a in trans.get("angles_searched") or []:
+        hit = a.get("hit") or "—"
+        reason = a.get("reason") or ""
+        angle_rows.append(
+            f"<tr><td>{_esc(a.get('variant', '')[:50])}</td>"
+            f"<td>{_esc(a.get('route'))}</td>"
+            f"<td>{_esc(a.get('tier'))}</td>"
+            f"<td>{_esc(hit)}</td>"
+            f"<td>{_esc(reason)}</td></tr>"
+        )
+    angles_table = (
+        "<table class=\"angles\"><tr>"
+        "<th>Variant</th><th>Route</th><th>Tier</th><th>Hit</th><th>Reason</th></tr>"
+        + ("".join(angle_rows) or "<tr><td colspan=\"5\">No angles logged.</td></tr>")
+        + "</table>"
+    )
+
+    # Imbalance
+    imb = trans.get("imbalance")
+    if imb:
+        imb_html = (
+            f'<p class="imbalance warn">'
+            f'<strong>IMBALANCE:</strong> {_esc(imb.get("dominant"))} dominates '
+            f'({_esc(imb.get("share"))}) — {_esc(imb.get("note"))}</p>'
+        )
+    else:
+        imb_html = '<p class="imbalance ok">IMBALANCE: none — source mix balanced</p>'
+
+    # Stack-fit (compact)
+    stack_html = ""
+    sf = data.get("stack_fit")
+    if sf:
+        stack_html = (
+            f'<section class="card"><h2>Stack-fit</h2>'
+            f'<p class="mono">fit={_esc(sf.get("fit"))} · '
+            f'stack={_esc(",".join((sf.get("stack") or {}).get("stack") or []))}</p>'
+            f'<p class="meta">{_esc(sf.get("improvement", ""))}</p></section>'
+        )
+
+    # Field signals (top 3)
+    field = data.get("field") or {}
+    field_rows = []
+    for g in (field.get("github") or [])[:3]:
+        field_rows.append(
+            f"<li>{_esc(g.get('stars', 0))} ★ {_esc(g.get('repo'))} "
+            f"— {_esc(g.get('why', ''))}</li>"
+        )
+    field_html = ""
+    if field_rows:
+        field_html = (
+            '<section class="card"><h2>Field adoption</h2>'
+            f"<ul>{''.join(field_rows)}</ul></section>"
+        )
+
+    return f"""
+<section class="verdict-card">
+  <p class="query-label mono">Query · {_esc(data.get('query'))}</p>
+  <p class="badge {badge_cls}">{_esc(label)}</p>
+  <div class="primary-body">{''.join(primary_bits)}</div>
+</section>
+
+<section class="transparency-card">
+  <h2>Transparency — what was searched</h2>
+  <div class="shallow-strip">
+    <span class="shallow-label mono">SHALLOW_ROUTE</span>
+    <span class="shallow-val {shallow_cls}">{shallow_txt}</span>
+    <span class="shallow-note">{'dictionary/cheap only' if shallow else 'field, practices, or peers present'}</span>
+  </div>
+  {angles_table}
+  {imb_html}
+</section>
+
+{stack_html}
+{field_html}
+"""
+
+
 def _visibility_page(query: str, *, live: bool = False, full: bool = True) -> str:
     """Full websearch visibility — truth layer HTML for judges."""
-    from clearance import visibility
     q = query.strip() or "ralph loop agentic"
     data = _visibility_panel(q, live=live, full=full)
-    body = visibility.format_panel(data)
+    panel = _visibility_panel_html(data)
     esc_q = _esc(q)
+    hosted_vis = f"{_HOSTED_URL}/visibility/ui?q={esc_q.replace(' ', '+')}"
     return f"""<!DOCTYPE html>
 <html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Visibility · Agent Science</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Newsreader:opsz,wght@6..72,400;6..72,600&display=swap" rel="stylesheet">
 <style>
-body{{font-family:"IBM Plex Mono",monospace;background:#e8e6e1;color:#16181d;margin:0;padding:1.5rem;font-size:.82rem;line-height:1.45}}
-.wrap{{max-width:52rem;margin:0 auto}}
-h1{{font-family:Georgia,serif;font-size:1.5rem;margin:0 0 .5rem}}
-p.meta{{color:#61656e;font-size:.9rem;font-family:Georgia,serif}}
+:root{{
+  --paper:#e8e6e1;--card:#f3f1ed;--ink:#16181d;--mute:#61656e;--rule:#c9c5bd;
+  --sourced:#1c5637;--refused:#8f3a24;--unknown:#6b5a1f;--contrary:#7a4a12;--accent:#16181d;
+}}
+*{{box-sizing:border-box}}
+body{{margin:0;background:var(--paper);color:var(--ink);
+  font:17px/1.5 Newsreader,Georgia,serif;-webkit-font-smoothing:antialiased}}
+.wrap{{max-width:56rem;margin:0 auto;padding:2rem 1.25rem 4rem}}
+.mono{{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace}}
+h1{{font-size:1.75rem;line-height:1.1;margin:0 0 .4rem;letter-spacing:-.015em}}
+h2{{font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--mute);
+  font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace;font-weight:600;
+  margin:0 0 .8rem;padding-bottom:.4rem;border-bottom:1px solid var(--rule)}}
+p.hook{{font-style:italic;color:var(--mute);margin:0 0 1.2rem;max-width:44rem;font-size:1.05rem}}
+p.meta{{color:var(--mute);font-size:.85rem;margin:.4rem 0 0}}
 a{{color:inherit}}
-form{{margin:1rem 0;display:flex;gap:.5rem;flex-wrap:wrap}}
-input[type=text]{{flex:1;min-width:12rem;padding:.5rem;border:1px solid #c9c5bd;font:inherit}}
-button{{font:inherit;padding:.5rem 1rem;background:#16181d;color:#e8e6e1;border:0;cursor:pointer}}
-pre{{white-space:pre-wrap;word-break:break-word;background:#fff;border:1px solid #c9c5bd;padding:1rem;margin:1rem 0}}
+.nav{{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace;font-size:.78rem;margin:0 0 1.2rem}}
+form.ask{{display:flex;gap:.5rem;margin:0 0 1.5rem;flex-wrap:wrap}}
+form.ask input{{flex:1;min-width:12rem;padding:.62rem .75rem;border:1px solid var(--rule);
+  background:#fff;font:inherit;font-size:.95rem}}
+form.ask button{{padding:.62rem 1.1rem;background:var(--ink);color:var(--paper);
+  border:0;cursor:pointer;font:inherit;font-size:.9rem}}
+.verdict-card{{background:var(--card);border:1px solid var(--rule);padding:1.2rem 1.3rem;margin:0 0 1.2rem}}
+.query-label{{font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);margin:0 0 .6rem}}
+.badge{{display:inline-block;font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+  font-size:1.1rem;font-weight:600;letter-spacing:.12em;padding:.35rem .7rem;
+  border:2px solid currentColor;margin:0 0 1rem}}
+.badge.sourced{{color:var(--sourced);border-color:var(--sourced)}}
+.badge.unsourced{{color:var(--refused);border-color:var(--refused)}}
+.badge.contrary{{color:var(--contrary);border-color:var(--contrary)}}
+.badge.unknown{{color:var(--unknown);border-color:var(--unknown)}}
+.span{{margin:.5rem 0;padding:.6rem .8rem;border-left:3px solid var(--sourced);
+  background:#fff;font-size:.95rem;color:#2c3038}}
+.cite{{font-size:.82rem;margin:.4rem 0}}
+.cite a{{color:var(--mute);word-break:break-all}}
+.why{{margin:.6rem 0 0;font-size:.92rem;color:#2c3038}}
+.cause{{font-size:.72rem;color:var(--refused);margin:.3rem 0 0}}
+.transparency-card,.card{{background:#fff;border:1px solid var(--rule);padding:1.1rem 1.2rem;margin:0 0 1.2rem}}
+.shallow-strip{{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem 1rem;
+  padding:.6rem .8rem;background:var(--card);border:1px solid var(--rule);margin:0 0 1rem}}
+.shallow-label{{font-size:.68rem;letter-spacing:.1em;color:var(--mute)}}
+.shallow-val{{font-weight:600;font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace}}
+.shallow-val.ok{{color:var(--sourced)}} .shallow-val.warn{{color:var(--unknown)}}
+.shallow-note{{font-size:.82rem;color:var(--mute)}}
+table.angles{{width:100%;border-collapse:collapse;font-size:.8rem;
+  font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace}}
+table.angles th{{text-align:left;font-size:.6rem;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--mute);font-weight:600;padding:.3rem .5rem .3rem 0;border-bottom:1px solid var(--rule)}}
+table.angles td{{padding:.35rem .5rem .35rem 0;border-bottom:1px solid var(--rule);
+  vertical-align:top;word-break:break-word}}
+.imbalance{{font-size:.85rem;margin:.8rem 0 0;padding:.5rem .7rem}}
+.imbalance.ok{{background:var(--card);color:var(--mute)}}
+.imbalance.warn{{background:#faf3e8;border-left:3px solid var(--unknown);color:#4a4438}}
+.card ul{{margin:.4rem 0 0;padding-left:1.2rem;font-size:.9rem}}
+.footer{{margin-top:2rem;padding-top:1rem;border-top:1px solid var(--rule);
+  font-size:.78rem;color:var(--mute);font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace}}
+.footer a{{text-decoration:none;border-bottom:1px solid var(--rule)}}
+@media(max-width:620px){{.shallow-strip{{flex-direction:column;align-items:flex-start}}}}
 </style></head><body><div class="wrap">
-<p><a href="/">← desk</a> · <a href="/truths/ui">truths</a> · <a href="/registry">registry</a></p>
+<p class="nav"><a href="/">← desk</a> · <a href="/truths/ui">truths dashboard</a> · <a href="/registry">registry</a> · <a href="/visibility?q={esc_q}">JSON</a></p>
 <h1>Websearch visibility</h1>
-<p class="meta">Truth layer for what builders believe and use — not one answer. Pane 1b shows what was searched.</p>
-<form method="get" action="/visibility/ui">
+<p class="hook">Paste a script. Get every checkable claim sourced verbatim — or refused with cause.</p>
+<p class="meta">Agentic transparency — what was searched, not just what was returned. Clearance/E&amp;O is one vertical on this layer.</p>
+<form class="ask" method="get" action="/visibility/ui">
   <input type="text" name="q" value="{esc_q}" placeholder="e.g. ralph loop agentic" required>
   <button type="submit">Run full visibility</button>
 </form>
-<pre>{_esc(body)}</pre>
+{panel}
+<p class="footer">
+  Hosted: <a href="{_esc(hosted_vis)}">{_esc(hosted_vis)}</a> ·
+  <a href="/truths/ui">Truths dashboard</a> ·
+  JSON API: <a href="/visibility?q={esc_q}">/visibility</a>
+</p>
 </div></body></html>"""
 
 
