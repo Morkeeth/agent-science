@@ -54,7 +54,8 @@ def test_run_history_records_prior_for_compound_delta():
 def test_desk_page_links_registry():
     page = _desk_page()
     assert "/registry" in page
-    assert "websearch companion" in page
+    assert "truth companion" in page.lower()
+    assert "websearch visibility" in page.lower()
 
 
 if __name__ == "__main__":

@@ -25,13 +25,23 @@ echo "4. Partner runtime wiring..."
 python3 tests/test_partner_runtime.py 2>&1 | tail -1
 
 echo
-echo "5. SUBMISSION-PACK doc gate..."
+echo "5. Registry surface..."
+python3 tests/test_registry_surface.py 2>&1 | tail -1
+
+echo
+echo "6. SUBMISSION-PACK doc gate..."
 python3 scripts/bench_check_docs.py 2>&1 | tail -1
 
 echo
-echo "6. Eval gate (baseline + ablation)..."
+echo "7. Eval gate (baseline + ablation + holdout + symmetry)..."
 python3 scripts/eval_refusal_baseline.py 2>&1 | tail -3
 python3 scripts/eval_refusal_ablation.py 2>&1 | tail -2
+python3 scripts/eval_holdout_frozen.py 2>&1 | tail -2
+python3 scripts/eval_scorer_symmetry.py 2>&1 | tail -2
+
+echo
+echo "8. Offline compound receipt..."
+python3 scripts/compound_exhibit_receipt.py 2>&1 | tail -5
 
 echo
 echo "=== cold-clone verify OK ==="

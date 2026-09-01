@@ -1,0 +1,8 @@
+{
+  "frozen_at": "2026-08-22T21:30:00Z",
+  "labelled_by": "cursor",
+  "label_fields_sha256": "34f809a92e3a94320dfdf23174eba8ebf902960b7ec3729cda0663be7cf43bdb",
+  "label_fields": ["id", "expected", "claim", "must_contain", "document", "accepted_passage"],
+  "n_items": 6,
+  "note": "Hash covers scoring labels only. Metadata (closed_at, closed_by, why) may change after freeze; label fields may not."
+}

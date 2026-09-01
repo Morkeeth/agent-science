@@ -108,8 +108,10 @@ Re-derives all 9 suite counts against `docs/SUBMISSION-PACK-2026-08-29.md` — e
 ## Checklist status (PRIOR LOSS gate)
 
 - [x] Alternative arm named and run
-- [x] Ablation with measured delta (delta=0; RC5 both false-GREEN)
+- [x] Ablation with measured delta (delta=+1 at n=6; RC5 discordant; McNemar p=1.0)
 - [x] External anchor — live rightsstatements.org (`scripts/eval_external_anchor.py`)
+- [x] Holdout frozen — `scripts/eval_holdout_frozen.py` + `HOLDOUT-MANIFEST.json`
+- [x] Scorer symmetrical — `scripts/eval_scorer_symmetry.py`
 - [x] Offline path with no API key
 - [x] Wilson CI + McNemar (n=6)
-- [x] Honesty carries worst number (tie + RC5 false-GREEN both arms)
+- [x] Honesty carries worst number (baseline 5/6; RC5 false-SUPPORTED in baseline arm)

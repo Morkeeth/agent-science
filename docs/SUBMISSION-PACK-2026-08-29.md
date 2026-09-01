@@ -11,6 +11,8 @@
 ```bash
 git clone https://github.com/Morkeeth/agent-science.git && cd agent-science
 bash scripts/verify_cold_clone.sh
+python3 tests/test_registry_surface.py -q
+python3 scripts/compound_exhibit_receipt.py | tail -8
 python3 ask_registry.py "agentlint" | head -5
 ```
 
@@ -48,7 +50,17 @@ python3 ask_registry.py "agentlint" | head -5
 
 **Compound exhibit (live hosted, 2026-08-31 PM):** `long_run_goal.sh` · A=**1**→B=**0** Parallel · B corpus hits=**1** — `docs/LONG-RUN-RECEIPT-2026-08-31.md` · sealed `docs/SEALED-PREDICTION-2026-08-31.md`. Prior: compound-mini A=**2**→B=**1**. Orphan-works full script: run B **503** — do not claim on video.
 
-**Eval gate:** `docs/QWEN-EVAL-GATE-2026-08-30.md` — baseline vs shipping **5/6 = 0.833** tie; RC5 false-GREEN both arms.
+**Eval gate (re-run 2026-09-01 at object):**
+
+| Gate | Command | Result |
+|------|---------|--------|
+| Baseline vs shipping | `python3 scripts/eval_refusal_baseline.py` | baseline **5/6**, shipping **6/6**, delta **+1**, McNemar p=1.0 |
+| Ablation | `python3 scripts/eval_refusal_ablation.py` | ablation **5/6**, shipping **6/6**, delta **+1** |
+| Holdout frozen | `python3 scripts/eval_holdout_frozen.py` | label hash matches manifest |
+| Scorer symmetry | `python3 scripts/eval_scorer_symmetry.py` | both arms scored from delivered JSON only |
+| External anchor | `python3 scripts/eval_external_anchor.py` | live rightsstatements.org EA1/EA2 |
+
+Full record: `docs/QWEN-EVAL-GATE-2026-08-30.md` · `docs/RECEIPT-night-wave-submit-2026-09-01.md`
 
 ---
 
@@ -129,7 +141,7 @@ market.
 | Repo | `https://github.com/Morkeeth/agent-science` @ `e6793ab` |
 | Entry point | `python3 agent_science.py <script.txt>` — Gemini + Parallel **live by default** |
 | Hosted | https://agent-science-568004190078.us-central1.run.app — `POST /clear` · `GET /corpus` |
-| Controls | registry **13/13** · cross-subject reuse **2/2** · compound exhibit B **1** Parallel vs A **2** (offline) |
+| Controls | registry surface **16/16** · cross-subject reuse **2/2** · compound exhibit B **1** Parallel vs A **2** (offline) |
 | License | `LICENSE` (MIT) |
 | Gap report | `fixtures/gap-report-600.md` — **561 of 600 (94%)** not sellable as-is |
 | Second question | `fixtures/shift-ai-training-vs-noncommercial.md` — 247 of 600 flip |

@@ -282,10 +282,10 @@ submission craft, supported by a real tendency, **not** as the explanation of th
 - [x] **Alternative arm named and run** — `python3 scripts/eval_refusal_baseline.py` · **re-run 2026-08-31: baseline 5/6 = 0.833, shipping 6/6 = 1.000, delta +1, McNemar p=1.0000 (b=0 c=1) — a real delta where 08-30 had a tie, and NOT significant at n=6; the CIs overlap [0.436,0.970] vs [0.610,1.000]**
 - [x] **Ablation** — `python3 scripts/eval_refusal_ablation.py` · **re-run 2026-08-31: ablation 5/6, shipping 6/6, delta +1, McNemar p=1.0000.** (2026-08-30 reading, before the semantic guard: delta=0, RC5 false-GREEN in both arms.)
 - [x] **External anchor** — `python3 scripts/eval_external_anchor.py` · live rightsstatements.org (EA1/EA2)
-- [ ] **Holdout frozen before the first tuning pass.**
+- [x] **Holdout frozen before the first tuning pass.** — `python3 scripts/eval_holdout_frozen.py` · manifest `fixtures/refusal-correctness/HOLDOUT-MANIFEST.json` · **re-run 2026-09-01: label hash matches; RC5 post-freeze metadata only**
 - [x] **Baseline steelmanned** — raw rows printed by eval scripts; RC5 is now the single discordant item (baseline GREEN, shipping UNKNOWN)
 - [x] **Statistic matched to n** — Wilson 95% CI + McNemar in baseline/ablation scripts
-- [ ] **Scorer symmetrical** — nothing only our system can emit; judge from delivered output for every arm.
+- [x] **Scorer symmetrical** — `python3 scripts/eval_scorer_symmetry.py` · both arms emit `{status, passage, cause}`; external scorer only · **re-run 2026-09-01: baseline 5/6, shipping 6/6, RC5 delta visible**
 - [ ] **Cost from billing**, with the price card's date stated.
 - [x] **Offline path with no API key.**
 - [x] **Honesty & limitations** section carrying our worst number — README §Honesty & limitations; PITCH first screen
@@ -298,7 +298,38 @@ Full record: `~/CODE/fleet-ops/retros/QWEN-LOSS-RETRO-2026-08-30.md` (corrected)
 
 ---
 
-## 🎯 NOW — Night wave: WOW websearch transparency (build lane)
+## 🎯 NOW — Night wave: submit path (build lane)
+
+**Slice:** SUBMISSION-PACK truth refresh + Qwen holdout/scorer gates + stranger one-command block.  
+**Not this slice:** deploy, video, Devpost, public repo flip.
+
+### Build
+
+- [x] Re-measure SUBMISSION-PACK counts; fix stale Devpost **13/13** → **16/16** — `python3 scripts/bench_check_docs.py`
+- [x] Ship `eval_holdout_frozen.py` + `HOLDOUT-MANIFEST.json` — `python3 scripts/eval_holdout_frozen.py`
+- [x] Ship `eval_scorer_symmetry.py` + `test_eval_holdout_gate.py` — `python3 tests/test_eval_holdout_gate.py` → 2/2
+- [x] Extend `verify_cold_clone.sh` with registry_surface + compound receipt — `bash scripts/verify_cold_clone.sh`
+- [x] Live compound: honest BLOCKED receipt if keys absent — `docs/RECEIPT-night-wave-submit-2026-09-01.md` §4
+- [x] Receipt `docs/RECEIPT-night-wave-submit-2026-09-01.md`
+
+### Verify (one command each)
+
+```bash
+git pull && python3 scripts/seed_document_cache.py && python3 tests/test_watch_it_go_red.py 2>&1 | tail -1
+python3 scripts/bench_check_docs.py
+python3 scripts/eval_holdout_frozen.py
+python3 scripts/eval_scorer_symmetry.py
+bash scripts/verify_cold_clone.sh
+python3 tests/test_eval_holdout_gate.py
+```
+
+### Receipt
+
+- `docs/RECEIPT-night-wave-submit-2026-09-01.md`
+
+---
+
+## 🎯 NOW (prior) — WOW websearch transparency (build lane)
 
 **Slice:** S1–S8 truth layer night — transparency panes, CONTRARY stamp, stack-fit, community notes, truths dashboard.  
 **Oscar film:** `python3 -m clearance.stack_cli visibility "ralph loop agentic" --full` → pane 1b + CONTRARY stamp.
@@ -386,6 +417,7 @@ bash scripts/verify_cold_clone.sh                                               
 
 | When | What | Command | Outcome |
 |------|------|---------|---------|
+| 2026-09-01 night | Submit path: holdout + scorer gates + pack refresh | `bash scripts/verify_cold_clone.sh` · `eval_holdout_frozen.py` · `eval_scorer_symmetry.py` | 127/127 pack · holdout PASS · scorer symmetry 5/6 vs 6/6 · live compound BLOCKED (no keys) |
 | 2026-09-01 hammer | Hosted visibility + demo | `./deploy.sh` · `demo_truth_layer.sh` | `/visibility/ui` live · 127/127 gate |
 | 2026-09-01 overnight | Deploy + pitch pack | `./deploy.sh` | rev 00018 · PITCH-TOMORROW |
 | 2026-08-31 night | Truth layer night S1–S8 | `bash scripts/full_gate.sh` | **FULL GATE OK** · transparency · CONTRARY · stack-fit · notes · receipt |
