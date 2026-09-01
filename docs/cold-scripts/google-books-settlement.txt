@@ -1,0 +1,9 @@
+# Cold script 3 · Google Books settlement (news primary · judge rejection)
+
+Source: Ars Technica reporting federal judge rejection (2011) — used as documentary narration about settlement collapse.
+URL: https://arstechnica.com/tech-policy/2011/03/judge-rejects-google-book-monopoly/
+
+The Google Books settlement collapsed in 2011 when a federal judge rejected it.
+Google had proposed a deal with authors and publishers to digitize millions of books.
+The judge ruled the agreement would give Google too much power over orphan works.
+Authors argued the settlement went too far in granting Google exclusive rights.

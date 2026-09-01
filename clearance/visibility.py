@@ -470,3 +470,138 @@ def format_panel(data: dict) -> str:
         "  Full rundown: docs/WEBSEARCH-FULL-RUNDOWN.md",
     ]
     return "\n".join(lines) + "\n"
+
+
+def _esc(s: object) -> str:
+    import html
+    return html.escape("" if s is None else str(s))
+
+
+def _badge(label: str) -> str:
+    lab = (label or "UNKNOWN").upper()
+    cls = "badge"
+    if "CONTRARY" in lab:
+        cls += " contrary"
+    elif lab in ("SOURCED", "CLEARED", "GREEN"):
+        cls += " sourced"
+    elif lab in ("UNSOURCED", "REFUSED", "RED"):
+        cls += " refused"
+    return f'<span class="{cls}">{_esc(lab)}</span>'
+
+
+def render_html(data: dict, *, query: str = "") -> str:
+    """Judge-facing HTML visibility panel — structured, not monospace dump."""
+    q = query or data.get("query") or ""
+    p = data.get("primary") or {}
+    trans = data.get("transparency") or {}
+    label = p.get("label") or p.get("result_label") or "UNKNOWN"
+    shallow = trans.get("shallow_route")
+    imb = trans.get("imbalance")
+
+    angle_rows = ""
+    for a in trans.get("angles_searched") or []:
+        hit = f' <span class="hit">{_esc(a.get("hit"))}</span>' if a.get("hit") else ""
+        angle_rows += (
+            f'<tr><td>{_esc(a.get("variant", "")[:50])}</td>'
+            f'<td>{_esc(a.get("route"))}</td><td>{_esc(a.get("tier"))}</td>'
+            f'<td>{hit}</td></tr>'
+        )
+
+    gh_rows = ""
+    for g in (data.get("field") or {}).get("github") or []:
+        gh_rows += (
+            f'<tr><td>{g.get("stars", 0):,}★</td>'
+            f'<td><a href="{_esc(g.get("url"))}">{_esc(g.get("repo"))}</a></td>'
+            f'<td>{_esc(g.get("why", ""))}</td></tr>'
+        )
+
+    span = (p.get("quoted_terms") or p.get("span") or "")
+    if span:
+        span = str(span).replace("\n", " ")[:280]
+
+    imb_html = ""
+    if imb:
+        imb_html = (
+            f'<p class="warn">IMBALANCE: <strong>{_esc(imb.get("dominant"))}</strong> '
+            f'({imb.get("share")}) — {_esc(imb.get("note"))}</p>'
+        )
+    elif not shallow:
+        imb_html = '<p class="ok">Source mix balanced — field, peers, and dictionary all represented.</p>'
+
+    shallow_html = (
+        '<p class="warn">SHALLOW ROUTE — dictionary/cheap only; no field depth.</p>'
+        if shallow
+        else '<p class="ok">Full route — field signals, peers, and dictionary searched.</p>'
+    )
+
+    return f"""<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Visibility · Agent Science</title>
+<style>
+:root{{--bg:#e8e6e1;--ink:#16181d;--muted:#61656e;--rule:#c9c5bd;--accent:#B42318;
+  --sourced:#1a6b3c;--refused:#8b1a1a;--contrary:#9a3412}}
+*{{box-sizing:border-box}}
+body{{font-family:Georgia,"Times New Roman",serif;background:var(--bg);color:var(--ink);
+  margin:0;padding:1.25rem 1.5rem;line-height:1.5;font-size:1rem}}
+.wrap{{max-width:56rem;margin:0 auto}}
+nav{{font-family:ui-monospace,monospace;font-size:.8rem;margin-bottom:1rem}}
+nav a{{color:inherit;margin-right:.75rem}}
+.lead{{font-size:1.05rem;color:var(--muted);margin:.5rem 0 1.25rem;max-width:42rem}}
+form{{display:flex;gap:.5rem;margin:1rem 0 1.5rem;flex-wrap:wrap}}
+input[type=text]{{flex:1;min-width:14rem;padding:.55rem .65rem;border:1px solid var(--rule);font:inherit}}
+button{{font:inherit;padding:.55rem 1rem;background:var(--ink);color:var(--bg);border:0;cursor:pointer}}
+.panel{{background:#fff;border:1px solid var(--rule);padding:1rem 1.15rem;margin:0 0 1rem}}
+.panel h2{{font-size:1rem;margin:0 0 .65rem;text-transform:uppercase;letter-spacing:.06em;font-weight:600}}
+.badge{{display:inline-block;font-family:ui-monospace,monospace;font-size:.75rem;font-weight:600;
+  padding:.2rem .55rem;border:1px solid var(--rule);margin-bottom:.5rem}}
+.badge.sourced{{border-color:var(--sourced);color:var(--sourced)}}
+.badge.refused{{border-color:var(--refused);color:var(--refused)}}
+.badge.contrary{{border-color:var(--contrary);color:var(--contrary)}}
+.meta{{font-family:ui-monospace,monospace;font-size:.78rem;color:var(--muted)}}
+.span{{border-left:3px solid var(--accent);padding-left:.75rem;margin:.75rem 0;font-style:italic}}
+table{{width:100%;border-collapse:collapse;font-size:.85rem;font-family:ui-monospace,monospace}}
+th,td{{border-bottom:1px solid var(--rule);padding:.35rem .4rem;text-align:left;vertical-align:top}}
+th{{color:var(--muted);font-weight:500}}
+.hit{{color:var(--contrary);font-weight:600}}
+.warn{{color:var(--contrary);font-size:.9rem}}
+.ok{{color:var(--sourced);font-size:.9rem}}
+.track{{background:var(--ink);color:var(--bg);padding:.85rem 1rem;margin:0 0 1.25rem;font-size:.95rem}}
+.track strong{{font-weight:600}}
+</style></head><body><div class="wrap">
+<nav><a href="/">desk</a><a href="/front">clearance</a><a href="/truths/ui">truths</a><a href="/registry">registry</a></nav>
+
+<div class="track"><strong>Paste a script.</strong> Every checkable claim returns a verbatim quote and source URL — or <strong>refused with cause</strong>. E&amp;O and clearance are one vertical on the truth layer.</div>
+
+<h1>Websearch visibility</h1>
+<p class="lead">Truth layer for what agentic builders believe and use. Not one answer — every angle searched, field signals, and a primary verdict.</p>
+
+<form method="get" action="/visibility/ui">
+  <input type="text" name="q" value="{_esc(q)}" placeholder="e.g. ralph loop agentic" required>
+  <button type="submit">Run full visibility</button>
+</form>
+
+<div class="panel">
+  <h2>Primary verdict</h2>
+  {_badge(label)}
+  <p class="meta">tier={_esc(p.get('cost_tier'))} · parallel={p.get('parallel_api_calls', 0)}</p>
+  {f'<p class="meta"><a href="{_esc(p.get("citation_url"))}">{_esc(p.get("citation_url"))}</a></p>' if p.get('citation_url') else ''}
+  {f'<div class="span">{_esc(span)}</div>' if span else ''}
+  {f'<p class="meta">cause: {_esc(p.get("cause"))}</p>' if p.get('cause') else ''}
+</div>
+
+<div class="panel">
+  <h2>Transparency · what was searched</h2>
+  {shallow_html}
+  {imb_html}
+  <table><tr><th>variant</th><th>route</th><th>tier</th><th>hit</th></tr>{angle_rows}</table>
+</div>
+
+<div class="panel">
+  <h2>Field adoption · GitHub ★</h2>
+  <p class="meta">stars = adoption signal, not a verdict</p>
+  <table><tr><th>★</th><th>repo</th><th>why</th></tr>{gh_rows or '<tr><td colspan="3">no match</td></tr>'}</table>
+</div>
+
+<p class="meta">JSON: <a href="/visibility?q={_esc(q)}">/visibility</a> · sealed compound A=1→B=0 · <a href="/partners">partners</a></p>
+</div></body></html>"""

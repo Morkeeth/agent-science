@@ -28,6 +28,17 @@ def t_transparency_formatted():
     assert "angles" in text.lower() or "variant=" in text
 
 
+def t_visibility_html_for_judges():
+    from clearance import visibility
+    data = visibility.panel("ralph loop agentic", full=True, personal=False)
+    html = visibility.render_html(data, query="ralph loop agentic")
+    assert "Primary verdict" in html
+    assert "Transparency" in html
+    assert "CONTRARY" in html or "SOURCED" in html or "REFUSED" in html.upper()
+    assert "<pre>" not in html
+    assert "Paste a script" in html
+
+
 def t_stack_fit_in_full_panel():
     from clearance import visibility
     data = visibility.panel("science_lookup MCP cursor", full=True, personal=False)

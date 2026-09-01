@@ -447,32 +447,7 @@ def _visibility_page(query: str, *, live: bool = False, full: bool = True) -> st
     from clearance import visibility
     q = query.strip() or "ralph loop agentic"
     data = _visibility_panel(q, live=live, full=full)
-    body = visibility.format_panel(data)
-    esc_q = _esc(q)
-    return f"""<!DOCTYPE html>
-<html lang="en"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Visibility · Agent Science</title>
-<style>
-body{{font-family:"IBM Plex Mono",monospace;background:#e8e6e1;color:#16181d;margin:0;padding:1.5rem;font-size:.82rem;line-height:1.45}}
-.wrap{{max-width:52rem;margin:0 auto}}
-h1{{font-family:Georgia,serif;font-size:1.5rem;margin:0 0 .5rem}}
-p.meta{{color:#61656e;font-size:.9rem;font-family:Georgia,serif}}
-a{{color:inherit}}
-form{{margin:1rem 0;display:flex;gap:.5rem;flex-wrap:wrap}}
-input[type=text]{{flex:1;min-width:12rem;padding:.5rem;border:1px solid #c9c5bd;font:inherit}}
-button{{font:inherit;padding:.5rem 1rem;background:#16181d;color:#e8e6e1;border:0;cursor:pointer}}
-pre{{white-space:pre-wrap;word-break:break-word;background:#fff;border:1px solid #c9c5bd;padding:1rem;margin:1rem 0}}
-</style></head><body><div class="wrap">
-<p><a href="/">← desk</a> · <a href="/truths/ui">truths</a> · <a href="/registry">registry</a></p>
-<h1>Websearch visibility</h1>
-<p class="meta">Truth layer for what builders believe and use — not one answer. Pane 1b shows what was searched.</p>
-<form method="get" action="/visibility/ui">
-  <input type="text" name="q" value="{esc_q}" placeholder="e.g. ralph loop agentic" required>
-  <button type="submit">Run full visibility</button>
-</form>
-<pre>{_esc(body)}</pre>
-</div></body></html>"""
+    return visibility.render_html(data, query=q)
 
 
 def _run_clearance(script: str, subject: str, model: str) -> dict:
