@@ -10,8 +10,8 @@
 > **You get:** every checkable claim back as a verbatim quote with its source URL, or
 > UNSOURCED with a named reason — plus a truth shelf that compounds so the second ask is free.
 >
-> **Proof:** hosted compound exhibit — Run A **2** Parallel calls, Run B **1** with
-> `corpus_hits=1` on repeat. Four partners wired at runtime: Vertex, Parallel, Cloud Run, ADK.
+> **Proof:** hosted compound exhibit — Run A **1** Parallel call, Run B **0** with
+> `corpus_hits=1` on repeat (`docs/SEALED-PREDICTION-2026-08-31.md`). Four partners wired at runtime: Vertex, Parallel, Cloud Run, ADK.
 >
 > **Constraint:** if the document does not contain the exact passage, refuse — never paraphrase,
 > never infer. We refused our own pitch headline on camera because of this rule.

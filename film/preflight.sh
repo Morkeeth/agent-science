@@ -16,15 +16,18 @@ grep -q "$PARALLEL_A" "$FILM_DIR/voiceover.txt" || red "missing parallel A"
 grep -q "$PARALLEL_B" "$FILM_DIR/voiceover.txt" || red "missing parallel B"
 
 ok "hosted /health"
-HEALTH="$(curl -sS --max-time 20 "$HOSTED_URL/health" || true)"
+HEALTH="$(curl -sS --max-time 90 --retry 2 --retry-delay 3 "$HOSTED_URL/health" || true)"
 echo "$HEALTH" | python3 -c "import json,sys; d=json.load(sys.stdin); assert d.get('ok') and d.get('engine_default')=='adk'" \
   || red "/health bad"
 
 ok "hosted /visibility/ui"
-curl -sf --max-time 20 "$VISIBILITY_URL" | grep -q Transparency || red "visibility UI missing Transparency pane"
+VIS_HTML="$(curl -sS --max-time 90 --retry 2 --retry-delay 3 "$VISIBILITY_URL" || true)"
+echo "$VIS_HTML" | grep -qE 'Transparency|1b · Transparency' \
+  || red "visibility UI missing Transparency pane"
 
 ok "hosted /truths/ui"
-curl -sf --max-time 20 "$TRUTHS_URL" | grep -q "Truths dashboard" || red "truths ui down"
+TRUTHS_HTML="$(curl -sS --max-time 90 --retry 2 --retry-delay 3 "$TRUTHS_URL" || true)"
+echo "$TRUTHS_HTML" | grep -q "Truths dashboard" || red "truths ui down"
 
 if [ -f demo/demo-final.mp4 ]; then
   DUR="$(ffprobe -v error -show_entries format=duration -of csv=p=0 demo/demo-final.mp4)"

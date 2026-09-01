@@ -12,3 +12,4 @@ cache/gemini.json
 .venv-adk/
 cache/run_history.json
 out/
+demo/.reel-build/

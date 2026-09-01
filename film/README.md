@@ -11,4 +11,5 @@ chmod +x film/*.sh
 
 **Spine:** `docs/VIDEO-SCRIPT-2026-08-29.md` · truth-layer WOW first.
 
-**Flipbook JSON:** bundled via `film/build.sh` (syncs screens + renders reel)
+**Flipbook JSON:** bundled via `film/build.sh` (syncs screens + renders reel).  
+**Cloud fallback:** if `~/CODE/flipbook` is absent, `film/render_reel.py` builds from `demo/flipbook.html` + `docs/assets/screens/`.
