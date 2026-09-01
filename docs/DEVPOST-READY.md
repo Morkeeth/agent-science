@@ -6,6 +6,8 @@
 
 Fill the form, then paste description from `SUBMISSION-PACK-2026-08-29.md` § Devpost block.
 
+**Lead paragraph order (§0):** M&E fact-check / E&O outcome → truth-layer pivot → hosted proof A=1→B=0 + `/visibility/ui` → refuse constraint → clearance as one vertical.
+
 ---
 
 ## Form fields (copy/paste)

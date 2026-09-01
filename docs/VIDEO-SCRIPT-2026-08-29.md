@@ -55,7 +55,7 @@
 
 ## B-roll inserts (optional, inside beats above)
 
-- `docs/COMPOUND-EXHIBIT-2026-08-29.md` table: A=2 Parallel, B=1, corpus hits=2
+- Hosted sealed prediction: **A=1 → B=0** Parallel, `corpus_hits=1` — `docs/SEALED-PREDICTION-2026-08-31.md` (offline anchor A=2→B=1 in `COMPOUND-EXHIBIT`)
 - `docs/SECOND-SUBJECT-RECEIPT-2026-08-29.md` — dust-bowl reuses orphan log at 0 Parallel
 - Health check: `"engine_default"` field (note ADK ⬜ until Oscar runs `deploy.sh` — do not claim ✅ on video)
 

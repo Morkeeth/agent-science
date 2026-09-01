@@ -21,7 +21,7 @@ python3 ask_registry.py "agentlint" | head -5
 
 | Gate | Requirement | Status | Evidence |
 |------|-------------|--------|----------|
-| Video | ≤ 3 min (≤ 180 s) | [ ] | Script: `docs/VIDEO-SCRIPT-2026-08-29.md` — beats sum **178 s** |
+| Video | ≤ 3 min (≤ 180 s) | [x] built | `demo/demo-final.mp4` — **98 s** · Oscar uploads to Devpost |
 | Devpost | All mandatory fields filled | [ ] | Paste block below (§1–3 from `PITCH.md`) |
 | Public repo | Stranger can clone | [ ] | Private until submit — flip visibility on GitHub |
 | OSI licence | Open-source approved | [x] | `LICENSE` (MIT) |
@@ -74,16 +74,29 @@ Copy everything between the lines into Devpost project description / inspiration
 
 ---BEGIN DEVPOST PASTE---
 
-## 0 · TRUTH LAYER (lead with this)
+## 0 · TRACK BRIEF → TRUTH LAYER (paste this first)
 
-> **Agent Science is the truth layer for what agentic builders believe and use** — not another answer engine.
+**Media & entertainment fact-checking / E&O:** every checkable claim in a production script
+returns a **verbatim quote with its source URL**, or **UNSOURCED with a named cause** — so
+a production can insure and release without guessing. PeriodCheck proves the first script;
+Agent Science proves the **second one costs less** on a shelf that remembers.
 
-When you or your agent websearches, you get a **full visibility panel**: what was searched (every angle, every tier), what the field runs (GitHub ★, blogs, peers), and a primary verdict — **sourced verbatim**, **refused with cause**, or **CONTRARY TO RESEARCH** when practitioners outrun papers. Stack-fit scores whether a truth fits *your* repo. The shelf compounds: ask once, free forever.
+**Agent Science is the truth layer underneath** — not another answer engine. When you or your
+agent websearches, you get a **full visibility panel**: what was searched (every angle, every
+tier), what the field runs (GitHub ★, blogs, peers), and a primary verdict — **sourced
+verbatim**, **refused with cause**, or **CONTRARY TO RESEARCH** when practitioners outrun
+papers. Stack-fit scores whether a truth fits *your* repo.
 
-**Try it:** https://agent-science-568004190078.us-central1.run.app/visibility/ui?q=ralph+loop+agentic  
+**Proof (hosted):** second `/clear` on the same subject → **A=1 → B=0** Parallel,
+`corpus_hits=1` — `docs/SEALED-PREDICTION-2026-08-31.md`.  
+**Transparency:** https://agent-science-568004190078.us-central1.run.app/visibility/ui?q=ralph+loop+agentic  
 **Truths dashboard:** `/truths/ui` · **265+ claims** on disk
 
-Clearance and E&O insurance? One paying vertical on the same layer — sections below.
+**Constraint:** refuse without cause is worse than demoting a source — if the document does
+not contain the exact passage, print UNSOURCED. No paraphrase. Enforced in the constructor,
+not by convention.
+
+Clearance and EU regulation? **One paying vertical on the same shelf** — sections below.
 
 ## 1 · THE COMPANY
 
@@ -130,7 +143,7 @@ market.
 | Repo | `https://github.com/Morkeeth/agent-science` @ `e6793ab` |
 | Entry point | `python3 agent_science.py <script.txt>` — Gemini + Parallel **live by default** |
 | Hosted | https://agent-science-568004190078.us-central1.run.app — `POST /clear` · `GET /corpus` |
-| Controls | registry **13/13** · cross-subject reuse **2/2** · compound exhibit B **1** Parallel vs A **2** (offline) |
+| Controls | **127/127** suites · hosted compound **A=1→B=0** Parallel, `corpus_hits=1` (offline anchor A=2→B=1 in `COMPOUND-EXHIBIT`) |
 | License | `LICENSE` (MIT) |
 | Gap report | `fixtures/gap-report-600.md` — **561 of 600 (94%)** not sellable as-is |
 | Second question | `fixtures/shift-ai-training-vs-noncommercial.md` — 247 of 600 flip |
@@ -159,7 +172,7 @@ object was.
 ## Oscar checklist (outward acts — not done in this slice)
 
 - [ ] `git push` + flip repo to public on GitHub
-- [ ] Record video from `docs/VIDEO-SCRIPT-2026-08-29.md` (≤ 180 s)
+- [x] Video built — `demo/demo-final.mp4` (98 s) · Oscar uploads to Devpost
 - [ ] Upload video to Devpost
 - [ ] Paste Devpost block + fill remaining fields (built with, links, screenshot)
 - [ ] Seal prediction hash in Devpost / commit message after live A/B

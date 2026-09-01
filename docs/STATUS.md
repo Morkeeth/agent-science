@@ -2,7 +2,7 @@
 doc: status
 project: Agent Science
 canonical: true
-last-updated: 2026-09-01T05:45:00Z
+last-updated: 2026-09-02T00:30:00Z
 deadline: 2026-09-09T14:00:00-07:00
 ---
 
@@ -11,7 +11,7 @@ deadline: 2026-09-09T14:00:00-07:00
 > **For Claude / fleet:** this file is the single “where we are” surface.  
 > `hack.md` = process · `CLAUDE.md` = entry · this file = gates + evidence.
 
-**Last gate run:** 2026-08-31T21:46:02Z — `bash scripts/full_gate.sh` → **FULL GATE OK** (127/127 · visibility hosted · 19/19 long run)
+**Last gate run:** 2026-09-01T20:34:32Z — `bash scripts/full_gate.sh` → **FULL GATE OK** (127/127 · long run 19/19 · privacy 0 hits)
 
 ---
 
@@ -21,8 +21,8 @@ deadline: 2026-09-09T14:00:00-07:00
 |-------|--------|
 | **Product noun** | **Agent Science** — truth layer for what people believe and use · B lead · A on the same layer |
 | **Product** | LIVE on Cloud Run · public repo · sealed prediction |
-| **Build lane** | WOW websearch transparency · CONTRARY stamp · stack-fit · community notes · `/truths/ui` |
-| **Oscar** | **Film 30 min** — `docs/PITCH-TOMORROW.md` · transparency WOW first · Devpost paste ready |
+| **Build lane** | AS-SHIP-4 submit pack — Devpost §0 track-brief lead · receipt · full gate |
+| **Oscar** | **Upload video** — `demo/demo-final.mp4` (98 s) built · Devpost paste from `SUBMISSION-PACK` §0 |
 | **Film lead** | Ask → sourced/refuse → free on re-ask · ≥2 domains · E&O as *a* truth not the only story |
 
 ---
@@ -33,8 +33,8 @@ deadline: 2026-09-09T14:00:00-07:00
 |-------|------|--------|
 | 0–4 Build | Partners, registry, compound, ADK | ✅ |
 | 5 Exhibit | Stranger one-click hosted | ✅ `long_run_goal.sh` 19/19 |
-| 6 Freeze | Oscar cold browser + film | ⛔ **video** |
-| 7 Submit | Devpost + sealed + public repo | ⚠️ repo public · sealed ✅ · **Devpost + video** ⛔ |
+| 6 Freeze | Oscar cold browser + film | ⚠️ **video built** (98 s) · logged-out Devpost unchecked |
+| 7 Submit | Devpost + sealed + public repo | ⚠️ repo public · sealed ✅ · **Devpost paste ready** · **video upload** ⛔ |
 
 ---
 
@@ -53,9 +53,10 @@ deadline: 2026-09-09T14:00:00-07:00
 | Stranger trial | ✅ | `new_user_trial.sh` |
 | Sealed prediction | ✅ | `SEALED-PREDICTION-2026-08-31.md` |
 | Public repo | ✅ | github.com/Morkeeth/agent-science |
-| Video | ⛔ | `VIDEO-SCRIPT-2026-08-29.md` |
+| Video | ⚠️ built · not uploaded | `demo/demo-final.mp4` (98 s) · Oscar → Devpost |
 | Architecture pack | ✅ | `docs/ARCHITECTURE.md` + `docs/assets/` |
-| Devpost | ⛔ | `DEVPOST-READY.md` + paste pack |
+| Devpost | ⚠️ paste ready · not submitted | `DEVPOST-READY.md` + `SUBMISSION-PACK` §0 |
+| Privacy grep | ✅ | `bash scripts/privacy_grep.sh` → 0 hits |
 
 ---
 
@@ -66,7 +67,7 @@ deadline: 2026-09-09T14:00:00-07:00
 | **URL** | https://agent-science-568004190078.us-central1.run.app |
 | **Revision** | `agent-science-00018-n4s` · `parallel_sdk: true` · **`/truths/ui` live** |
 | **Health** | `engine_default: adk` · 265 claims · hit rate ~0.80 |
-| **New** | `GET /visibility/ui` — full websearch panel for judges (film this) |
+| **New** | `GET /visibility/ui` — full websearch panel for judges |
 | **New** | `GET /truths/ui` — truths dashboard |
 | **Stats** | 265 claims · hit rate ~0.80 · queries logged growing |
 
@@ -76,10 +77,10 @@ deadline: 2026-09-09T14:00:00-07:00
 
 ## Oscar checklist (only human work left)
 
-1. **Read** `docs/PITCH-TOMORROW.md` — 30s pitch + morning plan
-2. **Record** ≤180s — transparency WOW first · `docs/FILM-SCOUT-COMMANDS.md`
-3. **Devpost** — `docs/DEVPOST-READY.md` (elevator pitch updated)
-4. **Verify** logged-out: video on live entry page
+1. **Upload** `demo/demo-final.mp4` → YouTube/Vimeo public URL → `submission/VIDEO-URL.txt`
+2. **Devpost** — paste `docs/SUBMISSION-PACK-2026-08-29.md` §0 lead (track brief → truth layer)
+3. **Verify** logged-out: video plays on live Devpost entry page
+4. **Screenshot** — SOURCED span visible on hosted URL
 
 ---
 
@@ -96,6 +97,7 @@ deadline: 2026-09-09T14:00:00-07:00
 ```bash
 cd agent-science
 bash scripts/full_gate.sh
+bash scripts/privacy_grep.sh
 ```
 
 ---
@@ -104,6 +106,7 @@ bash scripts/full_gate.sh
 
 | When (UTC) | What |
 |------------|------|
+| 2026-09-02 00:30 | **AS-SHIP-4** — Devpost §0 track-brief lead · compound A=1→B=0 pitch sync · receipt |
 | 2026-09-01 06:00 | **Hammer** — `/visibility/ui` hosted · demo_truth_layer.sh · README truth-layer lead · Devpost §0 |
 | 2026-08-31 21:23 | Truth layer night — transparency, CONTRARY, stack-fit, community notes, `/truths/ui` (branch) |
 | 2026-08-31 21:55 | Competitor research — websearch field map + steal angles → `RESEARCH-WEBSEARCH-COMPETITORS-2026-08-31.md` |

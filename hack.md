@@ -2,7 +2,7 @@
 doc: hack
 project: Agent Science
 phase: SHIP
-last-touched: 2026-09-01 00:20 UTC
+last-touched: 2026-09-02 00:30 UTC
 canonical: true
 event: Agentic Cinema · Parallel track · deadline 2026-09-09 14:00 PDT
 supersedes: docs/PHASE0-LADDER.md ClickHouse-track note (runtime track is Parallel)
@@ -289,7 +289,7 @@ submission craft, supported by a real tendency, **not** as the explanation of th
 - [ ] **Cost from billing**, with the price card's date stated.
 - [x] **Offline path with no API key.**
 - [x] **Honesty & limitations** section carrying our worst number — README §Honesty & limitations; PITCH first screen
-- [ ] **Answer the track brief in the track's own words on the first screen** — judge pack § above; must land on Devpost ¶1 + video 0:00
+- [x] **Answer the track brief in the track's own words on the first screen** — `SUBMISSION-PACK` §0 Devpost paste: M&E fact-check/E&O lead → truth-layer pivot (AS-SHIP-4 2026-09-02)
 - [ ] **Video verified attached and public on the live entry page, from a logged-out browser** — not in a checklist file, on the page.
 - [ ] **Every artifact claim measured at the submitted commit.** Four retros of that loss failed this row.
 
@@ -298,7 +298,37 @@ Full record: `fleet-ops (internal)/retros/QWEN-LOSS-RETRO-2026-08-30.md` (correc
 
 ---
 
-## 🎯 NOW — Partner integrations night wave (build lane)
+## 🎯 NOW — AS-SHIP-4 submit pack + gate + receipt (build lane)
+
+**Slice:** Freeze Devpost submission pack · fix compound number contradictions · full gate · ship receipt.
+
+### Build
+
+- [x] Devpost §0 — track brief (M&E/E&O) → truth-layer pivot · A=1→B=0 everywhere in pitch docs
+- [x] SUBMISSION.md — video marked built, Oscar uploads
+- [x] `docs/RECEIPT-ship-2026-09-02.md`
+- [x] `bash scripts/full_gate.sh` → FULL GATE OK (2026-09-01T20:34:32Z)
+- [x] `bash scripts/privacy_grep.sh` → 0 hits
+
+### Verify
+
+```bash
+rg 'A=2|2 Parallel' docs/ PITCH.md SUBMISSION.md README.md   # pitch docs only; historical receipts OK
+bash scripts/privacy_grep.sh
+bash scripts/full_gate.sh
+```
+
+### Receipt
+
+- `docs/RECEIPT-ship-2026-09-02.md`
+
+### BLOCKED (Oscar)
+
+- Video upload · Devpost submit · logged-out verify
+
+---
+
+## 🎯 NOW (prior) — Partner integrations night wave (build lane)
 
 **Slice:** P1–P7 partner integrations + promise line + eval gate + compound exhibit — all four partners provable at runtime.
 
@@ -420,7 +450,7 @@ bash scripts/verify_cold_clone.sh                                               
 
 | When | What | Command | Outcome |
 |------|------|---------|---------|
-| 2026-09-01 night | Partner integrations wave | `curl …/health` · compound-mini · `full_gate.sh` | **4/4 partners** on hosted · compound PASS · 127/127 · promise line shipped |
+| 2026-09-02 00:34 | AS-SHIP-4 submit pack | `full_gate.sh` · `privacy_grep.sh` | **FULL GATE OK** · Devpost §0 · receipt |
 | 2026-09-01 hammer | Hosted visibility + demo | `./deploy.sh` · `demo_truth_layer.sh` | `/visibility/ui` live · 127/127 gate |
 | 2026-09-01 overnight | Deploy + pitch pack | `./deploy.sh` | rev 00018 · PITCH-TOMORROW |
 | 2026-08-31 night | Truth layer night S1–S8 | `bash scripts/full_gate.sh` | **FULL GATE OK** · transparency · CONTRARY · stack-fit · notes · receipt |
