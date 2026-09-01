@@ -25,7 +25,7 @@ ffmpeg -ss 5 -i demo/demo-final.mp4 -frames:v 1 /tmp/f5.png  # truth-layer hook
 
 | Item | Status |
 |------|--------|
-| Hosted `/visibility/ui` HTML | **local only** — needs `deploy.sh` |
+| Hosted `/visibility/ui` HTML | ✅ deployed rev `00022` |
 | Apollo cold script | 0 claims extracted |
 | Devpost submit | Oscar |
 | Video upload | Oscar |
@@ -33,7 +33,7 @@ ffmpeg -ss 5 -i demo/demo-final.mp4 -frames:v 1 /tmp/f5.png  # truth-layer hook
 ## OSCAR_GATES
 
 1. Watch `demo/demo-final.mp4` end-to-end
-2. `deploy.sh` for judge UX on hosted URL
+2. ~~`deploy.sh` for judge UX on hosted URL~~ ✅ done 2026-09-01
 3. Upload video → `submission/VIDEO-URL.txt`
 4. Devpost paste from `docs/DEVPOST-WIN.md`
 5. Logged-out verify

@@ -37,7 +37,7 @@ https://agent-science-568004190078.us-central1.run.app/visibility/ui?q=ralph+loo
 | 3 | Controls 127/127 | ✅ | `bash scripts/full_gate.sh` |
 | 4 | Sealed compound A=1→B=0 | ✅ | `docs/SEALED-PREDICTION-2026-08-31.md` |
 | 5 | Demo video ≤180s | ✅ built | `demo/demo-final.mp4` (102s) · Oscar uploads |
-| 6 | Devpost submit | [ ] | `docs/DEVPOST-READY.md` |
+| 6 | Devpost submit | [ ] | `docs/DEVPOST-WIN.md` |
 | 7 | Privacy grep = 0 | ✅ | `bash scripts/privacy_grep.sh` |
 
 ---
