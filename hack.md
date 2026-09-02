@@ -2,7 +2,7 @@
 doc: hack
 project: Agent Science
 phase: SHIP
-last-touched: 2026-09-01 00:20 UTC
+last-touched: 2026-09-02 00:16 UTC
 canonical: true
 event: Agentic Cinema · Parallel track · deadline 2026-09-09 14:00 PDT
 supersedes: docs/PHASE0-LADDER.md ClickHouse-track note (runtime track is Parallel)
@@ -298,7 +298,38 @@ Full record: `fleet-ops (internal)/retros/QWEN-LOSS-RETRO-2026-08-30.md` (correc
 
 ---
 
-## 🎯 NOW — Partner integrations night wave (build lane)
+## 🎯 NOW — Partner verification re-run (verify lane)
+
+**Slice:** Re-verify all four partners at runtime; ship `verify_partners_hosted.sh`; fix unseeded test trap.
+
+### Build (shipped 2026-09-02)
+
+- [x] Hosted partner one-command verify — `bash scripts/verify_partners_hosted.sh`
+- [x] Compound hosted probe — `python3 scripts/compound_hosted_probe.py` (warm-shelf aware)
+- [x] Auto-seed in `test_watch_it_go_red.py` when document cache empty
+- [x] Receipt — `docs/RECEIPT-partner-verification-2026-09-02.md`
+
+### Verify (one command each)
+
+```bash
+git pull && python3 tests/test_watch_it_go_red.py                    # 72/72 (auto-seeds)
+bash scripts/verify_partners_hosted.sh                               # 4/4 partners live
+bash scripts/full_gate.sh                                            # FULL GATE OK
+python3 scripts/bench_check_docs.py                                  # 127/127
+python3 scripts/eval_refusal_baseline.py && python3 scripts/eval_refusal_ablation.py
+```
+
+### Receipt
+
+- `docs/RECEIPT-partner-verification-2026-09-02.md`
+
+### BLOCKED
+
+- Orphan-works full script Run B — **504 Gateway Timeout** at 300s. Use compound-mini for video.
+
+---
+
+## 🎯 NOW (prior) — Partner integrations night wave (build lane)
 
 **Slice:** P1–P7 partner integrations + promise line + eval gate + compound exhibit — all four partners provable at runtime.
 
@@ -420,6 +451,7 @@ bash scripts/verify_cold_clone.sh                                               
 
 | When | What | Command | Outcome |
 |------|------|---------|---------|
+| 2026-09-02 | Partner verify re-run | `verify_partners_hosted.sh` · `full_gate.sh` | **4/4 partners** · compound warm-shelf PASS · 72/72 auto-seed |
 | 2026-09-01 night | Partner integrations wave | `curl …/health` · compound-mini · `full_gate.sh` | **4/4 partners** on hosted · compound PASS · 127/127 · promise line shipped |
 | 2026-09-01 hammer | Hosted visibility + demo | `./deploy.sh` · `demo_truth_layer.sh` | `/visibility/ui` live · 127/127 gate |
 | 2026-09-01 overnight | Deploy + pitch pack | `./deploy.sh` | rev 00018 · PITCH-TOMORROW |

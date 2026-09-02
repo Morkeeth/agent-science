@@ -1,6 +1,6 @@
 # PARTNER INTEGRATIONS — Agent Science · Sep 9 path
 
-**Date:** 2026-08-30 · **Last verified:** 2026-09-01 · **Repo:** Morkeeth/agent-science · **Scope:** all four partners wired in code; deploy is Oscar's click.
+**Date:** 2026-08-30 · **Last verified:** 2026-09-02 · **Repo:** Morkeeth/agent-science · **Scope:** all four partners wired in code; deploy is Oscar's click.
 
 Each partner must be **called at runtime** on the default path — not documented only.
 
@@ -10,12 +10,17 @@ Each partner must be **called at runtime** on the default path — not documente
 
 1. **Rotate keys** if any revision ever had plaintext env vars (`deploy.sh` note).
 2. **`bash deploy.sh`** — Oscar only; writes Secret Manager, IAM, Cloud Run revision.
-3. **Verify hosted health:**
+3. **Verify all four partners at runtime (one command):**
+   ```bash
+   bash scripts/verify_partners_hosted.sh
+   ```
+   Expect: health OK · `engine_default: adk` · `/clear` stamps `engine: adk` · compound-mini PASS.
+4. **Or verify /health alone:**
    ```bash
    curl -s https://agent-science-568004190078.us-central1.run.app/health | python3 -m json.tool
    ```
    Expect: `"gemini_path": "vertex:hack-fleet"`, `"parallel": true`, `"engine_default": "adk"`.
-4. **Verify /clear** (JSON):
+5. **Verify /clear** (JSON):
    ```bash
    curl -s -X POST https://agent-science-568004190078.us-central1.run.app/clear \
      -H 'Content-Type: application/json' \

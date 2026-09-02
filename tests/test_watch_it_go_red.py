@@ -1113,6 +1113,18 @@ def t_one_key_per_document_not_per_url_spelling():
         "a query string was stripped; that changes which document is cited"
 
 
+def _ensure_fixture_documents():
+    """Controls pin passages in seeded fixtures — auto-seed when cache is empty."""
+    inc = instruments.document(REAL_INC)
+    if inc:
+        return
+    import subprocess
+    seed = Path(__file__).resolve().parents[1] / "scripts" / "seed_document_cache.py"
+    print("Seeding document cache (required for control suite)...")
+    subprocess.run([sys.executable, str(seed)], check=True)
+
+
+_ensure_fixture_documents()
 print("WATCH IT GO RED — control tests\n")
 # Held-out refusal set — suite must fail on false UNKNOWN.
 import importlib.util as _ilu
