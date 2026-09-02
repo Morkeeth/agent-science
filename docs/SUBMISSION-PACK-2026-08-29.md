@@ -1,6 +1,6 @@
 # SUBMISSION PACK — Agentic Cinema · slice 7
 
-**Date:** 2026-09-01 · **Repo:** https://github.com/Morkeeth/agent-science @ `main`  
+**Date:** 2026-09-02 · **Repo:** https://github.com/Morkeeth/agent-science @ `main`  
 **Hosted:** https://agent-science-568004190078.us-central1.run.app · **Deadline:** 2026-09-09 14:00 PT  
 **Scope:** docs + offline controls — no public repo flip, no video upload, no Devpost submit, no `deploy.sh`
 
@@ -10,6 +10,16 @@
 
 ```bash
 git clone https://github.com/Morkeeth/agent-science.git && cd agent-science
+python3 scripts/seed_document_cache.py
+python3 tests/test_registry_surface.py -q
+python3 scripts/compound_exhibit_receipt.py
+python3 scripts/freeze_holdout.py --check
+python3 scripts/eval_refusal_symmetric.py
+```
+
+Full path (includes watch_it_go_red + doc gate):
+
+```bash
 bash scripts/verify_cold_clone.sh
 bash scripts/demo_truth_layer.sh
 python3 ask_registry.py "agentlint" | head -5
@@ -29,7 +39,7 @@ python3 ask_registry.py "agentlint" | head -5
 | Partner integrations | All four called at runtime | [x] docs | `docs/PARTNER-INTEGRATIONS-2026-08-30.md` |
 | ADK default path | `engine_default: adk` | [x] local / [x] hosted | `docs/RECEIPT-adk-default-path-2026-08-30.md` |
 
-**Controls re-measured 2026-09-01** (run each at object):
+**Controls re-measured 2026-09-02** (run each at object):
 
 | Suite | Command | Result |
 |-------|---------|--------|
@@ -44,12 +54,14 @@ python3 ask_registry.py "agentlint" | head -5
 | refusal_correctness | `python3 tests/test_refusal_correctness.py` | **6/6** |
 | partner_runtime | `python3 tests/test_partner_runtime.py` | **6/6** |
 | parallel_integration | `python3 tests/test_parallel_integration.py` | **6/6** |
+| holdout_frozen | `python3 scripts/freeze_holdout.py --check` | **6 items intact** |
+| symmetric_scorer | `python3 scripts/eval_refusal_symmetric.py` | baseline **5/6** vs shipping **6/6**, delta +1 (RC5) |
 | **Total** | 11 suites | **127/127** |
 | docs gate | `python3 scripts/bench_check_docs.py` | **127/127 match** |
 
 **Compound exhibit (live hosted, 2026-08-31 PM):** `long_run_goal.sh` · A=**1**→B=**0** Parallel · B corpus hits=**1** — `docs/LONG-RUN-RECEIPT-2026-08-31.md` · sealed `docs/SEALED-PREDICTION-2026-08-31.md`. Prior: compound-mini A=**2**→B=**1**. Orphan-works full script: run B **503** — do not claim on video.
 
-**Eval gate:** `docs/QWEN-EVAL-GATE-2026-08-30.md` — baseline **5/6 = 0.833** vs shipping **6/6 = 1.000**, delta +1 (RC5); McNemar p=1.0000 at n=6. Re-run 2026-09-01: `docs/RECEIPT-partner-integrations-night-2026-09-01.md` §6.
+**Eval gate:** `docs/QWEN-EVAL-GATE-2026-08-30.md` — holdout frozen (`fixtures/refusal-correctness/MANIFEST.json`); symmetric scorer baseline **5/6 = 0.833** vs shipping **6/6 = 1.000**, delta +1 (RC5); McNemar p=1.0000 at n=6. Re-run: `python3 scripts/eval_refusal_symmetric.py`.
 
 ---
 
@@ -130,7 +142,7 @@ market.
 | Repo | `https://github.com/Morkeeth/agent-science` @ `e6793ab` |
 | Entry point | `python3 agent_science.py <script.txt>` — Gemini + Parallel **live by default** |
 | Hosted | https://agent-science-568004190078.us-central1.run.app — `POST /clear` · `GET /corpus` |
-| Controls | registry **13/13** · cross-subject reuse **2/2** · compound exhibit B **1** Parallel vs A **2** (offline) |
+| Controls | registry **16/16** · cross-subject reuse **2/2** · compound exhibit B **1** Parallel vs A **2** (offline) |
 | License | `LICENSE` (MIT) |
 | Gap report | `fixtures/gap-report-600.md` — **561 of 600 (94%)** not sellable as-is |
 | Second question | `fixtures/shift-ai-training-vs-noncommercial.md` — 247 of 600 flip |

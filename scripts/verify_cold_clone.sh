@@ -29,8 +29,10 @@ echo "5. SUBMISSION-PACK doc gate..."
 python3 scripts/bench_check_docs.py 2>&1 | tail -1
 
 echo
-echo "6. Eval gate (baseline + ablation)..."
-python3 scripts/eval_refusal_baseline.py 2>&1 | tail -3
+echo "6. Eval gate (baseline + ablation + symmetric)..."
+python3 scripts/freeze_holdout.py --check 2>&1 | tail -1
+python3 scripts/eval_refusal_symmetric.py 2>&1 | tail -4
+python3 scripts/eval_refusal_baseline.py 2>&1 | tail -2
 python3 scripts/eval_refusal_ablation.py 2>&1 | tail -2
 
 echo

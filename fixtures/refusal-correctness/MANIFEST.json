@@ -1,0 +1,12 @@
+{
+ "what": "the refusal-correctness holdout labelled before any engine tuning pass",
+ "frozen_at": "2026-09-02",
+ "labelled_at": "2026-08-22T21:30:00Z",
+ "labelled_by": "cursor",
+ "n_items": 6,
+ "set": {
+  "file": "set.json",
+  "sha256": "43be938daa77baff294d9f70299dfc5a9d9ba4f78849035aa10755a85d7fb01a",
+  "bytes": 3681
+ }
+}

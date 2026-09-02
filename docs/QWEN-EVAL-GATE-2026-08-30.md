@@ -97,7 +97,41 @@ FINDING: tied on external anchor — no measured delta.
 
 ---
 
-## Docs count gate
+---
+
+## Symmetric scorer — delivered output only
+
+```bash
+python3 scripts/seed_document_cache.py
+python3 scripts/freeze_holdout.py --check
+python3 scripts/eval_refusal_symmetric.py
+```
+
+Both arms emit `{supported: bool, quote: str|null}`. The scorer never reads GREEN/UNKNOWN,
+`cause`, or `refusal_code` — only the bool vs gold SUPPORTED / NOT_SUPPORTED.
+
+**Output this run (2026-09-02 UTC):**
+
+```
+Baseline:  5/6 = 0.833  95% CI [0.436, 0.970]
+Shipping:  6/6 = 1.000  95% CI [0.610, 1.000]
+Delta (shipping - baseline): +1
+McNemar:   p=1.0000 (b=0 c=1 discordant)
+FINDING: shipping beats baseline by 1 item(s).
+RC5 substring trap: baseline false-GREEN, shipping refuses — symmetric delta proven.
+```
+
+---
+
+## Holdout freeze
+
+```bash
+python3 scripts/freeze_holdout.py --check
+```
+
+Labels written 2026-08-22 before engine runs; manifest frozen 2026-09-02. Any edit to
+`set.json` without re-freezing fails the gate (`tests/test_holdout_frozen.py`).
+
 
 ```bash
 python3 scripts/bench_check_docs.py
@@ -107,11 +141,25 @@ Re-derives all 9 suite counts against `docs/SUBMISSION-PACK-2026-08-29.md` — e
 
 ---
 
+## Docs count gate
+
+```bash
+python3 scripts/bench_check_docs.py
+```
+
+Re-derives all 11 suite counts against `docs/SUBMISSION-PACK-2026-08-29.md` — exit 1 if stale.
+
+---
+
 ## Checklist status (PRIOR LOSS gate)
 
 - [x] Alternative arm named and run
 - [x] Ablation with measured delta (delta=0; RC5 both false-GREEN)
 - [x] External anchor — live rightsstatements.org (`scripts/eval_external_anchor.py`)
+- [x] **Holdout frozen before the first tuning pass** — `fixtures/refusal-correctness/MANIFEST.json` · `python3 scripts/freeze_holdout.py --check`
+- [x] Baseline steelmanned — raw rows printed by eval scripts; RC5 is now the single discordant item (baseline GREEN, shipping UNKNOWN)
+- [x] **Scorer symmetrical** — `python3 scripts/eval_refusal_symmetric.py` · both arms emit `{supported, quote}`; external bool scorer only
+- [x] Statistic matched to n — Wilson 95% CI + McNemar in baseline/ablation/symmetric scripts
+- [ ] **Cost from billing**, with the price card's date stated.
 - [x] Offline path with no API key
-- [x] Wilson CI + McNemar (n=6)
 - [x] Honesty carries worst number (tie + RC5 false-GREEN both arms)

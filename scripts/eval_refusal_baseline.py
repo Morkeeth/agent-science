@@ -10,7 +10,6 @@ Run: python3 scripts/seed_document_cache.py && python3 scripts/eval_refusal_base
 """
 from __future__ import annotations
 
-import json
 import re
 import html
 import sys
@@ -19,15 +18,13 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from clearance import instruments, verify as V
+from clearance import holdout, instruments, verify as V
 from clearance.facts import Claim, judge_claim
 from clearance.locate import DEFAULT, StringLocator
 from clearance.verdict import GREEN, UNKNOWN
 
 sys.path.insert(0, str(ROOT / "scripts"))
 from eval_stats import format_ci, mcnemar_exact  # noqa: E402
-
-SET = json.loads((ROOT / "fixtures/refusal-correctness/set.json").read_text())
 
 
 def _visible(raw: str) -> str:
@@ -66,12 +63,14 @@ def _gold(expected: str) -> str:
 
 
 def main() -> None:
+    holdout.verify()
+    items = holdout.holdout_set()["items"]
     rows = []
     base_correct = ship_correct = 0
     b_win = c = 0  # McNemar discordant: baseline-only correct / shipping-only correct
-    n = len(SET["items"])
+    n = len(items)
 
-    for item in SET["items"]:
+    for item in items:
         doc_path = ROOT / item["document"]
         body = _visible(doc_path.read_text())
         url = f"file://{doc_path.name}"

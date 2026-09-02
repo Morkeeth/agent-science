@@ -9,7 +9,6 @@ Run: python3 scripts/seed_document_cache.py && python3 scripts/eval_refusal_abla
 from __future__ import annotations
 
 import html
-import json
 import re
 import sys
 from pathlib import Path
@@ -17,15 +16,13 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from clearance import instruments
+from clearance import holdout, instruments
 from clearance.facts import Claim
 from clearance.locate import DEFAULT, StringLocator
 from clearance.verdict import GREEN, UNKNOWN
 
 sys.path.insert(0, str(ROOT / "scripts"))
 from eval_stats import format_ci, mcnemar_exact  # noqa: E402
-
-SET = json.loads((ROOT / "fixtures/refusal-correctness/set.json").read_text())
 
 
 def _visible(raw: str) -> str:
@@ -78,12 +75,14 @@ def _gold(expected: str) -> str:
 
 
 def main() -> None:
+    holdout.verify()
+    items = holdout.holdout_set()["items"]
     rows = []
     abl_correct = ship_correct = 0
     b_win = c = 0
-    n = len(SET["items"])
+    n = len(items)
 
-    for item in SET["items"]:
+    for item in items:
         doc_path = ROOT / item["document"]
         body = _visible(doc_path.read_text())
         url = f"file://{doc_path.name}"

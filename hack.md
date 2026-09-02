@@ -282,10 +282,10 @@ submission craft, supported by a real tendency, **not** as the explanation of th
 - [x] **Alternative arm named and run** — `python3 scripts/eval_refusal_baseline.py` · **re-run 2026-08-31: baseline 5/6 = 0.833, shipping 6/6 = 1.000, delta +1, McNemar p=1.0000 (b=0 c=1) — a real delta where 08-30 had a tie, and NOT significant at n=6; the CIs overlap [0.436,0.970] vs [0.610,1.000]**
 - [x] **Ablation** — `python3 scripts/eval_refusal_ablation.py` · **re-run 2026-08-31: ablation 5/6, shipping 6/6, delta +1, McNemar p=1.0000.** (2026-08-30 reading, before the semantic guard: delta=0, RC5 false-GREEN in both arms.)
 - [x] **External anchor** — `python3 scripts/eval_external_anchor.py` · live rightsstatements.org (EA1/EA2)
-- [ ] **Holdout frozen before the first tuning pass.**
+- [x] **Holdout frozen before the first tuning pass.** — `python3 scripts/freeze_holdout.py --check` · `fixtures/refusal-correctness/MANIFEST.json`
 - [x] **Baseline steelmanned** — raw rows printed by eval scripts; RC5 is now the single discordant item (baseline GREEN, shipping UNKNOWN)
 - [x] **Statistic matched to n** — Wilson 95% CI + McNemar in baseline/ablation scripts
-- [ ] **Scorer symmetrical** — nothing only our system can emit; judge from delivered output for every arm.
+- [x] **Scorer symmetrical** — `python3 scripts/eval_refusal_symmetric.py` · delivered `{supported, quote}` only; baseline 5/6 vs shipping 6/6, delta +1 (RC5)
 - [ ] **Cost from billing**, with the price card's date stated.
 - [x] **Offline path with no API key.**
 - [x] **Honesty & limitations** section carrying our worst number — README §Honesty & limitations; PITCH first screen
@@ -298,7 +298,41 @@ Full record: `fleet-ops (internal)/retros/QWEN-LOSS-RETRO-2026-08-30.md` (correc
 
 ---
 
-## 🎯 NOW — Partner integrations night wave (build lane)
+## 🎯 NOW — Sep 9 submit path night wave (build lane)
+
+**Slice:** Qwen eval gates (holdout + symmetric scorer) + SUBMISSION-PACK truth refresh + BLOCKED live compound receipt + deploy prep checklist.
+
+### Build (shipped 2026-09-02 night)
+
+- [x] Holdout frozen — `fixtures/refusal-correctness/MANIFEST.json` + `clearance/holdout.py` + `tests/test_holdout_frozen.py`
+- [x] Symmetric scorer gate — `scripts/eval_refusal_symmetric.py` · baseline 5/6 vs shipping 6/6, delta +1 (RC5)
+- [x] SUBMISSION-PACK truth refresh — `bench_check_docs.py` 127/127 · fixed stale **13/13** → **16/16** in Devpost paste
+- [x] Stranger one-command block — `registry_surface -q` + offline compound receipt + holdout + symmetric
+- [x] Live compound BLOCKED receipt — `docs/RECEIPT-live-compound-BLOCKED-2026-09-02.md` (no keys on VM)
+- [x] Deploy prep checklist — `docs/DEPLOY-PREP-CHECKLIST-2026-09-02.md` (Oscar only, no deploy)
+
+### Verify (one command each)
+
+```bash
+python3 scripts/seed_document_cache.py && python3 tests/test_watch_it_go_red.py   # 72/72
+python3 scripts/freeze_holdout.py --check && python3 tests/test_holdout_frozen.py  # 3/3
+python3 scripts/eval_refusal_symmetric.py                                        # 5/6 vs 6/6
+python3 scripts/bench_check_docs.py                                              # 127/127
+python3 scripts/compound_exhibit_receipt.py                                      # offline A=2→B=1
+python3 tests/test_registry_surface.py -q                                        # 16/16
+```
+
+### Receipt
+
+- `docs/RECEIPT-night-wave-submit-path-2026-09-02.md`
+
+### BLOCKED
+
+- Live orphan-works compound on this VM — no Gemini/Parallel keys. Offline receipt authoritative.
+
+---
+
+## 🎯 NOW (prior) — Partner integrations night wave (build lane)
 
 **Slice:** P1–P7 partner integrations + promise line + eval gate + compound exhibit — all four partners provable at runtime.
 
@@ -420,7 +454,7 @@ bash scripts/verify_cold_clone.sh                                               
 
 | When | What | Command | Outcome |
 |------|------|---------|---------|
-| 2026-09-01 night | Partner integrations wave | `curl …/health` · compound-mini · `full_gate.sh` | **4/4 partners** on hosted · compound PASS · 127/127 · promise line shipped |
+| 2026-09-02 night | Submit-path wave | holdout · symmetric · bench_check_docs | holdout 3/3 · symmetric delta +1 RC5 · 127/127 · BLOCKED live compound |
 | 2026-09-01 hammer | Hosted visibility + demo | `./deploy.sh` · `demo_truth_layer.sh` | `/visibility/ui` live · 127/127 gate |
 | 2026-09-01 overnight | Deploy + pitch pack | `./deploy.sh` | rev 00018 · PITCH-TOMORROW |
 | 2026-08-31 night | Truth layer night S1–S8 | `bash scripts/full_gate.sh` | **FULL GATE OK** · transparency · CONTRARY · stack-fit · notes · receipt |
