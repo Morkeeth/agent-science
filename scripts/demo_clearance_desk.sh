@@ -6,7 +6,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 BASE="${HOSTED_URL:-https://agent-science-568004190078.us-central1.run.app}"
-SCRIPT_FILE="${1:-docs/cold-scripts/google-books-settlement.txt}"
+SCRIPT_FILE="${1:-docs/cold-scripts/buyer-sourced-and-caught.txt}"
 SUBJECT="${2:-cold-demo-$(date +%Y%m%d)}"
 
 if [ ! -f "$SCRIPT_FILE" ]; then

@@ -228,6 +228,11 @@ def clear_script(
         # a refusal on subject A free on subject B.
         term = _term_of(c)
         log_row = refusal_log.lookup(logcon, term=term, assertion=c.text)
+        # Independence flags are unfinished work, not settled refusals. Reusing them
+        # forever blocked EUR-Lex primary clears on the hosted shelf.
+        if log_row and not refusal_log.is_settled_for_reuse(
+                verdict=log_row.get("verdict"), cause=log_row.get("cause")):
+            log_row = None
         if log_row:
             log_hits += 1
             green = log_row["verdict"] == GREEN

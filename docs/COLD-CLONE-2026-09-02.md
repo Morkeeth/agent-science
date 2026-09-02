@@ -135,7 +135,7 @@ desk UI:    https://agent-science-568004190078.us-central1.run.app/
 
 ```bash
 $ bash scripts/privacy_grep.sh
-PRIVACY OK: 0 hits (~/CODE, /Users/*, hack-agent-science, vault paths)
+PRIVACY OK: 0 hits
 ```
 
 ---

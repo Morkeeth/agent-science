@@ -10,6 +10,12 @@ supersedes: docs/PHASE0-LADDER.md ClickHouse-track note (runtime track is Parall
 
 # hack.md — Agentic Cinema constitution + handbook pass
 
+## STATE 2026-09-02 (Fable, probed)
+- **09:0x:** cold clone from GitHub to `/tmp/agent-science-cold`, README as written: `verify_cold_clone.sh` → 6/6 partner wiring · 127/127 SUBMISSION-PACK · eval gate b=0 c=1 p=1.0 · exit 0; `demo_truth_layer.sh` exit 0. Live `/health` 200. Repo PUBLIC since 2026-08-22; `git log -p --all` key scan → only fixtures (`pk-live-abc`). No key ever entered the repo; console rotation = Oscar's word. Final tweaks: fleet-ops `FINAL-TWEAKS-2026-09-02.md`.
+- **14:0x:** main 5d03583 carries the cold-clone transcript + buyer § (E&O underwriter; $15k–80k researcher time per hour-long doc; 0.5–2% premium). Re-clone 14:0x → cold verify OK. Privacy grep scrubbed (COLD-CLONE quote + hack.md path).
+- **21:5x:** Log poison fix — `no_independent_source` no longer freezes cross-subject reuse; GREEN upgrades poisoned rows. Buyer SOURCED+CATCH trace measured locally (EUR-Lex + overnight-museum refuse). Desk report shows buyer-week cleared/caught strip.
+
+
 **Repo:** Morkeeth/agent-science · **Event:** Agentic Cinema · Sep 9 2026 14:00 PDT  
 **Spine:** **Agent Science** — the truth layer for what people believe and use. Companion (B) lead; clearance (A) on the same layer. Verify-or-refuse; registry compounds.  
 **Constitution:** verbatim span or REFUSE — never paraphrase. No public repo until keys rotated. No rename. No `--set-env-vars` secrets. Slice 1 deploy/keys/video/Devpost: Oscar only.

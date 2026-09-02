@@ -86,4 +86,4 @@ A producer or insurer does not need a green check — they need **each fact name
 bash scripts/demo_clearance_desk.sh docs/cold-scripts/google-books-settlement.txt my-subject
 ```
 
-**Raw JSON:** saved at measurement time in terminal log; re-run producesLive rows (claim count may vary slightly with extractor).
+**Superseded for buyer demo:** prefer `docs/TRACE-2026-09-02-buyer.md` (SOURCED + CATCH). This file remains as the honest all-refuse public-news case.

@@ -97,6 +97,31 @@ _UNSOURCED_CAUSES = frozenset({
     "terms_never_fetched",
 })
 
+# Independence fails are NOT settled refusals — a primary source may still exist.
+# Reusing them forever poisoned EUR-Lex claims on the hosted shelf (a Wikipedia-only
+# pass stamped no_independent_source, then every later Directive ask skipped search).
+_UNSETTLED_CAUSES = frozenset({
+    "no_independent_source",
+})
+
+
+def is_settled_for_reuse(*, verdict: str | None, cause: str | None = None) -> bool:
+    """Whether a log row may short-circuit a fresh search.
+
+    GREEN and firm UNSOURCED causes compound forever. Independence flags do not —
+    they mean "human must judge / find primary", which is unfinished work.
+    """
+    if verdict == "GREEN":
+        return True
+    if verdict == "RED":
+        return True
+    if (cause or "") in _UNSETTLED_CAUSES:
+        return False
+    if verdict == "UNKNOWN" and (cause or "") in _UNSOURCED_CAUSES:
+        return True
+    # Unknown cause / other UNKNOWN: do not freeze a maybe-wrong refuse.
+    return False
+
 
 def surface_label(*, verdict: str | None, cause: str | None = None) -> str:
     """Map an engine verdict to the registry's three poles (+ honest miss)."""
@@ -197,15 +222,35 @@ def record(con, *, term: str, assertion: str, verdict: str, production: str,
     shifted every one of them by one, silently, with no error — a row where `basis`
     holds a URL and `cause` holds a quotation still inserts.
     """
+    t = norm_term(term)
+    slot = slot_of(assertion, term)
     cols = ("term", "slot", "established", "verdict", "basis", "cause", "citation_url",
             "quoted_terms", "origins", "resolves_with", "first_seen_in", "first_seen_at",
             "reused", "refusal_code", "trail")
-    vals = (norm_term(term), slot_of(assertion, term), assertion, verdict, basis, cause,
+    vals = (t, slot, assertion, verdict, basis, cause,
             citation_url, quoted_terms, json.dumps(origins or []), resolves_with,
             production, datetime.now(timezone.utc).isoformat(timespec="seconds"), 0,
             refusal_code, json.dumps(trail) if trail else None)
-    con.execute(f"INSERT OR IGNORE INTO claims ({','.join(cols)}) "
-                f"VALUES ({','.join('?' * len(cols))})", vals)
+    existing = con.execute(
+        "SELECT verdict, cause FROM claims WHERE term=? AND slot=?", (t, slot)
+    ).fetchone()
+    if existing is None:
+        con.execute(f"INSERT INTO claims ({','.join(cols)}) "
+                    f"VALUES ({','.join('?' * len(cols))})", vals)
+    elif existing["verdict"] != "GREEN" and verdict == "GREEN":
+        # First writer used to win forever (INSERT OR IGNORE). A later primary clear
+        # must upgrade a poisoned independence refuse — otherwise EUR-Lex never recovers.
+        con.execute(
+            "UPDATE claims SET established=?, verdict=?, basis=?, cause=?, "
+            "citation_url=?, quoted_terms=?, origins=?, resolves_with=?, "
+            "first_seen_in=?, first_seen_at=?, refusal_code=?, trail=? "
+            "WHERE term=? AND slot=?",
+            (assertion, verdict, basis, cause, citation_url, quoted_terms,
+             json.dumps(origins or []), resolves_with, production,
+             datetime.now(timezone.utc).isoformat(timespec="seconds"),
+             refusal_code, json.dumps(trail) if trail else None, t, slot),
+        )
+    # else: keep first settled row (GREEN stays GREEN; firm refuse stays refuse)
     con.commit()
     _maybe_push(con)
 
@@ -231,9 +276,6 @@ def lookup(con, *, term: str, assertion: str) -> Optional[dict]:
                     (norm_term(term), slot_of(assertion, term))).fetchone()
     if not r:
         return None
-    con.execute("UPDATE claims SET reused = reused + 1 WHERE term=? AND slot=?",
-                (norm_term(term), slot_of(assertion, term)))
-    con.commit()
     d = dict(r)
     d["origins"] = json.loads(d["origins"] or "[]")
     # Cross-production reuse is looser than same-subject reuse. If the assertion that
@@ -241,6 +283,14 @@ def lookup(con, *, term: str, assertion: str) -> Optional[dict]:
     # though it were the same sentence.
     d["reused_from_wording"] = (d["established"] if d["established"].strip().lower()
                                 != assertion.strip().lower() else None)
+    # Unsettled independence flags are returned so callers can inspect them, but they
+    # must not burn a reuse credit — the next search may still find a primary source.
+    if not is_settled_for_reuse(verdict=d.get("verdict"), cause=d.get("cause")):
+        d["unsettled"] = True
+        return d
+    con.execute("UPDATE claims SET reused = reused + 1 WHERE term=? AND slot=?",
+                (norm_term(term), slot_of(assertion, term)))
+    con.commit()
     return d
 
 
@@ -250,6 +300,28 @@ def stats(con) -> dict:
         " SUM(reused) reuses, COUNT(DISTINCT first_seen_in) productions FROM claims"
     ).fetchone()
     return {k: (row[k] or 0) for k in row.keys()}
+
+
+def week_tally(con, *, days: int = 7) -> dict:
+    """Buyer upward number: claims cleared vs caught in the last N days.
+
+    Cleared = GREEN. Caught = refused or flagged (everything else written to the log).
+    """
+    from datetime import timedelta
+    since = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat(timespec="seconds")
+    row = con.execute(
+        "SELECT COUNT(*) n, "
+        "SUM(verdict='GREEN') cleared, "
+        "SUM(verdict!='GREEN') caught "
+        "FROM claims WHERE first_seen_at >= ?",
+        (since,),
+    ).fetchone()
+    return {
+        "days": days,
+        "n": row["n"] or 0,
+        "cleared": row["cleared"] or 0,
+        "caught": row["caught"] or 0,
+    }
 
 
 def log_query(con, *, query: str, result: dict) -> int:

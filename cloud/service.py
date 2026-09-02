@@ -39,6 +39,7 @@ import agent_science  # noqa: E402
 import ask_registry  # noqa: E402
 from clearance import ingest as stack_ingest, query_analytics, stack_search  # noqa: E402
 from clearance import corpus  # noqa: E402
+from clearance import refusal_log  # noqa: E402
 from cloud import agent as adk_agent  # noqa: E402
 from cloud import partners as partner_manifest  # noqa: E402
 
@@ -95,9 +96,10 @@ button:hover{background:#000}
 </style></head><body>
 <div class="wrap">
   <h1 class="brand">Agent Science</h1>
-  <p class="thesis">Agent Science — the truth layer for what people believe and use.
-  Every claim sourced verbatim, or refused with why. The registry remembers.
-  Developer practice and clearance facts live on the same layer.</p>
+  <p class="thesis">Paste a documentary script. Every checkable claim comes back
+  <strong>sourced verbatim</strong> with its URL — or <strong>refused with a named cause</strong>
+  a lawyer can read. The shelf remembers: second ask is free. Clearance and E&amp;O are
+  one vertical on the same truth layer.</p>
 <p class="nav"><a href="/front">What this desk refuses, and why that is the product</a> · <a href="/visibility/ui?q=ralph+loop+agentic">Websearch visibility</a> · <a href="/registry">Browse the registry</a> · <a href="/truths/ui">Truths dashboard</a> · <a href="/popular/ui">Popular queries</a> — {registry_stats} verified truths on disk.</p>
   <form class="desk" method="post" action="/clear">
     <div class="row">
@@ -147,6 +149,30 @@ def _desk_page(subject: str = "orphan-works") -> str:
     return page
 
 
+def _buyer_week_strip() -> str:
+    """Recurring number a producer/insurer reports upward: cleared vs caught."""
+    try:
+        con = refusal_log.connect(_log_db())
+        w = refusal_log.week_tally(con)
+        return (
+            f"<section class='buyer'>"
+            f"<p class='compound-label'>Buyer week · last {w['days']} days</p>"
+            f"<div class='nums'>"
+            f"<div><span class='n'>{_esc(w['cleared'])}</span>"
+            f"<span class='k'>Cleared</span></div>"
+            f"<div><span class='n hit'>{_esc(w['caught'])}</span>"
+            f"<span class='k'>Caught</span></div>"
+            f"<div><span class='n'>{_esc(w['n'])}</span>"
+            f"<span class='k'>Logged</span></div>"
+            f"</div>"
+            f"<p class='compound-note'>Claims cleared vs caught — the number they report "
+            f"upward. Not model confidence.</p>"
+            f"</section>"
+        )
+    except Exception:
+        return ""
+
+
 def _report_html(out: dict) -> str:
     """Clearance memo: compound strip → action items → sourced evidence."""
     n = out.get("claims_extracted") or 0
@@ -161,6 +187,7 @@ def _report_html(out: dict) -> str:
     remembered = out.get("corpus_remembered") or 0
     subject = _esc(out.get("subject"))
     rows = out.get("rows") or []
+    buyer = _buyer_week_strip()
 
     compound = ""
     delta_note = ""
@@ -277,6 +304,7 @@ h1{{font-size:clamp(1.8rem,4vw,2.6rem);margin:.8rem 0 .3rem;letter-spacing:-.02e
 .nums .k{{font-family:"IBM Plex Mono",monospace;font-size:.65rem;letter-spacing:.06em;
   text-transform:uppercase;color:var(--mute)}}
 .compound-note{{margin:.85rem 0 0;color:var(--mute);font-size:.95rem}}
+.buyer{{background:#f4f1ea;padding:1.1rem 1rem;margin:0 0 1.75rem;border-left:4px solid var(--stamp)}}
 h2{{font-size:1.15rem;margin:2rem 0 .8rem;border-bottom:1px solid var(--ink);padding-bottom:.3rem}}
 ul{{list-style:none;padding:0;margin:0}}
 li{{padding:1rem 0;border-bottom:1px solid var(--line)}}
@@ -306,6 +334,7 @@ article{{padding:1rem 0;border-bottom:1px solid var(--line)}}
     <div><span class="n">{_esc(unsourced)}</span><span class="k">Unsourced</span></div>
     <div><span class="n">{_esc(parallel)}</span><span class="k">Parallel</span></div>
   </div>
+  {buyer}
   {compound}
   {action_html}
   {sourced_block}
