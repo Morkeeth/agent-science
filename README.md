@@ -21,9 +21,12 @@ paraphrase, never infer.
 
 ```bash
 git clone https://github.com/Morkeeth/agent-science.git && cd agent-science
-bash scripts/verify_cold_clone.sh    # offline controls (~10s)
-bash scripts/demo_truth_layer.sh     # truth layer: CONTRARY + transparency (~7s)
+bash scripts/verify_cold_clone.sh       # offline controls (~15s)
+bash scripts/demo_truth_layer.sh        # truth layer: CONTRARY + transparency (~7s)
+bash scripts/demo_clearance_desk.sh     # clearance desk: script → verdicts (~60s, no keys)
 ```
+
+**Documentary / E&O buyer path:** `demo_clearance_desk.sh` posts a public narration to the hosted clearance desk and prints each claim with verdict + cause — no Gemini or Parallel keys on your machine.
 
 **Browser only:** [visibility panel](https://agent-science-568004190078.us-central1.run.app/visibility/ui?q=ralph+loop+agentic) · [truths dashboard](https://agent-science-568004190078.us-central1.run.app/truths/ui)
 

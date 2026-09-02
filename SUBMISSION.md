@@ -13,6 +13,7 @@
 git clone https://github.com/Morkeeth/agent-science.git && cd agent-science
 bash scripts/verify_cold_clone.sh
 bash scripts/demo_truth_layer.sh
+bash scripts/demo_clearance_desk.sh
 ```
 
 **See it in the browser (no clone):**
@@ -74,3 +75,17 @@ Second `/clear` on the same subject: `corpus_hits ≥ 1` and Run B `parallel_cal
 
 - Orphan-works full compound when Run B returns **503**
 - Flywheel headline without showing transparency panel first
+
+---
+
+## Buyer
+
+**Role:** E&O underwriter or documentary clearance supervisor at a production company or specialty insurer (e.g. Chubb Media & Entertainment, Beazley, or in-house clearance at BBC Studios / Participant).
+
+**Budget line:** Errors & Omissions insurance premium and clearance labor — typically **$15k–$80k per hour-long documentary** in researcher time plus **0.5–2% of production budget** on E&O premium where uncleared claims force exclusions or holdbacks.
+
+**What they cancel:** Manual fact-check passes on every narration revision, duplicate researcher hours when the same orphan-works / settlement claims recur across episodes, and the **re-open cost** when a lawyer cannot show a per-claim audit trail (sourced quote + URL or named refusal).
+
+**Recurring metric they report upward:** **claims cleared per week** and **claims caught (refused or flagged)** — the gap report row count and UNSOURCED/INDEPENDENCE causes, not model confidence. Hosted desk: `POST /clear` · cold demo: `bash scripts/demo_clearance_desk.sh`.
+
+**Honest limit:** We prove verdict + cause on public scripts today; we do not yet sell a signed E&O endorsement. The buyer is the person who already owns that budget line and needs the audit artifact.

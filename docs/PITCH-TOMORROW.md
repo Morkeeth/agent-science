@@ -28,8 +28,8 @@
 
 **Proof on camera:**
 1. **Hosted** `/visibility/ui?q=ralph+loop+agentic` — transparency pane + CONTRARY stamp (no CLI needed) · live: primary `CONTRARY_TO_RESEARCH`, transparency keys `angles_searched`, `shallow_route`, `imbalance`
-2. `/truths/ui` — ranked queries, **284 claims** (live 2026-09-01; was 265+ at seal)
-3. Compound: same subject twice → `parallel_calls` drop, `corpus_hits` rise — `docs/SEALED-PREDICTION-2026-08-31.md` (A=1→B=0)
+2. `/truths/ui` — ranked queries, **271 claims** (live 2026-09-02; `curl -s …/truths/ui` → Shelf line)
+3. Compound: same subject twice → `parallel_calls` drop, `corpus_hits` rise — `docs/SEALED-PREDICTION-2026-08-31.md` (sealed A=1→B=0; warm shelf may show A=0→B=0 with `corpus_hits=1`)
 
 **Moat:** Positive truths + negative truths (named refusal) + popularity → self-tuning dictionary. Competitors prove the first script. We prove the **second costs less** — and we show *how we searched*.
 
@@ -44,7 +44,7 @@
 | Shipped | Evidence |
 |---------|----------|
 | Truth layer code on `main` | `clearance/visibility.py`, `contrary.py`, `stack_fit.py` |
-| **284 claims** on shelf (live) | hosted `/truths/ui` · `curl -s …/truths/ui` |
+| **284 claims** on shelf (live) | hosted `/truths/ui` · `curl -s …/truths/ui` → **271** claims (2026-09-02) |
 | **Deployed** | `GET /health` → `engine_default: adk`, `parallel_sdk: true` |
 | `/truths/ui` live | `curl …/truths/ui` → dashboard HTML |
 | 52 inbox ingests | `python3 scripts/auto_ingest_inbox.py` → receipt `docs/RECEIPT-agent-science-shape-2026-09-01.md` |
@@ -59,7 +59,7 @@
 |---|--------|------|
 | 1 | Scout film — `docs/FILM-SCOUT-COMMANDS.md` beats 1–3 in terminal | 10 min |
 | 2 | Record ≤180s — lead **transparency WOW**, then one non-EU SOURCED, one refuse | 15 min |
-| 3 | Devpost paste — `docs/DEVPOST-READY.md` (elevator pitch updated below) | 5 min |
+| 3 | Devpost paste — `docs/DEVPOST-WIN.md` | 5 min |
 
 **Do not lead with:** EU-only demos · flywheel metrics as headline · orphan-works full compound (B 503)
 
@@ -111,6 +111,24 @@ open https://agent-science-568004190078.us-central1.run.app/truths/ui
 | "Clearance is crowded" | Clearance is one vertical. Product is daily agentic websearch + truth dictionary |
 | "Where's the compound proof?" | Sealed A=1→B=0 Parallel, corpus_hits=1 on hosted — `SEALED-PREDICTION-2026-08-31.md` |
 | "PeriodCheck wins UX" | They win first-run. We win **economics + transparency + agentic truth layer** |
+
+---
+
+## Claim audit (2026-09-02)
+
+| Claim | Proof | Status |
+|-------|-------|--------|
+| Run A **1** → B **0** Parallel, `corpus_hits=1` | `docs/SEALED-PREDICTION-2026-08-31.md` (cold subject); warm shelf may show A=0 | ✅ sealed |
+| Four partners at runtime | `GET /health` → adk, parallel_sdk, gemini, vertex | ✅ live |
+| `/visibility/ui` CONTRARY + transparency keys | https://agent-science-568004190078.us-central1.run.app/visibility/ui?q=ralph+loop+agentic | ✅ live |
+| **271** claims on shelf | `curl -s …/truths/ui` → Shelf line (2026-09-02) | ✅ live |
+| 52 inbox ingests | `docs/RECEIPT-agent-science-shape-2026-09-01.md` | ✅ receipt |
+| Refused own pitch headline | `fixtures/shift-ai-training-vs-noncommercial.md` via `/clear` | ✅ fixture |
+| Full gate OK | `bash scripts/full_gate.sh` | ✅ script |
+| Cold clone stranger path | `docs/COLD-CLONE-2026-09-02.md` | ✅ transcript |
+| Hard public claim trace | `docs/TRACE-2026-09-02-google-books.md` | ✅ measured |
+
+**Removed / do not say:** 284 claims (stale) · orphan-works full compound on video (B 503)
 
 ---
 
