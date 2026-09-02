@@ -4,7 +4,7 @@
 **Method:** each URL was curled and each script was run on 2026-09-02 (~23:30–23:55 UTC) from a fresh worktree of `main` @ `5d03583`; the branch was then rebased onto `main` @ `a055ba3` (the sibling lane's log-poison fix), which had scrubbed the same two privacy lines in parallel — main's wording kept for both. Outputs are pasted, not quoted from other docs. A claim is **PROVEN** only when the proof is a URL that returned 200 today, a script + its output line, or a file:line that states it.
 **Probe machine:** macOS, Python 3.12, `~/.config/keys/{gemini,parallel}.key` present (so the history control does not early-return).
 
-**Totals:** 35 claims (19 PITCH + 16 SUBMISSION) · **31 PROVEN** · **4 UNPROVEN as written** — P4 ("on camera"), P16 (proof pointed at the wrong file), S14 (buyer names), S15 (E&O numbers); all four softened or re-pointed in the two docs — see §F.
+**Totals:** 35 claims (19 PITCH + 16 SUBMISSION) · **32 PROVEN** · **3 UNPROVEN as written** — P4 ("on camera"), P16 (proof pointed at the wrong file), S14 (buyer names); all softened or re-pointed in the two docs — see §F. **S15 (E&O numbers) resolved 2026-09-03:** the buyer §'s dollar figures now carry primary sources and the unsourced numbers were removed.
 
 ---
 
@@ -188,10 +188,11 @@ Status key: **PROVEN** = URL 200 today / script output pasted above / file:line.
 | S12 | Runtime integrations table (Parallel SDK, Vertex, Cloud Run, ADK) | `/health` (§A) | PROVEN |
 | S13 | Sealed prediction measured A=1→B=0, corpus_hits=1 | P2 | PROVEN |
 | S14 | Buyer names: Chubb Media & Entertainment, Beazley, BBC Studios, Participant | no contact, receipt, or doc in the repo names any of them (`git grep -n "Chubb\|Beazley"` → only SUBMISSION.md) | **UNPROVEN** → replaced by illustrative roles + "no named buyer contacted" |
-| S15 | Budget line $15k–$80k per hour-long doc · 0.5–2% of budget on E&O | no source in the repo (`git grep -nE "15k|80k|0\.5.?–.?2%"` → SUBMISSION.md and the hack.md line that quotes it) | **UNPROVEN** → kept as "working estimate, unsourced — do not quote to a buyer" |
+| S15 | Budget line — E&O premium | **Resolved 2026-09-03.** The percentage frame is wrong-object: no source expresses documentary E&O as % of budget; sources give a flat premium of ~$2,000–$10,000 — Desktop Documentaries (broker C&S International Insurance Brokers, "$2,000 … up to $3,500", undated, read 2026-09-03) and Wrapbook ("$2,500 to $10,000 for a standard three-year term with a $1 million limit", 2025-10-01, read 2026-09-03). The only %-of-budget figure any source gives is *all* insurance combined ≈ 2.5% (Media Services, *Film Production Insurance: A Definitive Guide*, 2022-07-12 — "All adding up to about 2.5% of the film or show's budget"), which is why E&O-as-a-percentage was the wrong object. | **PROVEN** (buyer § figures cited; see Sources there) |
+| S15b | Budget line — $15k–$80k researcher time | **Removed 2026-09-03, no primary source.** Archives access is "a few hundred to several thousand dollars" per collection (Academy Voices, 2024-04-07); there is no union rate card for documentary research — the Archival Producers Alliance (founded 2023) publishes best-practice guidance, not rate minimums (NEA/arts.gov, 2025-03-07). No source produces a $15k–$80k per-hour-long-doc total; we did not manufacture one. | **REMOVED** (deleted from SUBMISSION.md §Buyer) |
 | S16 | Hosted desk `POST /clear` · cold demo `demo_clearance_desk.sh` | §A | PROVEN |
 
-**Counts:** PITCH 19 rows → 17 PROVEN, 2 UNPROVEN as written (P4 "on camera"; P16 wrong proof pointer); SUBMISSION 16 rows → 14 PROVEN, 2 UNPROVEN (S14 buyer names, S15 E&O numbers). Total 35 → **31 PROVEN · 4 UNPROVEN**. P6/P9 were **stale** (271/284 vs live 276) and are counted PROVEN because the object exists and the number was refreshed — they are why the docs now say "re-curl before saying a number".
+**Counts:** PITCH 19 rows → 17 PROVEN, 2 UNPROVEN as written (P4 "on camera"; P16 wrong proof pointer); SUBMISSION 16 rows → 15 PROVEN, 1 UNPROVEN (S14 buyer names); S15 resolved 2026-09-03 (E&O premium sourced; $15k–$80k researcher figure removed as unsourced). Total 35 → **32 PROVEN · 3 UNPROVEN**. P6/P9 were **stale** (271/284 vs live 276) and are counted PROVEN because the object exists and the number was refreshed — they are why the docs now say "re-curl before saying a number".
 
 ---
 
@@ -208,12 +209,12 @@ Status key: **PROVEN** = URL 200 today / script output pasted above / file:line.
 | SUBMISSION | "Controls 127/127" relabelled: tests across 11 suites, proof = `bench_check_docs.py` |
 | SUBMISSION | privacy row dated today, notes the rewrite |
 | SUBMISSION | buyer names (Chubb, Beazley, BBC Studios, Participant) **removed** → illustrative roles, "no named buyer has been contacted yet" |
-| SUBMISSION | $15k–$80k / 0.5–2% **softened** to "working estimate, unsourced — do not quote to a buyer until cited" |
+| SUBMISSION | E&O budget line **sourced 2026-09-03**: flat premium ~$2,000–$10,000 cited to Desktop Documentaries (C&S broker) + Wrapbook; the "$15k–$80k researcher time" and "0.5–2% of budget" numbers **removed** as unsourced (no primary source; %-of-budget is the wrong object — only all-insurance-combined ≈2.5% has a source) |
 
 ## G · Not done / could not do
 
 - Did not watch `demo/demo-final.mp4` to confirm the refusal beat is in the cut (only duration measured). Oscar or the film lane confirms before saying "on camera".
-- Did not source the E&O budget numbers. A cited figure (insurer rate card, guild survey) replaces the estimate.
+- E&O budget numbers **now sourced (2026-09-03):** the premium is a flat fee (~$2,000–$10,000), cited to a broker interview (C&S International) and Wrapbook; the "$15k–$80k researcher time" and "0.5–2% of budget" figures were **removed** — no primary source, and archival research has no union rate card (Archival Producers Alliance publishes guidance, not rates). Could not verify a broker's own rate page at the object (Front Row Insurance returns 403 to automated fetches), so it is not cited even though a search index surfaced documentary-specific numbers there.
 - No deploy, no push, no Devpost edit, no key touched. Key files were only `ls`-ed to confirm the history control would not early-return.
 - `docs/LONG-RUN-RECEIPT-2026-09-02.md` and `research-inbox/2026-09-02-claim.md` were generated in the **main** tree by my `full_gate.sh` run and left untracked there; `cache/search_receipts.jsonl` gained rows from the demo runs and is left unstaged.
 - Another lane was editing `agent_science.py`, `clearance/refusal_log.py`, `cloud/service.py` in the main tree while this ran (mtimes 23:46–23:47Z); it landed as `a055ba3` on `main` and this branch now sits on top of it. The cold-clone verify below was re-run after the rebase.
