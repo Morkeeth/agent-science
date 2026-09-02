@@ -3,7 +3,8 @@
 **Event:** [Agentic Cinema](https://agentic-cinema.devpost.com/) · **Deadline:** Sep 9 2026 14:00 PDT  
 **Track:** Parallel  
 **Repo:** https://github.com/Morkeeth/agent-science (MIT)  
-**Hosted:** https://agent-science-568004190078.us-central1.run.app
+**Hosted:** https://agent-science-568004190078.us-central1.run.app  
+**Claims → evidence:** `docs/CLAIMS-MAP-2026-09-02.md`
 
 ---
 
@@ -35,11 +36,11 @@ https://agent-science-568004190078.us-central1.run.app/visibility/ui?q=ralph+loo
 |---|------|--------|-------|
 | 1 | Hosted URL live | ✅ | above |
 | 2 | Public repo + MIT | ✅ | GitHub |
-| 3 | Controls 127/127 | ✅ | `bash scripts/full_gate.sh` |
+| 3 | Controls 127/127 (tests across 11 suites, 72 of them mutation-watched) | ✅ 2026-09-02 | `python3 scripts/bench_check_docs.py` (step 5 of `full_gate.sh`) |
 | 4 | Sealed compound A=1→B=0 | ✅ | `docs/SEALED-PREDICTION-2026-08-31.md` |
 | 5 | Demo video ≤180s | ✅ built | `demo/demo-final.mp4` (102s) · Oscar uploads |
 | 6 | Devpost submit | [ ] | `docs/DEVPOST-WIN.md` |
-| 7 | Privacy grep = 0 | ✅ | `bash scripts/privacy_grep.sh` |
+| 7 | Privacy grep = 0 | ✅ 2026-09-02 (control rewritten on `git grep`; the old one scanned 0 files) | `bash scripts/privacy_grep.sh` |
 
 ---
 
@@ -80,9 +81,9 @@ Second `/clear` on the same subject: `corpus_hits ≥ 1` and Run B `parallel_cal
 
 ## Buyer
 
-**Role:** E&O underwriter or documentary clearance supervisor at a production company or specialty insurer (e.g. Chubb Media & Entertainment, Beazley, or in-house clearance at BBC Studios / Participant).
+**Role:** E&O underwriter or documentary clearance supervisor at a production company or specialty insurer (illustrative roles — the media & entertainment desk at a specialty insurer, or an in-house clearance desk at a studio; **no named buyer has been contacted yet**).
 
-**Budget line:** Errors & Omissions insurance premium and clearance labor — typically **$15k–$80k per hour-long documentary** in researcher time plus **0.5–2% of production budget** on E&O premium where uncleared claims force exclusions or holdbacks.
+**Budget line:** Errors & Omissions insurance premium and clearance labor. **Working estimate, unsourced (2026-09-02):** $15k–$80k per hour-long documentary in researcher time plus 0.5–2% of production budget on E&O premium where uncleared claims force exclusions or holdbacks — no citation in this repo; do not quote these numbers to a buyer until one is added.
 
 **What they cancel:** Manual fact-check passes on every narration revision, duplicate researcher hours when the same orphan-works / settlement claims recur across episodes, and the **re-open cost** when a lawyer cannot show a per-claim audit trail (sourced quote + URL or named refusal).
 

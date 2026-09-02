@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-"""Scrub Oscar-local paths from tracked text files. Run once, then privacy_grep.sh."""
+"""Scrub local home paths from tracked text files. Run once, then privacy_grep.sh.
+
+Patterns match any /Users/<name>/CODE/... path so this file itself carries no home path."""
 from __future__ import annotations
 
 import re
@@ -10,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 EXCLUDE = re.compile(r"\.(png|jpg|jpeg|gif|webp)$|cache/documents\.json$|fixtures/scripts/")
 
 REPLACEMENTS = [
-    (re.compile(r"/Users/morkeeth/CODE/cleared"), "agent-science"),
+    (re.compile(r"/Users/[^/\s]+/CODE/cleared"), "agent-science"),
     (re.compile(r"~/CODE/cleared"), "agent-science"),
     (re.compile(r"bash ~/CODE/cleared/"), "bash "),
     (re.compile(r"cd ~/CODE/cleared"), "cd agent-science"),
@@ -27,18 +29,18 @@ REPLACEMENTS = [
     (re.compile(r"~/CODE/flipbook"), "flipbook (sibling repo)"),
     (re.compile(r"~/CODE/voice-generation"), "voice-generation (sibling repo)"),
     (re.compile(r"~/CODE/[^\s`\"']+"), "<external-repo>"),
-    (re.compile(r"/Users/morkeeth/CODE/[^\s`\"']+"), "<external-repo>"),
+    (re.compile(r"/Users/[^/\s]+/CODE/[^\s`\"']+"), "<external-repo>"),
     (re.compile(r"hack-agent-science"), "agent-science"),
     (re.compile(r"Morkeeth/hack-agent-science"), "Morkeeth/agent-science"),
     (re.compile(r"vault `01 Projects/Hackathons/hack-ideation-2026-08-22.md`"), "hackathon ideation notes (2026-08-22)"),
-    (re.compile(r'"cwd": "/Users/morkeeth/CODE/cleared"'), '"cwd": "<path-to-clone>"'),
-    (re.compile(r"Repo `/Users/morkeeth/CODE/cleared`"), "Repo `agent-science`"),
-    (re.compile(r"repo `/Users/morkeeth/CODE/cleared`"), "repo `agent-science`"),
+    (re.compile(r'"cwd": "/Users/[^/\s]+/CODE/cleared"'), '"cwd": "<path-to-clone>"'),
+    (re.compile(r"Repo `/Users/[^/\s]+/CODE/cleared`"), "Repo `agent-science`"),
+    (re.compile(r"repo `/Users/[^/\s]+/CODE/cleared`"), "repo `agent-science`"),
     (re.compile(r"Repo `~/CODE/cleared`"), "Repo `agent-science`"),
     (re.compile(r"in `~/CODE/cleared`"), "in `agent-science`"),
     (re.compile(r"L5, Agent Science, `~/CODE/cleared`"), "L5, Agent Science, `agent-science`"),
     (re.compile(r"git clone --branch [^\s]+ ~/CODE/cleared"), "git clone --branch <branch> agent-science"),
-    (re.compile(r"ingest writes into the measured population: /Users/morkeeth/CODE/cleared/research-corpus"),
+    (re.compile(r"ingest writes into the measured population: /Users/[^/\s]+/CODE/cleared/research-corpus"),
      "ingest writes into the measured population: research-corpus"),
     (re.compile(r"PITCH\.md line 58-61, `~/CODE/hack-fleet-ata/PITCH\.md`"),
      "PITCH.md line 58-61, hack-fleet-ata PITCH.md"),

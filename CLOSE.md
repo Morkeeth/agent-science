@@ -8,6 +8,13 @@ status: BUILD COMPLETE — blocked only on Oscar's clicks
 
 # CLOSING FOUR LINES
 
+> **Correction 2026-09-02 (Fable):** the record below is dated 2026-08-23 and is kept as written.
+> Two facts have moved: the repo has been **public since 2026-08-22** (GitHub `PublicEvent
+> 2026-08-22T17:17:41Z`; MIT), so "nothing public" and "repo goes public at submission" are
+> stale; and the keys **never entered the repo** — control: `git log -p --all` grep in
+> `tests/test_watch_it_go_red.py` ("the key is nowhere in the tree"), run 2026-09-02, 0 keys,
+> fixtures only. The plaintext sat in an old Cloud Run revision; rotation = Oscar's console.
+
 **HEADLINE**
 A clearance desk that refuses to round up. It cleared 0 of 10 on a real script and I
 called it rigour; it was a category error. Fixed, it clears what can be cleared, refuses

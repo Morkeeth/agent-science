@@ -23,6 +23,7 @@ bash scripts/new_user_trial.sh     # quick hosted smoke
 - Verbatim span or REFUSE — no paraphrase
 - `science_lookup` defaults `live=false`
 - Outward acts (video, Devpost submit, key rotation in console): **Oscar only**
+- Keys never in repo — control: `git log -p --all` grep in `tests/test_watch_it_go_red.py`, run 2026-09-02 → 0 keys (fixtures only). Rotation = Oscar's console. Repo public since 2026-08-22.
 
 ## Product spine
 

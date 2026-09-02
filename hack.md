@@ -14,11 +14,12 @@ supersedes: docs/PHASE0-LADDER.md ClickHouse-track note (runtime track is Parall
 - **09:0x:** cold clone from GitHub to `/tmp/agent-science-cold`, README as written: `verify_cold_clone.sh` → 6/6 partner wiring · 127/127 SUBMISSION-PACK · eval gate b=0 c=1 p=1.0 · exit 0; `demo_truth_layer.sh` exit 0. Live `/health` 200. Repo PUBLIC since 2026-08-22; `git log -p --all` key scan → only fixtures (`pk-live-abc`). No key ever entered the repo; console rotation = Oscar's word. Final tweaks: fleet-ops `FINAL-TWEAKS-2026-09-02.md`.
 - **14:0x:** main 5d03583 carries the cold-clone transcript + buyer § (E&O underwriter; $15k–80k researcher time per hour-long doc; 0.5–2% premium). Re-clone 14:0x → cold verify OK. Privacy grep scrubbed (COLD-CLONE quote + hack.md path).
 - **21:5x:** Log poison fix — `no_independent_source` no longer freezes cross-subject reuse; GREEN upgrades poisoned rows. Buyer SOURCED+CATCH trace measured locally (EUR-Lex + overnight-museum refuse). Desk report shows buyer-week cleared/caught strip.
+- **23:5x (Fable, branch `fable/claims-map-2026-09-02`):** the 1 privacy file was `scripts/scrub_privacy_paths.py` (its own regexes) → task grep 0. `scripts/privacy_grep.sh` was a **false green** (`xargs rg` with `rg` a shell function → scanned 0 files, printed OK); rewritten on `git grep`, proven red on a planted hit. Claims map `docs/CLAIMS-MAP-2026-09-02.md`: 35 claims, 31 PROVEN, 4 UNPROVEN (softened). Long run 19/19 A=1→B=0. Merge hazard: main tree holds an untracked `docs/LONG-RUN-RECEIPT-2026-09-02.md` that the branch also adds.
 
 
 **Repo:** Morkeeth/agent-science · **Event:** Agentic Cinema · Sep 9 2026 14:00 PDT  
 **Spine:** **Agent Science** — the truth layer for what people believe and use. Companion (B) lead; clearance (A) on the same layer. Verify-or-refuse; registry compounds.  
-**Constitution:** verbatim span or REFUSE — never paraphrase. No public repo until keys rotated. No rename. No `--set-env-vars` secrets. Slice 1 deploy/keys/video/Devpost: Oscar only.
+**Constitution:** verbatim span or REFUSE — never paraphrase. Keys never in repo (control: `git log -p --all` grep, run 2026-09-02 → 0 keys, fixtures only; an old Cloud Run revision held plaintext → rotation = Oscar console). Repo public since 2026-08-22 (GitHub `PublicEvent 2026-08-22T17:17:41Z`). No rename. No `--set-env-vars` secrets. Slice 1 deploy/keys/video/Devpost: Oscar only.
 
 > **Handbook:** ladder + judge pack below. **Living status:** `docs/STATUS.md` · `CLAUDE.md`  
 > Detail: `docs/MOONSHOT-MEMO-2026-08-31.md` · `VISION-2026-08.md` · `AGENTS.md`
@@ -84,7 +85,7 @@ Paste a documentary script; get every checkable claim back as a verbatim quote w
 
 **Not in field:** ArkivX, external "truths by agentic coders" feed — **no such ingest exists**; see §WEBSEARCH DATA.
 
-**Published bar:** PeriodCheck has public repo + Devpost + live eval. We have **hosted URL** — still need **video + public repo** to match.
+**Published bar:** PeriodCheck has public repo + Devpost + live eval. We have **hosted URL + public repo** (public since 2026-08-22) + video built (`demo/demo-final.mp4`, 102s) — still need **video upload + Devpost** to match.
 
 ---
 
@@ -139,7 +140,7 @@ fleet websearch → research-corpus/ [CLAIM][URL]
 | Warm shelf | Reused subject → A=0 Parallel | Video: **fresh subject** or show `corpus_hits` not Parallel drop |
 | Orphan-works hosted B | Run B **503** | Offline receipt authoritative; don't claim full script on video |
 | C5 headline refuse | "94% of film archives" → `search_found_no_admissible_source` | **Video beat** — product refused our own pitch |
-| Keys leaked | Plaintext in old Cloud Run revision | **Oscar only** — rotate before public repo |
+| Keys leaked | Plaintext in an old Cloud Run revision — never in the repo (history grep 2026-09-02) | **Oscar only** — rotate in console; repo is already public (since 2026-08-22) |
 
 ### Stranger path (one command)
 
@@ -193,7 +194,7 @@ bash scripts/new_user_trial.sh
 | # | Slice | Done when | Owner |
 |---|-------|-----------|-------|
 | 1 | **Video ≤180s** | Public YouTube/Vimeo URL on Devpost | Oscar |
-| 2 | **Rotate keys + public repo** | MIT license visible; no secrets in history | Oscar |
+| 2 | **Rotate keys (console)** — repo already public since 2026-08-22, MIT visible, history grep 0 keys (2026-09-02) | Console rotation done (Oscar's word) | Oscar |
 | 3 | **Devpost + sealed prediction** | `docs/SUBMISSION-PACK-2026-08-29.md` pasted; logged-out page verified | Oscar |
 | 4 | **Fix top popular alias** | `Directive 2012/28/EU` → free hit | build (30 min, non-blocking) |
 
@@ -220,7 +221,7 @@ bash scripts/new_user_trial.sh
 
 ## ❓ OPEN QUESTIONS
 
-- **Rotate the leaked Parallel/Gemini keys — OSCAR ONLY.** Plaintext Cloud Run revision cannot be un-written; rotate before public repo.
+- **Rotate the leaked Parallel/Gemini keys — OSCAR ONLY (console).** Plaintext sat in an old Cloud Run revision, never in the repo (`git log -p --all` grep, run 2026-09-02: 0 keys, fixtures only). Repo is public since 2026-08-22; rotation is independent of that.
 - ~~RC5 substring false-GREEN~~ **CLOSED 2026-08-31** — `docs/FINDING-semantic-guard-2026-08-31.md`.
 - Design partner session — Oscar outreach (slice 6).
 - **EYES:** do winner angles survive PeriodCheck + Clearance Compass field? (next step)

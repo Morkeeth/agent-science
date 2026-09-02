@@ -1,7 +1,8 @@
 # Pitch tomorrow · Agent Science
 
 **For Oscar · 2026-09-01 morning**  
-**Deadline:** Agentic Cinema · 2026-09-09 14:00 PDT · **8 days**
+**Deadline:** Agentic Cinema · 2026-09-09 14:00 PDT · **7 days** (as of 2026-09-02)  
+**Claims → evidence:** `docs/CLAIMS-MAP-2026-09-02.md` — every number below is mapped to a URL, a script output, or a file:line
 
 ---
 
@@ -14,7 +15,9 @@
 > `corpus_hits=1` on repeat. Four partners wired at runtime: Vertex, Parallel, Cloud Run, ADK.
 >
 > **Constraint:** if the document does not contain the exact passage, refuse — never paraphrase,
-> never infer. We refused our own pitch headline on camera because of this rule.
+> never infer. We refused our own pitch headline in the product because of this rule
+> (hosted `POST /clear` on "94% of film archives…", 2026-09-02 → `UNSOURCED · search_found_no_admissible_source`);
+> the film script places that beat at 1:00 — say "on camera" only after checking the cut.
 >
 > Clearance and EU regulation? One vertical on the same layer — not the whole product.
 
@@ -27,8 +30,8 @@
 **Product:** Agent Science websearch returns a **full visibility panel** — primary verdict, transparency (angles searched, shallow-route warning, imbalance), field adoption (★), blogs, fleet peers, and **stack-fit**: does this truth fit *your* repo, and what improves if you adopt it?
 
 **Proof on camera:**
-1. **Hosted** `/visibility/ui?q=ralph+loop+agentic` — transparency pane + CONTRARY stamp (no CLI needed) · live: primary `CONTRARY_TO_RESEARCH`, transparency keys `angles_searched`, `shallow_route`, `imbalance`
-2. `/truths/ui` — ranked queries, **271 claims** (live 2026-09-02; `curl -s …/truths/ui` → Shelf line)
+1. **Hosted** `/visibility/ui?q=ralph+loop+agentic` — transparency pane + CONTRARY stamp (no CLI needed) · live 2026-09-02: UI shows primary `CONTRARY_TO_RESEARCH` + the transparency pane; the keys `angles_searched`, `shallow_route`, `imbalance` are in the JSON at `/visibility?q=ralph+loop+agentic`
+2. `/truths/ui` — ranked queries, **276 claims** (live 2026-09-02 ~23:40Z; `curl -s …/truths/ui` → `Shelf: 276 claims · hit rate 0.66 · 191 queries logged`; the shelf grows with use — re-curl before saying a number)
 3. Compound: same subject twice → `parallel_calls` drop, `corpus_hits` rise — `docs/SEALED-PREDICTION-2026-08-31.md` (sealed A=1→B=0; warm shelf may show A=0→B=0 with `corpus_hits=1`)
 
 **Moat:** Positive truths + negative truths (named refusal) + popularity → self-tuning dictionary. Competitors prove the first script. We prove the **second costs less** — and we show *how we searched*.
@@ -44,12 +47,12 @@
 | Shipped | Evidence |
 |---------|----------|
 | Truth layer code on `main` | `clearance/visibility.py`, `contrary.py`, `stack_fit.py` |
-| **284 claims** on shelf (live) | hosted `/truths/ui` · `curl -s …/truths/ui` → **271** claims (2026-09-02) |
+| **276 claims** on shelf (live 2026-09-02) | hosted `/truths/ui` · `curl -s …/truths/ui` → Shelf line **276** · hit rate 0.66 |
 | **Deployed** | `GET /health` → `engine_default: adk`, `parallel_sdk: true` |
 | `/truths/ui` live | `curl …/truths/ui` → dashboard HTML |
 | 52 inbox ingests | `python3 scripts/auto_ingest_inbox.py` → receipt `docs/RECEIPT-agent-science-shape-2026-09-01.md` |
 | Film scout | `docs/FILM-SCOUT-COMMANDS.md` |
-| Full gate | `bash scripts/full_gate.sh` OK |
+| Full gate | `bash scripts/full_gate.sh` 2026-09-02 — steps 1–6 OK (6/6 secrets · 72/72 · 127/127 · privacy · cold clone); hosted long run **19/19** on the clean re-run (A=1→B=0, corpus_hits=1, fresh subject) — `docs/CLAIMS-MAP-2026-09-02.md` §C |
 
 ---
 
@@ -121,14 +124,14 @@ open https://agent-science-568004190078.us-central1.run.app/truths/ui
 | Run A **1** → B **0** Parallel, `corpus_hits=1` | `docs/SEALED-PREDICTION-2026-08-31.md` (cold subject); warm shelf may show A=0 | ✅ sealed |
 | Four partners at runtime | `GET /health` → adk, parallel_sdk, gemini, vertex | ✅ live |
 | `/visibility/ui` CONTRARY + transparency keys | https://agent-science-568004190078.us-central1.run.app/visibility/ui?q=ralph+loop+agentic | ✅ live |
-| **271** claims on shelf | `curl -s …/truths/ui` → Shelf line (2026-09-02) | ✅ live |
+| **276** claims on shelf | `curl -s …/truths/ui` → `Shelf: 276 claims` (2026-09-02 ~23:40Z) | ✅ live |
 | 52 inbox ingests | `docs/RECEIPT-agent-science-shape-2026-09-01.md` | ✅ receipt |
-| Refused own pitch headline | `fixtures/shift-ai-training-vs-noncommercial.md` via `/clear` | ✅ fixture |
-| Full gate OK | `bash scripts/full_gate.sh` | ✅ script |
+| Refused own pitch headline | hosted `POST /clear` on `94% of film archives are unclearable for AI training.` → `C1 · UNSOURCED · search_found_no_admissible_source` (2026-09-02, 1 Parallel call) · `PITCH.md` §C5 · `cache/search_receipts.jsonl` (`n_candidates: 0`) | ✅ live |
+| Full gate OK | `bash scripts/full_gate.sh` — steps 1–6 OK 2026-09-02; step 7 long run 19/19 on clean re-run (`docs/CLAIMS-MAP-2026-09-02.md`) | ✅ script |
 | Cold clone stranger path | `docs/COLD-CLONE-2026-09-02.md` | ✅ transcript |
 | Hard public claim trace | `docs/TRACE-2026-09-02-google-books.md` | ✅ measured |
 
-**Removed / do not say:** 284 claims (stale) · orphan-works full compound on video (B 503)
+**Removed / do not say:** 284 and 271 claims (stale — live is 276 on 2026-09-02) · "refused on camera" until the cut is checked · orphan-works full compound on video (B 503)
 
 ---
 
