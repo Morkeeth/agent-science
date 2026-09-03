@@ -8,6 +8,8 @@
 >
 > **Re-verified 2026-09-01:** same delta +1; see `docs/RECEIPT-partner-integrations-night-2026-09-01.md` §6.
 
+> **Re-verified 2026-09-03:** holdout freeze + scorer symmetry gates shipped; see `docs/RECEIPT-night-wave-2026-09-03.md`.
+
 # QWEN EVAL GATE — alternative arm · 2026-08-30
 
 **Gate item:** Alternative arm named and run — competent baseline without this project, identical inputs, offline.
@@ -112,6 +114,8 @@ Re-derives all 9 suite counts against `docs/SUBMISSION-PACK-2026-08-29.md` — e
 - [x] Alternative arm named and run
 - [x] Ablation with measured delta (delta=0; RC5 both false-GREEN)
 - [x] External anchor — live rightsstatements.org (`scripts/eval_external_anchor.py`)
+- [x] Holdout frozen — `python3 scripts/eval_verify_holdout.py` (MANIFEST pins set.json + docs)
+- [x] Scorer symmetrical — `python3 scripts/eval_scorer_symmetry.py` (delivered SOURCED/UNSOURCED only)
 - [x] Offline path with no API key
 - [x] Wilson CI + McNemar (n=6)
 - [x] Honesty carries worst number (tie + RC5 false-GREEN both arms)

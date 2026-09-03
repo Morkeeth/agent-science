@@ -33,6 +33,10 @@ done
 echo "--- 5. Docs gate ---"
 python3 scripts/bench_check_docs.py
 
+echo "--- 5a. Qwen eval gates (holdout + scorer symmetry) ---"
+python3 scripts/eval_verify_holdout.py
+python3 scripts/eval_scorer_symmetry.py
+
 echo "--- 5b. Privacy (no home/~/CODE paths in tracked files) ---"
 bash scripts/privacy_grep.sh
 

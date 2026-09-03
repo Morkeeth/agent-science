@@ -1,0 +1,11 @@
+{
+  "frozen_at": "2026-08-22T21:30:00Z",
+  "labelled_before_tuning": true,
+  "note": "Hashes pin the held-out refusal set BEFORE any engine tuning. eval_verify_holdout.py fails if these drift.",
+  "files": {
+    "set.json": "43be938daa77baff294d9f70299dfc5a9d9ba4f78849035aa10755a85d7fb01a",
+    "docs/cne-status-only.html": "6c9e74fee2a6189fda830e3c03295bf39f5226a573c755b978ce6f073892cac6",
+    "docs/eur-lex-orphan-snippet.html": "d726bc9da1c93620d1bc3075a945dc4b5e78e32db0388e73f177ac179d6a7553",
+    "docs/wrong-doc-no-cne.html": "33fe2b9af8a742f4d02a0b2abeca95e24bda421c613a996b328398c642ff7378"
+  }
+}
