@@ -3,7 +3,8 @@
 **Event:** [Agentic Cinema](https://agentic-cinema.devpost.com/) · **Deadline:** Sep 9 2026 14:00 PDT  
 **Track:** Parallel  
 **Repo:** https://github.com/Morkeeth/agent-science (MIT)  
-**Hosted:** https://agent-science-568004190078.us-central1.run.app
+**Hosted:** https://agent-science-568004190078.us-central1.run.app  
+**Claims → evidence:** `docs/CLAIMS-MAP-2026-09-02.md`
 
 ---
 
@@ -35,11 +36,11 @@ https://agent-science-568004190078.us-central1.run.app/visibility/ui?q=ralph+loo
 |---|------|--------|-------|
 | 1 | Hosted URL live | ✅ | above |
 | 2 | Public repo + MIT | ✅ | GitHub |
-| 3 | Controls 127/127 | ✅ | `bash scripts/full_gate.sh` |
+| 3 | Controls 127/127 (tests across 11 suites, 72 of them mutation-watched) | ✅ 2026-09-02 | `python3 scripts/bench_check_docs.py` (step 5 of `full_gate.sh`) |
 | 4 | Sealed compound A=1→B=0 | ✅ | `docs/SEALED-PREDICTION-2026-08-31.md` |
 | 5 | Demo video ≤180s | ✅ built | `demo/demo-final.mp4` (102s) · Oscar uploads |
 | 6 | Devpost submit | [ ] | `docs/DEVPOST-WIN.md` |
-| 7 | Privacy grep = 0 | ✅ | `bash scripts/privacy_grep.sh` |
+| 7 | Privacy grep = 0 | ✅ 2026-09-02 (control rewritten on `git grep`; the old one scanned 0 files) | `bash scripts/privacy_grep.sh` |
 
 ---
 
@@ -80,9 +81,15 @@ Second `/clear` on the same subject: `corpus_hits ≥ 1` and Run B `parallel_cal
 
 ## Buyer
 
-**Role:** E&O underwriter or documentary clearance supervisor at a production company or specialty insurer (e.g. Chubb Media & Entertainment, Beazley, or in-house clearance at BBC Studios / Participant).
+**Role:** E&O underwriter or documentary clearance supervisor at a production company or specialty insurer (illustrative roles — the media & entertainment desk at a specialty insurer, or an in-house clearance desk at a studio; **no named buyer has been contacted yet**).
 
-**Budget line:** Errors & Omissions insurance premium and clearance labor — typically **$15k–$80k per hour-long documentary** in researcher time plus **0.5–2% of production budget** on E&O premium where uncleared claims force exclusions or holdbacks.
+**Budget line:** Errors & Omissions insurance premium and clearance/research labor. Documentary E&O is a **flat premium, not a percentage of budget** — roughly **$2,000–$10,000**: about $2,000–$3,500 for festival-to-showcase coverage, and $2,500–$10,000 for the standard three-year term at a $1M limit. The earlier repo estimate — a five-figure researcher-time cost per hour-long documentary plus a 0.5–2%-of-budget premium — is **removed as unsourced**: no primary source supports either number, no source frames E&O as a percentage of budget, and there is no union rate card for documentary research (the removed figures and this reasoning are recorded in §F of the claims map). Documented archive-access costs run a few hundred to several thousand dollars per collection; we do not convert that into a per-film total.
+
+**Sources (§Buyer figures, each read 2026-09-03):**
+- E&O $2,000–$3,500 (festival-to-showcase): Desktop Documentaries, *Film Production Insurance*, undated — *"according to an interview on Doc Roundup with Debra Kozee, president and founder of C&S International Insurance Brokers, the cost of E&O insurance can run anywhere from $2,000 for 'festival coverage' up to $3,500 depending where the film is showcased."* https://www.desktop-documentaries.com/film-production-insurance.html
+- E&O $2,500–$10,000 (three-year, $1M limit): Wrapbook, *Get the Lowdown on Errors and Omissions Insurance*, dated 2025-10-01 — *"For independent projects, E&O policies often range from $2,500 to $10,000 for a standard three-year term with a $1 million limit."* https://www.wrapbook.com/blog/errors-and-omissions-insurance
+- Archive-access "a few hundred to several thousand dollars": Academy Voices, *How Much Does It Cost to Make a Documentary*, dated 2024-04-07 — *"accessing archives or special collections could cost anywhere from a few hundred to several thousand dollars."* https://www.academyvoices.com/blog/how-much-does-it-cost-to-make-a-documentary-a-complete-breakdown
+- No union rate card for research: NEA (arts.gov), *Tech Check: Archival Producers Alliance*, dated 2025-03-07 — the Archival Producers Alliance, *"founded … in 2023,"* publishes best-practice guidance, not negotiated rate minimums. https://www.arts.gov/stories/blog/2025/nea-tech-check-archival-producers-alliance
 
 **What they cancel:** Manual fact-check passes on every narration revision, duplicate researcher hours when the same orphan-works / settlement claims recur across episodes, and the **re-open cost** when a lawyer cannot show a per-claim audit trail (sourced quote + URL or named refusal).
 
