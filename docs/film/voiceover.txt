@@ -1,0 +1,40 @@
+@voice am_michael
+@lang a
+@speed 1.0
+@pause 350
+# Agent Science, Agentic Cinema, one take. Read as written. Numbers are the live values on 2026-09-03.
+
+# Beat 0, the problem (0:00 to 0:20)
+Every agentic builder asks the same questions and gets one summarized answer with footnotes.
+You cannot see what was skipped. You cannot tell a real source from a confident guess.
+Agent Science is the truth layer for what people believe and use. | 700
+
+# Beat 1, the refusal (0:20 to 0:55)
+The rule is simple. If no document we read states it, we refuse. We never paraphrase. We never infer.
+So we pointed it at our own pitch headline: ninety four percent of film archives are unclearable for A I training.
+One claim in. Zero sourced. One unsourced. The cause: we searched, and no document we read states it.
+Zero metered calls, because the shelf already remembered the miss. | 700
+
+# Beat 5, the sourced verdict (0:55 to 1:25)
+Now a claim that holds. The orphan works directive, twenty twelve, twenty eight.
+One claim in. One sourced. The exact sentence from EUR-Lex, with the URL, marked primary: E U law.
+Parallel calls, zero. Corpus hits, one. It was cleared once on another production, so this production gets it free. | 700
+
+# Beat 2, the verdict with transparency (1:25 to 2:05)
+Ask a live one: ralph loop agentic.
+The verdict is contrary to research. The field is ahead of the papers.
+Under it, the whole search: every variant, every route, every tier, and an imbalance warning, because the evidence was GitHub stars only.
+Not one answer. The search itself, shown. | 700
+
+# Beat 3, the shelf (2:05 to 2:30)
+Every claim it clears joins a shelf. Hundreds of claims, growing every time someone asks.
+The top queries are ranked by asks, with sourced and miss counts.
+The most asked things get cheaper for everyone. | 700
+
+# Beat 4, the buyer (2:30 to 2:55)
+One buyer already owns this budget line: documentary errors and omissions insurance.
+E and O is a flat premium, about two to ten thousand dollars per film. We cite the broker.
+The clearance labor under it is what we cancel: a per claim audit trail, sourced quote or named refusal. | 700
+
+# Close (2:55 to 3:00)
+Agent Science. Parallel search at runtime, Gemini on Vertex, Cloud Run, A D K. Link in the description.
