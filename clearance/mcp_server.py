@@ -25,6 +25,11 @@ TOOLS = [
                 "query": {"type": "string", "description": "What to look up"},
                 "live": {"type": "boolean", "description": "Paid Parallel+Gemini on miss", "default": False},
                 "subject": {"type": "string", "description": "Production tag for compounding", "default": "stack"},
+                "traffic": {
+                    "type": "string",
+                    "description": "human|gate|fleet|demo — analytics class (default human for MCP)",
+                    "default": "human",
+                },
             },
             "required": ["query"],
         },
@@ -41,6 +46,7 @@ TOOLS = [
                 "query": {"type": "string", "description": "What to look up"},
                 "live": {"type": "boolean", "description": "Live Parallel on registry miss", "default": True},
                 "subject": {"type": "string", "description": "Production tag for compounding", "default": "stack"},
+                "traffic": {"type": "string", "default": "human"},
             },
             "required": ["query"],
         },
@@ -157,6 +163,32 @@ TOOLS = [
             "required": ["script"],
         },
     },
+    {
+        "name": "science_use_bar",
+        "description": (
+            "USE-BAR interceptor: run truth layer BEFORE any raw websearch and write a "
+            "session receipt (~/.agent-science/session-receipts.jsonl). Prefer this (or "
+            "science_visibility) over browser search. Returns lookup/visibility result + "
+            "receipt_id. Do not claim Oscar uses Agent Science every search without a "
+            "filled session receipt."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "query": {"type": "string"},
+                "mode": {
+                    "type": "string",
+                    "enum": ["lookup", "visibility"],
+                    "default": "lookup",
+                },
+                "live": {"type": "boolean", "default": False},
+                "traffic": {"type": "string", "default": "human"},
+                "subject": {"type": "string", "default": "stack"},
+                "session_id": {"type": "string"},
+            },
+            "required": ["query"],
+        },
+    },
 ]
 
 
@@ -186,6 +218,18 @@ def handle_tool(name: str, arguments: dict) -> str:
             arguments["query"],
             subject=arguments.get("subject", "stack"),
             live=live,
+            traffic=arguments.get("traffic", "human"),
+        ), indent=2)
+
+    if name == "science_use_bar":
+        from clearance import use_path
+        return json.dumps(use_path.intercept(
+            arguments["query"],
+            mode=arguments.get("mode", "lookup"),
+            live=bool(arguments.get("live", False)),
+            traffic=arguments.get("traffic", "human"),
+            subject=arguments.get("subject", "stack"),
+            session_id=arguments.get("session_id"),
         ), indent=2)
 
     if name == "science_popular":

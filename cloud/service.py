@@ -349,6 +349,25 @@ article{{padding:1rem 0;border-bottom:1px solid var(--line)}}
 
 def _popular_page(limit: int = 15) -> str:
     data = query_analytics.report(db=_log_db(), limit=limit)
+    notes = data.get("traffic_notes") or {}
+    note_html = "".join(f"<li>{_esc(n)}</li>" for n in (notes.get("notes") or []))
+    by_t = notes.get("by_traffic") or {}
+    traffic_meta = (
+        f"asks={notes.get('total_asks', 0)} · "
+        f"human={by_t.get('human', 0)} gate={by_t.get('gate', 0)} "
+        f"demo={by_t.get('demo', 0)} fleet={by_t.get('fleet', 0)} "
+        f"unknown={by_t.get('unknown', 0)}"
+        + (" · <strong>POLLUTED</strong>" if notes.get("polluted") else "")
+    )
+    human_rows = []
+    for r in (data.get("popular_human") or [])[:limit]:
+        human_rows.append(
+            f"<tr><td>{_esc(r['asks'])}</td>"
+            f"<td>{_esc(r.get('example', '')[:80])}</td>"
+            f"<td>{_esc(r.get('sourced', 0))}</td>"
+            f"<td>{_esc(r.get('not_cleared', 0))}</td>"
+            f"<td>{_esc(r.get('live_asks') or 0)}</td></tr>"
+        )
     rows = []
     for r in data.get("popular_queries", [])[:limit]:
         rows.append(
@@ -386,16 +405,24 @@ th{{font-family:monospace;font-size:.7rem;text-transform:uppercase;letter-spacin
 h2{{font-size:1rem;margin:2rem 0 .5rem}}
 ul{{padding-left:1.2rem}}
 code{{font-size:.85rem}}
+.notes{{background:#f3f1ec;padding:.75rem 1rem;border-left:3px solid #B42318}}
 </style></head><body><div class="wrap">
 <p><a href="/">← desk</a> · <a href="/registry">registry</a></p>
 <h1>Popular queries</h1>
-<p class="meta">Truth dictionary analytics — what devs ask, what to pre-clear next.
-JSON: <a href="/popular">/popular</a></p>
+<p class="meta">Truth dictionary analytics — human vs gate/demo split.
+JSON: <a href="/popular">/popular</a> · {traffic_meta}</p>
+<div class="notes"><strong>Traffic notes</strong><ul>{note_html or '<li>No pollution notes.</li>'}</ul></div>
+<h2>Human view (gate/demo excluded)</h2>
+<table>
+<tr><th>Asks</th><th>Query</th><th>Sourced</th><th>Miss</th><th>Live</th></tr>
+{''.join(human_rows) or '<tr><td colspan="5">No human/unknown asks yet.</td></tr>'}
+</table>
+<h2>All asks (includes gate + film demo)</h2>
 <table>
 <tr><th>Asks</th><th>Query</th><th>Sourced</th><th>Miss</th><th>Live</th></tr>
 {''.join(rows) or '<tr><td colspan="5">No queries logged yet — use science_lookup.</td></tr>'}
 </table>
-<h2>Optimize next</h2>
+<h2>Optimize next (human view)</h2>
 <ul>{''.join(targets) or '<li>Nothing flagged yet.</li>'}</ul>
 <h2>Alias candidates</h2>
 <ul>{''.join(aliases) or '<li>Add phrasings to truth-dictionary/aliases.json</li>'}</ul>
@@ -559,7 +586,10 @@ class Handler(BaseHTTPRequestHandler):
             q = (qs.get("q") or [""])[0]
             live = (qs.get("live") or ["true"])[0].lower() not in ("0", "false", "no")
             subj = (qs.get("subject") or ["stack"])[0]
-            return self._json(200, stack_search.search(q, live=live, subject=subj, db=_log_db()))
+            traffic = (qs.get("traffic") or [None])[0]
+            return self._json(200, stack_search.search(
+                q, live=live, subject=subj, db=_log_db(), traffic=traffic
+            ))
 
         if path == "/stats":
             return self._json(200, stack_search.stats(db=_log_db()))
@@ -664,7 +694,10 @@ class Handler(BaseHTTPRequestHandler):
                 return self._json(400, {"error": "field 'query' is required"})
             live = body.get("live", True)
             subject = (body.get("subject") or "stack").strip()
-            return self._json(200, stack_search.search(q, live=live, subject=subject, db=_log_db()))
+            traffic = body.get("traffic")
+            return self._json(200, stack_search.search(
+                q, live=live, subject=subject, db=_log_db(), traffic=traffic
+            ))
 
         if self.path == "/ingest":
             body = self._read_json()

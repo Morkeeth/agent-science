@@ -157,94 +157,125 @@ def _cheap_route(query: str, *, subject: str, con) -> Optional[dict]:
 
 def lookup(query: str, *, subject: str = "stack", live: bool = False,
            db: Path | str | None = None,
-           model: str | None = None) -> dict:
+           model: str | None = None,
+           traffic: str | None = None) -> dict:
     """Daily entry point — dictionary first, live web search only when asked."""
+    from clearance import traffic as traffic_mod
+
     raw = query.strip()
+    tclass = traffic_mod.classify(raw, traffic=traffic, subject=subject)
     if not raw:
-        return _enrich({"query": raw, "label": "NOT_CLEARED", "cause": "empty_query",
-                        "why": "query was empty", "source": "none"},
-                       cost_tier=COST_FREE, subject=subject)
+        out = _enrich({"query": raw, "label": "NOT_CLEARED", "cause": "empty_query",
+                       "why": "query was empty", "source": "none", "traffic": tclass},
+                      cost_tier=COST_FREE, subject=subject)
+        out["traffic"] = tclass
+        return out
 
     dbp = Path(db) if db else _db()
     con = refusal_log.connect(dbp)
     import ask_registry
 
+    def _stamp(res: dict) -> dict:
+        res = dict(res)
+        res["traffic"] = tclass
+        res["subject"] = subject
+        return res
+
     def _try_shelf(q: str) -> Optional[dict]:
         hit = last_exact_answer(con, q)
         if hit:
+            hit = _stamp(hit)
             hit["cost_tier"] = COST_FREE
             refusal_log.log_query(con, query=raw, result=hit)
-            return _enrich(hit, cost_tier=COST_FREE, subject=subject)
+            out = _enrich(hit, cost_tier=COST_FREE, subject=subject)
+            out["traffic"] = tclass
+            return out
         reg = ask_registry.ask(q, db=dbp)
         if reg.get("label") != "NOT_CLEARED":
+            reg = _stamp(reg)
             reg["source"] = "registry"
             reg["query"] = raw
-            return _enrich(reg, cost_tier=COST_FREE, subject=subject)
+            out = _enrich(reg, cost_tier=COST_FREE, subject=subject)
+            out["traffic"] = tclass
+            return out
         return None
 
-    canon = canonical_query(raw)
-    for q in dict.fromkeys([raw, canon]):  # preserve order, de-dupe
-        got = _try_shelf(q)
-        if got:
-            return got
+    with traffic_mod.scoped(traffic=tclass, subject=subject):
+        canon = canonical_query(raw)
+        for q in dict.fromkeys([raw, canon]):  # preserve order, de-dupe
+            got = _try_shelf(q)
+            if got:
+                return got
 
-    q = canon
+        q = canon
 
-    cheap = _cheap_route(q, subject=subject, con=con)
-    if cheap:
-        cheap["cost_tier"] = COST_CHEAP
-        cheap["query"] = raw
-        return _enrich(cheap, cost_tier=COST_CHEAP, subject=subject)
+        cheap = _cheap_route(q, subject=subject, con=con)
+        if cheap:
+            cheap = _stamp(cheap)
+            cheap["cost_tier"] = COST_CHEAP
+            cheap["query"] = raw
+            out = _enrich(cheap, cost_tier=COST_CHEAP, subject=subject)
+            out["traffic"] = tclass
+            return out
 
-    if not live:
-        from clearance import contrary
-        c = contrary.check(q)
-        if c:
-            refusal_log.log_query(con, query=raw, result=c)
-            return _enrich(c, cost_tier=COST_FREE, subject=subject)
-        miss = {
+        if not live:
+            from clearance import contrary
+            c = contrary.check(q)
+            if c:
+                c = _stamp(c)
+                refusal_log.log_query(con, query=raw, result=c)
+                out = _enrich(c, cost_tier=COST_FREE, subject=subject)
+                out["traffic"] = tclass
+                return out
+            miss = _stamp({
+                "query": raw,
+                "label": "NOT_CLEARED",
+                "cause": "not_in_registry",
+                "why": ("nothing in the dictionary sources this yet — "
+                        "try live=true or ingest a verified claim"),
+            })
+            miss["cost_tier"] = COST_FREE
+            miss["source"] = "dictionary_miss"
+            refusal_log.log_query(con, query=raw, result=miss)
+            out = _enrich(miss, cost_tier=COST_FREE, subject=subject)
+            out["traffic"] = tclass
+            return out
+
+        _search.reset_calls()
+        term = _distinctive_term(q)
+        claim = Claim("Q1", q, None, term)
+        mdl = model or os.environ.get("GEMINI_MODEL", "gemini-3.5-flash-lite")
+        try:
+            v = judge_claim(claim, locator=GeminiLocator(model=mdl),
+                            live_search=True, fetch=True)
+        except RuntimeError as e:
+            out = _enrich(_stamp({
+                "query": q, "label": "NOT_CLEARED", "cause": "search_failed",
+                "why": str(e), "source": "live_error",
+            }), cost_tier=COST_LIVE, subject=subject, parallel_api_calls=_search.calls())
+            out["traffic"] = tclass
+            return out
+
+        _record(con, term=term, query=q, v=v, production=subject)
+        label = refusal_log.surface_label(verdict=v.verdict, cause=v.cause)
+        why = v.cause or v.reason if label != "SOURCED" else None
+        result = _stamp({
             "query": raw,
-            "label": "NOT_CLEARED",
-            "cause": "not_in_registry",
-            "why": ("nothing in the dictionary sources this yet — "
-                    "try live=true or ingest a verified claim"),
-        }
-        miss["cost_tier"] = COST_FREE
-        miss["source"] = "dictionary_miss"
-        refusal_log.log_query(con, query=raw, result=miss)
-        return _enrich(miss, cost_tier=COST_FREE, subject=subject)
-
-    _search.reset_calls()
-    term = _distinctive_term(q)
-    claim = Claim("Q1", q, None, term)
-    mdl = model or os.environ.get("GEMINI_MODEL", "gemini-3.5-flash-lite")
-    try:
-        v = judge_claim(claim, locator=GeminiLocator(model=mdl),
-                        live_search=True, fetch=True)
-    except RuntimeError as e:
-        return _enrich({
-            "query": q, "label": "NOT_CLEARED", "cause": "search_failed",
-            "why": str(e), "source": "live_error",
-        }, cost_tier=COST_LIVE, subject=subject, parallel_api_calls=_search.calls())
-
-    _record(con, term=term, query=q, v=v, production=subject)
-    label = refusal_log.surface_label(verdict=v.verdict, cause=v.cause)
-    why = v.cause or v.reason if label != "SOURCED" else None
-    result = {
-        "query": raw,
-        "label": label,
-        "verdict": v.verdict,
-        "cause": v.cause,
-        "why": why,
-        "citation_url": v.citation_url,
-        "quoted_terms": v.quoted_terms,
-        "term": term,
-        "source": "live",
-        "cost_tier": COST_LIVE,
-    }
-    refusal_log.log_query(con, query=raw, result=result)
-    return _enrich(result, cost_tier=COST_LIVE, subject=subject,
-                   parallel_api_calls=_search.calls())
+            "label": label,
+            "verdict": v.verdict,
+            "cause": v.cause,
+            "why": why,
+            "citation_url": v.citation_url,
+            "quoted_terms": v.quoted_terms,
+            "term": term,
+            "source": "live",
+            "cost_tier": COST_LIVE,
+        })
+        refusal_log.log_query(con, query=raw, result=result)
+        out = _enrich(result, cost_tier=COST_LIVE, subject=subject,
+                      parallel_api_calls=_search.calls())
+        out["traffic"] = tclass
+        return out
 
 
 def economics(*, db: Path | str | None = None) -> dict:

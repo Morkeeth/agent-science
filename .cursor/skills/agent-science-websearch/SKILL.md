@@ -15,6 +15,15 @@ description: >-
 
 ## Steps (complete protocol)
 
+0. **Use-bar first** (session receipt — proves truth layer before raw websearch)
+   ```bash
+   python3 -m clearance.stack_cli use-bar "QUERY" --traffic human
+   # MCP: science_use_bar { "query": "QUERY", "traffic": "human" }
+   # Doc: docs/USE-BAR-PATH-2026-09-04.md
+   ```
+   **Done when:** `receipt_id` printed; file `~/.agent-science/session-receipts.jsonl` grew.
+   Oscar template: `docs/SESSION-RECEIPT-TEMPLATE.md` — do not claim daily use without it.
+
 1. **Run full visibility**
    ```bash
    cd agent-science
@@ -56,6 +65,8 @@ description: >-
 ## Hard rules
 
 - Full visibility over raw web search and over single `lookup`.
+- Call `use-bar` / `science_use_bar` (or visibility/lookup) **before** raw WebSearch; keep `receipt_id`.
+- Tag real asks `traffic=human`. Gate/demo probes (`xyzzy…`, film ralph loops) must not drive `/popular` optimization.
 - Stars = adoption only. Never author SOURCED.
 - Refuse with cause beats paraphrase.
 - Clearance / EU / E&O use the **same** panel — vertical on this layer, not a different product.
@@ -63,8 +74,10 @@ description: >-
 ## Cheatsheet
 
 ```bash
+python3 -m clearance.stack_cli use-bar "ralph loop" --traffic human
 python3 -m clearance visibility "ralph loop" --full
 python3 -m clearance visibility "context engineering" --full --live
 python3 -m clearance popular
 python3 scripts/refresh_field_signals.py
+bash scripts/use_bar_offline.sh
 ```

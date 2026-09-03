@@ -179,6 +179,7 @@ _ADDED_COLUMNS = (
 _QUERY_COLUMNS = (
     ("cost_tier", "TEXT"),      # free | cheap | live — for popular-query analytics
     ("source", "TEXT"),         # dictionary_exact | registry | live | …
+    ("traffic", "TEXT"),        # human | gate | fleet | demo | unknown
 )
 
 
@@ -326,15 +327,22 @@ def week_tally(con, *, days: int = 7) -> dict:
 
 def log_query(con, *, query: str, result: dict) -> int:
     """Every query becomes a browsable registry row — the refusal is the product."""
+    from clearance import traffic as traffic_mod
+    tclass = traffic_mod.classify(
+        query,
+        traffic=result.get("traffic"),
+        subject=result.get("subject"),
+    )
+    result.setdefault("traffic", tclass)
     cur = con.execute(
         "INSERT INTO queries (query_text, result_label, verdict, cause, term, "
-        "citation_url, quoted_terms, resolves_with, asked_at, cost_tier, source) "
-        "VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+        "citation_url, quoted_terms, resolves_with, asked_at, cost_tier, source, traffic) "
+        "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
         (query.strip(), result["label"], result.get("verdict"), result.get("cause"),
          result.get("term"), result.get("citation_url"), result.get("quoted_terms"),
          result.get("resolves_with"),
          datetime.now(timezone.utc).isoformat(timespec="seconds"),
-         result.get("cost_tier"), result.get("source")))
+         result.get("cost_tier"), result.get("source"), tclass))
     con.commit()
     _maybe_push(con)
     return cur.lastrowid

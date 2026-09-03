@@ -1,0 +1,41 @@
+{
+  "description": "Use-path baseline cases — expect sourced vs refuse. Measured against live dictionary when present.",
+  "cases": [
+    {
+      "id": "UP1",
+      "query": "2012/28/EU",
+      "expect": "sourced",
+      "why": "canonical free-tier dictionary hit"
+    },
+    {
+      "id": "UP2",
+      "query": "Directive 2012/28/EU",
+      "expect": "sourced",
+      "why": "alias / exact replay path"
+    },
+    {
+      "id": "UP3",
+      "query": "xyzzy-nonexistent-claim-99999",
+      "expect": "refuse",
+      "why": "gate probe — must not invent a citation"
+    },
+    {
+      "id": "UP4",
+      "query": "a claim that definitely is not in any registry qqzz99",
+      "expect": "refuse",
+      "why": "cold miss — honest NOT_CLEARED"
+    },
+    {
+      "id": "UP5",
+      "query": "orphan works directive",
+      "expect": "either",
+      "why": "may be sourced or refused depending on shelf; score pole-agnostic"
+    },
+    {
+      "id": "UP6",
+      "query": "Directive 2012/28/EU of the European Parliament and of the Council of 25 October 2012 on certain permitted uses of orphan works",
+      "expect": "sourced",
+      "why": "long-form alias — historically fragmented"
+    }
+  ]
+}

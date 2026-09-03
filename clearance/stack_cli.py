@@ -44,7 +44,9 @@ def _print_result(res: dict) -> None:
 
 
 def cmd_lookup(args: argparse.Namespace) -> int:
-    res = stack_search.lookup(args.query, live=args.live, subject=args.subject)
+    res = stack_search.lookup(
+        args.query, live=args.live, subject=args.subject, traffic=args.traffic
+    )
     if args.json:
         print(json.dumps(res, indent=2))
     else:
@@ -53,7 +55,12 @@ def cmd_lookup(args: argparse.Namespace) -> int:
 
 
 def cmd_search(args: argparse.Namespace) -> int:
-    res = stack_search.lookup(args.query, live=not args.offline, subject=args.subject)
+    res = stack_search.lookup(
+        args.query,
+        live=not args.offline,
+        subject=args.subject,
+        traffic=args.traffic,
+    )
     if args.json:
         print(json.dumps(res, indent=2))
     else:
@@ -77,12 +84,23 @@ def cmd_popular(args: argparse.Namespace) -> int:
     if args.json:
         print(json.dumps(data, indent=2))
         return 0
-    print("=== Popular queries (by asks) ===")
+    notes = data.get("traffic_notes") or {}
+    if notes.get("notes"):
+        print("=== Traffic notes ===")
+        for n in notes["notes"]:
+            print(f"  · {n}")
+        print(f"  by_traffic={notes.get('by_traffic')}")
+    print("=== Popular HUMAN view (gate/demo excluded) ===")
+    for r in (data.get("popular_human") or [])[: args.limit]:
+        print(f"  {r['asks']:3d}x  [{r.get('sourced', 0)} sourced / "
+              f"{r.get('not_cleared', 0)} miss / {r.get('live_asks', 0)} live]  "
+              f"{r['example'][:70]}")
+    print("\n=== Popular ALL (includes gate/demo) ===")
     for r in data["popular_queries"][: args.limit]:
         print(f"  {r['asks']:3d}x  [{r.get('sourced', 0)} sourced / "
               f"{r.get('not_cleared', 0)} miss / {r.get('live_asks', 0)} live]  "
               f"{r['example'][:70]}")
-    print("\n=== Optimize next (live spend or misses) ===")
+    print("\n=== Optimize next (human view) ===")
     for r in data["optimization_targets"][: args.limit]:
         print(f"  {r['asks']:3d}x  live={r.get('live_asks', 0)} miss={r.get('not_cleared', 0)}  "
               f"→ {r['action']}")
@@ -95,6 +113,28 @@ def cmd_popular(args: argparse.Namespace) -> int:
         print("\n=== Parallel probes (from receipts) ===")
         for r in data["parallel_probes"][:8]:
             print(f"  {r['asks']:3d}x  {r['probe'][:70]}")
+    return 0
+
+
+def cmd_use_bar(args: argparse.Namespace) -> int:
+    from clearance import use_path
+    if args.receipts:
+        print(json.dumps(use_path.use_bar_summary(limit=args.limit), indent=2))
+        return 0
+    res = use_path.intercept(
+        args.query,
+        mode=args.mode,
+        live=args.live,
+        traffic=args.traffic,
+        subject=args.subject,
+        session_id=args.session,
+    )
+    if args.json:
+        print(json.dumps(res, indent=2))
+    else:
+        _print_result(res)
+        print(f"  receipt={res.get('receipt_id')} session={res.get('session_id')}")
+        print(f"  path={res.get('receipt_path')}")
     return 0
 
 
@@ -223,6 +263,8 @@ def main(argv=None) -> int:
     s = sub.add_parser("lookup", help="truth dictionary (free/cheap; live optional)")
     s.add_argument("query", nargs="+", help="lookup query")
     s.add_argument("--subject", default="stack")
+    s.add_argument("--traffic", default=None,
+                   help="human|gate|fleet|demo — tags analytics; default classify")
     s.add_argument("--live", action="store_true", help="paid Parallel on miss")
     s.add_argument("--json", action="store_true")
     s.set_defaults(func=cmd_lookup)
@@ -230,6 +272,7 @@ def main(argv=None) -> int:
     s = sub.add_parser("search", help="verified websearch (live unless --offline)")
     s.add_argument("query", nargs="+", help="search query")
     s.add_argument("--subject", default="stack")
+    s.add_argument("--traffic", default=None)
     s.add_argument("--offline", action="store_true", help="registry only, no Parallel")
     s.add_argument("--json", action="store_true")
     s.set_defaults(func=cmd_search)
@@ -245,6 +288,21 @@ def main(argv=None) -> int:
     pop.add_argument("--limit", type=int, default=15)
     pop.add_argument("--json", action="store_true")
     pop.set_defaults(func=cmd_popular)
+
+    ub = sub.add_parser(
+        "use-bar",
+        help="interceptor: truth layer BEFORE raw websearch + session receipt",
+    )
+    ub.add_argument("query", nargs="*", help="query (omit with --receipts)")
+    ub.add_argument("--mode", choices=["lookup", "visibility"], default="lookup")
+    ub.add_argument("--live", action="store_true")
+    ub.add_argument("--traffic", default="human")
+    ub.add_argument("--subject", default="stack")
+    ub.add_argument("--session", default=None, help="stable session id for receipts")
+    ub.add_argument("--receipts", action="store_true", help="print recent receipt summary")
+    ub.add_argument("--limit", type=int, default=20)
+    ub.add_argument("--json", action="store_true")
+    ub.set_defaults(func=cmd_use_bar)
 
     vis = sub.add_parser(
         "visibility",
@@ -323,6 +381,10 @@ def main(argv=None) -> int:
 
     args = p.parse_args(argv)
     if args.cmd in ("search", "lookup", "visibility", "stack-fit"):
+        args.query = " ".join(args.query)
+    if args.cmd == "use-bar" and not args.receipts:
+        if not args.query:
+            p.error("use-bar requires a query (or pass --receipts)")
         args.query = " ".join(args.query)
     return args.func(args)
 

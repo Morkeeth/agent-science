@@ -307,7 +307,43 @@ Full record: `fleet-ops (internal)/retros/QWEN-LOSS-RETRO-2026-08-30.md` (correc
 
 ---
 
-## 🎯 NOW — Partner night wave (fresh compound + timeout finding)
+## 🎯 NOW — WAVE 2026-09-04 · use-bar path (NOT film theater)
+
+**Slice:** Make the default websearch path real and measurable — skill + interceptor + traffic split so a session can prove a lookup went through the truth layer. Gate green ≠ Oscar uses this every search.
+
+### Build (shipped 2026-09-04)
+
+- [x] Use-bar path doc — `docs/USE-BAR-PATH-2026-09-04.md` — **read exists; commands listed**
+- [x] Interceptor + session receipts + tests — `clearance/use_path.py` · `python3 tests/test_use_path.py` → OK
+- [x] Human vs gate/fleet/demo in popular — `python3 tests/test_traffic_class.py` → OK; hosted pollution measured `ralph loop agentic` **110×** via `curl …/popular`
+- [x] Baseline arm that can lose — `python3 scripts/eval_use_path_baseline.py` → hosted **18/18**, naive **14**, local **12** (tied silent)
+- [x] Cloud receipt — `docs/CLOUD-RECEIPT-as-use-2026-09-04.md`
+- [x] Oscar-only door — film, Devpost, key rotation (listed; not touched)
+
+### Verify (one command each)
+
+```bash
+python3 tests/test_use_path.py && python3 tests/test_traffic_class.py   # OK
+python3 tests/test_popular.py                                            # OK
+python3 scripts/eval_use_path_baseline.py                                # hosted 18/18 · naive 14 · local 12
+python3 -m clearance.stack_cli use-bar "2012/28/EU" --json               # receipt_id
+curl -s 'https://agent-science-568004190078.us-central1.run.app/popular?limit=5'  # ralph 110×
+bash scripts/use_bar_offline.sh                                          # use-bar offline OK
+```
+
+### Receipt
+
+- `docs/CLOUD-RECEIPT-as-use-2026-09-04.md`
+- `docs/USE-BAR-PATH-2026-09-04.md`
+- `docs/SESSION-RECEIPT-TEMPLATE.md` — Oscar fills; do not claim daily use without it
+
+### BLOCKED / Oscar-only (stop at the door)
+
+- Film / YouTube upload · Devpost submit · key rotation in console · redeploy so hosted `/popular` gains `traffic_notes`
+
+---
+
+## 🎯 NOW (prior) — Partner night wave (fresh compound + timeout finding)
 
 **Slice:** Harden partner verify to prove Parallel at runtime; ship fresh compound probe; document orphan-works 504 regression at object.
 
@@ -528,6 +564,7 @@ bash scripts/verify_cold_clone.sh                                               
 
 | When | What | Command | Outcome |
 |------|------|---------|---------|
+| 2026-09-04 | Use-bar path wave | `test_use_path` · `eval_use_path_baseline` · `use_bar_offline.sh` · `curl …/popular` | Interceptor+receipts · traffic split · **hosted 18/18** vs **naive 14** vs **local 12** · ralph **110×** pollution measured |
 | 2026-09-03 night | Fresh compound + timeout finding | `compound_fresh_hosted_probe.py` · `verify_partners_hosted.sh` | **A≥1 Parallel → B drop** · orphan-works Run A **504** @ 300s |
 | 2026-09-03 night | SUBMISSION-PACK + Qwen gates | `bench_check_docs.py` · `eval_verify_holdout.py` · `eval_scorer_symmetry.py` | **127/127** · holdout OK · scorer 5/6 vs 6/6 · offline compound A=2→B=1 |
 | 2026-09-02 | Partner verify re-run | `verify_partners_hosted.sh` · `full_gate.sh` | **4/4 partners** · compound warm-shelf PASS · 72/72 auto-seed |

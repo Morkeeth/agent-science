@@ -74,21 +74,29 @@ def _verdict_to_stack(v: Verdict, *, query: str, source: str,
 
 
 def search(query: str, *, subject: str = _DEFAULT_SUBJECT, live: bool = True,
-           db: Path | str | None = None, model: str = _DEFAULT_MODEL) -> dict:
+           db: Path | str | None = None, model: str = _DEFAULT_MODEL,
+           traffic: str | None = None) -> dict:
     """Live websearch — use dictionary.lookup() for daily free/cheap path first."""
-    return dictionary.lookup(query, subject=subject, live=live, db=db, model=model)
+    return dictionary.lookup(
+        query, subject=subject, live=live, db=db, model=model, traffic=traffic
+    )
 
 
 def lookup(query: str, *, subject: str = _DEFAULT_SUBJECT, live: bool = False,
-           db: Path | str | None = None, model: str = _DEFAULT_MODEL) -> dict:
+           db: Path | str | None = None, model: str = _DEFAULT_MODEL,
+           traffic: str | None = None) -> dict:
     """Truth dictionary — free registry, cheap routing, live only when asked."""
-    return dictionary.lookup(query, subject=subject, live=live, db=db, model=model)
+    return dictionary.lookup(
+        query, subject=subject, live=live, db=db, model=model, traffic=traffic
+    )
 
 
 def stats(*, db: Path | str | None = None) -> dict:
+    from clearance import query_analytics
     dbp = Path(db) if db else _db()
     con = refusal_log.connect(dbp)
     st = dictionary.economics(db=dbp)
     recent = refusal_log.browse_queries(con, limit=10)
     st["recent_queries"] = recent
+    st["traffic_notes"] = query_analytics.traffic_notes(db=dbp)
     return st

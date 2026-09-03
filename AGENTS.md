@@ -28,19 +28,22 @@ Or manually in `~/.cursor/mcp.json`:
 | Tool | When |
 |------|------|
 | `science_visibility` | **Scout / research** — multi-pane truth layer; indexes personal DB |
+| `science_use_bar` | **Interceptor** — truth layer BEFORE raw websearch; writes session receipt |
 | `science_truth` | Personal truth DB — stats, recent asks, fetch-field, Magnet skill verdicts |
 | `science_lookup` | Fast single lookup when you already know you only need the verdict |
 | `science_search` | When dictionary miss needs **fresh Parallel discovery** |
 | `science_browse` | See what the stack already searched |
 | `science_stats` | Dictionary size, hit rate, sourced/refused counts |
-| `science_popular` | **Top dev queries** — what to alias, ingest, or route next |
+| `science_popular` | **Top dev queries** — what to alias, ingest, or route next (`popular_human` excludes gate/demo) |
 | `science_ingest` | After manual research — verify claim+URL into dictionary |
 | `science_clear` | Full documentary script → gap report |
 
 **Skill:** `.cursor/skills/agent-science-websearch` — **full** visibility protocol.  
-**Canonical rundown:** `docs/WEBSEARCH-FULL-RUNDOWN.md`  
+**Use-bar path:** `docs/USE-BAR-PATH-2026-09-04.md`  
+**Canonical rundown:** `docs/WEBSEARCH-FULL-RUNDOWN.md` 
 ```bash
 python3 -m clearance visibility "QUERY" --full
+python3 -m clearance.stack_cli use-bar "QUERY" --traffic human
 ```
 
 ## Daily workflow (cost-efficient)

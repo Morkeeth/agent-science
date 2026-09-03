@@ -16,18 +16,18 @@ echo "1. Health (partners wired)"
 curl -sf "$BASE/health" | py "import sys,json; d=json.load(sys.stdin); assert d['ok']; print('  engine', d['engine_default'], 'parallel', d['parallel'], 'gemini', d['gemini'])"
 
 echo "2. Free lookup (dictionary — 0 Parallel)"
-curl -sf "$BASE/search?q=2012/28/EU&live=false" | py "
+curl -sf "$BASE/search?q=2012/28/EU&live=false&traffic=gate" | py "
 import sys,json
 d=json.load(sys.stdin)
-print('  label', d['label'], 'tier', d.get('cost_tier'), 'parallel', d.get('parallel_api_calls',0))
+print('  label', d['label'], 'tier', d.get('cost_tier'), 'parallel', d.get('parallel_api_calls',0), 'traffic', d.get('traffic'))
 assert d['label']=='SOURCED', d
 "
 
 echo "3. Miss without live (honest NOT_CLEARED)"
-curl -sf "$BASE/search?q=xyzzy-nonexistent-claim-99999&live=false" | py "
+curl -sf "$BASE/search?q=xyzzy-nonexistent-claim-99999&live=false&traffic=gate" | py "
 import sys,json
 d=json.load(sys.stdin)
-print('  label', d['label'], 'next_step', bool(d.get('next_step')))
+print('  label', d['label'], 'next_step', bool(d.get('next_step')), 'traffic', d.get('traffic'))
 assert d['label']=='NOT_CLEARED', d
 "
 
