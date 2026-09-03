@@ -11,13 +11,13 @@ Agent Science is the truth layer for what people believe and use. | 700
 
 # Beat 1, the refusal (0:20 to 0:55)
 The rule is simple. If no document we read states it, we refuse. We never paraphrase. We never infer.
-So we pointed it at our own pitch headline: ninety four percent of film archives are unclearable for A I training.
+So we pointed it at our own pitch headline: ninety four percent of film archives are unclearable for AI training.
 One claim in. Zero sourced. One unsourced. The cause: we searched, and no document we read states it.
 Zero metered calls, because the shelf already remembered the miss. | 700
 
 # Beat 5, the sourced verdict (0:55 to 1:25)
-Now a claim that holds. The orphan works directive, twenty twelve, twenty eight.
-One claim in. One sourced. The exact sentence from EUR-Lex, with the URL, marked primary: E U law.
+Now a claim that holds. The orphan works directive, 2012/28/EU.
+One claim in. One sourced. The exact sentence from EUR-Lex, with the URL, marked primary: EU law.
 Parallel calls, zero. Corpus hits, one. It was cleared once on another production, so this production gets it free. | 700
 
 # Beat 2, the verdict with transparency (1:25 to 2:05)
@@ -37,4 +37,4 @@ E and O is a flat premium, about two to ten thousand dollars per film. We cite t
 The clearance labor under it is what we cancel: a per claim audit trail, sourced quote or named refusal. | 700
 
 # Close (2:55 to 3:00)
-Agent Science. Parallel search at runtime, Gemini on Vertex, Cloud Run, A D K. Link in the description.
+Agent Science. Parallel search at runtime, Gemini on Vertex, Cloud Run, ADK. Link in the description.

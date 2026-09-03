@@ -1,7 +1,5 @@
 # Devpost paste: Agent Science (Agentic Cinema, Parallel track)
 
-Every number below was re-derived by a command on 2026-09-03 against main `0d48d88` and the hosted URL. The Devpost judging criteria are Technological Implementation, Design, Potential Impact and Quality of the Idea, listed on the event page as equally weighted; the sections under "About the project" follow that order.
-
 ## Project name
 
 Agent Science
@@ -60,11 +58,11 @@ Every claim it clears joins a shelf. A claim proven, or proven unprovable, once 
 
 - Parallel Search API at runtime through the official parallel-web SDK (1.3.2), used for discovery on a dictionary miss; the hosted `/health` endpoint reports `parallel_sdk: true` and `parallel_transport: parallel-web`.
 - Gemini on Vertex AI (`gemini-3.5-flash`) extracts claims and proposes candidate passages; it is never allowed to write the verdict.
-- Google Cloud Run hosts the desk, the websearch companion and the JSON API; the shelf persists to Google Cloud Storage.
+- Google Cloud Run hosts the desk, the websearch companion and the JSON API; the shelf (the refusal log and the corpus SQLite files) is pulled from and pushed to a Google Cloud Storage bucket around each write (`CORPUS_GCS_URI` and `REFUSAL_LOG_GCS_URI`, set by `deploy.sh`).
 - Agent Development Kit (2.7.1) is the default clearance engine (`engine_default: adk`; the report names the tool call `clear_script_tool`).
 - Verbatim verification is deterministic code: the fetched document must contain the proposed span, or the row is refused. An independence check refuses claims where every supporting document derives from one origin.
 - Three cost tiers: free (registry replay and alias hit), cheap (URL routing to EUR-Lex, arXiv and the rights vocabularies), live (Parallel plus Gemini). `science_lookup` defaults to the free tier.
-- Controls: 127 checks across 11 suites, 72 of them mutation-watched (each one is shown to go red when the rule it guards is removed); a refusal holdout set frozen before tuning (hash-pinned); a symmetric scorer that judges baseline and shipping arms on delivered labels only (baseline 5/6, shipping 6/6, McNemar p = 1.0 at n = 6, stated as a real but not significant delta).
+- Controls: 127 checks across 11 suites, 72 of them mutation-watched (each one is shown to go red when the rule it guards is removed); a refusal holdout set hash-pinned on 2026-09-03 (its last content change is the 2026-08-31 semantic-guard commit, so it is a regression pin, not a pre-tuning freeze); a symmetric scorer that judges baseline and shipping arms on delivered labels only (baseline 5/6, shipping 6/6, McNemar p = 1.0 at n = 6, stated as a real but not significant delta).
 
 ### Design
 
@@ -105,7 +103,7 @@ Export the gap report as an E&O-ready record with stable claim IDs; a buyer-cont
 
 ## Video
 
-Three-minute trailer, recorded against `docs/FILM-PACK-2026-09-03.md`: the problem, the refusal of our own headline, a sourced verdict with its EUR-Lex URL, the websearch companion with the search shown, the shelf, the buyer.
+The three-minute trailer shows, in order: the problem, the desk refusing our own headline, a sourced verdict with its EUR-Lex URL, the websearch companion with the whole search shown, the shelf, and the buyer.
 
 ## Honesty notes for the judge
 
