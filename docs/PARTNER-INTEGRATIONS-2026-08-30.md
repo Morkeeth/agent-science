@@ -1,6 +1,6 @@
 # PARTNER INTEGRATIONS — Agent Science · Sep 9 path
 
-**Date:** 2026-08-30 · **Last verified:** 2026-09-02 · **Repo:** Morkeeth/agent-science · **Scope:** all four partners wired in code; deploy is Oscar's click.
+**Date:** 2026-08-30 · **Last verified:** 2026-09-03 · **Repo:** Morkeeth/agent-science · **Scope:** all four partners wired in code; deploy is Oscar's click.
 
 Each partner must be **called at runtime** on the default path — not documented only.
 
@@ -14,13 +14,18 @@ Each partner must be **called at runtime** on the default path — not documente
    ```bash
    bash scripts/verify_partners_hosted.sh
    ```
-   Expect: health OK · `engine_default: adk` · `/clear` stamps `engine: adk` · compound-mini PASS.
-4. **Or verify /health alone:**
+   Expect: health OK · `engine_default: adk` · `/clear` stamps `engine: adk` with `parallel_calls ≥ 1` on fresh claim · compound-mini PASS · compound-fresh PASS (A_parallel≥1, B_hits≥1).
+4. **Compound with Parallel drop (video beat):**
+   ```bash
+   python3 scripts/compound_fresh_hosted_probe.py
+   ```
+   Expect: Run A `parallel_calls ≥ 1` → Run B `parallel_calls ≤ A` with `corpus_hits ≥ 1`.
+5. **Or verify /health alone:**
    ```bash
    curl -s https://agent-science-568004190078.us-central1.run.app/health | python3 -m json.tool
    ```
    Expect: `"gemini_path": "vertex:hack-fleet"`, `"parallel": true`, `"engine_default": "adk"`.
-5. **Verify /clear** (JSON):
+6. **Verify /clear** (JSON):
    ```bash
    curl -s -X POST https://agent-science-568004190078.us-central1.run.app/clear \
      -H 'Content-Type: application/json' \

@@ -48,25 +48,32 @@ print('partners checklist OK')
 " "$PARTNERS_JSON"
 
 echo
-echo "--- 3. POST /clear (ADK engine stamp) ---"
-SUBJECT="partner-verify-$(date +%s)"
+echo "--- 3. POST /clear (ADK + Parallel at runtime) ---"
+TOKEN="$(python3 -c 'import uuid; print(uuid.uuid4().hex[:12])')"
+SUBJECT="partner-verify-$TOKEN"
 CLEAR_JSON="$(curl -sf -X POST "$BASE/clear" \
   -H 'Content-Type: application/json' \
-  -d "{\"script\":\"The Dust Bowl displaced 2.5 million people.\",\"subject\":\"$SUBJECT\"}")"
+  -d "{\"script\":\"In ${TOKEN} the Archive of Zephyr-${TOKEN} passed Regulation Z-${TOKEN} for orphan media.\",\"subject\":\"$SUBJECT\"}")"
 python3 -c "
 import json, sys
 d = json.loads(sys.argv[1])
 assert d.get('engine') == 'adk', f\"engine must be adk, got {d.get('engine')!r}\"
 assert (d.get('claims_extracted') or 0) >= 1, 'expected at least one extracted claim'
+parallel = d.get('parallel_calls') or 0
+assert parallel >= 1, f'Parallel must run on fresh claim, got parallel_calls={parallel}'
 print('clear engine:', d.get('engine'))
-print('parallel_calls:', d.get('parallel_calls'))
+print('parallel_calls:', parallel)
 print('corpus_hits:', d.get('corpus_hits'))
 print('claims_extracted:', d.get('claims_extracted'))
 " "$CLEAR_JSON"
 
 echo
-echo "--- 4. Compound-mini A/B (Parallel drop + corpus hit) ---"
+echo "--- 4. Compound-mini A/B (warm shelf — corpus_hits) ---"
 python3 "$ROOT/scripts/compound_hosted_probe.py" "$BASE"
+
+echo
+echo "--- 5. Compound-fresh A/B (Parallel drop on fresh subject) ---"
+python3 "$ROOT/scripts/compound_fresh_hosted_probe.py" "$BASE"
 
 echo
 echo "=== Partner hosted verify OK === $STAMP"
