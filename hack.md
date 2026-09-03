@@ -2,7 +2,7 @@
 doc: hack
 project: Agent Science
 phase: SHIP
-last-touched: 2026-09-02 00:16 UTC
+last-touched: 2026-09-03 00:20 UTC
 canonical: true
 event: Agentic Cinema · Parallel track · deadline 2026-09-09 14:00 PDT
 supersedes: docs/PHASE0-LADDER.md ClickHouse-track note (runtime track is Parallel)
@@ -306,7 +306,40 @@ Full record: `fleet-ops (internal)/retros/QWEN-LOSS-RETRO-2026-08-30.md` (correc
 
 ---
 
-## 🎯 NOW — Partner verification re-run (verify lane)
+## 🎯 NOW — Partner night wave (fresh compound + timeout finding)
+
+**Slice:** Harden partner verify to prove Parallel at runtime; ship fresh compound probe; document orphan-works 504 regression at object.
+
+### Build (shipped 2026-09-03)
+
+- [x] Fresh compound probe — `python3 scripts/compound_fresh_hosted_probe.py` (A_parallel≥1 → B drop + corpus_hits)
+- [x] Partner verify hardened — `bash scripts/verify_partners_hosted.sh` (Parallel ≥1 on fresh claim + compound-fresh)
+- [x] Orphan-works timeout finding — `docs/FINDING-orphan-works-timeout-2026-09-03.md` (Run A now 504 @ 300s)
+- [x] Receipt — `docs/RECEIPT-partner-night-2026-09-03.md`
+
+### Verify (one command each)
+
+```bash
+git pull && python3 tests/test_watch_it_go_red.py                    # 72/72
+bash scripts/verify_partners_hosted.sh                               # 4/4 partners + Parallel + compound-fresh
+python3 scripts/compound_fresh_hosted_probe.py                       # A≥1 Parallel → B corpus_hits≥1
+bash scripts/full_gate.sh                                            # FULL GATE OK
+python3 scripts/bench_check_docs.py                                  # 127/127
+python3 scripts/eval_refusal_baseline.py && python3 scripts/eval_refusal_ablation.py
+```
+
+### Receipt
+
+- `docs/RECEIPT-partner-night-2026-09-03.md`
+- `docs/FINDING-orphan-works-timeout-2026-09-03.md`
+
+### BLOCKED
+
+- Orphan-works full script — **504 @ 300s on Run A** (was Run B only). Oscar: raise `deploy.sh --timeout` or film compound-fresh.
+
+---
+
+## 🎯 NOW (prior) — Partner verification re-run (verify lane)
 
 **Slice:** Re-verify all four partners at runtime; ship `verify_partners_hosted.sh`; fix unseeded test trap.
 
@@ -459,6 +492,7 @@ bash scripts/verify_cold_clone.sh                                               
 
 | When | What | Command | Outcome |
 |------|------|---------|---------|
+| 2026-09-03 night | Fresh compound + timeout finding | `compound_fresh_hosted_probe.py` · `verify_partners_hosted.sh` | **A≥1 Parallel → B drop** · orphan-works Run A **504** @ 300s |
 | 2026-09-02 | Partner verify re-run | `verify_partners_hosted.sh` · `full_gate.sh` | **4/4 partners** · compound warm-shelf PASS · 72/72 auto-seed |
 | 2026-09-01 night | Partner integrations wave | `curl …/health` · compound-mini · `full_gate.sh` | **4/4 partners** on hosted · compound PASS · 127/127 · promise line shipped |
 | 2026-09-01 hammer | Hosted visibility + demo | `./deploy.sh` · `demo_truth_layer.sh` | `/visibility/ui` live · 127/127 gate |
