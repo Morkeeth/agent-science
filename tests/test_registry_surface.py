@@ -247,13 +247,15 @@ def test_the_shelf_shows_a_refusal_in_the_same_column_as_evidence():
 
 
 if __name__ == "__main__":
+    quiet = "-q" in sys.argv
     fns = [v for k, v in sorted(globals().items())
            if k.startswith("test_") and callable(v)]
     bad = 0
     for fn in fns:
         try:
             fn()
-            print(f"PASS  {fn.__name__}")
+            if not quiet:
+                print(f"PASS  {fn.__name__}")
         except AssertionError as e:
             bad += 1
             print(f"FAIL  {fn.__name__}: {e}")

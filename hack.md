@@ -2,7 +2,7 @@
 doc: hack
 project: Agent Science
 phase: SHIP
-last-touched: 2026-09-02 00:16 UTC
+last-touched: 2026-09-03 00:15 UTC
 canonical: true
 event: Agentic Cinema · Parallel track · deadline 2026-09-09 14:00 PDT
 supersedes: docs/PHASE0-LADDER.md ClickHouse-track note (runtime track is Parallel)
@@ -288,10 +288,10 @@ submission craft, supported by a real tendency, **not** as the explanation of th
 - [x] **Alternative arm named and run** — `python3 scripts/eval_refusal_baseline.py` · **re-run 2026-08-31: baseline 5/6 = 0.833, shipping 6/6 = 1.000, delta +1, McNemar p=1.0000 (b=0 c=1) — a real delta where 08-30 had a tie, and NOT significant at n=6; the CIs overlap [0.436,0.970] vs [0.610,1.000]**
 - [x] **Ablation** — `python3 scripts/eval_refusal_ablation.py` · **re-run 2026-08-31: ablation 5/6, shipping 6/6, delta +1, McNemar p=1.0000.** (2026-08-30 reading, before the semantic guard: delta=0, RC5 false-GREEN in both arms.)
 - [x] **External anchor** — `python3 scripts/eval_external_anchor.py` · live rightsstatements.org (EA1/EA2)
-- [ ] **Holdout frozen before the first tuning pass.**
+- [x] **Holdout frozen before the first tuning pass.** — `fixtures/refusal-correctness/MANIFEST.json` + `python3 scripts/eval_verify_holdout.py` (re-run 2026-09-03: 4 files pinned)
 - [x] **Baseline steelmanned** — raw rows printed by eval scripts; RC5 is now the single discordant item (baseline GREEN, shipping UNKNOWN)
 - [x] **Statistic matched to n** — Wilson 95% CI + McNemar in baseline/ablation scripts
-- [ ] **Scorer symmetrical** — nothing only our system can emit; judge from delivered output for every arm.
+- [x] **Scorer symmetrical** — `python3 scripts/eval_scorer_symmetry.py` · delivered SOURCED/UNSOURCED labels only; baseline **5/6** vs shipping **6/6** (RC5 discordant)
 - [ ] **Cost from billing**, with the price card's date stated.
 - [x] **Offline path with no API key.**
 - [x] **Honesty & limitations** section carrying our worst number — README §Honesty & limitations; PITCH first screen
@@ -304,7 +304,42 @@ Full record: `fleet-ops (internal)/retros/QWEN-LOSS-RETRO-2026-08-30.md` (correc
 
 ---
 
-## 🎯 NOW — Partner verification re-run (verify lane)
+## 🎯 NOW — Night wave: SUBMISSION-PACK + Qwen eval gates (build lane)
+
+**Slice:** SUBMISSION-PACK truth refresh · holdout freeze · scorer symmetry · deploy prep (no deploy run).
+
+### Build (shipped 2026-09-03)
+
+- [x] SUBMISSION-PACK — stale `registry 13/13` → **16/16**; stranger block + offline compound; re-measured **127/127**
+- [x] Holdout freeze gate — `fixtures/refusal-correctness/MANIFEST.json` + `scripts/eval_verify_holdout.py`
+- [x] Scorer symmetry eval — `scripts/eval_scorer_symmetry.py` (baseline arm on delivered labels)
+- [x] Cold-clone path — `verify_cold_clone.sh` steps 6–9
+- [x] Deploy prep — `docs/DEPLOY-PREP-2026-09-03.md` (Oscar checklist only)
+
+### Verify (one command each)
+
+```bash
+git pull && python3 tests/test_watch_it_go_red.py                    # 72/72
+python3 scripts/bench_check_docs.py                                  # 127/127
+python3 scripts/eval_verify_holdout.py                               # HOLDOUT OK
+python3 scripts/eval_scorer_symmetry.py                              # baseline 5/6 vs shipping 6/6
+python3 tests/test_registry_surface.py -q                            # 16/16
+python3 scripts/compound_exhibit_receipt.py                          # offline A=2→B=1
+python3 tests/test_eval_holdout.py                                   # holdout gate + RED control
+```
+
+### Receipt
+
+- `docs/RECEIPT-night-wave-2026-09-03.md`
+
+### BLOCKED
+
+- Live compound exhibit — **PARALLEL_API_KEY** and **GEMINI_API_KEY** missing on this VM; offline receipt authoritative
+- Orphan-works full script Run B — **504 Gateway Timeout** at 300s on hosted
+
+---
+
+## 🎯 NOW (prior) — Partner verification re-run (verify lane)
 
 **Slice:** Re-verify all four partners at runtime; ship `verify_partners_hosted.sh`; fix unseeded test trap.
 
@@ -457,6 +492,7 @@ bash scripts/verify_cold_clone.sh                                               
 
 | When | What | Command | Outcome |
 |------|------|---------|---------|
+| 2026-09-03 night | SUBMISSION-PACK + Qwen gates | `bench_check_docs.py` · `eval_verify_holdout.py` · `eval_scorer_symmetry.py` | **127/127** · holdout OK · scorer 5/6 vs 6/6 · offline compound A=2→B=1 |
 | 2026-09-02 | Partner verify re-run | `verify_partners_hosted.sh` · `full_gate.sh` | **4/4 partners** · compound warm-shelf PASS · 72/72 auto-seed |
 | 2026-09-01 night | Partner integrations wave | `curl …/health` · compound-mini · `full_gate.sh` | **4/4 partners** on hosted · compound PASS · 127/127 · promise line shipped |
 | 2026-09-01 hammer | Hosted visibility + demo | `./deploy.sh` · `demo_truth_layer.sh` | `/visibility/ui` live · 127/127 gate |
