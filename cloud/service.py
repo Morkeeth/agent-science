@@ -100,7 +100,7 @@ button:hover{background:#000}
   <strong>sourced verbatim</strong> with its URL — or <strong>refused with a named cause</strong>
   a lawyer can read. The shelf remembers: second ask is free. Clearance and E&amp;O are
   one vertical on the same truth layer.</p>
-<p class="nav"><a href="/front">What this desk refuses, and why that is the product</a> · <a href="/visibility/ui?q=ralph+loop+agentic">Websearch visibility</a> · <a href="/registry">Browse the registry</a> · <a href="/truths/ui">Truths dashboard</a> · <a href="/popular/ui">Popular queries</a> — {registry_stats} verified truths on disk.</p>
+<p class="nav"><a href="/front">What this desk refuses, and why that is the product</a> · <a href="/visibility/ui?q=ralph+loop+agentic">Websearch visibility</a> (the websearch companion) · <a href="/registry">Browse the registry</a> · <a href="/truths/ui">Truths dashboard</a> · <a href="/popular/ui">Popular queries</a> — {registry_stats} verified truths on disk.</p>
   <form class="desk" method="post" action="/clear">
     <div class="row">
       <div>

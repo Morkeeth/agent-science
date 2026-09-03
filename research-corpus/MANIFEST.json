@@ -1,6 +1,6 @@
 {
  "what": "the frozen measurement population every published Agent Science number is computed over",
- "frozen_at": "2026-08-31",
+ "frozen_at": "2026-09-03",
  "source": "git ls-files research-corpus/*.md \u2014 committed content only",
  "written_by": "nothing; clearance.ingest writes to research-inbox/",
  "n_files": 22,
@@ -13,23 +13,23 @@
   },
   {
    "file": "2026-08-24-kaggle-ceiling-research.md",
-   "sha256": "d6f7775604c90f7968d6030a77695ea4e2894dd9821febbbea50bf5848832838",
-   "bytes": 15437
+   "sha256": "b35e5d6c06d79ba7704d53f5bd29ea88707b84ad2ff0ee84879b62caa1021cc7",
+   "bytes": 15450
   },
   {
    "file": "2026-08-24-kaggle-harmony-claim-corrected.md",
-   "sha256": "18e94b0b721c58eef57c9f26823f9212d1657835a291ada6228bd8e68236a0e3",
-   "bytes": 1459
+   "sha256": "4f305035357a0c8c1c984ab9316594de462dc4df36d09328fa05cf80ad4d2251",
+   "bytes": 1472
   },
   {
    "file": "2026-08-24-patent-103-fight.md",
-   "sha256": "a763d757ac272dd8335871cdeb5486377a4fbff6782423587090c1c24431f77e",
-   "bytes": 5753
+   "sha256": "2e53efde21ad7ad02415fa79437dbf13ac5dfadd00853d03f11dff0446a9172c",
+   "bytes": 5766
   },
   {
    "file": "2026-08-24-patent-angle-generation.md",
-   "sha256": "df56ce600d07c06da9cf053aacb92936cbd2eee6a3a9098043202cefb0976501",
-   "bytes": 15893
+   "sha256": "b501e4d762b98e3bfd60c4624abedd787879a3e02257f0998362f4c635878f29",
+   "bytes": 15937
   },
   {
    "file": "2026-08-24-patent-angle1-draft-ready.md",
@@ -43,8 +43,8 @@
   },
   {
    "file": "2026-08-24-patent-counsel-priorart.md",
-   "sha256": "6c6e7eb644b40d43899f78629fbb57fae60b11e02cb29ae74824c9e8c00534ba",
-   "bytes": 6579
+   "sha256": "d16928e5b90c0777bfb2ea22ada6787245355f0852be823c364d3866e0af34d3",
+   "bytes": 6592
   },
   {
    "file": "2026-08-24-patent-narrow-angle.md",
@@ -63,18 +63,18 @@
   },
   {
    "file": "2026-08-24-prd-helicon.md",
-   "sha256": "71d816c040ace5422b04f99ead6c8204057469cbda075cec79f9092091beb771",
-   "bytes": 2343
+   "sha256": "dc69d033478db266037f725b374e5bb123a0dbf2fc388b263061d6a887e8d885",
+   "bytes": 2356
   },
   {
    "file": "2026-08-24-prd-transcripto.md",
-   "sha256": "84935ae3fd18c111486aebb77e9a18e7a3c9d3beba03c5058911468f1dcfcf94",
-   "bytes": 7567
+   "sha256": "b2cd43015b227ab501513d18173a8497123e2836c7a3c4b31372d9262eeef31c",
+   "bytes": 7580
   },
   {
    "file": "2026-08-24-prd-zup.md",
-   "sha256": "915c4942558213ae9bcfa8df083d284d9a5db80d7d4e7bc21a2fc9dc28c858db",
-   "bytes": 6551
+   "sha256": "68bf987bd9eaad4af7bf1330e286179acb135e34f631ad5a4d1340b3b7ce0c97",
+   "bytes": 6555
   },
   {
    "file": "2026-08-24-prompting-coach.md",
@@ -108,8 +108,8 @@
   },
   {
    "file": "2026-08-25-nightrun-ab-subagents-arm.md",
-   "sha256": "3b2848de77f20d5eb671c468c05c70fe4b7da1c9e0339d1ae5b76f72c3f1492f",
-   "bytes": 7260
+   "sha256": "547dceb317985878786016f427258fdbcde30f5f808cb635e02958a96b564f7c",
+   "bytes": 7306
   },
   {
    "file": "2026-08-25-zup-onemove.md",
