@@ -2,7 +2,7 @@
 doc: hack
 project: Agent Science
 phase: SHIP
-last-touched: 2026-09-03 12:10 UTC
+last-touched: 2026-09-04 00:20 UTC
 canonical: true
 event: Agentic Cinema · Parallel track · deadline 2026-09-09 14:00 PDT
 supersedes: docs/PHASE0-LADDER.md ClickHouse-track note (runtime track is Parallel)
@@ -300,14 +300,53 @@ submission craft, supported by a real tendency, **not** as the explanation of th
 - [x] **Honesty & limitations** section carrying our worst number — README §Honesty & limitations; PITCH first screen
 - [ ] **Answer the track brief in the track's own words on the first screen** — judge pack § above; must land on Devpost ¶1 + video 0:00
 - [ ] **Video verified attached and public on the live entry page, from a logged-out browser** — not in a checklist file, on the page.
-- [ ] **Every artifact claim measured at the submitted commit.** Four retros of that loss failed this row.
+- [x] **Every artifact claim measured at the submitted commit.** — `python3 scripts/eval_artifact_claims.py` · pre-fix **4 stale** (Private-until-submit · `@ e6793ab` · STATUS 265/~0.80 · public row unchecked); post-fix 0 stale; RED control planted **26/13** → exit 1. Receipt: `docs/QWEN-EVAL-GATE-ARTIFACT-CLAIMS-2026-09-04.md`.
 
 Full record: `fleet-ops (internal)/retros/QWEN-LOSS-RETRO-2026-08-30.md` (corrected) ·
 `QWEN-FIELD-TEST-2026-08-30.md` (the n=40 falsification) · playbook lesson 97.
 
 ---
 
-## 🎯 NOW — Partner night wave (fresh compound + timeout finding)
+## 🎯 NOW — Night wave 2026-09-04 (artifact claims + pack truth)
+
+**Slice:** Close PRIOR LOSS "every artifact claim measured at submitted commit" with a falsifiable gate + baseline arm; refresh SUBMISSION-PACK / STATUS at object; honest live-compound BLOCKED; deploy prep only (no deploy).
+
+### Build (shipped 2026-09-04)
+
+- [x] Artifact-claims eval — `scripts/eval_artifact_claims.py` (baseline=trust-doc; shipping=re-derive at object) + RED control `tests/test_artifact_claims.py` (planted 26/13)
+- [x] Null arm steelman — `scripts/eval_null_arm.py` (always-UNKNOWN 3/6 vs shipping 6/6)
+- [x] SUBMISSION-PACK + STATUS truth refresh — public-repo [x], `@ main`, hosted n=306 / hr=0.627, killed stale 265/~0.80
+- [x] Live compound — **BLOCKED** `docs/BLOCKED-live-compound-exhibit-2026-09-04.md` (keys missing)
+- [x] Deploy prep — `docs/DEPLOY-PREP-2026-09-04.md` (timeout 300 note; no deploy run)
+- [x] Receipt — `docs/RECEIPT-night-wave-2026-09-04.md`
+
+### Verify (one command each)
+
+```bash
+git pull && python3 tests/test_watch_it_go_red.py                    # 72/72
+python3 scripts/bench_check_docs.py                                  # 127/127
+python3 scripts/eval_artifact_claims.py                              # 0 stale post-fix
+python3 scripts/eval_null_arm.py                                     # null 3/6 vs shipping 6/6
+python3 tests/test_artifact_claims.py                                # planted 26/13 RED
+python3 tests/test_registry_surface.py -q                            # 16/16
+python3 scripts/compound_exhibit_receipt.py                          # offline A=2→B=1
+```
+
+### Receipt
+
+- `docs/RECEIPT-night-wave-2026-09-04.md`
+- `docs/QWEN-EVAL-GATE-ARTIFACT-CLAIMS-2026-09-04.md`
+- `docs/BLOCKED-live-compound-exhibit-2026-09-04.md`
+
+### BLOCKED
+
+- Cost from billing — no Parallel/Gemini billing console on this VM (Oscar)
+- Live compound with keys — **PARALLEL / GEMINI / ADC missing**; offline receipt authoritative
+- Orphan-works full script — **504 @ 300s** on hosted (`deploy.sh --timeout=300`)
+
+---
+
+## 🎯 NOW (prior) — Partner night wave (fresh compound + timeout finding)
 
 **Slice:** Harden partner verify to prove Parallel at runtime; ship fresh compound probe; document orphan-works 504 regression at object.
 
@@ -528,6 +567,7 @@ bash scripts/verify_cold_clone.sh                                               
 
 | When | What | Command | Outcome |
 |------|------|---------|---------|
+| 2026-09-04 night | Artifact-claims gate + pack truth | `eval_artifact_claims.py` · `eval_null_arm.py` · planted 26/13 | **pre-fix 4 stale** (Private · e6793ab · 265/0.80 · public row); post-fix 0; null 3/6 vs ship 6/6; live compound **BLOCKED** no keys |
 | 2026-09-03 night | Fresh compound + timeout finding | `compound_fresh_hosted_probe.py` · `verify_partners_hosted.sh` | **A≥1 Parallel → B drop** · orphan-works Run A **504** @ 300s |
 | 2026-09-03 night | SUBMISSION-PACK + Qwen gates | `bench_check_docs.py` · `eval_verify_holdout.py` · `eval_scorer_symmetry.py` | **127/127** · holdout OK · scorer 5/6 vs 6/6 · offline compound A=2→B=1 |
 | 2026-09-02 | Partner verify re-run | `verify_partners_hosted.sh` · `full_gate.sh` | **4/4 partners** · compound warm-shelf PASS · 72/72 auto-seed |

@@ -2,7 +2,7 @@
 doc: status
 project: Agent Science
 canonical: true
-last-updated: 2026-09-01T05:45:00Z
+last-updated: 2026-09-04T00:12:00Z
 deadline: 2026-09-09T14:00:00-07:00
 ---
 
@@ -11,7 +11,7 @@ deadline: 2026-09-09T14:00:00-07:00
 > **For Claude / fleet:** this file is the single “where we are” surface.  
 > `hack.md` = process · `CLAUDE.md` = entry · this file = gates + evidence.
 
-**Last gate run:** 2026-08-31T21:46:02Z — `bash scripts/full_gate.sh` → **FULL GATE OK** (127/127 · visibility hosted · 19/19 long run)
+**Last gate run:** 2026-09-04 — `test_watch_it_go_red` **72/72** · `bench_check_docs` **127/127** · artifact-claims eval shipped (stale pack caught, then fixed)
 
 ---
 
@@ -21,7 +21,7 @@ deadline: 2026-09-09T14:00:00-07:00
 |-------|--------|
 | **Product noun** | **Agent Science** — truth layer for what people believe and use · B lead · A on the same layer |
 | **Product** | LIVE on Cloud Run · public repo · sealed prediction |
-| **Build lane** | WOW websearch transparency · CONTRARY stamp · stack-fit · community notes · `/truths/ui` |
+| **Build lane** | Artifact-claims gate + SUBMISSION-PACK truth refresh · null-arm steelman |
 | **Oscar** | **Film 30 min** — `docs/PITCH-TOMORROW.md` · transparency WOW first · Devpost paste ready |
 | **Film lead** | Ask → sourced/refuse → free on re-ask · ≥2 domains · E&O as *a* truth not the only story |
 
@@ -43,16 +43,18 @@ deadline: 2026-09-09T14:00:00-07:00
 | Gate | Result | Command / doc |
 |------|--------|----------------|
 | Mutation controls | **72/72** | `test_watch_it_go_red.py` |
-| All test suites | **127/127** + truth-layer suites | `bench_check_docs.py` + `full_gate.sh` |
+| Pack suites | **127/127** + truth-layer suites | `bench_check_docs.py` + `full_gate.sh` |
 | Secret scan | **6/6** | `test_secret_surfaces.py` |
 | Partner runtime | **6/6** | `test_partner_runtime.py` + `test_parallel_integration.py` |
 | ADK default | **5/5** | `test_adk_default_path.py` |
 | Registry surface | **16/16** | `test_registry_surface.py` |
+| Artifact claims | **eval** | `eval_artifact_claims.py` — trust-doc baseline vs re-derive |
+| Null arm | null 3/6 · ship 6/6 | `eval_null_arm.py` |
 | Cold clone | ✅ | `verify_cold_clone.sh` |
 | Hosted long run | **19/19** | `long_run_goal.sh` |
 | Stranger trial | ✅ | `new_user_trial.sh` |
 | Sealed prediction | ✅ | `SEALED-PREDICTION-2026-08-31.md` |
-| Public repo | ✅ | github.com/Morkeeth/agent-science |
+| Public repo | ✅ | github.com/Morkeeth/agent-science (public since 2026-08-22) |
 | Video | ⛔ | `VIDEO-SCRIPT-2026-08-29.md` |
 | Architecture pack | ✅ | `docs/ARCHITECTURE.md` + `docs/assets/` |
 | Devpost | ⛔ | `DEVPOST-READY.md` + paste pack |
@@ -65,12 +67,14 @@ deadline: 2026-09-09T14:00:00-07:00
 |---|---|
 | **URL** | https://agent-science-568004190078.us-central1.run.app |
 | **Revision** | `agent-science-00018-n4s` · `parallel_sdk: true` · **`/truths/ui` live** |
-| **Health** | `engine_default: adk` · 265 claims · hit rate ~0.80 |
+| **Health** | `engine_default: adk` · gemini vertex · parallel-web SDK |
+| **Stats (GET /stats, 2026-09-04T00:11Z)** | **306 claims** · hit rate **0.627** · queries_logged **279** · aliases **39** |
 | **New** | `GET /visibility/ui` — full websearch panel for judges (film this) |
 | **New** | `GET /truths/ui` — truths dashboard |
-| **Stats** | 265 claims · hit rate ~0.80 · queries logged growing |
 
 **Compound (sealed):** `longrun-0831-1320` A=**1** → B=**0** Parallel · B `corpus_hits=1`
+
+**Honesty:** earlier STATUS carried the Aug-31 shelf snapshot (**n≈265 / hr≈0.80**) — stale on 2026-09-04 against live **n=306 / hr=0.627**. Re-derived at `GET /stats`; do not carry the old pair forward.
 
 ---
 
@@ -85,8 +89,8 @@ deadline: 2026-09-09T14:00:00-07:00
 
 ## Do not on video / Devpost
 
-- Full orphan-works script compound (B **503** hosted)
-- Flywheel metrics as headline (low query count)
+- Full orphan-works script compound (B **504** hosted @ 300s ceiling)
+- Flywheel hit-rate as headline (live **0.627**, not ~0.80)
 - Lead with Parallel-drop only (PeriodCheck wins first-run UX)
 
 ---
@@ -96,6 +100,7 @@ deadline: 2026-09-09T14:00:00-07:00
 ```bash
 cd agent-science
 bash scripts/full_gate.sh
+python3 scripts/eval_artifact_claims.py
 ```
 
 ---
@@ -104,6 +109,7 @@ bash scripts/full_gate.sh
 
 | When (UTC) | What |
 |------------|------|
+| 2026-09-04 00:12 | Night wave — artifact-claims gate · null arm · pack/STATUS truth · stale 265/0.80 caught |
 | 2026-09-01 06:00 | **Hammer** — `/visibility/ui` hosted · demo_truth_layer.sh · README truth-layer lead · Devpost §0 |
 | 2026-08-31 21:23 | Truth layer night — transparency, CONTRARY, stack-fit, community notes, `/truths/ui` (branch) |
 | 2026-08-31 21:55 | Competitor research — websearch field map + steal angles → `RESEARCH-WEBSEARCH-COMPETITORS-2026-08-31.md` |

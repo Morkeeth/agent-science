@@ -41,10 +41,16 @@ echo "8. Offline compound receipt..."
 python3 scripts/compound_exhibit_receipt.py 2>&1 | grep -E 'parallel_calls|corpus_hits|Mode:' | head -4
 
 echo
-echo "9. Eval gate (baseline + ablation + scorer symmetry)..."
+echo "9. Eval gate (baseline + ablation + scorer symmetry + null)..."
 python3 scripts/eval_refusal_baseline.py 2>&1 | tail -3
 python3 scripts/eval_refusal_ablation.py 2>&1 | tail -2
 python3 scripts/eval_scorer_symmetry.py 2>&1 | tail -3
+python3 scripts/eval_null_arm.py 2>&1 | tail -4
+
+echo
+echo "10. Artifact-claims gate (offline) + RED control..."
+python3 scripts/eval_artifact_claims.py --offline 2>&1 | tail -5
+python3 tests/test_artifact_claims.py 2>&1 | tail -3
 
 echo
 echo "=== cold-clone verify OK ==="
