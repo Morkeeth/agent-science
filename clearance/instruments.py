@@ -9,7 +9,13 @@ from __future__ import annotations
 import html
 import json
 import re
-import urllib.request
+import hashlib
+import os
+import tempfile
+import threading
+from datetime import datetime, timezone
+
+from clearance.safe_fetch import fetch_public, validate_url
 from pathlib import Path
 from typing import Optional
 
@@ -78,11 +84,9 @@ def _visible_text(raw: str) -> str:
 
 def fetch(uri: str, timeout: int = 25) -> Optional[str]:
     """Fetch an instrument and cache the operative clause, VERBATIM. None on failure."""
-    req = urllib.request.Request(uri, headers={"User-Agent": UA, "Accept": "text/html"})
     try:
-        with urllib.request.urlopen(req, timeout=timeout) as r:
-            body = r.read().decode("utf-8", errors="ignore")
-            final = r.geturl()
+        raw, final = fetch_public(uri, timeout=timeout, user_agent=UA)
+        body = raw.decode("utf-8", errors="replace")
     except Exception as exc:  # network, 403, 404 — all mean "not evidenced"
         return None
 
@@ -97,7 +101,9 @@ def fetch(uri: str, timeout: int = 25) -> Optional[str]:
         return None
 
     cache = _load()
-    cache[canonical(uri)] = {"fetched_from": final, "terms": clause}
+    cache[canonical(uri)] = {"fetched_from": final, "terms": clause,
+                             "fetched_at": datetime.now(timezone.utc).isoformat(),
+                             "sha256": hashlib.sha256(txt.encode("utf-8")).hexdigest()}
     _save(cache)
     return clause
 
@@ -126,21 +132,74 @@ def _load_docs() -> dict:
     return json.loads(DOCS.read_text()) if DOCS.exists() else {}
 
 
-def document(url: str, *, fetch: bool = False, timeout: int = 30):
-    """Full visible text of a source document, or None if never fetched."""
-    docs = _load_docs()
-    hit = docs.get(url) or docs.get(canonical(url))
-    if hit:
-        return hit["text"]
-    if not fetch:
-        return None
-    req = urllib.request.Request(url, headers={"User-Agent": UA})
+_DOC_LOCK = threading.RLock()
+
+
+def _write_docs(docs: dict) -> None:
+    """Atomic replacement prevents readers from seeing a partial cache file."""
+    DOCS.parent.mkdir(parents=True, exist_ok=True)
+    fd, name = tempfile.mkstemp(prefix=".documents-", dir=DOCS.parent)
     try:
-        with urllib.request.urlopen(req, timeout=timeout) as r:
-            text = _visible_text(r.read().decode("utf-8", errors="ignore"))
+        with os.fdopen(fd, "w") as stream:
+            json.dump(docs, stream)
+        os.replace(name, DOCS)
+    finally:
+        if os.path.exists(name):
+            os.unlink(name)
+
+
+def document_snapshot(url: str, refresh: bool = False, *, timeout: int = 30,
+                      fetch: bool = True):
+    """A versioned visible-text snapshot, or None on a fetch failure.
+
+    Cached snapshots are historical evidence, not a freshness claim. Legacy entries
+    retain fetched_at=None. refresh=True must fetch successfully; it never falls
+    back to the prior snapshot. sha256 hashes the returned UTF-8 visible text.
+    """
+    try:
+        validate_url(url)
+    except ValueError:
+        return None
+    with _DOC_LOCK:
+        docs = _load_docs()
+        hit = docs.get(url) or docs.get(canonical(url))
+    if hit and not refresh:
+        text = hit["text"]
+        return {"url": url, "text": text,
+                "sha256": hashlib.sha256(text.encode("utf-8")).hexdigest(),
+                "fetched_at": hit.get("fetched_at"),
+                "final_url": hit.get("final_url") or hit.get("fetched_from") or url,
+                "cache_hit": True}
+    if not fetch and not refresh:
+        return None
+    try:
+        body, final = fetch_public(url, timeout=timeout, user_agent=UA)
+        text = _visible_text(body.decode("utf-8", errors="replace"))
     except Exception:
         return None
-    docs[canonical(url)] = {"text": text, "fetched_from": url}
-    DOCS.parent.mkdir(parents=True, exist_ok=True)
-    DOCS.write_text(json.dumps(docs))
-    return text
+    snapshot = {"url": url, "text": text,
+                "sha256": hashlib.sha256(text.encode("utf-8")).hexdigest(),
+                "fetched_at": datetime.now(timezone.utc).isoformat(),
+                "final_url": final, "cache_hit": False}
+    with _DOC_LOCK:
+        docs = _load_docs()
+        # Keep versions addressable by content hash for later evidence comparisons.
+        previous = docs.get(url) or docs.get(canonical(url)) or {}
+        versions = dict(previous.get("versions", {}))
+        if previous.get("text") is not None:
+            old_hash = hashlib.sha256(previous["text"].encode("utf-8")).hexdigest()
+            versions[old_hash] = {k: v for k, v in previous.items() if k != "versions"}
+        entry = {k: v for k, v in snapshot.items() if k != "cache_hit"}
+        versions[snapshot["sha256"]] = dict(entry)
+        entry["versions"] = versions
+        docs.pop(url, None)
+        docs[canonical(url)] = entry
+        _write_docs(docs)
+    return snapshot
+
+
+def document(url: str, *, fetch: bool = False, timeout: int = 30,
+             refresh: bool = False):
+    """Backward-compatible text API. Explicit refresh bypasses the cache."""
+    snapshot = document_snapshot(url, refresh=refresh, timeout=timeout, fetch=fetch)
+    return snapshot["text"] if snapshot else None
