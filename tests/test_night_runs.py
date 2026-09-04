@@ -117,3 +117,100 @@ class RunTests(unittest.TestCase):
 
 
 if __name__=='__main__':unittest.main()
+
+
+class CrossLaneTests(RunTests):
+    def test_challenge_revises_fixture_answer_from_new_evidence(self):
+        from clearance import synthesis
+        run=self.start()
+        texts={'https://fixture.example/one':'Memory improves outcomes for small coding tasks in this fixture.',
+               'https://fixture.example/two':'Memory reduces outcomes for large coding tasks in this fixture.'}
+        def snapshot(url,**kw):
+            return {'text':texts[url],'sha256':cases.digest(texts[url]),'cache_hit':True}
+        with patch('clearance.cases.instruments.document_snapshot',side_effect=snapshot):
+            run=night_runs.resume(run['id'],proposal=self.proposal(run,'read',urls=['https://fixture.example/one']),db=self.db)
+        data=cases.get(run['case_id'],db=self.db)
+        finding={'statement':'Memory helps on the small fixture task.', 'relation':'supports','rationale':'This authored fixture finding applies only to the small task.',
+                 'evidence_id':data['evidence'][0]['id'],'quote':texts['https://fixture.example/one'],
+                 'strongest_challenge':'The effect may reverse on large coding tasks.',
+                 'what_would_change':'A large-task failure would narrow the conclusion.'}
+        run=night_runs.resume(run['id'],proposal={**self.proposal(run),'findings':[finding]},db=self.db)
+        challenge=night_runs.start('When does memory help coding?',case_id=run['case_id'],challenge=True,db=self.db)
+        self.assertEqual(challenge['base_case_version'],run['case_version'])
+        self.assertIn('large coding tasks',challenge['challenges'][0])
+        with patch('clearance.cases.instruments.document_snapshot',side_effect=snapshot):
+            challenge=night_runs.resume(challenge['id'],proposal=self.proposal(challenge,'read',urls=['https://fixture.example/two']),db=self.db)
+        data=cases.get(run['case_id'],db=self.db)
+        second={**finding,'statement':'The fixture effect does not transfer to large coding tasks.',
+                'relation':'different_scope','evidence_id':data['evidence'][1]['id'],'quote':texts['https://fixture.example/two']}
+        challenge=night_runs.resume(challenge['id'],proposal={**self.proposal(challenge),'findings':[second]},db=self.db)
+        old=synthesis.build(cases.get(run['case_id'],version=run['case_version'],db=self.db))
+        new=synthesis.build(cases.get(run['case_id'],db=self.db))
+        self.assertEqual(len(old['conclusions']),1)
+        self.assertEqual(len(new['conclusions']),2)
+        self.assertEqual(challenge['status'],'completed')
+
+    def test_cancel_during_provider_does_not_schedule_next_call(self):
+        import threading
+        entered=threading.Event();release=threading.Event();out=[]
+        run=self.start()
+        def find(*a,**kw):
+            entered.set()
+            self.assertTrue(release.wait(3))
+            return []
+        def reasoner(ctx):
+            return self.proposal({'case_version':ctx['case_version']},'search',query='fixture')
+        def worker():
+            out.append(night_runs.resume(run['id'],reasoner=reasoner,db=self.db))
+        with patch('clearance.discovery.find',side_effect=find) as calls:
+            thread=threading.Thread(target=worker);thread.start()
+            self.assertTrue(entered.wait(3))
+            stopped=night_runs.cancel(run['id'],db=self.db)
+            self.assertEqual(stopped['status'],'cancelled')
+            release.set();thread.join(3)
+        self.assertFalse(thread.is_alive())
+        self.assertEqual(calls.call_count,1)
+        self.assertEqual(out[0]['status'],'cancelled')
+        self.assertEqual(out[0]['steps'][-1]['state'],'completed')
+
+    def test_separate_model_adapter_requires_configuration(self):
+        from clearance import reasoning
+        with patch.dict('os.environ',{},clear=True),patch('urllib.request.urlopen',side_effect=AssertionError('no implicit paid model')):
+            with self.assertRaises(ValueError):reasoning.configured()
+        with self.assertRaises(ValueError):reasoning.GeminiReasoner(model='x:runShell',api_key='fixture')
+
+    def test_context_has_prior_claims_and_explicit_truncation(self):
+        from clearance import synthesis
+        run=self.start()
+        data=cases.get(run['case_id'],db=self.db)
+        text='Memory improves outcomes on this fixture task. '+('extra source content. '*1000)
+        with patch('clearance.cases.instruments.document_snapshot',return_value={'text':text,'sha256':cases.digest(text),'cache_hit':True}):
+            run=night_runs.resume(run['id'],proposal=self.proposal(run,'read',urls=['https://fixture.example/source']),db=self.db)
+        data=cases.get(run['case_id'],db=self.db)
+        synthesis.apply(data['id'],data['version'],{'findings':[{'statement':'Memory improves this fixture task.',
+            'relation':'supports','rationale':'This is an authored interpretation of a controlled fixture.',
+            'evidence_id':data['evidence'][0]['id'],'quote':'Memory improves outcomes on this fixture task.',
+            'strongest_challenge':'Larger coding tasks could fail to benefit.',
+            'what_would_change':'A matched experiment could show the opposite result.'}]},db=self.db)
+        next_run=self.start(case_id=data['id'])
+        ctx=night_runs.context(next_run['id'],db=self.db)
+        self.assertTrue(ctx['prior_research'][0]['claims'])
+        self.assertTrue(ctx['current_answer']['conclusions'])
+        self.assertTrue(ctx['evidence'][0]['snapshot_truncated'])
+        self.assertEqual(len(ctx['evidence'][0]['snapshot_text']),12000)
+        self.assertEqual(night_runs.get(run['id'],db=self.db)['observed_usage']['online_fetches'],0)
+        self.assertEqual(night_runs.get(run['id'],db=self.db)['observed_usage']['cached_reads'],1)
+
+    def test_repeated_query_stops_without_repeat_provider_call(self):
+        run=self.start()
+        def reasoner(ctx):return self.proposal({'case_version':ctx['case_version']},'search',query='fixture same query')
+        with patch('clearance.discovery.find',return_value=[]) as calls:
+            result=night_runs.resume(run['id'],reasoner=reasoner,db=self.db)
+        self.assertEqual(calls.call_count,1)
+        self.assertIn('diminishing new evidence',result['stop_reason'])
+
+    def test_source_url_rejects_private_network_before_operation(self):
+        run=self.start()
+        with self.assertRaises(ValueError):
+            night_runs.resume(run['id'],proposal=self.proposal(run,'read',urls=['http://127.0.0.1/private']),db=self.db)
+        self.assertEqual(night_runs.get(run['id'],db=self.db)['steps'],[])
