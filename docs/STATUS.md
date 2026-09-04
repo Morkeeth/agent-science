@@ -11,7 +11,7 @@ deadline: 2026-09-09T14:00:00-07:00
 > **For Claude / fleet:** this file is the single “where we are” surface.  
 > `hack.md` = process · `CLAUDE.md` = entry · this file = gates + evidence.
 
-**Last gate run:** 2026-08-31T21:46:02Z — `bash scripts/full_gate.sh` → **FULL GATE OK** (127/127 · visibility hosted · 19/19 long run)
+**Last gate run:** 2026-09-04 — partner honesty night · `bench_check_docs.py` → **128/128** · `test_watch_it_go_red.py` → **72/72** · hosted partners live · FINDING soft≠sealed / naive=`log_hits`
 
 ---
 
@@ -43,7 +43,7 @@ deadline: 2026-09-09T14:00:00-07:00
 | Gate | Result | Command / doc |
 |------|--------|----------------|
 | Mutation controls | **72/72** | `test_watch_it_go_red.py` |
-| All test suites | **127/127** + truth-layer suites | `bench_check_docs.py` + `full_gate.sh` |
+| All test suites | **128/128** + truth-layer suites | `bench_check_docs.py` + `full_gate.sh` |
 | Secret scan | **6/6** | `test_secret_surfaces.py` |
 | Partner runtime | **6/6** | `test_partner_runtime.py` + `test_parallel_integration.py` |
 | ADK default | **5/5** | `test_adk_default_path.py` |

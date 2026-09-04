@@ -56,6 +56,7 @@ def _clear(base: str, script: str, subject: str, label: str) -> dict:
         "model_routing",
         "parallel_calls",
         "parallel_api_calls",
+        "search_cache_hits",
         "corpus_hits",
         "log_hits",
         "corpus_remembered",
