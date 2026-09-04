@@ -77,3 +77,6 @@ For an existing Perplexity report, call `science_case` action `import` with ques
 Read unread citation URLs with investigate sources, without a provider search. Use action `investigate` for a named evidence gap: query, providers (parallel/perplexity), limit, live and the inspected version. Read source snapshots with `source`, then use `assess` with claim_id (or a new statement), relation, rationale, evidence_id and an exact quote. Assessments are authored interpretations. Support is never established by keyword overlap or quotation occurrence alone.
 
 Return a compact answer with evidence, disagreement, limitations and the next experiment. Expose missing provider credentials and unread citations. Use `brief` and `review` on return visits; use supersedes to revise an assessment while retaining history. Keep raw report text, personal data and repo contents out of public discovery queries.
+
+
+For a broad research question, first call `science_case` with `action: "find"` and the user's query. This searches saved questions, claims and assessment rationales with explicit topic vocabulary, without a provider call. Read the returned authored limits and version-pinned brief. A related result does not prove the user's claim or establish repository fit. Missing local matches justify targeted investigation, not a claim that no research exists.

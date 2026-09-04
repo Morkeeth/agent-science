@@ -71,6 +71,10 @@ python3 -m clearance case decide CASE_ID --version 2 --supersedes DECISION_ID --
 Import a Perplexity report as Markdown/text, or a Sonar JSON response with `choices[0].message.content` and `citations`. The report stays local. Import reads its cited URLs only; it does not send report text or repo contents to a search provider.
 
 ```bash
+# Reuse saved research before making a new provider call
+agent-science case find "RAG for my repo"
+agent-science case find "human intervention" --json
+
 agent-science case import report.md --question "Do fresh sessions reduce repeated errors?" --root . --live
 ```
 
@@ -181,3 +185,11 @@ The cloud runtime exposes private case routes and public liveness only. Earlier 
 Deployment uses a dedicated runtime service account, Secret Manager access configuration, a private GCS bucket, and conditional generation writes. The upload allowlist excludes caches, local databases, notes and media. `deploy.sh` references existing pinned secret versions; it neither uploads local state nor rotates credentials.
 
 For local workspace development, set `AGENT_SCIENCE_HOSTED=1`, `AGENT_SCIENCE_WORKSPACE_DIR` to a private directory, `AGENT_SCIENCE_PUBLIC_ORIGIN=http://127.0.0.1:8080`, and `AGENT_SCIENCE_ALLOW_HTTP=1`. `AGENT_SCIENCE_ACCESS_CONFIG` is JSON with a random `session_key` of at least 43 characters and `users` mapping workspace slugs to SHA-256 token hashes. Use random access tokens of at least 32 characters. Run `python3 cloud/service.py`. Cloud Run refuses to start without cloud storage and access configuration.
+
+### Find research in daily use
+
+`case find "QUERY"` searches saved questions, claims and active assessment reasoning. It recognizes explicit topic vocabulary such as RAG/Obsidian, memory/context files, UX/intervention and multi-agent coordination. Matches explain their terms and topics. Relevance does not change the scientific assessment. Results include authored limits, source links and a version-pinned `case brief` command. `--root .` requires an existing directory and restricts results to cases attached to that exact repository; omit it to search all local cases. Use `--limit` and `--offset` for pagination.
+
+The normal personal `visibility` result also includes saved research, alongside its dictionary result. With an explicit root it restricts saved cases to that repository; without one it searches across repositories. A dictionary miss does not erase related case evidence. With `personal=False`, visibility never opens the private case store. MCP agents use `science_case` with `action: "find"` and `query`. This path makes no web or model call; it does not search full source snapshots or original report bodies. Selected source quotes attached to assessments can appear in results.
+
+Read the assessment limits before choosing an experiment. Use `case experiment` with a trusted acceptance script and explicit baseline/candidate commits to measure a repository change. Retrieved suggestions are not executable instructions or measured results.

@@ -2,14 +2,18 @@
 import json
 import subprocess
 import sqlite3
-from clearance import cases, case_review, research
+from clearance import cases, case_review, research, research_search
 from pathlib import Path
 
 
 def run(args):
     try:
         db=args.db
-        if args.action=='import':
+        if args.action=='find':
+            result=research_search.find(args.query,db=db,root=args.root,limit=args.limit,offset=args.offset)
+            print(json.dumps(result,indent=2) if args.json else research_search.render(result,db=db).rstrip(),end='\n')
+            return 0
+        elif args.action=='import':
             path=Path(args.file)
             with path.open('rb') as source:
                 raw=source.read(500_001)
@@ -74,12 +78,17 @@ def run(args):
 def add_parser(sub):
     case=sub.add_parser('case',help='research a question, preserve decisions and compare repo revisions')
     actions=case.add_subparsers(dest='action',required=True)
-    for action in ('create','show','refresh','decide','list','experiment','source','review','import','investigate','assess','brief','report'):
+    for action in ('create','show','refresh','decide','list','experiment','source','review','import','investigate','assess','brief','report','find'):
         p=actions.add_parser(action)
         p.add_argument('--db',help='local case database override')
         p.add_argument('--json',action='store_true')
         p.set_defaults(func=run)
-        if action not in ('create','list','review','import'):p.add_argument('case_id')
+        if action not in ('create','list','review','import','find'):p.add_argument('case_id')
+        if action=='find':
+            p.add_argument('query',help='search saved questions, claims and assessment limits; no web request')
+            p.add_argument('--root',help='only cases attached to this exact repo')
+            p.add_argument('--limit',type=int,default=5)
+            p.add_argument('--offset',type=int,default=0)
         if action in ('list','review'):
             p.add_argument('--root',help='only cases attached to this local repo')
             p.add_argument('--query',default='',help='find saved questions; no web request')

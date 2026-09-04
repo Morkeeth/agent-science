@@ -155,3 +155,6 @@ Read source snapshots before assess. Record claim-specific supports/contradicts/
 
 
 For broad agentic science, preserve the scope: memory/context, retrieval, coding workflows, agent UX/design, coordination and evaluation. Query the local shelf first, then investigate missing evidence through primary papers and practitioner sources. Record task/population/budget limits with each assessment. A study on multi-hop reasoning must not become a verdict on repository coding. Source mirrors and HTML/PDF versions of one paper are one study, not independent confirmations. The 2026-09-05 field pass is recorded in research-inbox; its local cases are inspectable with case brief.
+
+
+Use `science_case` action `find` with the user's own vocabulary before making another provider call. Search returns related saved claims, assessment limits and pinned brief references; relevance is not support. Personal visibility includes the same local results. Use an explicit root only to restrict to cases attached to that repository; global research has no root. Inspect all relevant claims with brief before applying findings or selecting a local experiment.

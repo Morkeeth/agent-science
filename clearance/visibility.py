@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import json
 import re
+import sqlite3
 from pathlib import Path
 from typing import Any
 
@@ -196,9 +197,18 @@ def panel(
     """
     from clearance import personal_truth
 
+    from clearance import research_search
+
     local = personal_truth.lookup_local(query) if personal else None
     primary = stack_search.lookup(query, live=live, subject=subject, refresh=refresh)
+    saved = {}
+    if personal:
+        try:
+            saved["saved_research"] = research_search.find(query, root=root, limit=5)
+        except (OSError, ValueError, sqlite3.Error) as exc:
+            saved["saved_research"] = {"error": str(exc)}
     out: dict[str, Any] = {
+        **saved,
         "query": query,
         "mode": "full" if full else "standard",
         "primary": primary,
@@ -303,10 +313,14 @@ def format_panel(data: dict) -> str:
     if p.get("resolves_with"):
         lines.append(f"  resolves_with={p['resolves_with']}")
 
+    if "saved_research" in data:
+        from clearance import research_search
+        lines.extend(["", research_search.render(data["saved_research"]).rstrip()])
+
     trans = data.get("transparency") or {}
     lines += ["", "## 1b · Transparency (what was searched)"]
     if trans.get("shallow_route"):
-        lines.append("  SHALLOW_ROUTE=yes — dictionary/cheap only; no field or peer depth")
+        lines.append("  SHALLOW_ROUTE=yes — primary lookup does not establish multi-source research depth")
     else:
         lines.append("  SHALLOW_ROUTE=no — field, practices, or peers present")
     for a in trans.get("angles_searched") or []:

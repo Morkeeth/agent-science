@@ -163,16 +163,16 @@ TOOLS = [
 
 TOOLS.append({
     "name": "science_case",
-    "description": "Research a question, import an existing report, investigate gaps with Parallel/Perplexity, assess claims against exact source passages, inspect a brief, save decisions and review changed evidence. Stored locally. Quote occurrence is verified; support is not inferred. Repo context never enters web queries. Experiments execute only through the explicit local CLI.",
+    "description": "Find saved research by topic with find; research a question, import an existing report, investigate gaps with Parallel/Perplexity, assess claims against exact source passages, inspect a brief, save decisions and review changed evidence. Stored locally. Quote occurrence is verified; support is not inferred. Repo context never enters web queries. Experiments execute only through the explicit local CLI.",
     "inputSchema": {"type": "object", "properties": {
-        "action": {"type": "string", "enum": ["create", "show", "refresh", "decide", "list", "source", "review", "import", "investigate", "assess", "brief", "report"]},
+        "action": {"type": "string", "enum": ["create", "show", "refresh", "decide", "list", "source", "review", "import", "investigate", "assess", "brief", "report", "find"]},
         "db": {"type": "string", "description": "Optional local case database, matching CLI --db"},
         "version": {"type": "integer", "description": "Required for decide, investigate and assess: inspected case version; optional historical version for show/source/brief/report"}, "evidence_id": {"type": "string"},
-        "offset": {"type": "integer", "default": 0}, "limit": {"type": "integer", "description": "Source/report chunk characters (default 12000); investigate results per provider (1–10, default 5); list/review page size alias"},
-        "query": {"type": "string", "description": "Local filter for list/review; explicit public search query for investigate"},
+        "offset": {"type": "integer", "default": 0}, "limit": {"type": "integer", "description": "Source/report chunk characters (default 12000); investigate results per provider (1–10, default 5); find page size (1–100, default 5); list/review page size alias"},
+        "query": {"type": "string", "description": "Local relevance query for find; local filter for list/review; explicit public search query for investigate"},
         "page_info": {"type": "boolean", "default": False, "description": "Include has_more/next_offset in list result; default retains legacy array"},
         "experiment_ids": {"type": "array", "items": {"type": "string"}, "description": "Valid local experiment IDs cited by this decision; may replace source evidence IDs"},
-        "page_size": {"type": "integer", "default": 20, "minimum": 1, "maximum": 100},
+        "page_size": {"type": "integer", "minimum": 1, "maximum": 100, "description": "Page size alias: default 5 for find, 20 for list/review. For find, do not pass a conflicting limit."},
         "supersedes": {"type": "string", "description": "Active decision or assessment ID to replace; requires inspected version"},
         "report_text": {"type":"string","description":"Report contents, Markdown/plain text or Sonar JSON. Stored locally; never sent to discovery."},
         "providers": {"type":"array","items":{"type":"string","enum":["parallel","perplexity"]}},
@@ -218,7 +218,7 @@ def _send_message(msg):
 
 def handle_tool(name: str, arguments: dict) -> str:
     if name == "science_case":
-        from clearance import cases, case_review, research
+        from clearance import cases, case_review, research, research_search
         action = arguments.get("action")
         db=arguments.get("db")
         try:
@@ -233,7 +233,14 @@ def handle_tool(name: str, arguments: dict) -> str:
                     raise ValueError(f"{key} must be text")
             if "version" in arguments and (type(arguments["version"]) is not int or arguments["version"]<1):
                 raise ValueError("version must be a positive integer")
-            if action == "import":
+            if action == "find":
+                for key in ("limit", "page_size"):
+                    if key in arguments and (type(arguments[key]) is not int or not 1 <= arguments[key] <= 100):
+                        raise ValueError(f"find {key} must be an integer from 1 to 100")
+                if "limit" in arguments and "page_size" in arguments and arguments["limit"] != arguments["page_size"]:
+                    raise ValueError("find limit and page_size must agree when both are supplied")
+                return json.dumps(research_search.find(arguments.get("query",""),db=db,root=arguments.get("root"),limit=arguments.get("page_size",arguments.get("limit",5)),offset=arguments.get("offset",0)),indent=2)
+            elif action == "import":
                 data=research.import_report(arguments.get("question",""),arguments.get("report_text",""),root=arguments.get("root"),live=arguments.get("live",False),max_documents=arguments.get("max_documents",12),db=db)
             elif action == "investigate":
                 data=research.investigate(arguments.get("case_id",""),arguments.get("version"),query=arguments.get("query",""),sources=arguments.get("sources",[]),providers=arguments.get("providers",["parallel"]),live=arguments.get("live",False),limit=arguments.get("limit",5),db=db)
