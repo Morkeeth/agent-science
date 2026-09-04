@@ -18,7 +18,6 @@ import uuid
 from urllib.parse import urlsplit
 
 from clearance import cases, claim_graph, conditions, discovery, research, synthesis
-from clearance import study as study_ids
 
 STOP_REASONS = (
     'evidence_sufficient',
