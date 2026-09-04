@@ -1,10 +1,13 @@
-"""CLI for adaptive research runs: research / challenge / resume."""
+"""CLI for adaptive research runs: research / challenge / resume / follow / updates / experiment-plan."""
 import argparse
 import json
 import sqlite3
 from clearance import research_run
 
-KNOWN = frozenset({'start', 'challenge', 'resume', 'show', 'list', 'cancel'})
+KNOWN = frozenset({
+    'start', 'challenge', 'resume', 'show', 'list', 'cancel',
+    'follow', 'unfollow', 'updates', 'experiment-plan',
+})
 
 
 def preprocess_argv(argv):
@@ -41,17 +44,29 @@ def run(args):
                 official_domains=getattr(args, 'official_domain', None) or (),
                 execute=not plan_only, max_steps=max_steps,
             )
-        elif args.action == 'challenge':
+            print(json.dumps(research_run.public_run(result), indent=2) if args.json
+                  else research_run.render_run(result), end='\n')
+            return 0
+        if args.action == 'challenge':
             result = research_run.start_challenge(
                 args.case_id, version=getattr(args, 'version', None),
                 live=live, db=db, limits=limits, providers=providers,
                 execute=not plan_only, max_steps=max_steps,
             )
-        elif args.action == 'resume':
+            print(json.dumps(research_run.public_run(result), indent=2) if args.json
+                  else research_run.render_run(result), end='\n')
+            return 0
+        if args.action == 'resume':
             result = research_run.resume(args.run_id, live=live, db=db, max_steps=max_steps)
-        elif args.action == 'show':
+            print(json.dumps(research_run.public_run(result), indent=2) if args.json
+                  else research_run.render_run(result), end='\n')
+            return 0
+        if args.action == 'show':
             result = research_run.get_run(args.run_id, db=db)
-        elif args.action == 'list':
+            print(json.dumps(research_run.public_run(result), indent=2) if args.json
+                  else research_run.render_run(result), end='\n')
+            return 0
+        if args.action == 'list':
             rows = research_run.list_runs(
                 case_id=getattr(args, 'case_id', None), db=db,
                 limit=getattr(args, 'limit', 20),
@@ -62,14 +77,85 @@ def run(args):
                 for r in rows:
                     print(f"{r['id']} · {r['kind']} · {r['status']} · case {r['case_id']} · {r['question'][:70]}")
             return 0
-        elif args.action == 'cancel':
+        if args.action == 'cancel':
             result = research_run.cancel(args.run_id, db=db)
-        else:
-            raise ValueError(f'unknown research action: {args.action}')
+            print(json.dumps(research_run.public_run(result), indent=2) if args.json
+                  else research_run.render_run(result), end='\n')
+            return 0
 
-        print(json.dumps(research_run.public_run(result), indent=2) if args.json
-              else research_run.render_run(result), end='\n')
-        return 0
+        # --- Lane C: follow / updates / experiment-plan ---
+        if args.action == 'follow':
+            from clearance import follow as follow_mod
+            if getattr(args, 'list', False) or not getattr(args, 'case_id', None):
+                rows = follow_mod.list_followed(db=db, limit=getattr(args, 'limit', 50))
+                print(json.dumps(rows, indent=2) if args.json else follow_mod.render(rows), end='')
+                return 0
+            result = follow_mod.follow(args.case_id, db=db, note=getattr(args, 'note', '') or '')
+            print(json.dumps(follow_mod.public_follow(result), indent=2) if args.json
+                  else follow_mod.render([result]), end='')
+            return 0
+        if args.action == 'unfollow':
+            from clearance import follow as follow_mod
+            result = follow_mod.unfollow(getattr(args, 'case_id', None), follow_id=getattr(args, 'follow_id', None), db=db)
+            print(json.dumps(follow_mod.public_follow(result), indent=2) if args.json
+                  else follow_mod.render([result]), end='')
+            return 0
+        if args.action == 'updates':
+            from clearance import updates
+            if getattr(args, 'show', None):
+                result = updates.get_run(args.show, db=db)
+            else:
+                result = updates.run_updates(
+                    db=db, case_id=getattr(args, 'case_id', None),
+                    live=live, refresh=not getattr(args, 'no_refresh', False),
+                    limit=getattr(args, 'limit', 50),
+                )
+            print(json.dumps(updates.public_run(result), indent=2) if args.json
+                  else updates.render_run(result), end='')
+            return 0
+        if args.action == 'experiment-plan':
+            from clearance import experiment_protocol as proto
+            if getattr(args, 'execute', False):
+                result = proto.execute(args.protocol_id, db=db, version=getattr(args, 'version', None))
+            elif getattr(args, 'show', None):
+                result = proto.get(args.show, version=getattr(args, 'version', None), db=db)
+            elif getattr(args, 'list', False):
+                rows = proto.list_protocols(case_id=getattr(args, 'case_id', None), db=db)
+                if args.json:
+                    print(json.dumps(rows, indent=2))
+                else:
+                    for p in rows:
+                        print(f"{p['id']} · v{p['version']} · {p['status']} · {p['kind']} · case {p['case_id']}")
+                        print(f"  {p['hypothesis'][:100]}")
+                return 0
+            else:
+                budget = None
+                if getattr(args, 'runs', None) or getattr(args, 'timeout', None):
+                    budget = {}
+                    if args.runs is not None:
+                        budget['paired_runs'] = args.runs
+                    if args.timeout is not None:
+                        budget['timeout_seconds'] = args.timeout
+                result = proto.create(
+                    args.case_id,
+                    hypothesis=args.hypothesis,
+                    kind=getattr(args, 'kind', 'code_change') or 'code_change',
+                    claim_ids=getattr(args, 'claim', None) or (),
+                    repo=getattr(args, 'root', None) or getattr(args, 'repo', None),
+                    baseline_ref=getattr(args, 'baseline', None),
+                    intervention_ref=getattr(args, 'intervention', None),
+                    tasks=getattr(args, 'task', None) or (),
+                    outcome_definition=getattr(args, 'outcome', '') or '',
+                    comparison_budget=budget,
+                    stopping_rule=getattr(args, 'stopping_rule', '') or '',
+                    acceptance_check=getattr(args, 'check', None),
+                    db=db,
+                )
+            print(json.dumps(proto.public_protocol(result), indent=2) if args.json
+                  else proto.render(result), end='')
+            return 0
+
+        raise ValueError(f'unknown research action: {args.action}')
     except (ValueError, OSError, sqlite3.Error) as exc:
         print(json.dumps({'error': str(exc)}) if getattr(args, 'json', False)
               else f'Cannot complete research action: {exc}')
@@ -79,7 +165,7 @@ def run(args):
 def add_parser(sub):
     research = sub.add_parser(
         'research',
-        help='adaptive investigation: research a question, challenge a pinned answer, resume a run',
+        help='adaptive investigation: research, challenge, follow, updates, experiment-plan',
     )
     actions = research.add_subparsers(dest='action', required=True)
 
@@ -132,3 +218,45 @@ def add_parser(sub):
     p = actions.add_parser('cancel', help='cancel a run')
     _common(p)
     p.add_argument('run_id')
+
+    p = actions.add_parser('follow', help='track a case for day-two update reports')
+    _common(p)
+    p.add_argument('case_id', nargs='?', help='case to follow (omit with --list)')
+    p.add_argument('--note', default='')
+    p.add_argument('--list', action='store_true', help='list followed questions')
+    p.add_argument('--limit', type=int, default=50)
+
+    p = actions.add_parser('unfollow', help='stop tracking a followed question')
+    _common(p)
+    p.add_argument('case_id', nargs='?')
+    p.add_argument('--follow-id')
+
+    p = actions.add_parser('updates', help='explicit update run: ranked change report for followed questions')
+    _common(p)
+    p.add_argument('--case-id', help='limit to one followed case')
+    p.add_argument('--live', action='store_true', help='fetch sources on the web')
+    p.add_argument('--no-refresh', action='store_true', help='compare saved versions only; no re-collect')
+    p.add_argument('--show', help='show a prior update run id')
+    p.add_argument('--limit', type=int, default=50)
+
+    p = actions.add_parser('experiment-plan', help='record a versioned experiment protocol (plan, not a result)')
+    _common(p)
+    p.add_argument('case_id', nargs='?', help='case this protocol belongs to')
+    p.add_argument('--hypothesis', default='')
+    p.add_argument('--kind', choices=sorted(['code_change', 'observation', 'manual']), default='code_change')
+    p.add_argument('--claim', action='append', default=[], help='claim id to pin (repeatable)')
+    p.add_argument('--root', help='repository root (must match case repo when set)')
+    p.add_argument('--repo', help='alias for --root')
+    p.add_argument('--baseline', help='baseline git ref')
+    p.add_argument('--intervention', help='intervention/candidate git ref')
+    p.add_argument('--check', help='trusted acceptance .py script')
+    p.add_argument('--task', action='append', default=[], help='fixed task description (repeatable)')
+    p.add_argument('--outcome', default='')
+    p.add_argument('--stopping-rule', default='')
+    p.add_argument('--runs', type=int, help='paired runs budget')
+    p.add_argument('--timeout', type=int, help='per-run timeout seconds')
+    p.add_argument('--list', action='store_true')
+    p.add_argument('--show', help='show protocol id')
+    p.add_argument('--execute', action='store_true', help='run a compatible code_change protocol')
+    p.add_argument('--protocol-id', help='protocol id for --execute')
+    p.add_argument('--version', type=int, help='protocol version for show/execute')

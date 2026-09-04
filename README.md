@@ -111,11 +111,24 @@ agent-science research challenge CASE_ID --version 2 --max-steps 4
 agent-science research resume RUN_ID
 agent-science research show RUN_ID
 
-# Offline stranger demo (no key, no network)
+# Day-two: follow a question and see ranked change reports
+agent-science research follow CASE_ID --note "watch this"
+agent-science research updates
+agent-science research follow --list
+
+# Record an experiment protocol (plan / denominator — not a result)
+agent-science research experiment-plan CASE_ID \
+  --hypothesis "Intervention preserves the acceptance check." \
+  --kind observation
+
+# Offline stranger demos (no key, no network)
 bash scripts/demo_research_challenge.sh
+bash scripts/demo_research_day_two.sh
 ```
 
-MCP exposes the same actions through `science_research` (`research`, `challenge`, `resume`, `show`, `list`, `cancel`). Live discovery still requires `--live` / `live=true` and configured providers. Without a model reasoner, the local planner proposes gaps and searches; assessments still need exact source quotes.
+First-use walkthrough (plan-only → challenge → follow → updates): `docs/FIRST-USE-RESEARCH.md`.
+
+MCP exposes the same actions through `science_research` (`research`, `challenge`, `resume`, `show`, `list`, `cancel`, `follow`, `unfollow`, `updates`, `experiment-plan`). Live discovery still requires `--live` / `live=true` and configured providers. Without a model reasoner, the local planner proposes gaps and searches; assessments still need exact source quotes. An experiment-plan stays `planned` until an explicit trusted execute attaches a measured experiment id — never relabel a plan as a result.
 
 ## Assess a claim against evidence
 

@@ -307,11 +307,42 @@ Full record: `fleet-ops (internal)/retros/QWEN-LOSS-RETRO-2026-08-30.md` (correc
 
 ---
 
-## 🎯 NOW — NIGHTPLAN 2026-09-05 · Lane A adaptive research
+## 🎯 NOW — NIGHTPLAN 2026-09-05c · Lane C daily CLI
+
+**Slice:** Followed questions, ranked update/change reports, versioned experiment protocols, first-use docs. Signature: **“What would change this answer?”**
+
+**Owns:** follow / updates / protocol modules · thin CLI/MCP edge wiring · first-use docs · Lane C receipt.  
+**Does not touch:** Lane B `study.py` or claim-graph insides of `research_run.py`.
+
+### Build (shipped this session)
+
+- [x] `research follow` / `updates` / `experiment-plan` (+ MCP) — `python3 -m clearance research follow|updates|experiment-plan --help` exit 0; CLI/MCP tests passed
+- [x] Day-two change report from a tracked question — `bash scripts/demo_research_day_two.sh` → **DEMO OK · material=1 · quiet_empty=True**
+- [x] First-use doc without reading nightplan — `docs/FIRST-USE-RESEARCH.md` + demos exit 0
+- [x] Effect-ranked updates vs naive baseline — `PYTHONPATH=. python3 scripts/eval_updates_ranking_baseline.py` → ranked FP **0** · naive FP **1** · wins
+- [x] Lane C receipt with exit codes — `docs/CLOUD-RECEIPT-nightplan-lane-c-2026-09-05.md`
+- [x] Tests green — `python3 -m pytest -q tests/test_research_follow.py` → **9 passed**
+
+### Verify (commands run)
+
+```bash
+python3 -m pytest -q tests/test_research_follow.py tests/test_research_run.py   # 16 passed
+bash scripts/demo_research_day_two.sh                                          # DEMO OK
+bash scripts/demo_research_challenge.sh                                        # DEMO OK · CONTESTED
+PYTHONPATH=. python3 scripts/eval_updates_ranking_baseline.py                  # BASELINE OK
+```
+
+### BLOCKED / Oscar door
+
+- USE BAR · film · Devpost · keys · paid live field pass · public push of RC
+
+---
+
+## 🎯 NOW (prior) — NIGHTPLAN 2026-09-05 · Lane A adaptive research
 
 **Slice:** Persist research runs; challenge = new investigation against a pinned answer; interrupt/resume; CLI/MCP surface.
 
-### Build (shipped this session)
+### Build (shipped)
 
 - [x] ResearchRun + question map + adaptive loop — `clearance/research_run.py` · verified: `python3 -m pytest -q tests/test_research_run.py` → **7 passed**
 - [x] Challenge revises answer — `bash scripts/demo_research_challenge.sh` → **DEMO OK · CONTESTED**
@@ -324,7 +355,6 @@ Full record: `fleet-ops (internal)/retros/QWEN-LOSS-RETRO-2026-08-30.md` (correc
 
 - Live six-topic field pass (no Parallel/Gemini keys on this VM)
 - Film / Devpost / key rotation / hosted secret redeploy
-- Lanes B/C (study identity, followed questions, experiment protocols)
 
 ---
 
@@ -549,6 +579,7 @@ bash scripts/verify_cold_clone.sh                                               
 
 | When | What | Command | Outcome |
 |------|------|---------|---------|
+| 2026-09-05c overnight | Lane C follow/updates/experiment-plan | `pytest tests/test_research_follow.py` · `demo_research_day_two.sh` · `eval_updates_ranking_baseline.py` | **9 passed** · DEMO OK material=1 · ranked FP0 < naive FP1 |
 | 2026-09-05 overnight | Lane A research engine | `pytest tests/test_research_run.py` · `demo_research_challenge.sh` · `eval_research_challenge_baseline.py` | **7 passed** · DEMO OK CONTESTED · adaptive 1 > naive 0 |
 | 2026-09-03 night | Fresh compound + timeout finding | `compound_fresh_hosted_probe.py` · `verify_partners_hosted.sh` | **A≥1 Parallel → B drop** · orphan-works Run A **504** @ 300s |
 | 2026-09-03 night | SUBMISSION-PACK + Qwen gates | `bench_check_docs.py` · `eval_verify_holdout.py` · `eval_scorer_symmetry.py` | **127/127** · holdout OK · scorer 5/6 vs 6/6 · offline compound A=2→B=1 |

@@ -192,21 +192,38 @@ TOOLS.append({
 
 TOOLS.append({
     "name": "science_research",
-    "description": "Adaptive research loop: start an investigation, challenge a pinned case version (new investigation for overturning evidence), resume a paused run, or show/list/cancel runs. Challenge is not agreeing prose. Interruption preserves completed evidence and does not repeat finished discovery calls.",
+    "description": "Adaptive research loop: start an investigation, challenge a pinned case version (new investigation for overturning evidence), resume a paused run, follow questions, run ranked updates, or record an experiment-plan. Challenge is not agreeing prose. An experiment-plan is a denominator, never a result until execute attaches a measured experiment_id.",
     "inputSchema": {"type": "object", "properties": {
-        "action": {"type": "string", "enum": ["research", "challenge", "resume", "show", "list", "cancel"]},
+        "action": {"type": "string", "enum": [
+            "research", "challenge", "resume", "show", "list", "cancel",
+            "follow", "unfollow", "updates", "experiment-plan",
+        ]},
         "db": {"type": "string"},
         "question": {"type": "string"},
         "case_id": {"type": "string"},
         "run_id": {"type": "string"},
-        "version": {"type": "integer", "description": "Pin this case version for challenge"},
+        "follow_id": {"type": "string"},
+        "protocol_id": {"type": "string"},
+        "version": {"type": "integer", "description": "Pin this case version for challenge, or protocol version"},
         "root": {"type": "string"},
         "live": {"type": "boolean", "default": False},
         "plan_only": {"type": "boolean", "default": False},
+        "refresh": {"type": "boolean", "default": True, "description": "For updates: re-collect sources (false = compare saved versions only)"},
+        "execute": {"type": "boolean", "default": False, "description": "For experiment-plan: run a compatible code_change protocol"},
         "max_steps": {"type": "integer", "description": "Interrupt after N steps; resume later"},
         "sources": {"type": "array", "items": {"type": "string"}},
         "providers": {"type": "array", "items": {"type": "string", "enum": ["parallel", "perplexity"]}},
         "official_domains": {"type": "array", "items": {"type": "string"}},
+        "claim_ids": {"type": "array", "items": {"type": "string"}},
+        "tasks": {"type": "array", "items": {"type": "string"}},
+        "note": {"type": "string"},
+        "hypothesis": {"type": "string"},
+        "kind": {"type": "string", "enum": ["code_change", "observation", "manual"]},
+        "baseline_ref": {"type": "string"},
+        "intervention_ref": {"type": "string"},
+        "acceptance_check": {"type": "string"},
+        "outcome_definition": {"type": "string"},
+        "stopping_rule": {"type": "string"},
         "limit": {"type": "integer", "default": 20}
     }, "required": ["action"]}
 })
@@ -243,13 +260,15 @@ def handle_tool(name: str, arguments: dict) -> str:
         action = arguments.get("action")
         db = arguments.get("db")
         try:
-            for key in ("live", "plan_only"):
+            for key in ("live", "plan_only", "refresh", "execute"):
                 if key in arguments and type(arguments[key]) is not bool:
                     raise ValueError(f"{key} must be a boolean")
-            for key in ("sources", "providers", "official_domains"):
+            for key in ("sources", "providers", "official_domains", "claim_ids", "tasks"):
                 if key in arguments and (not isinstance(arguments[key], list) or any(not isinstance(v, str) for v in arguments[key])):
                     raise ValueError(f"{key} must be an array of strings")
-            for key in ("question", "case_id", "run_id", "root", "db"):
+            for key in ("question", "case_id", "run_id", "root", "db", "follow_id", "protocol_id",
+                        "note", "hypothesis", "kind", "baseline_ref", "intervention_ref",
+                        "acceptance_check", "outcome_definition", "stopping_rule"):
                 if key in arguments and not isinstance(arguments[key], str):
                     raise ValueError(f"{key} must be text")
             if "version" in arguments and (type(arguments["version"]) is not int or arguments["version"] < 1):
@@ -266,25 +285,80 @@ def handle_tool(name: str, arguments: dict) -> str:
                     providers=providers, official_domains=arguments.get("official_domains") or (),
                     execute=not arguments.get("plan_only", False), max_steps=max_steps,
                 )
-            elif action == "challenge":
+                return json.dumps(research_run.public_run(result), indent=2)
+            if action == "challenge":
                 result = research_run.start_challenge(
                     arguments.get("case_id", ""), version=arguments.get("version"),
                     live=live, db=db, providers=providers,
                     execute=not arguments.get("plan_only", False), max_steps=max_steps,
                 )
-            elif action == "resume":
+                return json.dumps(research_run.public_run(result), indent=2)
+            if action == "resume":
                 result = research_run.resume(arguments.get("run_id", ""), live=live, db=db, max_steps=max_steps)
-            elif action == "show":
+                return json.dumps(research_run.public_run(result), indent=2)
+            if action == "show":
                 result = research_run.get_run(arguments.get("run_id", ""), db=db)
-            elif action == "list":
+                return json.dumps(research_run.public_run(result), indent=2)
+            if action == "list":
                 result = research_run.list_runs(case_id=arguments.get("case_id"), db=db,
                                                 limit=arguments.get("limit", 20))
                 return json.dumps(result, indent=2)
-            elif action == "cancel":
+            if action == "cancel":
                 result = research_run.cancel(arguments.get("run_id", ""), db=db)
-            else:
-                raise ValueError("unknown research action")
-            return json.dumps(research_run.public_run(result), indent=2)
+                return json.dumps(research_run.public_run(result), indent=2)
+            if action == "follow":
+                from clearance import follow as follow_mod
+                if arguments.get("case_id"):
+                    result = follow_mod.follow(
+                        arguments["case_id"], db=db, note=arguments.get("note") or "",
+                    )
+                    return json.dumps(follow_mod.public_follow(result), indent=2)
+                return json.dumps(follow_mod.list_followed(db=db, limit=arguments.get("limit", 50)), indent=2)
+            if action == "unfollow":
+                from clearance import follow as follow_mod
+                result = follow_mod.unfollow(
+                    arguments.get("case_id"), follow_id=arguments.get("follow_id"), db=db,
+                )
+                return json.dumps(follow_mod.public_follow(result), indent=2)
+            if action == "updates":
+                from clearance import updates
+                if arguments.get("run_id"):
+                    result = updates.get_run(arguments["run_id"], db=db)
+                else:
+                    result = updates.run_updates(
+                        db=db, case_id=arguments.get("case_id"), live=live,
+                        refresh=arguments.get("refresh", True),
+                        limit=arguments.get("limit", 50),
+                    )
+                return json.dumps(updates.public_run(result), indent=2)
+            if action == "experiment-plan":
+                from clearance import experiment_protocol as proto
+                if arguments.get("execute"):
+                    result = proto.execute(
+                        arguments.get("protocol_id") or arguments.get("run_id") or "",
+                        db=db, version=arguments.get("version"),
+                    )
+                elif arguments.get("protocol_id") and not arguments.get("hypothesis"):
+                    result = proto.get(arguments["protocol_id"], version=arguments.get("version"), db=db)
+                elif arguments.get("case_id") and not arguments.get("hypothesis"):
+                    return json.dumps(proto.list_protocols(case_id=arguments.get("case_id"), db=db), indent=2)
+                else:
+                    result = proto.create(
+                        arguments.get("case_id", ""),
+                        hypothesis=arguments.get("hypothesis", ""),
+                        kind=arguments.get("kind") or "code_change",
+                        claim_ids=arguments.get("claim_ids") or (),
+                        repo=arguments.get("root"),
+                        baseline_ref=arguments.get("baseline_ref"),
+                        intervention_ref=arguments.get("intervention_ref"),
+                        tasks=arguments.get("tasks") or (),
+                        outcome_definition=arguments.get("outcome_definition") or "",
+                        stopping_rule=arguments.get("stopping_rule") or "",
+                        acceptance_check=arguments.get("acceptance_check"),
+                        db=db,
+                    )
+                return json.dumps(proto.public_protocol(result), indent=2)
+            raise ValueError("unknown research action")
         except (ValueError, OSError, sqlite3.Error) as exc:
             return json.dumps({"error": str(exc)})
     if name == "science_case":
