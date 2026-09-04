@@ -300,6 +300,7 @@ def clear_script(
     remembered = corpus.size_for_use(con, _use(subject))
     log_size = refusal_log.stats(logcon)["n"]
     api_calls = _search.calls()
+    search_cache_hits = _search.cache_hits()
     run_history.record(
         subject,
         parallel_api_calls=api_calls,
@@ -316,6 +317,7 @@ def clear_script(
         "unsourced": n - sourced,
         "parallel_calls": parallel_calls,
         "parallel_api_calls": api_calls,
+        "search_cache_hits": search_cache_hits,
         "prior_run": prior_run,
         "corpus_hits": corpus_hits,
         # Cross-subject reuse is a DIFFERENT economic object from same-subject reuse, so
@@ -330,6 +332,7 @@ def clear_script(
             prior_run=prior_run,
             corpus_hits=corpus_hits,
             corpus_remembered=remembered, log_hits=log_hits, log_size=log_size,
+            search_cache_hits=search_cache_hits,
         ),
     }
 
@@ -339,7 +342,7 @@ def _markdown(rows: list[dict], *, subject: str, n: int, sourced: int,
               prior_run: dict | None = None,
               corpus_hits: int = 0,
               corpus_remembered: int = 0, log_hits: int = 0,
-              log_size: int = 0) -> str:
+              log_size: int = 0, search_cache_hits: int = 0) -> str:
     gaps = n - sourced
     out = [
         f"# GAP REPORT — subject `{subject}`",
@@ -349,6 +352,7 @@ def _markdown(rows: list[dict], *, subject: str, n: int, sourced: int,
         f"| UNSOURCED | {gaps} ({(gaps/n if n else 0):.0%}) |",
         f"| Claims searched (no corpus/log hit) | {parallel_calls} |",
         f"| Parallel API calls (metered) | {parallel_api_calls} |",
+        f"| Search cache hits | {search_cache_hits} |",
         f"| Corpus hits (same subject) | {corpus_hits} |",
         f"| Log hits (cross subject) | {log_hits} |",
         f"| Remembered on this subject | {corpus_remembered} |",

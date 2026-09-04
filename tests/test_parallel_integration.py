@@ -83,6 +83,34 @@ def t_requirements_pins_parallel_web():
     assert "parallel-web==" in req
 
 
+def t_cache_hits_meter_increments():
+    """Search cache hits are metered separately from live Parallel calls."""
+    import tempfile
+    from clearance import search as S
+
+    S.reset_calls()
+    with tempfile.TemporaryDirectory() as td:
+        saved_cache, saved_receipts = S.CACHE, S.RECEIPTS
+        S.CACHE = Path(td) / "searches.json"
+        S.RECEIPTS = Path(td) / "receipts.jsonl"
+        try:
+            # Seed cache as if a prior live call wrote it.
+            S.CACHE.write_text(json.dumps({
+                json.dumps({"o": "obj", "q": ["q1"], "m": "advanced"}, sort_keys=True): [
+                    {"url": "https://example.com/a", "title": "A", "excerpt": "e"},
+                ]
+            }))
+            out = S.find_sources("obj", ["q1"], mode="advanced", live=False)
+            assert out and out[0].url.endswith("/a")
+            assert S.cache_hits() == 1
+            assert S.calls() == 0  # cache must not count as live
+            info = S.integration_info()
+            assert info["cache_hits"] == 1
+        finally:
+            S.CACHE, S.RECEIPTS = saved_cache, saved_receipts
+            S.reset_calls()
+
+
 if __name__ == "__main__":
     fns = [v for k, v in sorted(globals().items()) if k.startswith("t_") and callable(v)]
     failed = 0

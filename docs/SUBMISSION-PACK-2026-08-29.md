@@ -47,9 +47,9 @@ Offline compound receipt writes `docs/COMPOUND-EXHIBIT-2026-08-29.md` with A=2â†
 | source_map | `python3 tests/test_source_map.py` | **3/3** |
 | refusal_correctness | `python3 tests/test_refusal_correctness.py` | **6/6** |
 | partner_runtime | `python3 tests/test_partner_runtime.py` | **6/6** |
-| parallel_integration | `python3 tests/test_parallel_integration.py` | **6/6** |
-| **Total** | 11 suites | **127/127** |
-| docs gate | `python3 scripts/bench_check_docs.py` | **127/127 match** |
+| parallel_integration | `python3 tests/test_parallel_integration.py` | **7/7** |
+| **Total** | 11 suites | **128/128** |
+| docs gate | `python3 scripts/bench_check_docs.py` | **128/128 match** |
 | holdout freeze | `python3 scripts/eval_verify_holdout.py` | **4 files pinned** |
 | scorer symmetry | `python3 scripts/eval_scorer_symmetry.py` | baseline **5/6** vs shipping **6/6** on delivered labels |
 
