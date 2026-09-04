@@ -51,9 +51,10 @@ Raw JSON from the final honesty run: `docs/RECEIPT-partner-honesty-exhibit-raw-2
 
 ### FINDING_RED (publishable embarrassment)
 
-1. **Soft verify can green while sealed prediction fails.** Runs 00:15 and 00:22: `SOFT_PASS_FLAT` — soft PASS, sealed `B < A` FAIL. Mechanism: Run B extracted an extra claim; Parallel stayed flat while overlap hit corpus/log.
+1. **Soft verify can green while sealed prediction fails.** Runs 00:15, 00:22, and final fresh: `SOFT_PASS_FLAT` — soft PASS, sealed `B < A` FAIL. Mechanism: Run B extracted an extra claim; Parallel stayed flat while overlap hit corpus/log.
 2. **Naive Parallel drop = cross-subject `log_hits`, not search cache.** Run 00:22: naive A=2→B=1 Parallel with `corpus_hits=0` and **`log_hits=2`**. An earlier draft blamed search cache (nearer proxy); corrected at object. Search cache is still real (`SHIP_B parallel_api_calls=0` with `parallel_calls=1`) but was not the naive claim-path mechanism.
 3. **First naive arm was contaminated** (same claim text as shipping → Parallel 0 on A). Fixed with distinct tokens before clean runs.
+4. **Warm compound-mini went RED then green.** Same night: A=0→B=1 Parallel with hits=1 failed `bp<=ap`; later A=0→B=0 hits=2 passed. Probe comment already said warm A=0 is OK; gate contradicted it — fixed to `bh>=1 and (ap==0 or bp<=ap)`.
 
 **Pitch correction:** film **corpus_hits** for same-subject compound; read **log_hits** before calling a Parallel drop "compound"; never claim Parallel always drops.
 
