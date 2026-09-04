@@ -505,6 +505,11 @@ def _run_clearance(script: str, subject: str, model: str) -> dict:
 class Handler(BaseHTTPRequestHandler):
     protocol_version = "HTTP/1.1"
 
+    def setup(self):
+        super().setup()
+        if os.getenv('AGENT_SCIENCE_HOSTED') == '1' or os.getenv('K_SERVICE'):
+            self.connection.settimeout(10)
+
     def _send(self, code: int, body: bytes, content_type: str):
         self.send_response(code)
         self.send_header("Content-Type", content_type)
@@ -525,6 +530,9 @@ class Handler(BaseHTTPRequestHandler):
             return None
 
     def do_GET(self):
+        if os.getenv('AGENT_SCIENCE_HOSTED') == '1' or os.getenv('K_SERVICE'):
+            from cloud.case_http import WorkspaceHTTP
+            return WorkspaceHTTP(self).handle()
         parsed = urlparse(self.path)
         path = parsed.path
         qs = parse_qs(parsed.query)
@@ -655,6 +663,9 @@ class Handler(BaseHTTPRequestHandler):
         self._json(404, {"error": f"no route {path}"})
 
     def do_POST(self):
+        if os.getenv('AGENT_SCIENCE_HOSTED') == '1' or os.getenv('K_SERVICE'):
+            from cloud.case_http import WorkspaceHTTP
+            return WorkspaceHTTP(self).handle()
         if self.path == "/search":
             body = self._read_json()
             if body is None:
@@ -715,10 +726,21 @@ class Handler(BaseHTTPRequestHandler):
         self._json(404, {"error": f"no route {self.path}"})
 
     def log_message(self, fmt, *a):
-        sys.stderr.write("%s %s\n" % (self.address_string(), fmt % a))
+        if os.getenv('AGENT_SCIENCE_HOSTED') == '1' or os.getenv('K_SERVICE'):
+            # Request lines may contain private questions or signed source URLs.
+            sys.stderr.write("workspace HTTP response\n")
+        else:
+            sys.stderr.write("%s %s\n" % (self.address_string(), fmt % a))
 
 
 def main():
+    if os.getenv('AGENT_SCIENCE_HOSTED') == '1' or os.getenv('K_SERVICE'):
+        from cloud.case_auth import Auth
+        from cloud.case_storage import WorkspaceStore
+        Auth()
+        WorkspaceStore.from_env()
+        if not os.getenv('AGENT_SCIENCE_PUBLIC_ORIGIN'):
+            raise RuntimeError('Hosted service requires its public origin')
     port = int(os.environ.get("PORT", 8080))
     sys.stderr.write(f"agent-science compounding desk on :{port}\n")
     HTTPServer(("0.0.0.0", port), Handler).serve_forever()

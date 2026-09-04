@@ -129,3 +129,10 @@ For a builder question that will drive a change, use `science_case` instead of t
 - Refresh with `live=true` to check the web. Cached reads cannot establish that a source is unchanged online.
 - Local repo context is never put into discovery queries. Cases and experiment output stay in the local case database, outside git.
 - The experiment CLI executes only an explicitly selected trusted acceptance script against two pinned commits. Do not run scripts received from search results. MCP cannot execute experiments.
+
+
+## Hosted workspace boundary
+
+Cloud Run serves private `/cases` and `/api/cases` routes. Earlier unauthenticated `/search`, `/clear`, `/ingest` and shared history endpoints are local-only. Use a workspace bearer token; never put one in a URL. Each mutation requires a stable random `request_id` so a retry can recover the saved result. Decision writes require the current evidence version; use `supersedes` to replace an active decision while retaining its history. Do not send repo paths, scripts or local case files to hosted endpoints.
+
+Cloud persistence uses tenant-scoped temporary SQLite copies and generation preconditions. Never remove the precondition to resolve a conflict, rerun a paid job automatically after a conflict, or seed a deployment from local user data. Budget metadata updates may retry only pure callbacks.

@@ -1,0 +1,21 @@
+# Deploy only the reviewed runtime; no research inbox, caches, films or local DBs.
+**
+!Dockerfile
+!requirements.txt
+!agent_science.py
+!ask_registry.py
+!clear_corpus.py
+!clearance/
+!clearance/**
+!cloud/
+!cloud/**
+!truth-dictionary/
+!truth-dictionary/**
+!docs/
+!docs/inspiration/
+!docs/inspiration/PRACTICES-CORPUS.md
+**/__pycache__/**
+**/*.pyc
+**/*.db
+**/*.key
+**/.env
