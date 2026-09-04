@@ -1,6 +1,7 @@
 """Research terminal interface. Only this interface permits trusted code execution."""
 import argparse
 import json
+import shlex
 from pathlib import Path
 
 from clearance import research_workflow
@@ -78,12 +79,13 @@ def run(args):
             result = research_protocols.execute(arguments['protocol_id'], check=arguments['check'], trusted=arguments['trusted'], version=arguments.get('version'), db=arguments.get('db'))
     else:
         result = research_workflow.handle(arguments)
-    print(json.dumps(result, indent=2, ensure_ascii=False) if arguments.get('json') else render(result))
+    print(json.dumps(result, indent=2, ensure_ascii=False) if arguments.get('json') else render(result, db=arguments.get('db')))
     return 0
 
 
-def render(result):
+def render(result, *, db=None):
     """Compact terminal view; --json retains the full inspectable object."""
+    suffix = ' --db ' + shlex.quote(str(db)) if db else ''
     if 'updates' in result:
         lines = [result['message']]
         for item in result['updates']:
@@ -107,14 +109,21 @@ def render(result):
         lines.append('Completed steps: ' + str(sum(s.get('state') in ('completed', 'COMPLETED') for s in result.get('steps', []))))
         for node in result['question_map']:
             lines.append(f"{node.get('question', '')}: {node.get('gap', 'unresolved')}")
-        lines.append(f"Inspect: research context {result['id']}; continue: research resume {result['id']}; cancel: research cancel {result['id']}")
+        lines.append(f"Answer: agent-science research show --case-id {result['case_id']}{suffix}")
+        lines.append(f"Inspect: agent-science research context {result['id']}{suffix}")
+        lines.append(f"Continue: agent-science research resume {result['id']}{suffix}")
+        lines.append(f"Cancel: agent-science research cancel {result['id']}{suffix}")
         return '\n'.join(lines)
     if 'conclusions' in result:
         lines = [f"{result.get('question', 'Research answer')} (v{result['version']})"]
         if not result['conclusions']:
             lines.append('No assessed conclusion yet.')
         for conclusion in result['conclusions']:
-            lines.append(f"[{conclusion['state']}] {conclusion['statement']}")
+            lines.append(f"[{conclusion.get('claim_state', conclusion['state'])}; {conclusion['relation']}] {conclusion['statement']}")
+            lines.append('Rationale: ' + conclusion['rationale'])
+            for condition in conclusion.get('conditions', []):
+                lines.append(f"Scope — {condition['field']}: {condition['value']}")
+            lines.append('Strongest challenge: ' + str(conclusion.get('strongest_challenge') or 'not specified'))
             anchor = conclusion.get('anchor', {})
             if anchor:
                 lines.append(f"Source: {anchor.get('url')} — {anchor.get('quote')}")

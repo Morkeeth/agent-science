@@ -45,6 +45,34 @@ def handle(arguments):
         raise ValueError('arguments must be an object')
     action = arguments.get('action', 'start')
     db = arguments.get('db')
+    allowed = {'start', 'show', 'context', 'resume', 'cancel', 'challenge', 'compare', 'follow', 'updates', 'update', 'experiment-plan', 'protocol', 'execute-protocol'}
+    if not isinstance(action, str) or action not in allowed:
+        raise ValueError('Unknown research action')
+    for key in ('live',):
+        if key in arguments and type(arguments[key]) is not bool:
+            raise ValueError(key + ' must be a boolean')
+    for key in ('proposal', 'policy', 'protocol'):
+        if key in arguments and arguments[key] is not None and not isinstance(arguments[key], dict):
+            raise ValueError(key + ' must be an object')
+    for key in ('version', 'from_version'):
+        if key in arguments and (type(arguments[key]) is not int or arguments[key] < 1):
+            raise ValueError(key + ' must be a positive integer')
+    required = []
+    if action in ('context', 'resume', 'cancel'):
+        required = ['run_id']
+    elif action in ('challenge', 'compare', 'follow', 'update', 'experiment-plan'):
+        required = ['case_id']
+    elif action == 'protocol':
+        required = ['protocol_id']
+    elif action == 'show':
+        if bool(arguments.get('case_id')) == bool(arguments.get('run_id')):
+            raise ValueError('show requires exactly one case_id or run_id')
+        required = ['case_id'] if arguments.get('case_id') else ['run_id']
+    for key in required:
+        if not isinstance(arguments.get(key), str) or not arguments[key].strip():
+            raise ValueError(key + ' is required')
+    if action == 'compare' and 'from_version' not in arguments:
+        raise ValueError('from_version is required')
     if action == 'execute-protocol':
         raise ValueError('Protocol execution is CLI-only; select a trusted script in the terminal.')
     if action == 'follow':
@@ -60,7 +88,7 @@ def handle(arguments):
                                          root=arguments.get('root'), protocol_id=arguments.get('protocol_id'), db=db)
     if action == 'compare':
         from clearance import synthesis
-        return synthesis.compare(arguments['case_id'], int(arguments['from_version']), db=db)
+        return synthesis.compare(arguments['case_id'], arguments['from_version'], db=db)
     if action == 'show' and arguments.get('case_id'):
         from clearance import synthesis
         return synthesis.build(cases.get(arguments['case_id'], db=db, version=arguments.get('version')))
@@ -78,5 +106,5 @@ def handle(arguments):
         return fn(arguments['run_id'], db=db)
     if action == 'resume':
         return night_runs.resume(arguments['run_id'], proposal=arguments.get('proposal'),
-                                 live=bool(arguments.get('live', False)), db=db)
+                                 live=arguments.get('live', False), db=db)
     raise ValueError(f'Unknown research action: {action}')

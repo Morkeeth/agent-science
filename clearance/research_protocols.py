@@ -57,7 +57,7 @@ def create(case_id, fields, *, root=None, protocol_id=None, db=None):
         if field in body and (not isinstance(body[field], str) or not body[field].strip()):
             raise ValueError(field + ' must be nonempty text')
     for field in ('claim_refs', 'tasks', 'outcomes'):
-        if body.get(field) and not isinstance(body[field], list):
+        if field in body and not isinstance(body[field], list):
             raise ValueError(field + ' must be a list')
     for field in ('tasks', 'outcomes'):
         if any(not isinstance(value, str) or not value.strip() for value in body.get(field, [])):
@@ -139,16 +139,18 @@ def execute(protocol_id, *, check, trusted=False, version=None, db=None):
         with tempfile.TemporaryDirectory(prefix='science-protocol-') as directory:
             captured = Path(directory) / 'acceptance.py'
             captured.write_bytes(script)
-            result = experiments.compare(plan['case_id'], repo=plan['repo'], baseline=plan['baseline'], candidate=plan['intervention'], check=str(captured), runs=plan['budget']['runs'], timeout=plan['budget']['timeout'], db=db)
-        valid = result.get('valid', False) and result.get('acceptance_sha256') == plan['check_sha256']
+            result = experiments.compare(plan['case_id'], repo=plan['repo'], baseline=plan['baseline'], candidate=plan['intervention'], check=str(captured), runs=plan['budget']['runs'], timeout=plan['budget']['timeout'], db=db, expected_case_version=plan['case_version'])
+        valid = (result.get('valid', False) and result.get('acceptance_sha256') == plan['check_sha256']
+                 and result.get('case_version') == plan['case_version']
+                 and result.get('pins') == {'baseline': plan['baseline'], 'candidate': plan['intervention']})
         receipt.update(state='COMPLETED' if valid else 'INVALID', experiment_id=result['id'], result=cases.experiment_summary(result))
         if not valid:
-            receipt['error'] = 'Runner result is invalid or differs from the protocol acceptance digest.'
+            receipt['error'] = 'Runner result is invalid or differs from the protocol case version, pins or acceptance digest.'
     except Exception as exc:
         receipt.update(state='FAILED', error=str(exc))
         raise
     finally:
-        receipt['finished_at'] = cases.now()
+        receipt['interrupted_at' if receipt['state'] == 'RUNNING' else 'finished_at'] = cases.now()
         with closing(_connect(db)) as con, con:
             con.execute('UPDATE night_protocol_executions SET state=?,body=? WHERE id=?', (receipt['state'], json.dumps(receipt), receipt['id']))
     return receipt
