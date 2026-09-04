@@ -39,6 +39,7 @@ python3 scripts/eval_scorer_symmetry.py
 python3 scripts/eval_null_arm.py
 python3 scripts/eval_artifact_claims.py --offline
 python3 tests/test_artifact_claims.py
+python3 scripts/eval_suite_coverage.py
 
 echo "--- 5b. Privacy (no home/~/CODE paths in tracked files) ---"
 bash scripts/privacy_grep.sh

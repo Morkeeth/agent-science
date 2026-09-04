@@ -568,7 +568,7 @@ bash scripts/verify_cold_clone.sh                                               
 
 | When | What | Command | Outcome |
 |------|------|---------|---------|
-| 2026-09-04 night | Artifact-claims gate + pack truth + live compound | `eval_artifact_claims.py` · `eval_null_arm.py` · `compound_fresh_hosted_probe.py` | **pre-fix 4 stale**; post-fix 0; null 3/6 vs ship 6/6; hosted fresh **A=1 B=1 hits=1 PASS**; local-key BLOCKED assumption **retracted** |
+| 2026-09-04 night | Artifact-claims gate + pack truth + live compound | `eval_artifact_claims.py` · `eval_null_arm.py` · `compound_fresh_hosted_probe.py` · `eval_suite_coverage.py` | **pre-fix 4 stale**; post-fix 0; null 3/6 vs ship 6/6; hosted fresh **A=1 B=1 hits=1 PASS**; pack gate **127/254 = 0.500** of tree |
 | 2026-09-03 night | Fresh compound + timeout finding | `compound_fresh_hosted_probe.py` · `verify_partners_hosted.sh` | **A≥1 Parallel → B drop** · orphan-works Run A **504** @ 300s |
 | 2026-09-03 night | SUBMISSION-PACK + Qwen gates | `bench_check_docs.py` · `eval_verify_holdout.py` · `eval_scorer_symmetry.py` | **127/127** · holdout OK · scorer 5/6 vs 6/6 · offline compound A=2→B=1 |
 | 2026-09-02 | Partner verify re-run | `verify_partners_hosted.sh` · `full_gate.sh` | **4/4 partners** · compound warm-shelf PASS · 72/72 auto-seed |

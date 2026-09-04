@@ -56,6 +56,7 @@ Offline compound receipt writes `docs/COMPOUND-EXHIBIT-2026-08-29.md` with A=2�
 | scorer symmetry | `python3 scripts/eval_scorer_symmetry.py` | baseline **5/6** vs shipping **6/6** on delivered labels |
 | null arm | `python3 scripts/eval_null_arm.py` | null **3/6** · baseline **5/6** · shipping **6/6** |
 | artifact claims | `python3 scripts/eval_artifact_claims.py` | shipping catches stale pack claims (AC4–AC8) |
+| suite coverage | `python3 scripts/eval_suite_coverage.py` | pack gate = **127/254** PASS lines (**0.500**); 21 files ungated — not "all tests" |
 
 **Compound exhibit (offline, 2026-09-04):** `python3 scripts/compound_exhibit_receipt.py` · A=**2**→B=**1** Parallel · B corpus hits=**2** — `docs/COMPOUND-EXHIBIT-2026-08-29.md`. Live hosted (2026-08-31): `long_run_goal.sh` · A=**1**→B=**0** · sealed `docs/SEALED-PREDICTION-2026-08-31.md`. Orphan-works full script: run B **504** — do not claim on video.
 

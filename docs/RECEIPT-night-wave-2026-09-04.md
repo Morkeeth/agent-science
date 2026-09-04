@@ -87,5 +87,5 @@ curl -sf https://api.github.com/repos/Morkeeth/agent-science | python3 -c \
 - **Null arm does not embarrass us tonight** (3/6 vs 6/6). Shipped anyway so a future regression is visible.
 - **Did not close Cost-from-billing** — would require Oscar's Parallel/Gemini billing console + dated price card; inventing a USD figure would violate "never carry a number / re-derive at object."
 - **Did not run `full_gate.sh` end-to-end** — long_run + stranger trial hit hosted; offline subset + artifact gate + fresh compound verified instead.
-- **127/127 pack gate still covers only 11 of ~31 test files** (~252 PASS lines across the tree). Expanding that denominator is a separate slice; tonight did not pretend the pack is the whole suite.
+- **127/127 pack gate covers exactly half the tree** — `python3 scripts/eval_suite_coverage.py` → **127/254 = 0.500** PASS lines; 21 files ungated (incl. semantic_guard 18, front_surface 23, citation_conflict 21). Shipped the measurement; did **not** silently expand the pack denominator tonight.
 - **Prompt said "fix stale 26/13"** — that exact pair was not in the pack (already 16/16 / 127/127 from Sep-3). Used **26/13 as the RED-control plant** instead; the live stales were Private-until-submit, `@ e6793ab`, and 265/~0.80.
