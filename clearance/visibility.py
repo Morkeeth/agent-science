@@ -74,8 +74,14 @@ def _practices_hits(query: str, *, full: bool = False) -> list[dict]:
 
     def _rows() -> list[dict]:
         out = []
+        in_practitioner_table = False
         for line in _PRACTICES.read_text(encoding="utf-8").splitlines():
-            if not line.startswith("|") or "Practitioner" in line or line.startswith("|---"):
+            if line.startswith("|") and "Practitioner" in line and "Source" in line:
+                in_practitioner_table = True
+                continue
+            if line.startswith("#"):
+                in_practitioner_table = False
+            if not in_practitioner_table or not line.startswith("|") or line.startswith("|---"):
                 continue
             parts = [p.strip() for p in line.strip("|").split("|")]
             if len(parts) >= 3:

@@ -149,7 +149,7 @@ def _collect(question, *, live=False, refresh=False, sources=(), official_domain
         for angle, objective, query in angles:
             events = []
             try:
-                found = search.find_sources(objective,[query[:190]],live=live,refresh=refresh,max_results=max_per_angle,trace=events) or []
+                found = search.find_sources(objective,[query[:190]],live=live,refresh=refresh,max_results=max_per_angle,trace=events,**search.private_paths()) or []
                 candidates.extend((angle,c) for c in found)
             except (RuntimeError, OSError, ValueError) as exc:
                 events.append({'route':'discovery','outcome':'error','reason':type(exc).__name__})
@@ -168,7 +168,7 @@ def _collect(question, *, live=False, refresh=False, sources=(), official_domain
             # Offline mode reads only a pre-existing document; it never fetches.
             snapshot = instruments.document_snapshot(candidate.url,refresh=refresh,fetch=live)
             if not snapshot:
-                raise ValueError('source unavailable in this mode')
+                raise ValueError('source fetch or text extraction failed' if live else 'source absent from local document cache; web was not checked')
             quote = _quote(question,candidate,snapshot['text'])
             entry.update(snapshot_hash=snapshot['sha256'],fetched_at=snapshot.get('fetched_at'),
                          final_url=snapshot.get('final_url',candidate.url),quote=quote,
@@ -238,9 +238,15 @@ def changes(old, new):
 def refresh(case_id, *, live=False, db=None, max_documents=None):
     old=get(case_id,db=db)
     # Revisit every cited URL even if the discovery rankings have changed.
-    sources=list(dict.fromkeys(old['provided_sources']+[e['url'] for e in old['evidence']]))
+    sources=list(dict.fromkeys([e['url'] for e in old['evidence']]+old['provided_sources']))
+    if max_documents is None and old.get('document_limit'):
+        max_documents=max(old['document_limit'],len(old['evidence']))
     evidence,trace=_collect(old['question'],live=live,refresh=live,sources=sources,official_domains=old['official_domains'],
-        excerpts={e['url']:e.get('quote') for e in old['evidence']},titles={e['url']:e.get('title') for e in old['evidence']},origin_angles={e['url']:e.get('angle') for e in old['evidence']},include_discovery=not old['provided_sources'],max_documents=max_documents)
+        excerpts={e['url']:e.get('quote') for e in old['evidence']},titles={e['url']:e.get('title') for e in old['evidence']},origin_angles={e['url']:e.get('angle') for e in old['evidence']},include_discovery=not old['provided_sources'] and not old.get('report'),max_documents=max_documents) if sources or not old.get('report') else ([],[])
+    previous={e['id']:e for e in old['evidence']}
+    for entry in evidence:
+        for key in ('discovered_by','discovery_query'):
+            if key in previous.get(entry['id'],{}):entry[key]=previous[entry['id']][key]
     new={k:v for k,v in old.items() if k not in ('decisions','experiments','coverage','freshness')}
     new.update(version=old['version']+1,checked_at=now(),evidence=evidence,trace=trace)
     if old.get('repo'):
@@ -300,6 +306,8 @@ def source(case_id, evidence_id, *, db=None, version=None, offset=0, limit=12000
     if offset<0 or not 1<=limit<=20000:
         raise ValueError('offset must be nonnegative; limit must be 1–20000 characters')
     text=e['snapshot_text']
+    if text.lstrip().startswith('%PDF-'):
+        raise ValueError('legacy snapshot contains unextracted PDF bytes; refresh this source to extract text')
     return {'case_id':case_id,'version':data['version'],'evidence_id':evidence_id,
             'url':e['url'],'sha256':e['snapshot_hash'],'fetched_at':e.get('fetched_at'),
             'offset':offset,'total_characters':len(text),'text':text[offset:offset+limit],
@@ -321,7 +329,8 @@ def experiment_summary(result):
 
 def public_view(data):
     """Compact local tool output, not a public export of private case data."""
-    return {**data,'evidence':[{k:v for k,v in e.items() if k!='snapshot_text'} for e in data['evidence']],
+    report=data.get('report')
+    return {**data,**({'report':{k:v for k,v in report.items() if k!='text'}} if report else {}),'evidence':[{k:v for k,v in e.items() if k!='snapshot_text'} for e in data['evidence']],
             'experiments':[experiment_summary(e) for e in data.get('experiments',[])]}
 
 
@@ -345,6 +354,11 @@ def format_case(data):
         for c in d['review']['changes']:lines += [f"  {c['kind']}: {c.get('url',c.get('reason',''))}"]
     for e in data.get('experiments',[]):
         lines += [f"Experiment {e['id']}: {e['summary']}"]
+    if data.get('claims'):
+        from clearance.research import brief, render_brief
+        lines += ['',render_brief(brief(data))]
+    if data.get('report'):
+        lines += [f"Imported report SHA-256: {data['report']['sha256']} (original text retained locally)"]
     lines += ['','Actual attempts:']
     for event in data['trace']:
         lines += [f"  {event.get('angle','')} / {event['route']}: {event['outcome']}" + (f" · {event['reason']}" if event.get('reason') else '')]

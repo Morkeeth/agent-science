@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import json
 import os
+import tempfile
 import urllib.error
 import urllib.request
 from dataclasses import dataclass
@@ -139,13 +140,25 @@ def load_key() -> str:
     )
 
 
-def _cache_load() -> dict:
-    return json.loads(CACHE.read_text()) if CACHE.exists() else {}
+def private_paths():
+    root=Path(os.environ.get("AGENT_SCIENCE_SEARCH_DIR",Path.home()/".agent-science/search"))
+    return {"cache_path":root/"parallel-cache.json","receipts_path":root/"parallel-receipts.jsonl"}
 
 
-def _cache_save(d: dict) -> None:
-    CACHE.parent.mkdir(parents=True, exist_ok=True)
-    CACHE.write_text(json.dumps(d, indent=2))
+def _cache_load(path=None) -> dict:
+    target=Path(path) if path is not None else CACHE
+    return json.loads(target.read_text()) if target.exists() else {}
+
+
+def _cache_save(d: dict, path=None) -> None:
+    target=Path(path) if path is not None else CACHE
+    target.parent.mkdir(parents=True,exist_ok=True)
+    fd,name=tempfile.mkstemp(prefix='.search-',dir=target.parent)
+    try:
+        with os.fdopen(fd,'w') as stream:json.dump(d,stream,indent=2)
+        os.replace(name,target)
+    finally:
+        if os.path.exists(name):os.unlink(name)
 
 
 def _candidates_from_payload(payload: dict) -> list[Candidate]:
@@ -165,9 +178,10 @@ def _candidates_from_payload(payload: dict) -> list[Candidate]:
 
 def log_receipt(*, source: str, objective: str, queries: list[str],
                 candidates: list[Candidate], cache_hit: bool = False,
-                search_id: Optional[str] = None) -> None:
+                search_id: Optional[str] = None, path=None) -> None:
     from datetime import datetime, timezone
-    RECEIPTS.parent.mkdir(parents=True, exist_ok=True)
+    target=Path(path) if path is not None else RECEIPTS
+    target.parent.mkdir(parents=True, exist_ok=True)
     row = {
         "at": datetime.now(timezone.utc).isoformat(),
         "source": source,
@@ -178,7 +192,7 @@ def log_receipt(*, source: str, objective: str, queries: list[str],
         "urls": [c.url for c in candidates[:8]],
         "search_id": search_id,
     }
-    with RECEIPTS.open("a", encoding="utf-8") as f:
+    with target.open("a", encoding="utf-8") as f:
         f.write(json.dumps(row, ensure_ascii=False) + "\n")
 
 
@@ -199,7 +213,7 @@ def _live_search_urllib(objective: str, queries: list[str], *, mode: str) -> tup
 def _live_search_sdk(objective: str, queries: list[str], *, mode: str) -> tuple[dict, str | None]:
     from parallel import Parallel
 
-    client = Parallel(api_key=load_key())
+    client = Parallel(api_key=load_key(),max_retries=0)
     search = client.search(objective=objective, search_queries=queries, mode=mode)
     sid = getattr(search, "search_id", None)
     results = []
@@ -215,10 +229,13 @@ def _live_search_sdk(objective: str, queries: list[str], *, mode: str) -> tuple[
 def _live_search(objective: str, queries: list[str], *, mode: str) -> tuple[dict, str | None]:
     global LIVE_CALLS, LAST_SEARCH_ID
     LIVE_CALLS += 1
-    if sdk_available():
-        payload, sid = _live_search_sdk(objective, queries, mode=mode)
-    else:
-        payload, sid = _live_search_urllib(objective, queries, mode=mode)
+    try:
+        if sdk_available():
+            payload, sid = _live_search_sdk(objective, queries, mode=mode)
+        else:
+            payload, sid = _live_search_urllib(objective, queries, mode=mode)
+    except Exception as exc:
+        raise RuntimeError('Parallel provider request failed: '+type(exc).__name__) from None
     LAST_SEARCH_ID = sid
     return payload, sid
 
@@ -226,13 +243,13 @@ def _live_search(objective: str, queries: list[str], *, mode: str) -> tuple[dict
 def find_sources(objective: str, queries: list[str], *, mode: str = "advanced",
                  live: bool = False, max_results: int = 6,
                  term: str = "", refresh: bool = False,
-                 trace: list | None = None) -> Optional[list[Candidate]]:
+                 trace: list | None = None, cache_path=None, receipts_path=None) -> Optional[list[Candidate]]:
     ck = json.dumps({"o": objective, "q": sorted(queries), "m": mode}, sort_keys=True)
-    cache = _cache_load()
+    cache = _cache_load(cache_path)
     if not refresh and ck in cache:
         out = [Candidate(**c) for c in cache[ck][:max_results]]
         log_receipt(source="parallel", objective=objective, queries=queries,
-                    candidates=out, cache_hit=True)
+                    candidates=out, cache_hit=True,path=receipts_path)
         if trace is not None:
             trace.append({"route": "parallel_cache", "outcome": "hit", "queries": queries, "candidates": len(out)})
         return out
@@ -240,7 +257,7 @@ def find_sources(objective: str, queries: list[str], *, mode: str = "advanced",
     if not refresh and term_key and term_key in cache:
         out = [Candidate(**c) for c in cache[term_key][:max_results]]
         log_receipt(source="parallel", objective=objective, queries=queries,
-                    candidates=out, cache_hit=True)
+                    candidates=out, cache_hit=True,path=receipts_path)
         if trace is not None:
             trace.append({"route": "parallel_cache", "outcome": "hit", "queries": queries, "candidates": len(out[:max_results])})
         return out[:max_results]
@@ -265,7 +282,7 @@ def find_sources(objective: str, queries: list[str], *, mode: str = "advanced",
     cache[ck] = [c.__dict__ for c in out]
     if term_key:
         cache[term_key] = cache[ck]
-    _cache_save(cache)
+    _cache_save(cache,cache_path)
     log_receipt(source="parallel", objective=objective, queries=queries,
-                candidates=out[:max_results], cache_hit=False, search_id=sid)
+                candidates=out[:max_results], cache_hit=False, search_id=sid,path=receipts_path)
     return out[:max_results]

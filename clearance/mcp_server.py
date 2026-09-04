@@ -163,17 +163,23 @@ TOOLS = [
 
 TOOLS.append({
     "name": "science_case",
-    "description": "Create a versioned research case, inspect evidence, save an authored decision, or refresh cited sources to see which decisions require review. Stored locally. Quote occurrence is verified; support is not inferred. Repo context never enters web queries. Experiments execute only through the explicit local CLI.",
+    "description": "Research a question, import an existing report, investigate gaps with Parallel/Perplexity, assess claims against exact source passages, inspect a brief, save decisions and review changed evidence. Stored locally. Quote occurrence is verified; support is not inferred. Repo context never enters web queries. Experiments execute only through the explicit local CLI.",
     "inputSchema": {"type": "object", "properties": {
-        "action": {"type": "string", "enum": ["create", "show", "refresh", "decide", "list", "source", "review"]},
+        "action": {"type": "string", "enum": ["create", "show", "refresh", "decide", "list", "source", "review", "import", "investigate", "assess", "brief", "report"]},
         "db": {"type": "string", "description": "Optional local case database, matching CLI --db"},
-        "version": {"type": "integer", "description": "Required for decide: the evidence version you inspected; optional historical version for show/source"}, "evidence_id": {"type": "string"},
-        "offset": {"type": "integer", "default": 0}, "limit": {"type": "integer", "description": "Source chunk characters (default 12000); list/review page size alias when page_size is absent"},
-        "query": {"type": "string", "description": "Local saved-question filter for list/review"},
+        "version": {"type": "integer", "description": "Required for decide, investigate and assess: inspected case version; optional historical version for show/source/brief/report"}, "evidence_id": {"type": "string"},
+        "offset": {"type": "integer", "default": 0}, "limit": {"type": "integer", "description": "Source/report chunk characters (default 12000); investigate results per provider (1–10, default 5); list/review page size alias"},
+        "query": {"type": "string", "description": "Local filter for list/review; explicit public search query for investigate"},
         "page_info": {"type": "boolean", "default": False, "description": "Include has_more/next_offset in list result; default retains legacy array"},
         "experiment_ids": {"type": "array", "items": {"type": "string"}, "description": "Valid local experiment IDs cited by this decision; may replace source evidence IDs"},
         "page_size": {"type": "integer", "default": 20, "minimum": 1, "maximum": 100},
-        "supersedes": {"type": "string", "description": "Active decision ID to replace; requires version you inspected"},
+        "supersedes": {"type": "string", "description": "Active decision or assessment ID to replace; requires inspected version"},
+        "report_text": {"type":"string","description":"Report contents, Markdown/plain text or Sonar JSON. Stored locally; never sent to discovery."},
+        "providers": {"type":"array","items":{"type":"string","enum":["parallel","perplexity"]}},
+        "max_documents": {"type":"integer","minimum":1,"maximum":40,"default":12},
+        "claim_id": {"type":"string"},
+        "quote": {"type":"string","description":"Exact source snapshot passage for an authored assessment"},
+        "relation": {"type":"string","enum":["supports","contradicts","context","unresolved"]},
         "question": {"type": "string"}, "case_id": {"type": "string"},
         "root": {"type": "string", "description": "Local user repo for context"},
         "live": {"type": "boolean", "default": False},
@@ -212,22 +218,32 @@ def _send_message(msg):
 
 def handle_tool(name: str, arguments: dict) -> str:
     if name == "science_case":
-        from clearance import cases, case_review
+        from clearance import cases, case_review, research
         action = arguments.get("action")
         db=arguments.get("db")
         try:
             for key in ("live","page_info"):
                 if key in arguments and type(arguments[key]) is not bool:
                     raise ValueError(f"{key} must be a boolean")
-            for key in ("sources","official_domains","evidence_ids","experiment_ids"):
+            for key in ("sources","official_domains","evidence_ids","experiment_ids","providers"):
                 if key in arguments and (not isinstance(arguments[key],list) or any(not isinstance(v,str) for v in arguments[key])):
                     raise ValueError(f"{key} must be an array of strings")
-            for key in ("question","case_id","statement","rationale","query","supersedes","root","db","evidence_id"):
+            for key in ("question","case_id","statement","rationale","query","supersedes","root","db","evidence_id","report_text","claim_id","quote","relation"):
                 if key in arguments and not isinstance(arguments[key],str):
                     raise ValueError(f"{key} must be text")
             if "version" in arguments and (type(arguments["version"]) is not int or arguments["version"]<1):
                 raise ValueError("version must be a positive integer")
-            if action == "create":
+            if action == "import":
+                data=research.import_report(arguments.get("question",""),arguments.get("report_text",""),root=arguments.get("root"),live=arguments.get("live",False),max_documents=arguments.get("max_documents",12),db=db)
+            elif action == "investigate":
+                data=research.investigate(arguments.get("case_id",""),arguments.get("version"),query=arguments.get("query",""),sources=arguments.get("sources",[]),providers=arguments.get("providers",["parallel"]),live=arguments.get("live",False),limit=arguments.get("limit",5),db=db)
+            elif action == "assess":
+                data=research.assess(arguments.get("case_id",""),arguments.get("version"),statement=arguments.get("statement"),relation=arguments.get("relation"),rationale=arguments.get("rationale"),evidence_id=arguments.get("evidence_id"),quote=arguments.get("quote"),claim_id=arguments.get("claim_id"),supersedes=arguments.get("supersedes"),db=db)
+            elif action == "brief":
+                return json.dumps(research.brief(cases.get(arguments.get("case_id",""),version=arguments.get("version"),db=db)),indent=2)
+            elif action == "report":
+                return json.dumps(research.report_source(arguments.get("case_id",""),version=arguments.get("version"),db=db,offset=arguments.get("offset",0),limit=arguments.get("limit",12000)),indent=2)
+            elif action == "create":
                 data = cases.create(arguments.get("question", ""), root=arguments.get("root"),
                     live=arguments.get("live", False), sources=arguments.get("sources", []),
                     official_domains=arguments.get("official_domains", []),db=db)
@@ -344,7 +360,7 @@ def main():
                 "result": {
                     "protocolVersion": "2024-11-05",
                     "capabilities": {"tools": {"listChanged": False}},
-                    "serverInfo": {"name": "agent-science", "version": "0.3.0"},
+                    "serverInfo": {"name": "agent-science", "version": "0.4.0"},
                 },
             })
         elif method == "notifications/initialized":

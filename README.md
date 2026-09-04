@@ -66,6 +66,45 @@ python3 -m clearance case decide CASE_ID --version 2 --supersedes DECISION_ID --
 
 `--version` is required: a refresh between reading and saving rejects the stale decision. Superseding retains the old decision and its evidence history. Source output names its case version, fetch time and content hash; long documents include the next offset.
 
+## Import research and investigate gaps
+
+Import a Perplexity report as Markdown/text, or a Sonar JSON response with `choices[0].message.content` and `citations`. The report stays local. Import reads its cited URLs only; it does not send report text or repo contents to a search provider.
+
+```bash
+agent-science case import report.md --question "Do fresh sessions reduce repeated errors?" --root . --live
+```
+
+Without `--live`, only existing source snapshots are read. By default, up to 12 cited documents are inspected; `--max-documents` permits 1–40. PDF sources use bounded text extraction through the pinned `pypdf` dependency; encrypted, scanned or oversized PDFs remain unavailable. The original report and all extracted citation URLs are retained, and `brief` lists unread citations. Imported paragraphs become **unassessed passages**, not independently verified claims. Numbered `[1]` citations are matched to Markdown reference definitions (including titles) or Sonar's citation array. Sonar `search_results` URLs are retained as leads; their ordering is not assumed to establish citation numbering. Unresolved citation markers remain explicit. Inline URLs are retained too. The parser does not infer missing references or split complex paragraphs into atomic claims.
+
+Use the returned case ID to inspect the report, read a source, or add a targeted search:
+
+```text
+agent-science case report CASE_ID
+agent-science case brief CASE_ID
+agent-science case investigate CASE_ID --version 1 --source https://example.org/cited-paper --live
+agent-science case investigate CASE_ID --version 1 --query "fresh sessions coding agents replication failures" --provider parallel --provider perplexity --limit 5 --live
+```
+
+Use repeated `--source URL` to read up to 10 unread citations directly, without a search query or provider key. An explicit live source read also rechecks an existing snapshot.
+
+Investigation retains prior evidence and records the explicit query, providers, actual attempts and newly read sources. `--limit` bounds results per provider to 1–10. New sources receive provider attribution; duplicate URLs are read once. Each write advances the case version. Always inspect the new version before the next write.
+
+Perplexity uses its [first-party Search API](https://docs.perplexity.ai/api-reference/search-post), configured with `PERPLEXITY_API_KEY` or `~/.config/keys/perplexity.key`. Parallel case discovery caches and receipts live in `~/.agent-science/search` (override with `AGENT_SCIENCE_SEARCH_DIR`), outside Git. Live investigation bypasses discovery caches; each attempt, including an unavailable provider, advances the case version. There is no Perplexity cache yet; offline calls explicitly skip it. Missing credentials and failed requests are recorded as unavailable/error attempts, with no fabricated results or automatic paid retries. Request counts are recorded; provider billing is not inferred. Existing lookup/visibility routing remains unchanged; choose providers through `case investigate`.
+
+## Assess a claim against evidence
+
+After reading a source with `case source`, record your interpretation with an exact source passage:
+
+```text
+agent-science case assess CASE_ID --version 2 --claim CLAIM_ID --relation supports --evidence EVIDENCE_ID --quote "Exact passage copied from this source snapshot" --reason "Why this result supports this claim, and where it applies"
+```
+
+Use `--statement` instead of `--claim` to add a new claim. Relations are `supports`, `contradicts`, `context` and `unresolved`. The first three require an exact 20–4000 character source quote; unresolved claims may have no source. Quote occurrence is mechanically checked. The interpretation remains authored by the user or agent; it is not an automatic entailment judgment or a confidence score.
+
+The brief shows supporting and opposing assessments, open questions and stale evidence. Opposing active assessments produce `CONTESTED`. Use `--supersedes ASSESSMENT_ID` with `--claim` to replace an assessment, preserving its historical version. Refresh checks source changes; affected claims enter `case review` alongside affected decisions. Separate hosts are listed for visibility, never counted as independent experiments.
+
+MCP exposes the same actions through `science_case`: `import` takes `report_text` instead of reading a file; `investigate` takes `query` and `providers`, or `sources` for direct citation reads; `assess` takes `claim_id` or `statement`, `relation`, `rationale`, `evidence_id` and `quote`. `investigate` and `assess` require the inspected `version`. `brief` and `report` support historical versions; report text is paginated with `offset` and `limit` and omitted from routine case output.
+
 ## Test a practice on your repo
 
 The experiment command runs a selected, trusted Python acceptance script against two immutable Git revisions. It captures the script once, alternates arm order across pairs, restores the pinned worktree before each run, and records pass counts, wall time, output hashes and limitations.

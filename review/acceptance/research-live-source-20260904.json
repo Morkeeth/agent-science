@@ -1,0 +1,22 @@
+{
+  "case_id": "98586ba84e89",
+  "source_status": "QUOTE_VERIFIED",
+  "freshness": {
+    "new_fetches": 1,
+    "cached_reads": 0,
+    "meaning": "Only new_fetches checks sources on the web. Cached reads cannot rule out external changes."
+  },
+  "quote": "The Search API returns a ranked `results[]` array.",
+  "claim_state": "SUPPORTED_AS_ASSESSED",
+  "perplexity_attempt": [
+    {
+      "route": "perplexity",
+      "queries": [
+        "Perplexity Search API structured results"
+      ],
+      "outcome": "unavailable",
+      "reason": "PERPLEXITY_API_KEY is not configured"
+    }
+  ],
+  "report_round_trip": true
+}

@@ -7,3 +7,6 @@ parallel-web==1.3.2
 
 # Hosted workspace snapshots use explicit generation preconditions.
 google-cloud-storage==3.4.1
+
+# Public paper source extraction runs in a bounded subprocess.
+pypdf==6.14.2

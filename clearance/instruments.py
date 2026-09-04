@@ -13,6 +13,8 @@ import hashlib
 import os
 import tempfile
 import threading
+import subprocess
+import sys
 from datetime import datetime, timezone
 
 from clearance.safe_fetch import fetch_public, validate_url
@@ -163,6 +165,9 @@ def document_snapshot(url: str, refresh: bool = False, *, timeout: int = 30,
     with _DOC_LOCK:
         docs = _load_docs()
         hit = docs.get(url) or docs.get(canonical(url))
+    # Legacy caches may contain PDF bytes decoded as UTF-8. They are not text evidence.
+    if hit and hit.get("text", "").lstrip().startswith("%PDF-"):
+        hit = None
     if hit and not refresh:
         text = hit["text"]
         return {"url": url, "text": text,
@@ -174,7 +179,12 @@ def document_snapshot(url: str, refresh: bool = False, *, timeout: int = 30,
         return None
     try:
         body, final = fetch_public(url, timeout=timeout, user_agent=UA)
-        text = _visible_text(body.decode("utf-8", errors="replace"))
+        if body.lstrip().startswith(b'%PDF-'):
+            result=subprocess.run([sys.executable,str(Path(__file__).with_name('pdf_source.py'))],
+                input=body,stdout=subprocess.PIPE,stderr=subprocess.DEVNULL,timeout=30,check=True)
+            text=result.stdout.decode('utf-8')
+        else:
+            text = _visible_text(body.decode("utf-8", errors="replace"))
     except Exception:
         return None
     snapshot = {"url": url, "text": text,

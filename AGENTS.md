@@ -145,3 +145,13 @@ Cloud persistence uses tenant-scoped temporary SQLite copies and generation prec
 ## Terminal review and measured decisions
 
 Use `science_case` action `review` (or `python3 -m clearance case review --root .`) to find decisions flagged by saved evidence changes. This is local retrieval, not a fresh web check. Read `show`/`source`, then pass the inspected `version` when deciding. Use `supersedes` to replace an active decision without deleting its reasoning. A decision may cite `experiment_ids` from valid local runs in that same case, as well as source `evidence_ids`. Only the explicit CLI runs a trusted acceptance script; MCP cannot execute experiments. `list` retains its JSON array by default; `page_info=true` returns pagination metadata.
+
+
+## Research expansion
+
+Use `science_case` import to retain an existing report and retrieve its cited sources. Pass report contents as `report_text`; the original remains local. Imported passages start unassessed. Read unread citations with investigate sources (no discovery call). For a gap, use investigate with an explicit public `query`, `providers` (parallel/perplexity), `limit`, and the current `version`. Never copy private report/repo contents into the query without user intent.
+
+Read source snapshots before assess. Record claim-specific supports/contradicts/context with exact `quote`, `evidence_id` and an explanatory `rationale`; use unresolved when evidence is absent. These are authored interpretations, not machine-proven entailment. Inspect brief for opposing findings and stale assessments. Refresh then review on the return visit. Missing providers and unread citations must be visible in the answer. Do not claim live Perplexity validation without an actual completed provider call.
+
+
+For broad agentic science, preserve the scope: memory/context, retrieval, coding workflows, agent UX/design, coordination and evaluation. Query the local shelf first, then investigate missing evidence through primary papers and practitioner sources. Record task/population/budget limits with each assessment. A study on multi-hop reasoning must not become a verdict on repository coding. Source mirrors and HTML/PDF versions of one paper are one study, not independent confirmations. The 2026-09-05 field pass is recorded in research-inbox; its local cases are inspectable with case brief.

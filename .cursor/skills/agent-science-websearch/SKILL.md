@@ -68,3 +68,12 @@ python3 -m clearance visibility "context engineering" --full --live
 python3 -m clearance popular
 python3 scripts/refresh_field_signals.py
 ```
+
+
+## Research that informs a repo decision
+
+For an existing Perplexity report, call `science_case` action `import` with question and report_text. Use `brief` to inspect unassessed passages and unread citations. The report is a source of leads, not proof.
+
+Read unread citation URLs with investigate sources, without a provider search. Use action `investigate` for a named evidence gap: query, providers (parallel/perplexity), limit, live and the inspected version. Read source snapshots with `source`, then use `assess` with claim_id (or a new statement), relation, rationale, evidence_id and an exact quote. Assessments are authored interpretations. Support is never established by keyword overlap or quotation occurrence alone.
+
+Return a compact answer with evidence, disagreement, limitations and the next experiment. Expose missing provider credentials and unread citations. Use `brief` and `review` on return visits; use supersedes to revise an assessment while retaining history. Keep raw report text, personal data and repo contents out of public discovery queries.
