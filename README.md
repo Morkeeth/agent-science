@@ -4,7 +4,7 @@
 UNSOURCED with a named reason — and a truth shelf that compounds so the second ask is
 free.
 
-**Proof:** `bash scripts/full_gate.sh` → FULL GATE OK · **127/127** controls · hosted
+**Proof:** `bash scripts/full_gate.sh` → FULL GATE OK · **128/128** controls · hosted
 compound A→B Parallel drop measured live (`docs/RECEIPT-partner-integrations-night-2026-09-01.md`).
 
 **Constraint:** if the document does not contain the exact passage, refuse — never
@@ -21,9 +21,9 @@ paraphrase, never infer.
 
 ```bash
 git clone https://github.com/Morkeeth/agent-science.git && cd agent-science
-bash scripts/verify_cold_clone.sh       # offline controls (~15s)
-bash scripts/demo_truth_layer.sh        # truth layer: CONTRARY + transparency (~7s)
-bash scripts/demo_clearance_desk.sh     # clearance desk: script → verdicts (~60s, no keys)
+bash scripts/verify_cold_clone.sh       # offline controls (~3.5 min)
+bash scripts/demo_truth_layer.sh        # truth layer: CONTRARY + transparency (~12s)
+bash scripts/demo_clearance_desk.sh     # clearance desk: script → verdicts (~25s, no keys)
 ```
 
 **Documentary / E&O buyer path:** `demo_clearance_desk.sh` posts a public narration to the hosted clearance desk and prints each claim with verdict + cause — no Gemini or Parallel keys on your machine.
@@ -50,7 +50,7 @@ python3 -m clearance.stack_cli visibility "ralph loop agentic" --full
 open https://agent-science-568004190078.us-central1.run.app/visibility/ui
 ```
 
-**Proof:** `bash scripts/full_gate.sh` → FULL GATE OK · **127/127** controls
+**Proof:** `bash scripts/full_gate.sh` → FULL GATE OK · **128/128** controls
 
 ---
 

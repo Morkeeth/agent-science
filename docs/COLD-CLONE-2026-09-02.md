@@ -38,7 +38,7 @@ transparency: ['angles_searched', 'shallow_route', 'imbalance']
 === done ===
 ```
 
-**Exit code:** 0 · **Wall-clock:** ~18s (verify) + ~7s (demo)
+**Exit code:** 0 · **Wall-clock:** ~18s (verify) + ~7s (demo) [CORRECTED 2026-09-04: verify measures 203s, not ~18s. This run was a real clone on a WARM machine, so ambient site-packages and local API keys were still in play. Re-measured on 2026-09-04 in a scrubbed environment with an empty HOME and a bare virtualenv where google-adk and parallel-web are both absent.]
 
 ### Where a stranger got stuck
 
@@ -127,7 +127,7 @@ desk UI:    https://agent-science-568004190078.us-central1.run.app/
 === done ===
 ```
 
-**Exit code:** 0 · **Wall-clock:** ~50s total (verify + truth layer + clearance desk)
+**Exit code:** 0 · **Wall-clock:** ~50s total (verify + truth layer + clearance desk) [CORRECTED 2026-09-04: 4m00s measured on a scrubbed environment, with step 1 at 203s, step 2 at 12s and step 3 at 25s.]
 
 ---
 

@@ -36,7 +36,7 @@ https://agent-science-568004190078.us-central1.run.app/visibility/ui?q=ralph+loo
 |---|------|--------|-------|
 | 1 | Hosted URL live | ✅ | above |
 | 2 | Public repo + MIT | ✅ | GitHub |
-| 3 | Controls 127/127 (tests across 11 suites, 72 of them mutation-watched) | ✅ 2026-09-02 | `python3 scripts/bench_check_docs.py` (step 5 of `full_gate.sh`) |
+| 3 | Controls 128/128 (tests across 11 suites, 72 of them mutation-watched) | ✅ 2026-09-04 | `python3 scripts/bench_check_docs.py` (step 5 of `full_gate.sh`) |
 | 4 | Sealed compound A=1→B=0 | ✅ | `docs/SEALED-PREDICTION-2026-08-31.md` |
 | 5 | Demo video ≤180s | ✅ built | `demo/demo-final.mp4` (102s) · Oscar uploads |
 | 6 | Devpost submit | [ ] | `docs/DEVPOST-WIN.md` |

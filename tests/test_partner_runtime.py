@@ -71,6 +71,59 @@ def t_deploy_sh_secret_manager_not_plaintext_env():
     assert "GEMINI_API_KEY" not in deploy.split("--set-env-vars")[1].split("--set-secrets")[0]
 
 
+def t_partner_manifest_survives_cold_start():
+    """The Parallel proof must not read as unused on a fresh instance.
+
+    live_calls/last_search_id are per-process. This control asserts the manifest
+    also carries receipt-backed fields, and that they go red when the log has no
+    real search_id. Added 2026-09-04.
+    """
+    import json
+    import tempfile
+    from clearance import search
+
+    info = search.integration_info()
+    for field in ("last_verified_utc", "verified_search_id", "verified_calls_logged"):
+        assert field in info, f"{field} missing from /partners manifest"
+
+    real = search.RECEIPTS
+    try:
+        d = Path(tempfile.mkdtemp())
+
+        # Red 1: no log at all.
+        search.RECEIPTS = d / "absent.jsonl"
+        out = search.last_verified_receipt()
+        assert out["verified_search_id"] is None
+        assert out["verified_calls_logged"] == 0
+
+        # Red 2: receipts exist but none carry a real search_id, plus a bad line.
+        log = d / "no_ids.jsonl"
+        log.write_text(
+            json.dumps({"at": "2026-01-01T00:00:00+00:00", "source": "parallel", "search_id": None})
+            + "\n{ this is not json\n"
+        )
+        search.RECEIPTS = log
+        out = search.last_verified_receipt()
+        assert out["verified_search_id"] is None, "a cache-hit receipt is not proof of a live call"
+        assert out["verified_calls_logged"] == 0
+
+        # Green: one real receipt, and the LAST one wins.
+        log = d / "ids.jsonl"
+        log.write_text(
+            json.dumps({"at": "2026-01-01T00:00:00+00:00", "source": "parallel", "search_id": "search_old"})
+            + "\n"
+            + json.dumps({"at": "2026-02-02T00:00:00+00:00", "source": "parallel", "search_id": "search_new"})
+            + "\n"
+        )
+        search.RECEIPTS = log
+        out = search.last_verified_receipt()
+        assert out["verified_search_id"] == "search_new"
+        assert out["last_verified_utc"] == "2026-02-02T00:00:00+00:00"
+        assert out["verified_calls_logged"] == 2
+    finally:
+        search.RECEIPTS = real
+
+
 def t_requirements_pins_parallel_web():
     req = (ROOT / "requirements.txt").read_text()
     assert "parallel-web==" in req
