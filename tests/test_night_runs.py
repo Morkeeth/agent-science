@@ -116,10 +116,7 @@ class RunTests(unittest.TestCase):
         self.assertEqual(night_runs.get(a['id'],db=self.db)['steps'],[])
 
 
-if __name__=='__main__':unittest.main()
 
-
-class CrossLaneTests(RunTests):
     def test_challenge_revises_fixture_answer_from_new_evidence(self):
         from clearance import synthesis
         run=self.start()
@@ -214,3 +211,81 @@ class CrossLaneTests(RunTests):
         with self.assertRaises(ValueError):
             night_runs.resume(run['id'],proposal=self.proposal(run,'read',urls=['http://127.0.0.1/private']),db=self.db)
         self.assertEqual(night_runs.get(run['id'],db=self.db)['steps'],[])
+
+    def test_missing_provider_access_is_visible_to_next_reasoning_step(self):
+        run=self.start()
+        def find(provider,query,**kw):
+            kw['trace'].append({'route':provider,'outcome':'unavailable','reason':'fixture missing credentials'})
+            return []
+        with patch('clearance.discovery.find',side_effect=find):
+            run=night_runs.resume(run['id'],proposal=self.proposal(run,'search',query='fixture missing access'),db=self.db)
+        ctx=night_runs.context(run['id'],db=self.db)
+        self.assertEqual(ctx['steps'][-1]['observed_events'][0]['outcome'],'unavailable')
+        self.assertEqual(ctx['observed_usage']['provider_completed'],0)
+
+    def test_configured_adapter_transport_fixture_and_unknown_cost(self):
+        import io
+        from clearance import reasoning
+        run=self.start(policy={'aggregate':{'id':'adapter-fixture','limits':dict(discovery_calls=0,document_reads=0,reasoning_calls=1,rounds=0)}})
+        proposal=self.proposal(run)
+        payload={'candidates':[{'content':{'parts':[{'text':json.dumps(proposal)}]}}]}
+        adapter=reasoning.GeminiReasoner(model='fixture-model',api_key='fixture-key')
+        def urlopen(request,**kwargs):
+            sent=json.loads(request.data)
+            self.assertEqual(sent['generationConfig']['responseMimeType'],'application/json')
+            self.assertNotIn('tools',sent)
+            self.assertIn('untrusted data',sent['systemInstruction']['parts'][0]['text'])
+            return io.BytesIO(json.dumps(payload).encode())
+        with patch('urllib.request.urlopen',side_effect=urlopen) as network:
+            result=night_runs.resume(run['id'],reasoner=adapter,db=self.db)
+        self.assertEqual(network.call_count,1)
+        self.assertEqual(result['status'],'completed')
+        self.assertEqual(result['observed_usage']['reasoning_responses'],1)
+        self.assertIsNone(result['billing'])
+
+    def test_case_mutations_from_separate_runs_are_serial_and_version_bound(self):
+        import threading
+        first=self.start();second=self.start(case_id=first['case_id'])
+        entered=threading.Event();release=threading.Event();results=[];errors=[]
+        def find(*a,**kw):
+            entered.set();self.assertTrue(release.wait(3));return []
+        def worker(run):
+            try:results.append(night_runs.resume(run['id'],proposal=self.proposal(run,'search',query='fixture'),db=self.db))
+            except ValueError as exc:errors.append(str(exc))
+        with patch('clearance.discovery.find',side_effect=find) as provider:
+            one=threading.Thread(target=worker,args=(first,));two=threading.Thread(target=worker,args=(second,))
+            one.start();self.assertTrue(entered.wait(3));two.start();release.set();one.join(3);two.join(3)
+        self.assertFalse(one.is_alive() or two.is_alive())
+        self.assertEqual(provider.call_count,1)
+        self.assertEqual(len(results),1)
+        self.assertEqual(len(errors),1)
+        self.assertIn('case changed outside this run',errors[0])
+
+    def test_invalid_quote_rejects_then_accepts_corrected_proposal(self):
+        run=self.start(policy={'aggregate':{'id':'validation-budget','limits':dict(discovery_calls=1,document_reads=3,reasoning_calls=0,rounds=2)}})
+        text='Memory improves outcomes on a narrow controlled fixture task.'
+        with patch('clearance.cases.instruments.document_snapshot',return_value={'text':text,'sha256':cases.digest(text),'cache_hit':True}):
+            run=night_runs.resume(run['id'],proposal=self.proposal(run,'read',urls=['https://fixture.example/one']),db=self.db)
+        data=cases.get(run['case_id'],db=self.db)
+        finding={'statement':'Memory improves the narrow fixture task.','relation':'supports',
+                 'rationale':'Authored fixture interpretation limited to this single task.',
+                 'evidence_id':data['evidence'][0]['id'],'quote':'A fabricated quotation that never occurred.',
+                 'strongest_challenge':'Other task scales may show the opposite effect.',
+                 'what_would_change':'A controlled failure on this task would change the answer.'}
+        proposal={**self.proposal(run,'search',query='fixture replication'),'findings':[finding]}
+        with patch('clearance.discovery.find',return_value=[]) as call:
+            with self.assertRaises(ValueError):night_runs.resume(run['id'],proposal=proposal,db=self.db)
+            rejected=night_runs.get(run['id'],db=self.db)
+            self.assertEqual(rejected['status'],'awaiting_reasoning')
+            self.assertEqual(rejected['steps'][-1]['state'],'rejected')
+            self.assertEqual(rejected['usage']['discovery_calls'],0)
+            self.assertEqual(cases.get(run['case_id'],db=self.db)['version'],run['case_version'])
+            self.assertEqual(call.call_count,0)
+            finding['quote']=text
+            corrected=night_runs.resume(run['id'],proposal=proposal,db=self.db)
+        self.assertEqual(call.call_count,1)
+        self.assertEqual(corrected['case_version'],run['case_version']+2)
+        self.assertEqual(corrected['steps'][-1]['state'],'completed')
+
+
+if __name__=='__main__':unittest.main()
