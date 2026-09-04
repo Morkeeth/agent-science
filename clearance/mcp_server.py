@@ -194,7 +194,7 @@ TOOLS.append({
     "name": "science_research",
     "description": "Conduct a persisted investigation: start locally, inspect context, submit a case-version-pinned reasoning proposal with resume, challenge a conclusion, compare versions, follow questions and define experiments. Start makes no external calls. A waiting run is not complete. Only explicit live execution under a configured aggregate policy can fetch/search. Findings are authored interpretations with checked quotations. This tool cannot execute experiments or shell commands.",
     "inputSchema": {"type":"object", "additionalProperties":False, "required":["action"], "properties": {
-        "action":{"type":"string","enum":["start","show","context","resume","cancel","challenge","update","compare","follow","updates","experiment-plan","protocol"]},
+        "action":{"type":"string","enum":["start","show","context","resume","cancel","reconcile","challenge","update","compare","follow","updates","experiment-plan","protocol"]},
         "question":{"type":"string","maxLength":1500},
         "case_id":{"type":"string"}, "run_id":{"type":"string"},
         "root":{"type":"string","description":"Local repository path; contents are not web queries."},
@@ -204,7 +204,10 @@ TOOLS.append({
         "proposal":{"type":"object","description":"Host-authored proposal with case_version, optional question_map/findings and next_action {kind:search|read|finish,reason,...}. Inspect context first. Exact source quotes are checked; interpretation remains authored."},
         "policy":{"type":"object","description":"Explicit bounded run policy; shared aggregate authorization is required before live calls."},
         "protocol":{"type":"object","description":"Experiment definition: hypothesis, claim_refs, repo, tasks, baseline, intervention, outcomes, budget and stopping_rule. Incomplete definitions remain DRAFT."},
-        "protocol_id":{"type":"string"}
+        "protocol_id":{"type":"string"},
+        "operation_id":{"type":"string"},
+        "case_version":{"type":"integer","minimum":1},
+        "acknowledgement":{"type":"string","description":"For reconcile: retain-reservation-and-do-not-retry. Inspect unknown step and current case first; this cannot establish the external outcome or refund capacity."}
     }}
 })
 

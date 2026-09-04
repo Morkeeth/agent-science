@@ -46,13 +46,13 @@ An MCP host reads `context`, then passes one structured JSON object as `proposal
 }
 ```
 
-This example records a limit; it is not a researched answer. Use the actual version and inspected evidence in an investigation. CLI proposals use `--proposal 'JSON_OBJECT'`. `--proposal` and `--reasoner` are mutually exclusive.
+This example records a limit; it is not a researched answer. Use the actual version and inspected evidence in an investigation. To page through an already saved source, propose `next_action: {"kind":"read","reason":"Inspect the methods after the introduction","urls":["https://example.org/paper"],"offset":12000,"limit":12000}`. This reads local saved text, reserves one document read and makes no external call. The next context shows that window; ordinary read without offset retrieves the URL. Each source reports truncation and its next offset. CLI proposals use `--proposal 'JSON_OBJECT'`. `--proposal` and `--reasoner` are mutually exclusive.
 
 ## Explicit live investigation
 
 Live discovery needs a configured provider, a reasoning source, and an explicit aggregate policy. Provider configuration alone does not authorize calls. Parallel uses `PARALLEL_API_KEY`; the optional Perplexity adapter uses `PERPLEXITY_API_KEY`. Missing access must remain visible. The separate reasoning adapter uses `AGENT_SCIENCE_REASONER_MODEL` and `AGENT_SCIENCE_REASONER_API_KEY`; it does not reuse the passage locator's configuration.
 
-After approving a bounded policy, supply it on `research start --policy 'JSON_OBJECT'` (or challenge/update). The policy shape is:
+Save a bounded policy to `policy.json`, then explicitly approve its shared limits with `agent-science research policy --policy-file policy.json --approve`. Approval is a CLI-only local operation and makes no provider call. MCP cannot approve or increase its own capacity. Supply that same policy on `research start --policy 'JSON_OBJECT'` (or challenge/update). The policy shape is:
 
 ```json
 {
@@ -67,9 +67,19 @@ After approving a bounded policy, supply it on `research start --policy 'JSON_OB
 }
 ```
 
-These are example ceilings, not measured quality thresholds or spending approval. Reuse the aggregate ID for runs sharing one allowance. The allowance is shared within the selected cases database. Dollar costs can remain unknown. Engine usage counts exclude host reasoning and separate `science_case` source reads; they are not the total cost of an MCP session. Once configured and authorized, the explicit terminal command is `research resume RUN_ID --reasoner gemini --live`. Without those environment values it reports the missing configuration. Supplying `--reasoner` can call the model even when discovery is offline; it still requires the aggregate policy. No paid calls were made for the overnight implementation checks.
+Keep the policy ID and limits identical between approval and start, and use the same case store. These are example ceilings, not measured quality thresholds or spending approval. Reuse the aggregate ID for runs sharing one allowance. The allowance is shared within the selected cases database. Dollar costs can remain unknown. Engine usage counts exclude host reasoning and separate `science_case` source reads; they are not the total cost of an MCP session. Once configured and authorized, the explicit terminal command is `research resume RUN_ID --reasoner gemini --live`. Without those environment values it reports the missing configuration. Supplying `--reasoner` can call the model even when discovery is offline; it still requires the aggregate policy. No paid calls were made for the overnight implementation checks.
 
 MCP hosts can reason themselves and supply proposals. They cannot use `science_research` to execute repository scripts. Explicit `live:true` applies to source work requested in the proposal and still requires the policy.
+
+## Recover an interrupted run
+
+A request interrupted before its result was recorded remains unknown, and its capacity stays reserved. Inspect the run, operation ID and current case first. To continue without asserting that the unknown call failed or was free:
+
+```text
+agent-science research reconcile RUN_ID --operation-id OPERATION_ID --case-version VERSION --acknowledgement retain-reservation-and-do-not-retry
+```
+
+MCP exposes the same `reconcile` action and fields. Reconciliation preserves the unknown outcome and question map. It requires a fresh host proposal before further model-driven work and does not replay the unknown source request. A completed saved model response is reused after a restart. A run stopped by its resource limit can still accept an explicit local finish proposal with bounded conclusions and gaps; this does not authorize another external call.
 
 ## Return to a followed question
 

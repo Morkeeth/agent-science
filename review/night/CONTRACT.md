@@ -89,3 +89,10 @@ commit hashes. No push/deploy, no paid research/model calls, no reading or modif
 personal cases during tests. Use private fixture databases. Use pinned source
 fixtures as replay data, never label them live. Worktree-specific closeout goes in
 review/night/LANE-{A,B,C}.md. Continue the ranked work queue without approval pauses.
+
+## Final review additions
+
+- `night_runs.reconcile(run_id, *, operation_id, case_version, acknowledgement, db=None)` acknowledges an unknown operation after inspecting the current case. Required acknowledgement: `retain-reservation-and-do-not-retry`. Unknown status and reserved capacity remain; a fresh host proposal is required before further autonomous work. CLI and MCP expose the same fields.
+- Read action optional `offset` and `limit` select a local stored-source page (one URL, 0-based offset, limit up to 12,000). Context retains the selected source window and truncation; paging does not fetch or revise the case.
+- `research_policy.approve(policy, *, db=None)` records explicit local CLI approval of immutable aggregate limits. It is not exposed through MCP. Live source/model reservations require `research_policy.is_approved(aggregate, db=db)`; a caller-supplied policy alone cannot authorize them.
+- The numeric occurrence guard covers new non-unresolved statements. A contrary numerical target absent from the new quote requires an explicit existing claim_id with a current anchored target; authored interpretation remains distinct from semantic proof.

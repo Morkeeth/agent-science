@@ -45,7 +45,7 @@ def handle(arguments):
         raise ValueError('arguments must be an object')
     action = arguments.get('action', 'start')
     db = arguments.get('db')
-    allowed = {'start', 'show', 'context', 'resume', 'cancel', 'challenge', 'compare', 'follow', 'updates', 'update', 'experiment-plan', 'protocol', 'execute-protocol'}
+    allowed = {'start', 'show', 'context', 'resume', 'cancel', 'reconcile', 'challenge', 'compare', 'follow', 'updates', 'update', 'experiment-plan', 'protocol', 'execute-protocol'}
     if not isinstance(action, str) or action not in allowed:
         raise ValueError('Unknown research action')
     for key in ('live',):
@@ -54,11 +54,15 @@ def handle(arguments):
     for key in ('proposal', 'policy', 'protocol'):
         if key in arguments and arguments[key] is not None and not isinstance(arguments[key], dict):
             raise ValueError(key + ' must be an object')
-    for key in ('version', 'from_version'):
+    for key in ('version', 'from_version', 'case_version'):
         if key in arguments and (type(arguments[key]) is not int or arguments[key] < 1):
             raise ValueError(key + ' must be a positive integer')
     required = []
-    if action in ('context', 'resume', 'cancel'):
+    if action == 'reconcile':
+        required = ['run_id', 'operation_id', 'acknowledgement']
+        if 'case_version' not in arguments:
+            raise ValueError('case_version is required')
+    elif action in ('context', 'resume', 'cancel'):
         required = ['run_id']
     elif action in ('challenge', 'compare', 'follow', 'update', 'experiment-plan'):
         required = ['case_id']
@@ -104,6 +108,9 @@ def handle(arguments):
     if action in ('show', 'context', 'cancel'):
         fn = {'show': night_runs.get, 'context': night_runs.context, 'cancel': night_runs.cancel}[action]
         return fn(arguments['run_id'], db=db)
+    if action == 'reconcile':
+        return night_runs.reconcile(arguments['run_id'], operation_id=arguments['operation_id'],
+            case_version=arguments['case_version'], acknowledgement=arguments['acknowledgement'], db=db)
     if action == 'resume':
         return night_runs.resume(arguments['run_id'], proposal=arguments.get('proposal'),
                                  live=arguments.get('live', False), db=db)

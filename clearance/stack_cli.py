@@ -220,9 +220,19 @@ def cmd_mcp(_args: argparse.Namespace) -> int:
 
 def main(argv=None) -> int:
     argv = list(sys.argv[1:] if argv is None else argv)
-    research_actions = {'start','show','context','resume','cancel','challenge','update','compare','follow','updates','experiment-plan','protocol','execute-protocol'}
-    if len(argv) > 1 and argv[0] == 'research' and not argv[1].startswith('-') and argv[1] not in research_actions:
-        argv.insert(1, 'start')
+    research_actions = {'start','show','context','resume','cancel','reconcile','challenge','update','compare','follow','updates','experiment-plan','protocol','policy','execute-protocol'}
+    if argv and argv[0] == 'research':
+        index=1
+        while index < len(argv):
+            token=argv[index]
+            if token == '--json' or token.startswith('--db='):
+                index+=1
+            elif token == '--db':
+                index+=2
+            else:
+                break
+        if index < len(argv) and not argv[index].startswith('-') and argv[index] not in research_actions:
+            argv.insert(index, 'start')
     p = argparse.ArgumentParser(description="Agent Science — stack websearch")
     sub = p.add_subparsers(dest="cmd", required=True)
 

@@ -24,7 +24,7 @@ def add_parser(sub):
     parser.add_argument('--db', default=argparse.SUPPRESS)
     parser.add_argument('--json', action='store_true', default=argparse.SUPPRESS)
     actions = parser.add_subparsers(dest='action', required=True)
-    for name in ('start', 'show', 'context', 'resume', 'cancel', 'challenge', 'compare', 'follow', 'update', 'updates', 'experiment-plan', 'protocol', 'execute-protocol'):
+    for name in ('start', 'show', 'context', 'resume', 'cancel', 'reconcile', 'challenge', 'compare', 'follow', 'update', 'updates', 'experiment-plan', 'protocol', 'policy', 'execute-protocol'):
         item = actions.add_parser(name)
         item.set_defaults(func=run)
         item.add_argument('--db', default=argparse.SUPPRESS)
@@ -38,8 +38,12 @@ def add_parser(sub):
             item.add_argument('run_id', nargs='?')
             item.add_argument('--case-id')
             item.add_argument('--version', type=int)
-        elif name in ('context', 'resume', 'cancel'):
+        elif name in ('context', 'resume', 'cancel', 'reconcile'):
             item.add_argument('run_id')
+            if name == 'reconcile':
+                item.add_argument('--operation-id',required=True)
+                item.add_argument('--case-version',type=int,required=True)
+                item.add_argument('--acknowledgement',required=True,choices=['retain-reservation-and-do-not-retry'])
             if name == 'resume':
                 host = item.add_mutually_exclusive_group()
                 host.add_argument('--proposal', type=_object)
@@ -56,6 +60,9 @@ def add_parser(sub):
                 item.add_argument('--protocol', type=_object, default={})
                 item.add_argument('--protocol-file', type=Path)
                 item.add_argument('--protocol-id')
+        elif name == 'policy':
+            item.add_argument('--policy-file',type=Path,required=True)
+            item.add_argument('--approve',action='store_true',required=True)
         elif name in ('protocol', 'execute-protocol'):
             item.add_argument('protocol_id')
             item.add_argument('--version', type=int)
@@ -79,7 +86,10 @@ def _run(args):
     protocol_file = arguments.pop('protocol_file', None)
     if protocol_file:
         arguments['protocol'] = _object(protocol_file.read_text())
-    if arguments['action'] == 'resume' and arguments.get('reasoner'):
+    if arguments['action'] == 'policy':
+        from clearance import research_policy
+        result=research_policy.approve(_object(arguments['policy_file'].read_text()), db=arguments.get('db'))
+    elif arguments['action'] == 'resume' and arguments.get('reasoner'):
         from clearance import night_runs, reasoning
         result = night_runs.resume(arguments['run_id'], reasoner=reasoning.configured(),
                                    live=arguments.get('live', False), db=arguments.get('db'))
@@ -123,8 +133,15 @@ def render(result, *, db=None):
             lines.append(f"{node.get('question', '')}: {node.get('gap', 'unresolved')}")
         lines.append(f"Answer: agent-science research show --case-id {result['case_id']}{suffix}")
         lines.append(f"Inspect: agent-science research context {result['id']}{suffix}")
-        lines.append(f"Continue: agent-science research resume {result['id']}{suffix}")
-        lines.append(f"Cancel: agent-science research cancel {result['id']}{suffix}")
+        if result['status']=='stale':
+            lines.append(f"Start from current evidence: agent-science research start {shlex.quote(result['question'])} --case-id {result['case_id']}{suffix}")
+        elif result['status']=='needs_reconciliation':
+            lines.append('Recovery: inspect the unknown operation and current case version, then use research reconcile. Capacity stays reserved.')
+        elif result['status']=='stopped':
+            lines.append('A fresh host finish proposal can save a bounded conclusion; external work remains stopped.')
+        elif result['status'] not in ('completed','cancelled'):
+            lines.append(f"Continue: agent-science research resume {result['id']}{suffix}")
+            lines.append(f"Cancel: agent-science research cancel {result['id']}{suffix}")
         return '\n'.join(lines)
     if 'conclusions' in result:
         lines = [f"{result.get('question', 'Research answer')} (v{result['version']})"]
@@ -132,6 +149,7 @@ def render(result, *, db=None):
             lines.append('No assessed conclusion yet.')
         for conclusion in result['conclusions']:
             lines.append(f"[{conclusion.get('claim_state', conclusion['state'])}; {conclusion['relation']}] {conclusion['statement']}")
+            lines.append('Evidence class: ' + conclusion.get('category','unclassified'))
             lines.append('Rationale: ' + conclusion['rationale'])
             for condition in conclusion.get('conditions', []):
                 lines.append(f"Scope — {condition['field']}: {condition['value']}")
@@ -140,6 +158,8 @@ def render(result, *, db=None):
             if anchor:
                 lines.append(f"Source: {anchor.get('url')} — {anchor.get('quote')}")
             lines.append('What would change this: ' + str(conclusion.get('what_would_change') or 'not specified'))
+        for gap in result.get('gaps', [])[:10]:
+            lines.append('Gap: ' + str(gap.get('reason','unresolved')) + (' — '+gap['meaning'] if gap.get('meaning') else ''))
         lines.append(f"Unresolved gaps: {len(result.get('gaps', []))}. Interpretations are authored; source occurrence does not prove entailment.")
         return '\n'.join(lines)
     if 'from_version' in result and 'evidence_changes' in result:

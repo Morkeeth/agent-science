@@ -83,5 +83,19 @@
     "Exact source anchors establish occurrence, not semantic entailment",
     "Baseline local retrieval and candidate synthesis are different operations; no research-quality lift measured"
   ],
-  "total_tool_calls": 207
+  "total_tool_calls": 207,
+  "day_two": {
+    "candidate": "ab8aa28",
+    "tool_calls": 11,
+    "errors": 0,
+    "decision_id": "0111694669f9",
+    "result": "Followed v2, challenge committed v3, updates flagged cited decision; case show initially disagreed.",
+    "transcript_sha256": "d87f10b510f15fcb260cd322e91387b524ad18aeaef5a76b8446aba277e4f2a4",
+    "recheck": {
+      "candidate": "4ca697f",
+      "tool_calls": 4,
+      "result": "Current case show, research updates, case review all REVIEW_REQUIRED; historical v2 UNCHANGED_IN_SNAPSHOT.",
+      "transcript_sha256": "a01d6aa802e054f51253a5554d00086bc1b7d123d7ffc9f8581de9a060e0b438"
+    }
+  }
 }

@@ -76,7 +76,7 @@ def _draft(case_id,version,db):
 
 
 def _save(data,db,changes=None):
-    data.update(version=data['version']+1,checked_at=cases.now(),changes=changes or [])
+    data.update(version=data['version']+1,changes=changes or [])
     return cases._save(data,db=db)
 
 
@@ -91,7 +91,7 @@ def import_report(question,text,*,root=None,live=False,db=None,max_documents=12)
     evidence,trace=(cases._collect(question,live=live,sources=report['urls'],max_documents=max_documents)
                     if report['urls'] else ([],[]))
     data={'id':uuid.uuid4().hex[:12],'version':1,'question':question.strip(),'created_at':cases.now(),
-          'checked_at':cases.now(),'repo':context,'official_domains':[],
+          'checked_at':cases.now() if live and any(e.get('route')=='document' and e.get('outcome')=='read' and e.get('cache_hit') is False for e in trace) else None,'repo':context,'official_domains':[],
           'provided_sources':report['urls'],'evidence':evidence,'trace':trace,'changes':[],
           'claims':report.pop('passages'),'report':report,'document_limit':max_documents,
           'limits':['Report passages are unassessed. Citation text must be read and assessed.',
@@ -133,6 +133,9 @@ def investigate(case_id,version,*,query='',sources=(),providers=('parallel',),li
     for e in evidence:prior[e['url']]=e
     data['evidence']=list(prior.values())
     data['trace']=events+reads
+    if live and any(e.get('route')=='document' and e.get('outcome')=='read' and e.get('cache_hit') is False for e in reads):
+        data['checked_at']=cases.now()
+        data['limits']=[note for note in data.get('limits',[]) if note != 'Planned investigation; no online check has run.']
     data.setdefault('investigations',[]).append({'query':query,'providers':list(dict.fromkeys(providers)) if query.strip() else [],
         'sources':list(sources),'at':cases.now(),'trace':copy.deepcopy(data['trace']),
         'new_sources':sum(e['url'] not in {b['url'] for b in before['evidence']} for e in evidence)})

@@ -29,3 +29,7 @@ The exact baseline `e12ca6f7c4ad489b8e20bb16c307470635b0883d` ran 18 local retri
 - Broken SQLite paths could print a traceback. CLI now returns a clean error and status 2.
 
 These fixes were exercised with actual entry points and failure controls. The original transcripts remain unchanged and predate the fixes.
+
+## Day-two decision flow
+
+A further fresh-agent pass used 11 actual MCP calls on `ab8aa28`: save a cited decision, follow version 2, observe empty updates, challenge its interpretation, then inspect version 3. Updates flagged decision `0111694669f9` for review. The agent found that the ordinary case view still said unchanged. Commit `4ca697f` unifies the underlying decision review. Four more actual MCP calls verified current case show, research updates and case review all report `REVIEW_REQUIRED`, while historical version 2 remains `UNCHANGED_IN_SNAPSHOT`. No external call occurred. This is a real saved-source change report, not a newly discovered web result.

@@ -1,0 +1,17 @@
+{
+  "reviews": [
+    {
+      "reviewer": "Cursor",
+      "candidate": "61e791d36a0b8f75cbd9bbcf0d3ee0cefafc1cf4",
+      "sha256": "e793cc0fd99246db8d4522caf5a9dbff140ecea677cc401b84a3e2ebd579dfef",
+      "full_report": "private local receipt outside Git"
+    },
+    {
+      "reviewer": "Fable",
+      "candidate": "61e791d36a0b8f75cbd9bbcf0d3ee0cefafc1cf4",
+      "sha256": "3bd25949f29d2f7234cfa5d0898d978464b5130fd4dba833e8d124fabd1d1935",
+      "full_report": "private local receipt outside Git"
+    }
+  ],
+  "mode": "Independent coding review with real CLI/MCP fixture probes; no live scientific research"
+}

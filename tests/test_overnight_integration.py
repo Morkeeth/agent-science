@@ -114,3 +114,77 @@ def test_cli_existing_case_and_broken_store_fail_cleanly(tmp_path):
     proc=subprocess.run([sys.executable,'-m','clearance','research','updates','--db',str(broken),'--json'],capture_output=True,text=True,timeout=20)
     assert proc.returncode==2 and 'Traceback' not in proc.stderr
     assert json.loads(proc.stderr)['error']
+
+
+def test_cli_shorthand_accepts_parent_options(tmp_path):
+    for prefix in (['--json'], ['--db',str(tmp_path/'parent.db'),'--json'], ['--db='+str(tmp_path/'equals.db')]):
+        proc=subprocess.run([sys.executable,'-m','clearance','research',*prefix,
+            'When do tools help coding?', '--json','--db',str(tmp_path/'cases.db')],capture_output=True,text=True,timeout=20)
+        assert proc.returncode==0,proc.stderr
+        assert json.loads(proc.stdout)['status']=='awaiting_reasoning'
+
+
+def test_real_mcp_reconciliation_retains_unknown_outcome_and_budget(tmp_path):
+    from clearance import night_runs
+    db=str(tmp_path/'reconcile.db')
+    run=night_runs.start('When does research need more evidence?',db=db)
+    def interrupted(context):
+        raise OSError('fixture transport lost after dispatch')
+    with __import__('pytest').raises(OSError):
+        night_runs.resume(run['id'],reasoner=interrupted,db=db)
+    saved=night_runs.get(run['id'],db=db)
+    arguments={'action':'reconcile','run_id':run['id'],'db':db,
+        'operation_id':saved['steps'][-1]['id'],'case_version':1,
+        'acknowledgement':'retain-reservation-and-do-not-retry'}
+    failed,_=call({**arguments,'case_version':2})
+    assert failed['isError']
+    result,reconciled=call(arguments)
+    assert not result['isError'],reconciled
+    assert reconciled['usage']==saved['usage']
+    assert reconciled['steps'][-1]['state']=='unknown'
+    result,finished=call({'action':'resume','run_id':run['id'],'db':db,'proposal':{
+        'case_version':1,'next_action':{'kind':'finish','reason':'Unknown external outcome retained; no evidence-based answer is available.'}}})
+    assert not result['isError'],finished
+    assert finished['status']=='completed'
+
+
+def test_source_check_clock_requires_actual_online_read(tmp_path):
+    from clearance import night_runs
+    db=tmp_path/'clock.db'
+    run=night_runs.start('Does inspected evidence support this question?',db=db)
+    with patch.object(instruments,'document_snapshot',return_value=None):
+        missing=research.investigate(run['case_id'],1,sources=['https://example.org/source'],live=False,db=db)
+    assert missing['checked_at'] is None
+    snapshot={'text':QUOTE,'sha256':cases.digest(QUOTE),'cache_hit':True}
+    with patch.object(instruments,'document_snapshot',return_value=snapshot):
+        cached=research.investigate(run['case_id'],2,sources=['https://example.org/source'],live=False,db=db)
+    assert cached['checked_at'] is None
+    snapshot['cache_hit']=False
+    with patch.object(instruments,'document_snapshot',return_value=snapshot),patch.object(cases,'now',return_value='2026-09-05T00:00:00Z'):
+        online=research.investigate(run['case_id'],3,sources=['https://example.org/source'],live=True,db=db)
+    assert online['checked_at']=='2026-09-05T00:00:00Z'
+    assert 'Planned investigation; no online check has run.' not in online['limits']
+    assessed=research.assess(run['case_id'],4,statement='Inspected evidence may inform this question.',relation='unresolved',rationale='No effect estimate established.',db=db)
+    assert assessed['checked_at']==online['checked_at']
+
+
+def test_mcp_cannot_approve_its_own_live_capacity(tmp_path):
+    from clearance import night_runs, research_policy
+    db=str(tmp_path/'policy.db')
+    policy={'aggregate':{'id':'host-minted','limits':{'discovery_calls':100,'document_reads':100,'reasoning_calls':100,'rounds':100}}}
+    run=research_workflow.handle({'action':'start','question':'When do tools improve agent outcomes?','policy':policy,'db':db})
+    with patch('clearance.research.investigate',side_effect=AssertionError('unapproved external operation')):
+        paused=research_workflow.handle({'action':'resume','run_id':run['id'],'live':True,'db':db,'proposal':{
+            'case_version':1,'next_action':{'kind':'search','query':'tool original result','reason':'Find original measurements.'}}})
+    assert paused['status']=='paused'
+    assert not paused['steps']
+    denied,_=call({'action':'policy','policy':policy,'db':db})
+    assert denied['isError']
+    source=tmp_path/'policy.json';source.write_text(json.dumps(policy))
+    proc=subprocess.run([sys.executable,'-m','clearance','research','policy','--policy-file',str(source),'--approve','--db',db,'--json'],capture_output=True,text=True,timeout=20)
+    assert proc.returncode==0,proc.stderr
+    assert json.loads(proc.stdout)['approved']
+    assert research_policy.is_approved(policy['aggregate'],db=db)
+    changed={**policy['aggregate'],'limits':{**policy['aggregate']['limits'],'rounds':101}}
+    assert not research_policy.is_approved(changed,db=db)
+    with __import__('pytest').raises(ValueError):research_policy.approve({'aggregate':changed},db=db)

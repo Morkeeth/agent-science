@@ -1,1 +1,37 @@
-{"baseline":"e12ca6f7c4ad489b8e20bb16c307470635b0883d","status":"building","lanes":[{"id":"A","owner":"autonomous investigation","status":"assigned","commit":null},{"id":"B","owner":"evidence and synthesis","status":"assigned","commit":null},{"id":"C","owner":"daily workflow","status":"assigned","commit":null}],"live_validation":"not authorized: no aggregate spending policy"}
+{
+  "baseline": "e12ca6f7c4ad489b8e20bb16c307470635b0883d",
+  "status": "final review fixes and acceptance",
+  "integration_branch": "build/adaptive-research-night-20260905",
+  "lanes": [
+    {
+      "id": "A",
+      "owner": "autonomous investigation",
+      "branch": "build/night-investigation-20260905",
+      "status": "integrated with recovery, paging and approval controls",
+      "commit": "7ae97cc",
+      "integrated_commit": "9654c98",
+      "evidence": "review/night/LANE-A.md"
+    },
+    {
+      "id": "B",
+      "owner": "evidence and synthesis",
+      "branch": "build/night-synthesis-20260905",
+      "status": "integrated with review fixes",
+      "commit": "0d7a713",
+      "integrated_commit": "bffe00d",
+      "evidence": "review/night/LANE-B.md"
+    },
+    {
+      "id": "C",
+      "owner": "daily workflow",
+      "branch": "build/night-workflow-20260905",
+      "status": "integrated; coordinator extending recovery and live-policy approval interface",
+      "commit": "7b6cd01",
+      "integrated_commit": "da7df9a",
+      "evidence": "review/night/LANE-C.md"
+    }
+  ],
+  "replay_evidence": "review/night/replay-acceptance.json",
+  "independent_review_pin": "61e791d36a0b8f75cbd9bbcf0d3ee0cefafc1cf4",
+  "live_validation": "not authorized: no approved aggregate spending policy"
+}

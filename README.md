@@ -35,7 +35,7 @@ The first command saves a local plan and retrieves related prior research. An MC
 
 Answers retain source anchors, study conditions, competing interpretations, the strongest challenge and what would change the conclusion. Challenges pin the previous answer; comparisons show changes and affected decisions. Followed updates compare saved versions. Explicit update runs check for new evidence only when resumed under a configured policy.
 
-Live calls require an aggregate resource policy. Usage reservations are not billing, and engine counters exclude reasoning and source reads performed separately by the MCP host. Repository experiments use immutable protocols and an explicitly selected trusted acceptance script.
+Live calls require an aggregate resource policy approved through the explicit local CLI; MCP cannot approve its own capacity. Usage reservations are not billing, and engine counters exclude reasoning and source reads performed separately by the MCP host. Repository experiments use immutable protocols and an explicitly selected trusted acceptance script.
 
 See [the terminal and MCP quickstart](docs/RESEARCH-QUICKSTART.md) for installation, live setup, resume, updates and experiments. The lower-level case commands below remain available.
 
