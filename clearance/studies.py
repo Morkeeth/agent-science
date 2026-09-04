@@ -17,7 +17,12 @@ def _identities(item):
         if field == 'doi' or host in ('doi.org', 'dx.doi.org'):
             match = DOI.search(value)
             if match:
-                identity = 'doi:' + match[0].rstrip('.,;').lower()
+                doi = match[0].rstrip('.,;')
+                # DOI suffixes can contain balanced parentheses. Trim only a
+                # surplus closing delimiter from a surrounding prose citation.
+                while doi.endswith(')') and doi.count(')') > doi.count('('):
+                    doi = doi[:-1].rstrip('.,;')
+                identity = 'doi:' + doi.lower()
                 identities.add(identity); basis.append({'field':field, 'value':value, 'identity':identity})
         if field == 'arxiv_id' or host in ('arxiv.org', 'www.arxiv.org', 'export.arxiv.org'):
             value = value.removeprefix('arXiv:')

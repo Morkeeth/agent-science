@@ -81,9 +81,15 @@ def _finding(data, finding, version):
                     target_numbers.update(re.findall(r'(?<![\w])\d+(?:\.\d+)?%?', checked_anchor['quote']))
             if not missing_numbers <= target_numbers:
                 raise ValueError('numerical assertion missing from its source quote; cite a current anchored target claim_id or leave unresolved')
-        designs = ' '.join(c['value'].lower() for c in checked if c['field'] == 'study_design')
-        if ('qualitative' in designs or 'interview' in designs) and re.search(r'\b(causes?|causal|increases?|improves?|reduces?)\b', statement, re.I):
-            raise ValueError('qualitative study cannot establish causal effectiveness; leave unresolved')
+        designs = ' '.join(c['value'] for c in checked if c['field'] == 'study_design')
+        # The source quote is checked data, not proposer-selected method metadata.
+        # Its explicit interview/qualitative wording must not disappear when the
+        # proposer omits study_design. This conservative guard is not entailment.
+        methods = designs + ' ' + anchor['quote']
+        qualitative = re.search(r'\b(qualitative|interviews?|interviewed|interviewing)\b', methods, re.I)
+        causal = re.search(r'\b(causes?|caused|causal|increases?|improves?|reduces?)\b', statement, re.I)
+        if relation == 'supports' and qualitative and causal:
+            raise ValueError('qualitative study cannot establish causal effectiveness; leave unresolved or assess the claim as context/contradicted')
     category = finding.get('category', 'unclassified')
     if category not in ('empirical_findings', 'official_constraints', 'field_adoption', 'unclassified'):
         raise ValueError('invalid finding category; local measurements must come from actual experiments')

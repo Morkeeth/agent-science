@@ -54,3 +54,16 @@ python3 -m pytest -q tests/test_studies_synthesis.py tests/test_case_storage.py 
 ```
 
 Controls exercised: fabricated numeric contradiction rejected; legitimate anchored numeric target accepted; unavailable, retracted, superseded and stale target sources rejected; unassessed imported target rejected; interpretation replacement flags the matching saved decision through both case and comparison views; unrelated and historical decisions retain state; semantically identical replacement and authored-clock changes do not flag; condition changes flag their cited decision. All source text and databases in these tests are artificial/private fixtures. No live or paid calls.
+
+## Fable bounded follow-up — DOI punctuation and omitted study design
+
+DOI identifiers now trim only surplus trailing closing parentheses, preserving balanced and nested DOI suffix parentheses. Tests cover prose punctuation, metadata DOI values, balanced suffixes and nested suffixes.
+
+The qualitative causal-support guard now uses explicit qualitative/interview wording in the checked finding quote as well as extracted study-design conditions. Omitting `study_design` no longer bypasses that source-local check. It applies to `supports`: a positive causal proposition being contradicted or retained only as context does not assert its causal effect. An artificial interviewed-source fixture with adversarial instructions exercises rejection, unchanged case version, permitted contradiction and inert source retention.
+
+```text
+python3 -m pytest -q tests/test_studies_synthesis.py tests/test_research_expansion.py tests/test_case_storage.py
+69 passed, 8 subtests passed in 1.04s
+```
+
+Limits: the qualitative control recognizes explicit wording in the inspected quote/conditions, not every study design or paraphrase. It does not infer methods from unrelated reference-list text. Numeric recognition remains digit-token based; written-out numbers require authored review. The malicious text fixture tests this synthesis boundary, not a live reasoning model's prompt-injection resistance. No provider calls occurred.
