@@ -28,6 +28,38 @@ class RunTests(unittest.TestCase):
         self.assertEqual(result['status'],'completed')
         self.assertEqual(result['usage']['reasoning_calls'],0)
 
+    def test_completed_model_response_survives_before_action_checkpoint(self):
+        run=self.start()
+        from unittest.mock import Mock
+        reasoner=Mock(return_value=self.proposal(run))
+        reasoner.external=False; reasoner.model='controlled-fixture'
+        with patch('clearance.night_runs._validate',side_effect=KeyboardInterrupt):
+            with self.assertRaises(KeyboardInterrupt):
+                night_runs.resume(run['id'],reasoner=reasoner,db=self.db)
+        saved=night_runs.get(run['id'],db=self.db)
+        self.assertEqual(saved['steps'][-1]['state'],'completed')
+        result=night_runs.resume(run['id'],reasoner=reasoner,db=self.db)
+        self.assertEqual(result['status'],'completed')
+        self.assertEqual(reasoner.call_count,1)
+        self.assertEqual(result['usage']['reasoning_calls'],1)
+
+    def test_local_store_routes_do_not_enter_adapter_request(self):
+        import io
+        from clearance import reasoning
+        adapter=reasoning.GeminiReasoner(model='fixture',api_key='fixture')
+        context={'db':'PRIVATE_STORE_SENTINEL','evidence':[{'url':'https://example.org/paper',
+            'inspect_more':{'db':'PRIVATE_STORE_SENTINEL','evidence_id':'e'}}]}
+        def transport(request, **kwargs):
+            self.assertNotIn(b'PRIVATE_STORE_SENTINEL',request.data)
+            self.assertIn(b'https://example.org/paper',request.data)
+            return io.BytesIO(json.dumps({'candidates':[{'content':{'parts':[{'text':'{}'}]}}]}).encode())
+        with patch('urllib.request.urlopen',side_effect=transport):adapter(context)
+        self.assertEqual(context['db'],'PRIVATE_STORE_SENTINEL')
+
+    def test_malformed_aggregate_has_validation_error(self):
+        for limits in (None, 1, [], 'not limits'):
+            with self.assertRaises(ValueError):self.start(policy={'aggregate':{'id':'bad','limits':limits}})
+
     def test_stale_and_no_model_stop(self):
         run=self.start()
         proposal=self.proposal(run);proposal['case_version']=0
@@ -227,6 +259,8 @@ class RunTests(unittest.TestCase):
         import io
         from clearance import reasoning
         run=self.start(policy={'aggregate':{'id':'adapter-fixture','limits':dict(discovery_calls=0,document_reads=0,reasoning_calls=1,rounds=0)}})
+        from clearance.research_policy import approve
+        approve({'aggregate':run['aggregate']},db=self.db)
         proposal=self.proposal(run)
         payload={'candidates':[{'content':{'parts':[{'text':json.dumps(proposal)}]}}]}
         adapter=reasoning.GeminiReasoner(model='fixture-model',api_key='fixture-key')
@@ -321,6 +355,262 @@ class RunTests(unittest.TestCase):
         self.assertIn(general['id'],found)
         self.assertIn(same['id'],found)
         self.assertTrue(all(row.get('root') in (None,str(here.resolve())) for row in run['prior_research']['cases']))
+
+    def test_budget_stopped_run_accepts_only_explicit_host_finish(self):
+        run=self.start(policy={'rounds':1})
+        with patch('clearance.cases.instruments.document_snapshot',return_value=None):
+            run=night_runs.resume(run['id'],proposal=self.proposal(run,'read',urls=['https://fixture.example/a']),db=self.db)
+            stopped=night_runs.resume(run['id'],proposal=self.proposal(run,'read',urls=['https://fixture.example/b']),db=self.db)
+        self.assertEqual(stopped['status'],'stopped')
+        usage=stopped['usage'].copy()
+        with patch('clearance.research.investigate',side_effect=AssertionError('no new research')),patch('clearance.reasoning.GeminiReasoner.__call__',side_effect=AssertionError('no model')):
+            unchanged=night_runs.resume(run['id'],reasoner=lambda ctx: self.fail('must not reason'),db=self.db)
+            self.assertEqual(unchanged['status'],'stopped')
+            result=night_runs.resume(run['id'],proposal={**self.proposal(stopped),'findings':[{
+                'statement':'The fixture question remains unresolved.','relation':'unresolved','rationale':'No accessible fixture evidence was inspected.'}]},db=self.db)
+        self.assertEqual(result['status'],'completed')
+        self.assertEqual(result['usage'],usage)
+        self.assertEqual(result['stops'][0]['reason'],'budget exhausted')
+        self.assertEqual(cases.get(run['case_id'],db=self.db)['claims'][0]['statement'],'The fixture question remains unresolved.')
+
+    def test_diminishing_stop_keeps_map_and_can_finish(self):
+        run=self.start()
+        proposal=self.proposal(run,'search',query='repeat fixture')
+        proposal['question_map']=[{'id':'remaining','question':'Scope?','gap':'Missing failure evidence',
+                                  'competing_explanation':'Different task scope','importance':'material'}]
+        with patch('clearance.discovery.find',return_value=[]):
+            run=night_runs.resume(run['id'],proposal=proposal,db=self.db)
+            proposal['case_version']=run['case_version']
+            stopped=night_runs.resume(run['id'],proposal=proposal,db=self.db)
+        self.assertEqual(stopped['status'],'stopped')
+        result=night_runs.resume(run['id'],proposal=self.proposal(stopped),db=self.db)
+        self.assertEqual(result['status'],'completed')
+        self.assertEqual(result['question_map'],proposal['question_map'])
+        self.assertIn('diminishing',result['stops'][0]['reason'])
+
+    def test_cancel_preserves_completed_and_unknown_states(self):
+        run=self.start()
+        done=night_runs.resume(run['id'],proposal=self.proposal(run),db=self.db)
+        self.assertEqual(night_runs.cancel(run['id'],db=self.db),done)
+        run=self.start()
+        with patch('clearance.research.investigate',side_effect=OSError('fixture interruption')):
+            with self.assertRaises(OSError):night_runs.resume(run['id'],proposal=self.proposal(run,'search',query='uncertain fixture'),db=self.db)
+        unknown=night_runs.get(run['id'],db=self.db)
+        self.assertEqual(night_runs.cancel(run['id'],db=self.db),unknown)
+        self.assertEqual(unknown['status'],'needs_reconciliation')
+
+    def test_invalid_model_output_is_saved_rejected_and_not_replayed(self):
+        run=self.start()
+        with self.assertRaises(ValueError):
+            night_runs.resume(run['id'],reasoner=lambda ctx:self.proposal(run,'shell'),db=self.db)
+        rejected=night_runs.get(run['id'],db=self.db)
+        self.assertEqual(rejected['status'],'awaiting_reasoning')
+        self.assertTrue(rejected['steps'][-1]['proposal_rejected'])
+        self.assertEqual(rejected['usage']['reasoning_calls'],1)
+        self.assertEqual(night_runs.resume(run['id'],db=self.db)['status'],'awaiting_reasoning')
+        done=night_runs.resume(run['id'],proposal=self.proposal(run),db=self.db)
+        self.assertEqual(done['status'],'completed')
+        self.assertEqual(done['usage']['reasoning_calls'],1)
+
+    def test_reconcile_requires_ack_and_current_case_and_never_replays(self):
+        from clearance import research
+        run=self.start()
+        nodes=[{'id':'scope','question':'Scope?','gap':'Large tasks untested',
+                'competing_explanation':'Different task scope','importance':'material'}]
+        with patch('clearance.cases.instruments.document_snapshot',return_value=None):
+            run=night_runs.resume(run['id'],proposal={**self.proposal(run,'read',urls=['https://fixture.example/known']),'question_map':nodes},db=self.db)
+        original=research.investigate
+        def committed_then_interrupted(*args,**kwargs):
+            original(*args,**kwargs)
+            raise OSError('fixture response lost after commit')
+        with patch('clearance.discovery.find',return_value=[]),patch('clearance.research.investigate',side_effect=committed_then_interrupted):
+            with self.assertRaises(OSError):night_runs.resume(run['id'],proposal=self.proposal(run,'search',query='unknown fixture'),db=self.db)
+        unknown=night_runs.get(run['id'],db=self.db)
+        op=unknown['steps'][-1]['id'];usage=unknown['usage'].copy()
+        current=cases.get(run['case_id'],db=self.db)
+        ctx=night_runs.context(run['id'],db=self.db)
+        self.assertTrue(ctx['reconciliation']['required'])
+        self.assertEqual(ctx['reconciliation']['operation_ids'],[op])
+        with self.assertRaises(ValueError):night_runs.reconcile(run['id'],operation_id=op,case_version=current['version'],acknowledgement='',db=self.db)
+        with self.assertRaises(ValueError):night_runs.reconcile(run['id'],operation_id=op,case_version=run['case_version'],acknowledgement='retain-reservation-and-do-not-retry',db=self.db)
+        acknowledged=night_runs.reconcile(run['id'],operation_id=op,case_version=current['version'],acknowledgement='retain-reservation-and-do-not-retry',db=self.db)
+        self.assertEqual(acknowledged['steps'][-1]['state'],'unknown')
+        self.assertEqual(acknowledged['usage'],usage)
+        self.assertEqual(acknowledged['question_map'],nodes)
+        self.assertEqual(acknowledged['case_version'],current['version'])
+        with patch('clearance.discovery.find',side_effect=AssertionError('unknown replay prohibited')):
+            unchanged=night_runs.resume(run['id'],reasoner=lambda ctx:self.fail('fresh host proposal required'),db=self.db)
+            self.assertTrue(unchanged['host_proposal_required'])
+            replay=self.proposal(acknowledged,'search',query='unknown fixture')
+            replay['next_action']['reason']='A changed reason must not bypass the signature.'
+            with self.assertRaises(ValueError):night_runs.resume(run['id'],proposal=replay,db=self.db)
+            result=night_runs.resume(run['id'],proposal=self.proposal(acknowledged),db=self.db)
+        self.assertEqual(result['status'],'completed')
+        self.assertEqual(result['usage'],usage)
+        self.assertEqual(result['question_map'],nodes)
+
+    def test_reconcile_lost_model_response_requires_fresh_host_proposal(self):
+        run=self.start()
+        def lost(ctx):raise OSError('fixture missing model response')
+        with self.assertRaises(OSError):night_runs.resume(run['id'],reasoner=lost,db=self.db)
+        unknown=night_runs.get(run['id'],db=self.db)
+        ack=night_runs.reconcile(run['id'],operation_id=unknown['steps'][-1]['id'],case_version=run['case_version'],acknowledgement='retain-reservation-and-do-not-retry',db=self.db)
+        night_runs.resume(run['id'],reasoner=lambda ctx:self.fail('must not retry missing model response'),db=self.db)
+        done=night_runs.resume(run['id'],proposal=self.proposal(ack),db=self.db)
+        self.assertEqual(done['usage']['reasoning_calls'],1)
+        self.assertEqual(done['steps'][0]['state'],'unknown')
+
+    def test_unavailable_source_reason_survives_reasoning_context(self):
+        run=self.start()
+        with patch('clearance.cases.instruments.document_snapshot',return_value=None):
+            run=night_runs.resume(run['id'],proposal=self.proposal(run,'read',urls=['https://fixture.example/absent']),db=self.db)
+        ctx=night_runs.context(run['id'],db=self.db)
+        self.assertEqual(ctx['evidence'][0]['status'],'UNAVAILABLE')
+        self.assertIn('absent from local document cache; web was not checked',ctx['evidence'][0]['reason'])
+
+    def test_invalid_start_leaves_no_case_run_or_aggregate_rows(self):
+        policy={'aggregate':{'id':'new-policy','limits':dict(discovery_calls=1,document_reads=2,reasoning_calls=1,rounds=1)}}
+        for question in ('','How should we do it'):
+            with self.assertRaises(ValueError):night_runs.start(question,policy=policy,db=self.db)
+        with night_runs._connect(self.db) as con:
+            for table in ('cases','night_runs','night_policy'):
+                self.assertEqual(con.execute('SELECT COUNT(*) FROM '+table).fetchone()[0],0)
+        with self.assertRaises(ValueError):night_runs.start('memory',root=Path(self.tmp.name)/'absent',policy=policy,db=self.db)
+        with night_runs._connect(self.db) as con:
+            self.assertEqual(con.execute('SELECT COUNT(*) FROM night_policy').fetchone()[0],0)
+
+    def test_confirmed_offline_skip_releases_reservations_with_audit(self):
+        policy={'aggregate':{'id':'offline-shared','limits':dict(discovery_calls=1,document_reads=2,reasoning_calls=0,rounds=1)}}
+        run=self.start(policy=policy)
+        def skipped(provider,query,**kwargs):
+            kwargs['trace'].append({'route':provider,'outcome':'skipped','reason':'live search disabled'})
+            return []
+        with patch('clearance.discovery.find',side_effect=skipped):
+            first=night_runs.resume(run['id'],proposal=self.proposal(run,'search',query='first offline fixture'),db=self.db)
+            second=night_runs.resume(run['id'],proposal=self.proposal(first,'search',query='second offline fixture'),db=self.db)
+        self.assertEqual(first['usage'],dict.fromkeys(night_runs.DEFAULTS,0))
+        self.assertEqual(second['usage'],dict.fromkeys(night_runs.DEFAULTS,0))
+        self.assertEqual(second['case_version'],3)
+        self.assertTrue(second['steps'][0]['reservation_released'])
+        self.assertEqual(second['observed_usage']['provider_completed'],0)
+        self.assertEqual(second['steps'][1]['observed_events'][0]['outcome'],'skipped')
+        with night_runs._connect(self.db) as con:
+            usage=json.loads(con.execute('SELECT usage FROM night_policy').fetchone()[0])
+        self.assertEqual(usage,dict.fromkeys(night_runs.DEFAULTS,0))
+
+    def test_existing_source_paging_reveals_late_passage_without_fetch(self):
+        from clearance import synthesis
+        run=self.start()
+        text='Memory fixture introduction. '+('Initial source text. '*800)+'Late falsifier: memory fails on larger coding tasks.'
+        with patch('clearance.cases.instruments.document_snapshot',return_value={'text':text,'sha256':cases.digest(text),'cache_hit':True}):
+            run=night_runs.resume(run['id'],proposal=self.proposal(run,'read',urls=['https://fixture.example/long']),db=self.db)
+        self.assertNotIn('Late falsifier',night_runs.context(run['id'],db=self.db)['evidence'][0]['snapshot_text'])
+        version=run['case_version'];rounds=run['usage']['rounds']
+        with patch('clearance.research.investigate',side_effect=AssertionError('paging must not investigate')),patch('clearance.cases.instruments.document_snapshot',side_effect=AssertionError('paging must not fetch')):
+            run=night_runs.resume(run['id'],proposal=self.proposal(run,'read',urls=['https://fixture.example/long'],offset=12000,limit=12000),live=True,db=self.db)
+        page=night_runs.context(run['id'],db=self.db)['evidence'][0]
+        self.assertIn('Late falsifier',page['snapshot_text'])
+        self.assertEqual(page['snapshot_offset'],12000)
+        self.assertFalse(page['has_more'])
+        self.assertIsNone(page['inspect_more']['offset'])
+        self.assertEqual(run['case_version'],version)
+        self.assertEqual(run['usage']['rounds'],rounds)
+        self.assertEqual(run['observed_usage']['online_fetches'],0)
+        self.assertEqual(run['observed_usage']['cached_reads'],2)
+        finding={'statement':'The fixture effect fails on larger coding tasks.','relation':'different_scope',
+                 'rationale':'The late source passage limits the task scope.',
+                 'evidence_id':page['id'],'quote':'Late falsifier: memory fails on larger coding tasks.',
+                 'strongest_challenge':'A matched larger-task replication could reverse this observation.',
+                 'what_would_change':'A matched success on larger tasks would change this interpretation.'}
+        run=night_runs.resume(run['id'],proposal={**self.proposal(run),'findings':[finding]},db=self.db)
+        self.assertEqual(run['status'],'completed')
+        self.assertTrue(synthesis.build(cases.get(run['case_id'],db=self.db))['conclusions'])
+
+    def test_paging_requires_valid_existing_snapshot_and_bounded_offsets(self):
+        run=self.start()
+        for args in ({'offset':-1},{'offset':True},{'offset':0,'limit':12001},{'offset':0}):
+            with self.assertRaises(ValueError):
+                night_runs.resume(run['id'],proposal=self.proposal(run,'read',urls=['https://fixture.example/missing'],**args),db=self.db)
+        self.assertEqual(night_runs.get(run['id'],db=self.db)['steps'],[])
+        text='A small fixture snapshot with relevant memory text.'
+        with patch('clearance.cases.instruments.document_snapshot',return_value={'text':text,'sha256':cases.digest(text),'cache_hit':True}):
+            run=night_runs.resume(run['id'],proposal=self.proposal(run,'read',urls=['https://fixture.example/small']),db=self.db)
+        with self.assertRaises(ValueError):
+            night_runs.resume(run['id'],proposal=self.proposal(run,'read',urls=['https://fixture.example/small'],offset=len(text)+1),db=self.db)
+        self.assertEqual(len(night_runs.get(run['id'],db=self.db)['steps']),1)
+
+    def test_canonical_repeat_signature_ignores_reason(self):
+        run=self.start()
+        with patch('clearance.discovery.find',return_value=[]) as find:
+            run=night_runs.resume(run['id'],proposal=self.proposal(run,'search',query='same fixture'),db=self.db)
+            proposal=self.proposal(run,'search',query='same fixture',providers=['parallel'])
+            proposal['next_action']['reason']='A new reason does not make a new query.'
+            run=night_runs.resume(run['id'],proposal=proposal,db=self.db)
+        self.assertEqual(find.call_count,1)
+        self.assertEqual(run['status'],'stopped')
+
+    def test_stale_sibling_show_has_no_awaiting_reasoning_state(self):
+        first=self.start();second=self.start(case_id=first['case_id'])
+        with patch('clearance.discovery.find',return_value=[]):
+            first=night_runs.resume(first['id'],proposal=self.proposal(first,'search',query='fixture'),db=self.db)
+        shown=night_runs.get(second['id'],db=self.db)
+        self.assertEqual(shown['status'],'stale')
+        self.assertIn('inspect the current case',shown['stop_reason'])
+        with self.assertRaises(ValueError):night_runs.resume(second['id'],proposal=self.proposal(second),db=self.db)
+        self.assertEqual(night_runs.get(second['id'],db=self.db)['status'],'stale')
+
+    def test_received_invalid_adapter_json_is_recoverable_known_outcome(self):
+        import io
+        from clearance import reasoning
+        from clearance.research_policy import approve
+        run=self.start(policy={'aggregate':{'id':'invalid-response','limits':dict(discovery_calls=0,document_reads=0,reasoning_calls=1,rounds=0)}})
+        approve({'aggregate':run['aggregate']},db=self.db)
+        adapter=reasoning.GeminiReasoner(model='fixture',api_key='fixture')
+        with patch('urllib.request.urlopen',return_value=io.BytesIO(b'not valid JSON')):
+            with self.assertRaises(reasoning.ReasoningResponseError):night_runs.resume(run['id'],reasoner=adapter,db=self.db)
+        saved=night_runs.get(run['id'],db=self.db)
+        self.assertEqual(saved['status'],'awaiting_reasoning')
+        self.assertEqual(saved['steps'][0]['state'],'completed')
+        self.assertTrue(saved['steps'][0]['response_invalid'])
+        self.assertEqual(saved['observed_usage']['reasoning_responses'],1)
+        with patch('urllib.request.urlopen',side_effect=AssertionError('no implicit retry')):
+            done=night_runs.resume(run['id'],proposal=self.proposal(saved),db=self.db)
+        self.assertEqual(done['status'],'completed')
+        self.assertEqual(done['usage']['reasoning_calls'],1)
+
+    def test_caller_policy_is_not_live_authorization(self):
+        from clearance.research_policy import approve
+        policy={'aggregate':{'id':'unapproved-policy','limits':dict(discovery_calls=8,document_reads=20,reasoning_calls=12,rounds=3)}}
+        run=self.start(policy=policy)
+        with patch('clearance.discovery.find',return_value=[]) as find:
+            denied=night_runs.resume(run['id'],proposal=self.proposal(run,'search',query='fixture'),live=True,db=self.db)
+            self.assertEqual(denied['status'],'paused')
+            self.assertIn('operator-approved',denied['stop_reason'])
+            self.assertEqual(find.call_count,0)
+            self.assertEqual(denied['usage']['discovery_calls'],0)
+            approve(policy,db=self.db)
+            accepted=night_runs.resume(run['id'],proposal=self.proposal(run,'search',query='fixture'),live=True,db=self.db)
+        self.assertEqual(find.call_count,1)
+        self.assertEqual(accepted['usage']['discovery_calls'],1)
+
+    def test_paging_selects_source_beyond_initial_context_window(self):
+        run=self.start()
+        data=cases.get(run['case_id'],db=self.db)
+        data['version']+=1
+        data['evidence']=[{'id':'fixture-'+str(i),'url':'https://fixture.example/'+str(i),
+            'title':'Fixture source','status':'QUOTE_VERIFIED','quote':'Memory fixture source '+str(i)+'.',
+            'snapshot_text':'Memory fixture source '+str(i)+'.','snapshot_hash':str(i),
+            'relation':'not_assessed','kind':'research','angle':'provided'} for i in range(42)]
+        cases._save(data,db=self.db)
+        run=self.start(case_id=data['id'])
+        before=night_runs.context(run['id'],db=self.db)
+        self.assertNotIn('fixture-41',{e['id'] for e in before['evidence']})
+        with patch('clearance.research.investigate',side_effect=AssertionError('no fetch for existing source page')):
+            run=night_runs.resume(run['id'],proposal=self.proposal(run,'read',urls=['https://fixture.example/41'],offset=0),db=self.db)
+        after=night_runs.context(run['id'],db=self.db)
+        self.assertEqual(after['evidence'][0]['id'],'fixture-41')
+        self.assertEqual(after['truncation']['evidence_total'],42)
+        self.assertEqual(after['truncation']['evidence_included'],40)
 
 
 if __name__=='__main__':unittest.main()

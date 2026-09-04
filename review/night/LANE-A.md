@@ -63,3 +63,34 @@ Research start now includes matching general research and the selected repositor
 The usage annotation now states that counters cover engine-dispatched operations only. Host reasoning and separate `science_case` source reads are outside these counters; total model calls/tokens/work are not inferred. Reading an older run also receives this clarified annotation.
 
 Validation: `python3 -m pytest tests/test_night_runs.py tests/test_research_search.py -q` — **40 passed in 0.97s**. Root/global/other-repository selection and more than one ranked page were exercised with temporary saved fixtures.
+
+## Independent-review fixes
+
+This slice includes the coordinator's inherited A-file fixes: shared proposal validator, completed-model-response checkpoint replay, aggregate-shape validation and local-store routing removal from adapter payloads.
+
+Cursor/Fable findings addressed:
+
+- Exhausted and diminishing-evidence stops permit an explicit no-cost host finish with authored findings. Original stop provenance remains in `stops`; this does not reopen provider or model allowance.
+- Cancelling completed or unknown-outcome runs preserves those states and their reasons. Cancellation still stops an active loop after its in-flight operation.
+- Invalid model proposals persist as rejected proposals with `awaiting_reasoning`, while received unparseable adapter responses use `ReasoningResponseError`: a known received outcome, retained model reservation, response digest, and no implicit retry.
+- `reconcile(run_id, operation_id=..., case_version=..., acknowledgement='retain-reservation-and-do-not-retry', db=...)` requires the inspected current case version and the exact unresolved operation. The operation stays `unknown` with acknowledgement metadata; no capacity is refunded. The run preserves its map and requires a fresh explicit host proposal. Unknown search/read signatures cannot be replayed, including with changed reason text.
+- Context retains missing-source reasons, exposes reconciliation requirements, and reports stale sibling runs as stale rather than waiting for reasoning.
+- Question, retrieval vocabulary, root and case validation precede persistent case/policy mutations.
+- Confirmed fully skipped offline discovery releases its reserved action capacity atomically. Its trace and case revision remain as an audit of the attempt. Unknown results are never refunded.
+- Repeated investigation signatures compare query/URLs/providers, not rationale text.
+- External execution requires `research_policy.is_approved` for the exact aggregate ID and limits. A caller-provided aggregate is not approval. The coordinator owns the approval module and CLI-only approval path.
+
+Stored-source paging now uses `read` with one existing URL plus `offset` and optional `limit` (1–12000 characters). It reads the saved snapshot without fetching or revising the case, consumes one document-read unit and no investigation round, and records a cached read. Selected pages are pinned to snapshot hashes. Context prioritizes explicitly paged sources, including a source beyond its initial first-40 window, and gives exact next offsets and `has_more`. The explicit reasoner prompt describes paging, relation enums and claim-replacement fields.
+
+Actual validation after this packet:
+
+```text
+python3 -m pytest tests/test_night_runs.py tests/test_studies_synthesis.py tests/test_research_expansion.py tests/test_evidence_cases.py tests/test_research_search.py -q
+........................................................................ [ 64%]
+.......................................                                  [100%]
+111 passed in 5.73s
+```
+
+Tests include a late falsifier beyond character 12000 that becomes an anchored authored finding after local paging; explicit acknowledgement/current-version failures; changed-reason unknown replay rejection; completed/unknown cancel preservation; no-cost finish after exhaustion; received-invalid JSON recovery; and an unapproved caller policy that cannot reach a provider. All use temporary databases and controlled fixture effects. No live research or paid model calls occurred.
+
+The earlier receipt's statement that reconciliation is absent is superseded by this section. Billing remains unknown; reconciliation never asserts that an unknown request was free. Shared research metadata (`checked_at` semantics and the initial planned-case limit after live work) was reported to the coordinator because those files are outside lane A ownership.
