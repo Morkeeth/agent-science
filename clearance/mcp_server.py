@@ -190,6 +190,24 @@ TOOLS.append({
     }, "required": ["action"]}
 })
 
+TOOLS.append({
+    "name": "science_research",
+    "description": "Conduct a persisted investigation: start locally, inspect context, submit a case-version-pinned reasoning proposal with resume, challenge a conclusion, compare versions, follow questions and define experiments. Start makes no external calls. A waiting run is not complete. Only explicit live execution under a configured aggregate policy can fetch/search. Findings are authored interpretations with checked quotations. This tool cannot execute experiments or shell commands.",
+    "inputSchema": {"type":"object", "additionalProperties":False, "required":["action"], "properties": {
+        "action":{"type":"string","enum":["start","show","context","resume","cancel","challenge","update","compare","follow","updates","experiment-plan"]},
+        "question":{"type":"string","maxLength":1500},
+        "case_id":{"type":"string"}, "run_id":{"type":"string"},
+        "root":{"type":"string","description":"Local repository path; contents are not web queries."},
+        "db":{"type":"string","description":"Private local case store override."},
+        "version":{"type":"integer","minimum":1}, "from_version":{"type":"integer","minimum":1},
+        "live":{"type":"boolean","default":False},
+        "proposal":{"type":"object","description":"Host-authored proposal with case_version, optional question_map/findings and next_action {kind:search|read|finish,reason,...}. Inspect context first. Exact source quotes are checked; interpretation remains authored."},
+        "policy":{"type":"object","description":"Explicit bounded run policy; shared aggregate authorization is required before live calls."},
+        "protocol":{"type":"object","description":"Experiment definition: hypothesis, claim_refs, repo, tasks, baseline, intervention, outcomes, budget and stopping_rule. Incomplete definitions remain DRAFT."},
+        "protocol_id":{"type":"string"}
+    }}
+})
+
 for tool in TOOLS:
     if tool["name"] in ("science_lookup", "science_search", "science_visibility"):
         tool["inputSchema"]["properties"]["refresh"] = {"type": "boolean", "default": False, "description": "Bypass cached verdicts; live=true fetches current sources"}
@@ -217,6 +235,24 @@ def _send_message(msg):
 
 
 def handle_tool(name: str, arguments: dict) -> str:
+    if name == "science_research":
+        from clearance import research_workflow
+        try:
+            schema = next(t for t in TOOLS if t['name'] == name)['inputSchema']['properties']
+            for key, value in arguments.items():
+                if key not in schema:
+                    raise ValueError(f"unknown research argument: {key}")
+                expected = schema[key]['type']
+                types = {'string':str, 'integer':int, 'boolean':bool, 'object':dict}
+                if type(value) is not types[expected]:
+                    raise ValueError(f"{key} must be {expected}")
+                if expected == 'integer' and value < 1:
+                    raise ValueError(f"{key} must be positive")
+            if arguments.get('action') not in schema['action']['enum']:
+                raise ValueError('unknown research action; experiments execute only through the explicit CLI')
+            return json.dumps(research_workflow.handle(arguments), indent=2)
+        except (ValueError, TypeError, KeyError, OSError, sqlite3.Error, RuntimeError) as exc:
+            return json.dumps({'error':str(exc)})
     if name == "science_case":
         from clearance import cases, case_review, research, research_search
         action = arguments.get("action")
@@ -367,7 +403,7 @@ def main():
                 "result": {
                     "protocolVersion": "2024-11-05",
                     "capabilities": {"tools": {"listChanged": False}},
-                    "serverInfo": {"name": "agent-science", "version": "0.4.0"},
+                    "serverInfo": {"name": "agent-science", "version": "0.5.0"},
                 },
             })
         elif method == "notifications/initialized":

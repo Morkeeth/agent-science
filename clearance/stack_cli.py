@@ -219,6 +219,10 @@ def cmd_mcp(_args: argparse.Namespace) -> int:
 
 
 def main(argv=None) -> int:
+    argv = list(sys.argv[1:] if argv is None else argv)
+    research_actions = {'start','show','context','resume','cancel','challenge','update','compare','follow','updates','experiment-plan','execute-protocol'}
+    if len(argv) > 1 and argv[0] == 'research' and not argv[1].startswith('-') and argv[1] not in research_actions:
+        argv.insert(1, 'start')
     p = argparse.ArgumentParser(description="Agent Science — stack websearch")
     sub = p.add_subparsers(dest="cmd", required=True)
 
@@ -329,6 +333,8 @@ def main(argv=None) -> int:
 
     from clearance.case_cli import add_parser
     add_parser(sub)
+    from clearance.research_cli import add_parser as add_research_parser
+    add_research_parser(sub)
 
     args = p.parse_args(argv)
     if args.cmd in ("search", "lookup", "visibility", "stack-fit"):
