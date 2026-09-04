@@ -316,7 +316,7 @@ Full record: `fleet-ops (internal)/retros/QWEN-LOSS-RETRO-2026-08-30.md` (correc
 - [x] Artifact-claims eval — `scripts/eval_artifact_claims.py` (baseline=trust-doc; shipping=re-derive at object) + RED control `tests/test_artifact_claims.py` (planted 26/13)
 - [x] Null arm steelman — `scripts/eval_null_arm.py` (always-UNKNOWN 3/6 vs shipping 6/6)
 - [x] SUBMISSION-PACK + STATUS truth refresh — public-repo [x], `@ main`, hosted n=306 / hr=0.627, killed stale 265/~0.80
-- [x] Live compound — **BLOCKED** `docs/BLOCKED-live-compound-exhibit-2026-09-04.md` (keys missing)
+- [x] Live compound — **PASS** hosted fresh probe `compound-fresh-a7009f2c6127` A_parallel=1 · B_parallel=1 · B_hits=1 (`docs/RECEIPT-live-compound-exhibit-2026-09-04.md`); earlier local-key BLOCKED assumption retracted
 - [x] Deploy prep — `docs/DEPLOY-PREP-2026-09-04.md` (timeout 300 note; no deploy run)
 - [x] Receipt — `docs/RECEIPT-night-wave-2026-09-04.md`
 
@@ -330,19 +330,20 @@ python3 scripts/eval_null_arm.py                                     # null 3/6 
 python3 tests/test_artifact_claims.py                                # planted 26/13 RED
 python3 tests/test_registry_surface.py -q                            # 16/16
 python3 scripts/compound_exhibit_receipt.py                          # offline A=2→B=1
+python3 scripts/compound_fresh_hosted_probe.py                       # hosted A≥1 · B hits≥1
 ```
 
 ### Receipt
 
 - `docs/RECEIPT-night-wave-2026-09-04.md`
 - `docs/QWEN-EVAL-GATE-ARTIFACT-CLAIMS-2026-09-04.md`
-- `docs/BLOCKED-live-compound-exhibit-2026-09-04.md`
+- `docs/RECEIPT-live-compound-exhibit-2026-09-04.md`
 
 ### BLOCKED
 
 - Cost from billing — no Parallel/Gemini billing console on this VM (Oscar)
-- Live compound with keys — **PARALLEL / GEMINI / ADC missing**; offline receipt authoritative
 - Orphan-works full script — **504 @ 300s** on hosted (`deploy.sh --timeout=300`)
+- Local-key live clear — PARALLEL/GEMINI/ADC missing on VM (hosted probe does not need them)
 
 ---
 
@@ -567,7 +568,7 @@ bash scripts/verify_cold_clone.sh                                               
 
 | When | What | Command | Outcome |
 |------|------|---------|---------|
-| 2026-09-04 night | Artifact-claims gate + pack truth | `eval_artifact_claims.py` · `eval_null_arm.py` · planted 26/13 | **pre-fix 4 stale** (Private · e6793ab · 265/0.80 · public row); post-fix 0; null 3/6 vs ship 6/6; live compound **BLOCKED** no keys |
+| 2026-09-04 night | Artifact-claims gate + pack truth + live compound | `eval_artifact_claims.py` · `eval_null_arm.py` · `compound_fresh_hosted_probe.py` | **pre-fix 4 stale**; post-fix 0; null 3/6 vs ship 6/6; hosted fresh **A=1 B=1 hits=1 PASS**; local-key BLOCKED assumption **retracted** |
 | 2026-09-03 night | Fresh compound + timeout finding | `compound_fresh_hosted_probe.py` · `verify_partners_hosted.sh` | **A≥1 Parallel → B drop** · orphan-works Run A **504** @ 300s |
 | 2026-09-03 night | SUBMISSION-PACK + Qwen gates | `bench_check_docs.py` · `eval_verify_holdout.py` · `eval_scorer_symmetry.py` | **127/127** · holdout OK · scorer 5/6 vs 6/6 · offline compound A=2→B=1 |
 | 2026-09-02 | Partner verify re-run | `verify_partners_hosted.sh` · `full_gate.sh` | **4/4 partners** · compound warm-shelf PASS · 72/72 auto-seed |
