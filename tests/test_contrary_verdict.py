@@ -13,20 +13,12 @@ def t_contrary_constant():
     assert CONTRARY_TO_RESEARCH in VERDICTS
 
 
-def t_contrary_lookup_seed():
-    from clearance import stack_search
-    res = stack_search.lookup("ralph loop agentic practice", live=False)
-    assert res.get("label") == "CONTRARY_TO_RESEARCH"
-    assert res.get("why")
-    assert "arXiv" in res.get("why") or "2512" in res.get("why")
-
-
-def t_contrary_check_direct():
+def t_unrelated_and_seed_queries_abstain_without_comparable_evidence():
     from clearance import contrary
-    out = contrary.check("ralph loop agentic coding")
-    assert out is not None
-    assert out["label"] == "CONTRARY_TO_RESEARCH"
-    assert out.get("stale_research")
+    for query in ("fruit loop cereal nutrition", "best practice for tomato pruning",
+                  "ralph loop agentic practice", "ralph loop agentic coding"):
+        assert contrary.check(query) is None
+        assert contrary.check(query, practices=[], field=[]) is None
 
 
 def t_sourced_not_contrary():

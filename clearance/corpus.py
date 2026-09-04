@@ -9,6 +9,7 @@ can share one shelf. /tmp alone is not a product.
 """
 from __future__ import annotations
 
+import json
 import os
 import sqlite3
 from pathlib import Path
@@ -50,6 +51,14 @@ def _migrate(con: sqlite3.Connection) -> None:
     for col in ("cause", "published_instrument"):
         if col not in have:
             con.execute(f"ALTER TABLE verdicts ADD COLUMN {col} TEXT")
+    con.execute("CREATE TABLE IF NOT EXISTS verdict_observations "
+                "(id INTEGER PRIMARY KEY, subject_id TEXT, use TEXT, observed_at TEXT, payload TEXT)")
+    con.execute("CREATE INDEX IF NOT EXISTS verdict_observation_idx ON verdict_observations(subject_id, use)")
+    for row in con.execute("SELECT * FROM verdicts").fetchall():
+        if not con.execute("SELECT 1 FROM verdict_observations WHERE subject_id=? AND use=? LIMIT 1",
+                           (row["subject_id"], row["use"])).fetchone():
+            con.execute("INSERT INTO verdict_observations (subject_id, use, observed_at, payload) VALUES (?, ?, ?, ?)",
+                        (row["subject_id"], row["use"], row["observed_at"], json.dumps(dict(row))))
     con.commit()
 
 
@@ -87,9 +96,17 @@ def remember(con: sqlite3.Connection, verdicts: Iterable[Verdict]) -> int:
          v.cause, v.published_instrument, v.observed_at)
         for v in verdicts
     ]
+    columns = ("subject_id", "use", "subject_title", "noun", "verdict", "reason",
+               "citation_url", "quoted_terms", "holder", "interpretive", "cause",
+               "published_instrument", "observed_at")
+    updates = ", ".join(f"{name}=excluded.{name}" for name in columns[2:])
     con.executemany(
-        "INSERT OR REPLACE INTO verdicts VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)", rows
-    )
+        f"INSERT INTO verdicts ({','.join(columns)}) VALUES ({','.join('?' for _ in columns)}) "
+        f"ON CONFLICT(subject_id, use) DO UPDATE SET {updates} "
+        "WHERE julianday(excluded.observed_at) >= julianday(verdicts.observed_at)", rows)
+    con.executemany(
+        "INSERT INTO verdict_observations (subject_id, use, observed_at, payload) VALUES (?, ?, ?, ?)",
+        [(row[0], row[1], row[-1], json.dumps(dict(zip(columns, row)))) for row in rows])
     con.commit()
     uri = corpus_gcs.gcs_uri()
     path = _PATHS.get(id(con))
@@ -98,12 +115,19 @@ def remember(con: sqlite3.Connection, verdicts: Iterable[Verdict]) -> int:
     return len(rows)
 
 
-def recall(con: sqlite3.Connection, subject_id: str, use: str) -> Optional[Verdict]:
+def recall(con: sqlite3.Connection, subject_id: str, use: str, *,
+           assertion: str | None = None) -> Optional[Verdict]:
     r = con.execute(
         "SELECT * FROM verdicts WHERE subject_id=? AND use=?", (subject_id, use)
     ).fetchone()
     if not r:
         return None
+    if assertion is not None:
+        from .refusal_log import norm_term, is_settled_for_reuse
+        if norm_term(assertion) != norm_term(r["subject_title"]):
+            return None
+        if not is_settled_for_reuse(verdict=r["verdict"], cause=r["cause"]):
+            return None
     return Verdict(
         subject_id=r["subject_id"], subject_title=r["subject_title"], noun=r["noun"],
         use=r["use"], verdict=r["verdict"], reason=r["reason"],

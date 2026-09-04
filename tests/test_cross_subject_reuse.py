@@ -1,15 +1,7 @@
-"""Cross-subject reuse through the refusal log — the moat, proven offline.
+"""Exact supported claims reuse across subjects; bounded search failures retry.
 
-Two productions on DIFFERENT subjects share two overlapping claims (one provable, one
-proven-unprovable), phrased differently but carrying the same distinctive term. The FIRST
-production searches; the SECOND must reuse the log and spend NO Parallel call — and the
-proven-unprovable claim must stay refused without re-searching.
-
-We fake ONLY the two network boundaries, exactly as tests/test_search_path.py does:
-`search.find_sources` (Parallel) and `instruments.document` (the fetch). The locator is
-the real shipping StringLocator (DEFAULT) and the verdict rule (`verify`, independence)
-runs for real. We substitute EFFECTS (what the network returns), never the RULE (what
-counts as verified). Ground truth is the fake's own call count, not the code's self-report.
+Only network and extraction effects are substituted. The verifier and verdict
+constructor run, and an external counter measures actual discovery attempts.
 """
 from __future__ import annotations
 
@@ -43,17 +35,16 @@ class _Raw:
     must_contain: str
 
 
-# Same distinctive term in each pair, DIFFERENT wording between the two productions —
-# so the reuse must key on the term, and the wording difference must be FLAGGED.
+# Identical assertions in both productions; unsupported claims still retry.
 _SCRIPTS = {
     "prodA": [
         _Raw("The Act came into force on 1 April 2024.", None, _MUST_FORCE),
         _Raw("Some Statute establishes the register.", None, _MUST_STATUTE),
     ],
     "prodB": [
-        _Raw("Commencement: the statute came into force on 1 April 2024, per the notes.",
+        _Raw("The Act came into force on 1 April 2024.",
              None, _MUST_FORCE),
-        _Raw("Some Statute establishes the register, the archive says.", None, _MUST_STATUTE),
+        _Raw("Some Statute establishes the register.", None, _MUST_STATUTE),
     ],
 }
 
@@ -101,7 +92,7 @@ def _run(net, tmp: Path, subject: str, script_key: str) -> dict:
          agent_science.GeminiExtractor, agent_science.GeminiLocator) = saved
 
 
-def test_second_subject_reuses_the_log_and_spends_no_parallel_call():
+def test_second_subject_reuses_support_and_retries_unsettled_claim():
     net = _Net()
     with tempfile.TemporaryDirectory() as d:
         tmp = Path(d)
@@ -118,29 +109,27 @@ def test_second_subject_reuses_the_log_and_spends_no_parallel_call():
         before = net.find_calls
         b = _run(net, tmp, subject="dust-bowl", script_key="prodB")
 
-        # THE PROOF: a different subject, both claims overlap by distinctive term.
-        # No Parallel call is spent — measured at the fake, not just self-reported.
-        assert net.find_calls == before, \
+        # The supported assertion reuses; the unresolved assertion searches again.
+        assert net.find_calls == before + 1, \
             f"production 2 hit the network {net.find_calls - before} time(s); reuse failed"
-        assert b["parallel_calls"] == 0, b["parallel_calls"]
-        assert b["log_hits"] == 2, b["log_hits"]
+        assert b["parallel_calls"] == 1, b["parallel_calls"]
+        assert b["log_hits"] == 1, b["log_hits"]
         assert b["corpus_hits"] == 0, "cross-subject reuse must not read as same-subject"
 
         by_text = {r["text"]: r for r in b["rows"]}
 
-        # 1) The proven claim is reused as SOURCED, carries the citation, and FLAGS that
-        #    the evidence was established under a different wording.
-        force = by_text["Commencement: the statute came into force on 1 April 2024, per the notes."]
+        # The supported assertion retains its citation and exact identity.
+        force = by_text["The Act came into force on 1 April 2024."]
         assert force["label"] == "SOURCED"
         assert force["citation_url"] == _PRIMARY_URL
         assert force.get("cross_subject") is True and force["probe"] == "log_hit"
-        assert force.get("reused_from"), "different wording must be flagged, not silently served"
+        assert not force.get("reused_from"), "identical wording must retain its identity"
 
-        # 2) The proven-UNPROVABLE claim stays refused, with NO re-search.
-        statute = by_text["Some Statute establishes the register, the archive says."]
+        # The bounded failure is searched again; this network still has no source.
+        statute = by_text["Some Statute establishes the register."]
         assert statute["label"] != "SOURCED"
         assert statute["engine_verdict"] == UNKNOWN
-        assert statute.get("cross_subject") is True
+        assert not statute.get("cross_subject")
 
 
 def test_not_gameable_reuse_carries_the_original_verdict_both_poles():

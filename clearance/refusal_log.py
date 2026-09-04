@@ -1,21 +1,12 @@
-"""The cross-production claim log — and the refusal log inside it.
+"""Versioned observations and the current view of each exact assertion.
 
-The corpus compounds inside ONE production's subject. This compounds across every
-production that ever ran, which is a different economic object: a claim established
-once should be free for everyone afterwards, forever.
-
-**The asset is the negative space.** Anyone can rebuild "what is true" — that is a
-search, and four funded companies do it. Nobody else accumulates **what CANNOT be
-proven, and why**, because no competing product emits refusals at all. A refusal is
-expensive to produce (a full search, several documents fetched and read, an independence
-assessment) and it is the half a marketplace has no reason to build.
-
-Cross-production reuse is LOOSER than same-subject reuse and therefore riskier, so every
-record keeps the wording it was established under. A reuse whose original assertion was
-phrased differently is flagged, never silently served.
+Topic retrieval returns candidates. Only an identical supported or refuted assertion
+can authorize reuse; unresolved searches remain retryable. Older observations are
+retained when newer evidence changes the current verdict.
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import re
@@ -97,30 +88,14 @@ _UNSOURCED_CAUSES = frozenset({
     "terms_never_fetched",
 })
 
-# Independence fails are NOT settled refusals — a primary source may still exist.
-# Reusing them forever poisoned EUR-Lex claims on the hosted shelf (a Wikipedia-only
-# pass stamped no_independent_source, then every later Directive ask skipped search).
-_UNSETTLED_CAUSES = frozenset({
-    "no_independent_source",
-})
-
-
 def is_settled_for_reuse(*, verdict: str | None, cause: str | None = None) -> bool:
     """Whether a log row may short-circuit a fresh search.
 
-    GREEN and firm UNSOURCED causes compound forever. Independence flags do not —
-    they mean "human must judge / find primary", which is unfinished work.
+    Only supported or refuted assertions qualify. UNKNOWN describes a bounded
+    attempt, including missing evidence or failed independence; it must remain retryable.
     """
-    if verdict == "GREEN":
-        return True
-    if verdict == "RED":
-        return True
-    if (cause or "") in _UNSETTLED_CAUSES:
-        return False
-    if verdict == "UNKNOWN" and (cause or "") in _UNSOURCED_CAUSES:
-        return True
-    # Unknown cause / other UNKNOWN: do not freeze a maybe-wrong refuse.
-    return False
+    # A bounded failure to find evidence is not permanent negative knowledge.
+    return verdict in ("GREEN", "RED")
 
 
 def surface_label(*, verdict: str | None, cause: str | None = None) -> str:
@@ -135,9 +110,8 @@ def surface_label(*, verdict: str | None, cause: str | None = None) -> str:
         return "UNKNOWN"
     return "NOT_CLEARED"
 
-# What a claim is ABOUT, so "adopted in 2012" and "was known as the Orphan Works
-# Directive" do not collide on the same distinctive term. This is the collision the
-# per-subject corpus could only flag; here it is prevented.
+# Descriptive categories retained for callers; these never establish identity.
+# A date category can contain many unrelated predicates and values.
 _SLOTS = (
     (r"\b(1[6-9]\d{2}|20\d{2})\b", "date"),
     (r"\b\d[\d,\.]*\s*(%|percent|million|billion|thousand|hours|titles|items|works|licences|licenses)\b", "quantity"),
@@ -167,6 +141,15 @@ def norm_term(term: str) -> str:
     return re.sub(r"\s+", " ", (term or "").strip().lower())
 
 
+def claim_key(assertion: str) -> str:
+    """Exact assertion identity, including predicate, values, negation and scope.
+
+    Deliberately conservative: wording variants remain retrieval candidates until
+    independently verified. No heuristic slot can authorize assertion reuse.
+    """
+    return "claim:" + hashlib.sha256(norm_term(assertion).encode()).hexdigest()
+
+
 # ADDITIVE, and additive on purpose. Every registry on disk predates the audit trail,
 # and a migration that rewrote them would be this product asserting something about rows
 # it never judged. New columns default NULL, and a row with no trail SAYS SO on the
@@ -179,6 +162,8 @@ _ADDED_COLUMNS = (
 _QUERY_COLUMNS = (
     ("cost_tier", "TEXT"),      # free | cheap | live — for popular-query analytics
     ("source", "TEXT"),         # dictionary_exact | registry | live | …
+    ("established", "TEXT"),
+    ("trace", "TEXT"),
 )
 
 
@@ -202,6 +187,23 @@ def connect(path: Path | str = DB) -> sqlite3.Connection:
     for name, decl in _QUERY_COLUMNS:
         if name not in q_have:
             con.execute(f"ALTER TABLE queries ADD COLUMN {name} {decl}")
+    # Re-key legacy claims using the assertion actually stored. Previously lost
+    # collisions cannot be recovered by migration; never invent their contents.
+    for row in con.execute("SELECT term, slot, established FROM claims").fetchall():
+        key = claim_key(row["established"])
+        if row["slot"] != key:
+            con.execute("UPDATE OR IGNORE claims SET slot=? WHERE term=? AND slot=?",
+                        (key, row["term"], row["slot"]))
+    con.execute("CREATE INDEX IF NOT EXISTS claims_assertion_idx ON claims(slot)")
+    con.execute("CREATE TABLE IF NOT EXISTS claim_observations "
+                "(id INTEGER PRIMARY KEY, term TEXT, assertion TEXT, observed_at TEXT, payload TEXT)")
+    con.execute("CREATE INDEX IF NOT EXISTS observation_assertion_idx ON claim_observations(term, assertion)")
+    for row in con.execute("SELECT * FROM claims").fetchall():
+        exists = con.execute("SELECT 1 FROM claim_observations WHERE term=? AND assertion=? LIMIT 1",
+                             (row["term"], row["established"])).fetchone()
+        if not exists:
+            con.execute("INSERT INTO claim_observations (term, assertion, observed_at, payload) VALUES (?, ?, ?, ?)",
+                        (row["term"], row["established"], row["first_seen_at"], json.dumps(dict(row))))
     con.commit()
     if p != Path(":memory:"):
         _PATHS[id(con)] = p
@@ -222,14 +224,15 @@ def record(con, *, term: str, assertion: str, verdict: str, production: str,
     shifted every one of them by one, silently, with no error — a row where `basis`
     holds a URL and `cause` holds a quotation still inserts.
     """
-    t = norm_term(term)
-    slot = slot_of(assertion, term)
+    slot = claim_key(assertion)
+    prior = con.execute("SELECT term FROM claims WHERE slot=? ORDER BY first_seen_at DESC LIMIT 1", (slot,)).fetchone()
+    t = prior["term"] if prior else norm_term(term)
     cols = ("term", "slot", "established", "verdict", "basis", "cause", "citation_url",
             "quoted_terms", "origins", "resolves_with", "first_seen_in", "first_seen_at",
             "reused", "refusal_code", "trail")
     vals = (t, slot, assertion, verdict, basis, cause,
             citation_url, quoted_terms, json.dumps(origins or []), resolves_with,
-            production, datetime.now(timezone.utc).isoformat(timespec="seconds"), 0,
+            production, datetime.now(timezone.utc).isoformat(), 0,
             refusal_code, json.dumps(trail) if trail else None)
     existing = con.execute(
         "SELECT verdict, cause FROM claims WHERE term=? AND slot=?", (t, slot)
@@ -237,9 +240,9 @@ def record(con, *, term: str, assertion: str, verdict: str, production: str,
     if existing is None:
         con.execute(f"INSERT INTO claims ({','.join(cols)}) "
                     f"VALUES ({','.join('?' * len(cols))})", vals)
-    elif existing["verdict"] != "GREEN" and verdict == "GREEN":
-        # First writer used to win forever (INSERT OR IGNORE). A later primary clear
-        # must upgrade a poisoned independence refuse — otherwise EUR-Lex never recovers.
+    else:
+        # The current view follows the latest observation. The append-only history
+        # below preserves prior support, contradiction and uncertainty.
         con.execute(
             "UPDATE claims SET established=?, verdict=?, basis=?, cause=?, "
             "citation_url=?, quoted_terms=?, origins=?, resolves_with=?, "
@@ -247,10 +250,13 @@ def record(con, *, term: str, assertion: str, verdict: str, production: str,
             "WHERE term=? AND slot=?",
             (assertion, verdict, basis, cause, citation_url, quoted_terms,
              json.dumps(origins or []), resolves_with, production,
-             datetime.now(timezone.utc).isoformat(timespec="seconds"),
+             datetime.now(timezone.utc).isoformat(),
              refusal_code, json.dumps(trail) if trail else None, t, slot),
         )
-    # else: keep first settled row (GREEN stays GREEN; firm refuse stays refuse)
+    con.execute("INSERT INTO claim_observations (term, assertion, observed_at, payload) "
+                "VALUES (?, ?, ?, ?)",
+                (t, assertion, datetime.now(timezone.utc).isoformat(),
+                 json.dumps(dict(zip(cols, vals)))))
     con.commit()
     _maybe_push(con)
 
@@ -272,15 +278,13 @@ def trail_of(row) -> list:
 
 
 def lookup(con, *, term: str, assertion: str) -> Optional[dict]:
-    r = con.execute("SELECT * FROM claims WHERE term=? AND slot=?",
-                    (norm_term(term), slot_of(assertion, term))).fetchone()
+    r = con.execute("SELECT * FROM claims WHERE slot=? ORDER BY first_seen_at DESC LIMIT 1",
+                    (claim_key(assertion),)).fetchone()
     if not r:
         return None
     d = dict(r)
     d["origins"] = json.loads(d["origins"] or "[]")
-    # Cross-production reuse is looser than same-subject reuse. If the assertion that
-    # established this record was worded differently, say so rather than serving it as
-    # though it were the same sentence.
+    # Keep the established wording visible, including harmless whitespace changes.
     d["reused_from_wording"] = (d["established"] if d["established"].strip().lower()
                                 != assertion.strip().lower() else None)
     # Unsettled independence flags are returned so callers can inspect them, but they
@@ -289,7 +293,7 @@ def lookup(con, *, term: str, assertion: str) -> Optional[dict]:
         d["unsettled"] = True
         return d
     con.execute("UPDATE claims SET reused = reused + 1 WHERE term=? AND slot=?",
-                (norm_term(term), slot_of(assertion, term)))
+                (d["term"], claim_key(assertion)))
     con.commit()
     return d
 
@@ -308,7 +312,7 @@ def week_tally(con, *, days: int = 7) -> dict:
     Cleared = GREEN. Caught = refused or flagged (everything else written to the log).
     """
     from datetime import timedelta
-    since = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat(timespec="seconds")
+    since = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
     row = con.execute(
         "SELECT COUNT(*) n, "
         "SUM(verdict='GREEN') cleared, "
@@ -328,13 +332,14 @@ def log_query(con, *, query: str, result: dict) -> int:
     """Every query becomes a browsable registry row — the refusal is the product."""
     cur = con.execute(
         "INSERT INTO queries (query_text, result_label, verdict, cause, term, "
-        "citation_url, quoted_terms, resolves_with, asked_at, cost_tier, source) "
-        "VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+        "citation_url, quoted_terms, resolves_with, asked_at, cost_tier, source, established, trace) "
+        "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
         (query.strip(), result["label"], result.get("verdict"), result.get("cause"),
          result.get("term"), result.get("citation_url"), result.get("quoted_terms"),
          result.get("resolves_with"),
-         datetime.now(timezone.utc).isoformat(timespec="seconds"),
-         result.get("cost_tier"), result.get("source")))
+         datetime.now(timezone.utc).isoformat(),
+         result.get("cost_tier"), result.get("source"), result.get("established"),
+         json.dumps(result.get("trace", []))))
     con.commit()
     _maybe_push(con)
     return cur.lastrowid
@@ -346,59 +351,41 @@ def browse_queries(con, *, limit: int = 50) -> list[dict]:
         "SELECT * FROM queries ORDER BY id DESC LIMIT ?", (limit,))]
 
 
-def search_registry(con, query: str, *, limit: int = 5) -> dict:
-    """Query in → SOURCED span, UNSOURCED, or UNKNOWN with named refusal."""
+def search_registry(con, query: str, *, limit: int = 5, log: bool = True, reuse: bool = True) -> dict:
+    """Browse related claims, but reuse a verdict only for the same assertion."""
     q = query.strip()
-    if not q:
-        return {"query": q, "label": "NOT_CLEARED", "cause": "empty_query",
-                "why": "query was empty", "matches": 0}
-
-    qnorm = f"%{norm_term(q)}%"
+    exact = con.execute("SELECT * FROM claims WHERE slot=? ORDER BY first_seen_at DESC LIMIT 1",
+                        (claim_key(q),)).fetchone() if q else None
+    # Escape LIKE wildcards: user input is a literal topic, not a SQL pattern.
+    needle = norm_term(q).replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
     rows = con.execute(
-        "SELECT * FROM claims WHERE lower(term) LIKE ? OR lower(established) LIKE ? "
-        "OR lower(quoted_terms) LIKE ? ORDER BY (verdict='GREEN') DESC, reused DESC "
-        "LIMIT ?",
-        (qnorm, qnorm, qnorm, limit)).fetchall()
-
-    if not rows:
-        result = {
-            "query": q,
-            "label": "NOT_CLEARED",
-            "verdict": None,
-            "cause": "not_in_registry",
-            "why": ("nothing in the registry sources this yet — run a clearance or "
-                    "backfill; do not trust an unsourced answer"),
-            "matches": 0,
-        }
+        "SELECT * FROM claims WHERE lower(term) LIKE ? ESCAPE '\\' "
+        "OR lower(established) LIKE ? ESCAPE '\\' "
+        "OR lower(quoted_terms) LIKE ? ESCAPE '\\' ORDER BY first_seen_at DESC LIMIT ?",
+        (f"%{needle}%", f"%{needle}%", f"%{needle}%", limit)).fetchall() if q else []
+    result = {"query": q, "label": "NOT_CLEARED", "verdict": None,
+              "cause": "related_claims_only" if rows else "not_in_registry",
+              "why": "Related claims are candidates, not evidence that this assertion is supported."
+                     if rows else "No matching assertion is established in the registry.",
+              "matches": len(rows), "candidates": [dict(r) for r in rows]}
+    if exact:
+        best = dict(exact)
+        result.update({k: best.get(k) for k in (
+            "verdict", "cause", "term", "established", "citation_url", "quoted_terms",
+            "resolves_with", "reused", "first_seen_in")})
+        result["label"] = surface_label(verdict=best["verdict"], cause=best.get("cause"))
+        result["why"] = best.get("resolves_with") or best.get("cause")
+        result["unsettled"] = not is_settled_for_reuse(verdict=best["verdict"], cause=best.get("cause"))
+        latest = con.execute(
+            "SELECT * FROM queries WHERE lower(trim(query_text)) = lower(trim(?)) ORDER BY id DESC LIMIT 1",
+            (q,)).fetchone()
+        if latest and latest["asked_at"] >= best["first_seen_at"] and any(latest[field] != best.get(field) for field in ("verdict", "cause", "citation_url", "quoted_terms")):
+            result.update(label="UNKNOWN", verdict="UNKNOWN", cause="newer_result_differs",
+                          why="A newer result differs from this saved claim; re-evaluate it.", unsettled=True)
+        if reuse and not result["unsettled"]:
+            lookup(con, term=best["term"], assertion=best["established"])
+    if log:
         log_query(con, query=q, result=result)
-        return result
-
-    best = dict(rows[0])
-    best["origins"] = json.loads(best.get("origins") or "[]")
-    label = surface_label(verdict=best["verdict"], cause=best.get("cause"))
-    why = None
-    if label == "UNSOURCED":
-        why = best.get("resolves_with") or best.get("cause") or "no admissible source"
-    elif label == "UNKNOWN":
-        why = best.get("cause") or "unknown gap"
-    result = {
-        "query": q,
-        "label": label,
-        "verdict": best["verdict"],
-        "cause": best.get("cause"),
-        "term": best["term"],
-        "established": best["established"],
-        "citation_url": best.get("citation_url"),
-        "quoted_terms": best.get("quoted_terms"),
-        "resolves_with": best.get("resolves_with"),
-        "reused": best.get("reused", 0),
-        "first_seen_in": best.get("first_seen_in"),
-        "matches": len(rows),
-        "why": why,
-    }
-    log_query(con, query=q, result=result)
-    # Bump reuse on the matched claim when a registry query hits it.
-    lookup(con, term=best["term"], assertion=best["established"])
     return result
 
 

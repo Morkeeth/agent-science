@@ -4,7 +4,8 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY clearance/ clearance/
 COPY truth-dictionary/ truth-dictionary/
-COPY agent_science.py ask_registry.py ./
+COPY agent_science.py ask_registry.py clear_corpus.py ./
+COPY docs/inspiration/PRACTICES-CORPUS.md docs/inspiration/PRACTICES-CORPUS.md
 COPY cloud/ cloud/
 ENV PORT=8080 \
     PYTHONUNBUFFERED=1 \

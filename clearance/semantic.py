@@ -284,6 +284,12 @@ def check_polarity(passage: str, *, claim: str, must_contain: str) -> Optional[F
     own = negators(must_contain)
     carrier_neg = negators(_without_asides(carrier, must_contain)) - own
 
+    # Negation is bidirectional: an affirmative quotation cannot establish a
+    # negative claim. Compare the actual carrier before subtracting the anchor.
+    if claim_neg and not negators(_without_asides(carrier, must_contain)):
+        return _detail(CONTRADICTED,
+                       f"the claim is negated but its evidence clause is affirmative: {carrier[:160]!r}")
+
     extra = carrier_neg - claim_neg
     if extra:
         return _detail(UNDER_NEGATION,

@@ -20,7 +20,7 @@ def test_registry_hit_no_parallel():
             con, term="2012/28/eu", assertion="Directive 2012/28/EU is the orphan works directive",
             verdict="GREEN", production="test", citation_url="https://example.org/x",
             quoted_terms="Directive 2012/28/EU on orphan works")
-        res = stack_search.search("2012/28/EU", live=False, db=db)
+        res = stack_search.search("Directive 2012/28/EU is the orphan works directive", live=False, db=db)
         assert res["label"] == "SOURCED", res
         assert res["parallel_api_calls"] == 0
         assert res["source"] == "registry"
@@ -37,6 +37,7 @@ def test_ingest_claim_offline():
         body = instruments.document(url, fetch=False)
         if not body:
             return  # skip if no cache
+        ingest._INBOX = Path(d) / "inbox"
         res = ingest.ingest_claim(
             "Copyright was never evaluated for this item",
             url,

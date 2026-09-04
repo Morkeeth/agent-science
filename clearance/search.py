@@ -225,25 +225,43 @@ def _live_search(objective: str, queries: list[str], *, mode: str) -> tuple[dict
 
 def find_sources(objective: str, queries: list[str], *, mode: str = "advanced",
                  live: bool = False, max_results: int = 6,
-                 term: str = "") -> Optional[list[Candidate]]:
+                 term: str = "", refresh: bool = False,
+                 trace: list | None = None) -> Optional[list[Candidate]]:
     ck = json.dumps({"o": objective, "q": sorted(queries), "m": mode}, sort_keys=True)
     cache = _cache_load()
-    if ck in cache:
+    if not refresh and ck in cache:
         out = [Candidate(**c) for c in cache[ck][:max_results]]
         log_receipt(source="parallel", objective=objective, queries=queries,
                     candidates=out, cache_hit=True)
+        if trace is not None:
+            trace.append({"route": "parallel_cache", "outcome": "hit", "queries": queries, "candidates": len(out)})
         return out
     term_key = (term or "").strip().lower()
-    if term_key and term_key in cache:
+    if not refresh and term_key and term_key in cache:
         out = [Candidate(**c) for c in cache[term_key][:max_results]]
         log_receipt(source="parallel", objective=objective, queries=queries,
                     candidates=out, cache_hit=True)
+        if trace is not None:
+            trace.append({"route": "parallel_cache", "outcome": "hit", "queries": queries, "candidates": len(out[:max_results])})
         return out[:max_results]
     if not live:
+        if trace is not None:
+            trace.append({"route": "parallel", "outcome": "skipped", "queries": queries, "reason": "live search disabled"})
         return None
 
-    payload, sid = _live_search(objective, queries, mode=mode)
+    from time import monotonic
+    started = monotonic()
+    event = {"route": "parallel", "outcome": "started", "queries": queries}
+    if trace is not None:
+        trace.append(event)
+    try:
+        payload, sid = _live_search(objective, queries, mode=mode)
+    except Exception:
+        event.update(outcome="error", elapsed_ms=round((monotonic()-started)*1000))
+        raise
+    event.update(outcome="completed", search_id=sid, elapsed_ms=round((monotonic()-started)*1000))
     out = _candidates_from_payload(payload)
+    event.update(candidates=len(out[:max_results]), urls=[c.url for c in out[:max_results]])
     cache[ck] = [c.__dict__ for c in out]
     if term_key:
         cache[term_key] = cache[ck]

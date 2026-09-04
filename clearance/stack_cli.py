@@ -44,7 +44,7 @@ def _print_result(res: dict) -> None:
 
 
 def cmd_lookup(args: argparse.Namespace) -> int:
-    res = stack_search.lookup(args.query, live=args.live, subject=args.subject)
+    res = stack_search.lookup(args.query, live=args.live, subject=args.subject, refresh=args.refresh)
     if args.json:
         print(json.dumps(res, indent=2))
     else:
@@ -53,7 +53,7 @@ def cmd_lookup(args: argparse.Namespace) -> int:
 
 
 def cmd_search(args: argparse.Namespace) -> int:
-    res = stack_search.lookup(args.query, live=not args.offline, subject=args.subject)
+    res = stack_search.lookup(args.query, live=not args.offline, subject=args.subject, refresh=args.refresh)
     if args.json:
         print(json.dumps(res, indent=2))
     else:
@@ -111,6 +111,8 @@ def cmd_visibility(args: argparse.Namespace) -> int:
         subject=args.subject,
         full=args.full,
         personal=not args.no_personal,
+        root=args.root,
+        refresh=args.refresh,
     )
     if args.json:
         print(json.dumps(data, indent=2, default=str))
@@ -224,6 +226,7 @@ def main(argv=None) -> int:
     s.add_argument("query", nargs="+", help="lookup query")
     s.add_argument("--subject", default="stack")
     s.add_argument("--live", action="store_true", help="paid Parallel on miss")
+    s.add_argument("--refresh", action="store_true", help="bypass old verdicts and source caches")
     s.add_argument("--json", action="store_true")
     s.set_defaults(func=cmd_lookup)
 
@@ -231,6 +234,7 @@ def main(argv=None) -> int:
     s.add_argument("query", nargs="+", help="search query")
     s.add_argument("--subject", default="stack")
     s.add_argument("--offline", action="store_true", help="registry only, no Parallel")
+    s.add_argument("--refresh", action="store_true", help="bypass old verdicts and source caches")
     s.add_argument("--json", action="store_true")
     s.set_defaults(func=cmd_search)
 
@@ -253,6 +257,8 @@ def main(argv=None) -> int:
     vis.add_argument("query", nargs="+", help="query")
     vis.add_argument("--subject", default="stack")
     vis.add_argument("--live", action="store_true")
+    vis.add_argument("--refresh", action="store_true")
+    vis.add_argument("--root", default=".", help="your repo context (kept local)")
     vis.add_argument("--full", action="store_true",
                      help="full agentic-truth rundown (all panes)")
     vis.add_argument("--no-personal", action="store_true",
@@ -320,6 +326,9 @@ def main(argv=None) -> int:
     sv.set_defaults(func=cmd_serve)
 
     sub.add_parser("mcp", help="stdio MCP for Cursor").set_defaults(func=cmd_mcp)
+
+    from clearance.case_cli import add_parser
+    add_parser(sub)
 
     args = p.parse_args(argv)
     if args.cmd in ("search", "lookup", "visibility", "stack-fit"):

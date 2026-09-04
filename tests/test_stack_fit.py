@@ -18,7 +18,8 @@ def t_detect_stack_this_repo():
 def t_score_fits_agents():
     from clearance import stack_fit
     res = stack_fit.score("science_lookup MCP fleet websearch", root=ROOT)
-    assert res["fit"] == "fits"
+    assert res["fit"] == "unassessed"
+    assert res["stack"]["root"] == str(ROOT.resolve())
     assert res.get("improvement")
 
 

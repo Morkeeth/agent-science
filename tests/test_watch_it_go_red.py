@@ -884,21 +884,15 @@ def t_independence_actually_demotes_a_real_claim():
         "independence demoted a claim with a genuine primary source"
 
 
-def t_the_corpus_can_compound_across_two_scripts():
-    """The pitch's own claim, tested on what it actually says.
-
-    'The second production about the same subject costs a fraction of the first.'
-    Keying on full claim text meant the corpus only compounded when the IDENTICAL
-    sentence recurred - a re-run of the same script, not a second production. Against a
-    genuinely different script the hit rate was zero BY CONSTRUCTION, and nothing said so.
-    """
+def t_the_corpus_requires_exact_assertion_identity():
     import agent_science as A
     subject = "orphan-works"
-    a = A._claim_key("The European Parliament adopted Directive 2012/28/EU in October 2012",
-                     subject, "Directive 2012/28/EU")
-    b = A._claim_key("Europe passed the Orphan Works Directive, 2012/28/EU, in 2012",
-                     subject, "Directive 2012/28/EU")
-    assert a == b, "the same fact in different prose still misses the corpus"
+    first = "The European Parliament adopted Directive 2012/28/EU in October 2012"
+    other = "Europe passed the Orphan Works Directive, 2012/28/EU, in 2012"
+    a = A._claim_key(first, subject, "Directive 2012/28/EU")
+    b = A._claim_key(other, subject, "Directive 2012/28/EU")
+    assert a != b, "a shared topic cannot establish equivalent assertions"
+    assert a == A._claim_key(first, subject, "October 2012")
 
 
 def t_a_claim_with_no_distinctive_term_does_not_collide():
@@ -1035,8 +1029,8 @@ def t_refusal_log_write_and_read_agree_on_the_slot():
              verdict=UNKNOWN, production="A", cause="no_independent_source")
     assert L.stats(con)["n"] == 2, \
         "two different assertions about one term merged into a single log row"
-    date_claim = L.lookup(con, term=T, assertion=f"{T} passed in 2012")
-    ident = L.lookup(con, term=T, assertion=f"{T} is called the Orphan Works Directive")
+    date_claim = L.lookup(con, term=T, assertion=f"{T} was adopted in 2012")
+    ident = L.lookup(con, term=T, assertion=f"{T} was known as the Orphan Works Directive")
     assert date_claim["verdict"] == GREEN and ident["verdict"] == UNKNOWN, \
         "the log served a verdict about a different assertion"
 
