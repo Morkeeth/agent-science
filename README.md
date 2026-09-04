@@ -78,6 +78,8 @@ MIT licensed.
 
 ## Private hosted workspaces
 
+[Open the workspace](https://agent-science-33kamss2jq-uc.a.run.app/cases). [Build and verification receipt](docs/BUILD-HOSTED-CASES-2026-09-04.md).
+
 The hosted service now serves `/cases`: question → saved sources → authored decision → refresh → review. A revised decision can supersede an earlier one while preserving its evidence and reasoning. Historical source pages stay bound to the version you opened.
 
 Sign in with a workspace access token, or use `Authorization: Bearer <token>` with the JSON API. Keep tokens out of URLs. Each workspace has a separate cloud database. Local case databases and repo experiments are never uploaded by deployment.
@@ -91,7 +93,7 @@ Sign in with a workspace access token, or use `Authorization: Bearer <token>` wi
 
 Use a random UUID for each new mutation and reuse it when retrying that same mutation. A completed retry returns the saved result. An interrupted request requires a fresh ID after checking the workspace. A concurrent write returns 409 instead of replacing newer data. Stale decision forms also return 409.
 
-The default limits are **10 admitted live research runs per workspace per UTC day**, **50 across the service**, and **100 writes per workspace**. These are configured request ceilings, not measured dollar costs. Failed research attempts count. Jobs stop after 180 seconds; hosted source collections stop at 24 documents. New browser cases select live research by default; turn it off to create an empty case. Offline refresh reuses that case's saved sources and makes no claim about web freshness.
+The default limits are **10 admitted live research runs per workspace per UTC day**, **50 across the service**, and **100 writes per workspace / 1,000 across the service**. These are configured request ceilings, not measured dollar costs. Failed research attempts count. Jobs stop after 180 seconds; hosted source collections stop at 24 documents. New browser cases select live research by default; turn it off to create an empty case. Offline refresh reuses that case's saved sources and makes no claim about web freshness.
 
 The cloud runtime exposes private case routes and public liveness only. Earlier public `/search`, `/clear`, `/ingest`, registry and query-history routes remain available in the local legacy server, not the hosted workspace. Repository uploads and experiment execution remain local.
 
