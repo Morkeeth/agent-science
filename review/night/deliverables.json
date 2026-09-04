@@ -1,6 +1,6 @@
 {
   "baseline": "e12ca6f7c4ad489b8e20bb16c307470635b0883d",
-  "status": "final review fixes and acceptance",
+  "status": "local release candidate integrated and verified; live field validation outstanding",
   "integration_branch": "build/adaptive-research-night-20260905",
   "lanes": [
     {
@@ -25,7 +25,7 @@
       "id": "C",
       "owner": "daily workflow",
       "branch": "build/night-workflow-20260905",
-      "status": "integrated; coordinator extending recovery and live-policy approval interface",
+      "status": "integrated; reviewed coordinator recovery and policy interfaces complete",
       "commit": "7b6cd01",
       "integrated_commit": "da7df9a",
       "evidence": "review/night/LANE-C.md"
@@ -33,5 +33,8 @@
   ],
   "replay_evidence": "review/night/replay-acceptance.json",
   "independent_review_pin": "61e791d36a0b8f75cbd9bbcf0d3ee0cefafc1cf4",
-  "live_validation": "not authorized: no approved aggregate spending policy"
+  "live_validation": "not authorized: no approved aggregate spending policy",
+  "code_candidate": "d4bde5ed5b30b9e43299d84fa6657a43979122c4",
+  "publication": "not pushed or deployed",
+  "verified_local_main": "d4bde5ed5b30b9e43299d84fa6657a43979122c4"
 }

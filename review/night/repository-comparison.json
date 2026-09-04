@@ -1,0 +1,123 @@
+{
+  "protocol_id": "7494b402ce4c",
+  "protocol_version": 2,
+  "state": "COMPLETED",
+  "experiment_id": "014b83cc70c0",
+  "result": {
+    "valid": true,
+    "case_version": 1,
+    "pins": {
+      "baseline": "e12ca6f7c4ad489b8e20bb16c307470635b0883d",
+      "candidate": "d4bde5ed5b30b9e43299d84fa6657a43979122c4"
+    },
+    "acceptance_sha256": "ff70361bcd77934d15a8f4e32eb539e1e7835e6e4bfcd67e5b19c30a03418950",
+    "runs": [
+      {
+        "arm": "baseline",
+        "pair": 1,
+        "commit": "e12ca6f7c4ad489b8e20bb16c307470635b0883d",
+        "exit_code": 1,
+        "timed_out": false,
+        "acceptance_unchanged": true,
+        "seconds": 0.2471,
+        "output_sha256": "27bceaa1db83b58ecfaf4e917ac655a103ca14a907866da7cc0a03d6251af7bb",
+        "output_bytes": 841,
+        "output_truncated": false,
+        "capture_complete": true
+      },
+      {
+        "arm": "candidate",
+        "pair": 1,
+        "commit": "d4bde5ed5b30b9e43299d84fa6657a43979122c4",
+        "exit_code": 0,
+        "timed_out": false,
+        "acceptance_unchanged": true,
+        "seconds": 1.6595,
+        "output_sha256": "07728b88661502721d59487cd233a9c54789d4678cf72be7377905eb91901ee5",
+        "output_bytes": 197,
+        "output_truncated": false,
+        "capture_complete": true
+      },
+      {
+        "arm": "candidate",
+        "pair": 2,
+        "commit": "d4bde5ed5b30b9e43299d84fa6657a43979122c4",
+        "exit_code": 0,
+        "timed_out": false,
+        "acceptance_unchanged": true,
+        "seconds": 1.664,
+        "output_sha256": "07728b88661502721d59487cd233a9c54789d4678cf72be7377905eb91901ee5",
+        "output_bytes": 197,
+        "output_truncated": false,
+        "capture_complete": true
+      },
+      {
+        "arm": "baseline",
+        "pair": 2,
+        "commit": "e12ca6f7c4ad489b8e20bb16c307470635b0883d",
+        "exit_code": 1,
+        "timed_out": false,
+        "acceptance_unchanged": true,
+        "seconds": 0.1907,
+        "output_sha256": "27bceaa1db83b58ecfaf4e917ac655a103ca14a907866da7cc0a03d6251af7bb",
+        "output_bytes": 841,
+        "output_truncated": false,
+        "capture_complete": true
+      },
+      {
+        "arm": "baseline",
+        "pair": 3,
+        "commit": "e12ca6f7c4ad489b8e20bb16c307470635b0883d",
+        "exit_code": 1,
+        "timed_out": false,
+        "acceptance_unchanged": true,
+        "seconds": 0.2625,
+        "output_sha256": "27bceaa1db83b58ecfaf4e917ac655a103ca14a907866da7cc0a03d6251af7bb",
+        "output_bytes": 841,
+        "output_truncated": false,
+        "capture_complete": true
+      },
+      {
+        "arm": "candidate",
+        "pair": 3,
+        "commit": "d4bde5ed5b30b9e43299d84fa6657a43979122c4",
+        "exit_code": 0,
+        "timed_out": false,
+        "acceptance_unchanged": true,
+        "seconds": 1.4372,
+        "output_sha256": "07728b88661502721d59487cd233a9c54789d4678cf72be7377905eb91901ee5",
+        "output_bytes": 197,
+        "output_truncated": false,
+        "capture_complete": true
+      }
+    ],
+    "aggregate": {
+      "baseline": {
+        "passed": 0,
+        "runs": 3,
+        "median_seconds": 0.2471
+      },
+      "candidate": {
+        "passed": 3,
+        "runs": 3,
+        "median_seconds": 1.6595
+      }
+    },
+    "summary": "baseline 0/3 passes; candidate 3/3 passes on the same acceptance script",
+    "limits": [
+      "A passing script is only as strong as its independent acceptance criteria.",
+      "Wall time includes process startup. API cost and human rework were not measured.",
+      "Repeated runs on one machine do not establish general practice superiority.",
+      "Run only trusted code: worktree isolation and child cleanup are not an OS sandbox."
+    ],
+    "id": "014b83cc70c0",
+    "case_id": "4ad05886d492",
+    "recorded_at": "2026-09-04T23:47:20.065804+00:00"
+  },
+  "meaning": "Frozen functional research workflow acceptance only; no model effectiveness, web research quality or human rework measurement.",
+  "installed_agent_retrieval": {
+    "code_candidate": "d4bde5ed5b30b9e43299d84fa6657a43979122c4",
+    "verified": "Real MCP protocol and case retrieval returned the identical executed outcome; reconcile exposed, policy approval excluded.",
+    "transcript_sha256": "2a4ec28f2437865c71c2fb4fddd4cccca22d987416df6fe5863634e2679c201b"
+  }
+}
