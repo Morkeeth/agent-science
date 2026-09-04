@@ -178,3 +178,10 @@ def test_generic_phrases_do_not_expand_to_agentic_topics():
 def test_query_without_searchable_terms_needs_clarification(tmp_path):
     with pytest.raises(ValueError,match='specific topic or keyword'):
         research_search.find('how should my agent use it',db=tmp_path/'cases.db')
+
+
+def test_ux_query_finds_natural_intervention_question(tmp_path):
+    db=tmp_path/'cases.db'
+    data=seed(db,'What should an agent show a human, and when should it ask for intervention?', 'Opaque agent loops can hinder collaboration.')
+    result=research_search.find('UX for agents',db=db)
+    assert result['cases'][0]['case_id']==data['id']

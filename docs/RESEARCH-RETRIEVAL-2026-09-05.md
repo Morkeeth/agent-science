@@ -8,7 +8,7 @@ The workflow is: find prior work, inspect the evidence and its limits, investiga
 
 ## Validation
 
-- 88 focused tests passed across saved research retrieval, report research, terminal cases, evidence cases and hosted boundaries.
+- 89 focused tests passed across saved research retrieval, report research, terminal cases, evidence cases and hosted boundaries.
 - Five visibility transparency tests and six Parallel integration checks passed.
 - Twelve manual local retrieval checks used the four actual saved field-pass cases: eight topic queries selected the intended case first; four unrelated queries returned no results. These are a small acceptance set, not a general retrieval benchmark. The private receipt stays outside git at the local Agent Science data location.
 - A real `visibility "RAG for my repo" --json` run returned the saved retrieval case alongside `NOT_CLEARED` from the dictionary. No paid provider call was requested.

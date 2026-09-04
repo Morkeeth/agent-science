@@ -12,7 +12,7 @@ STOP = set('a an the and or for to of in on is are do does how what when where w
 TOPICS = {
     'retrieval': ('rag', 'retrieval', 'embedding', 'embeddings', 'obsidian', 'repository search', 'lexical search', 'bm25'),
     'memory': ('memory', 'context engineering', 'persistent context', 'agents.md', 'context files', 'context file'),
-    'interaction': ('ux', 'user experience', 'human intervention', 'human-ai collaboration', 'agent interface', 'progress display'),
+    'interaction': ('ux', 'user experience', 'human intervention', 'intervention controls', 'ask for intervention', 'human-ai collaboration', 'agent interface', 'progress display'),
     'coordination': ('multi-agent', 'multi agent', 'multiagent', 'coordination', 'delegation', 'delegated agents', 'parallel agents', 'multiple agents'),
     'evaluation': ('evaluation', 'benchmark', 'benchmarks', 'acceptance test', 'acceptance script', 'ablation'),
 }
