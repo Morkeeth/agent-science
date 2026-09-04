@@ -1,0 +1,115 @@
+{
+  "case_id": "fd9d26c32d77",
+  "experiment": {
+    "valid": true,
+    "case_version": 1,
+    "pins": {
+      "baseline": "2d5e3ecb84dbeb51f2b95d33e8b8b5c49c276680",
+      "candidate": "b8302612c9ed833f9de84831ce79414effcc2836"
+    },
+    "acceptance_sha256": "0fd441621791857dfd8243df2ba6dc764baae27bfed080d08de7d4917dc4a690",
+    "runs": [
+      {
+        "arm": "baseline",
+        "pair": 1,
+        "commit": "2d5e3ecb84dbeb51f2b95d33e8b8b5c49c276680",
+        "exit_code": 1,
+        "timed_out": false,
+        "acceptance_unchanged": true,
+        "seconds": 0.2381,
+        "output_sha256": "3f10db5f9708d2dc0769ee961a05f25622258000f95d2fd196480ae4b8052895",
+        "output_bytes": 733,
+        "output_truncated": false,
+        "capture_complete": true
+      },
+      {
+        "arm": "candidate",
+        "pair": 1,
+        "commit": "b8302612c9ed833f9de84831ce79414effcc2836",
+        "exit_code": 0,
+        "timed_out": false,
+        "acceptance_unchanged": true,
+        "seconds": 0.6076,
+        "output_sha256": "73d6b919d11ec75b90aa377b14e85f2be00a4ea5a8063ad9f50cb67d9757e25a",
+        "output_bytes": 98,
+        "output_truncated": false,
+        "capture_complete": true
+      },
+      {
+        "arm": "candidate",
+        "pair": 2,
+        "commit": "b8302612c9ed833f9de84831ce79414effcc2836",
+        "exit_code": 0,
+        "timed_out": false,
+        "acceptance_unchanged": true,
+        "seconds": 0.6032,
+        "output_sha256": "73d6b919d11ec75b90aa377b14e85f2be00a4ea5a8063ad9f50cb67d9757e25a",
+        "output_bytes": 98,
+        "output_truncated": false,
+        "capture_complete": true
+      },
+      {
+        "arm": "baseline",
+        "pair": 2,
+        "commit": "2d5e3ecb84dbeb51f2b95d33e8b8b5c49c276680",
+        "exit_code": 1,
+        "timed_out": false,
+        "acceptance_unchanged": true,
+        "seconds": 0.2369,
+        "output_sha256": "3f10db5f9708d2dc0769ee961a05f25622258000f95d2fd196480ae4b8052895",
+        "output_bytes": 733,
+        "output_truncated": false,
+        "capture_complete": true
+      },
+      {
+        "arm": "baseline",
+        "pair": 3,
+        "commit": "2d5e3ecb84dbeb51f2b95d33e8b8b5c49c276680",
+        "exit_code": 1,
+        "timed_out": false,
+        "acceptance_unchanged": true,
+        "seconds": 0.1865,
+        "output_sha256": "3f10db5f9708d2dc0769ee961a05f25622258000f95d2fd196480ae4b8052895",
+        "output_bytes": 733,
+        "output_truncated": false,
+        "capture_complete": true
+      },
+      {
+        "arm": "candidate",
+        "pair": 3,
+        "commit": "b8302612c9ed833f9de84831ce79414effcc2836",
+        "exit_code": 0,
+        "timed_out": false,
+        "acceptance_unchanged": true,
+        "seconds": 0.5532,
+        "output_sha256": "73d6b919d11ec75b90aa377b14e85f2be00a4ea5a8063ad9f50cb67d9757e25a",
+        "output_bytes": 98,
+        "output_truncated": false,
+        "capture_complete": true
+      }
+    ],
+    "aggregate": {
+      "baseline": {
+        "passed": 0,
+        "runs": 3,
+        "median_seconds": 0.2369
+      },
+      "candidate": {
+        "passed": 3,
+        "runs": 3,
+        "median_seconds": 0.6032
+      }
+    },
+    "summary": "baseline 0/3 passes; candidate 3/3 passes on the same acceptance script",
+    "limits": [
+      "A passing script is only as strong as its independent acceptance criteria.",
+      "Wall time includes process startup. API cost and human rework were not measured.",
+      "Repeated runs on one machine do not establish general practice superiority.",
+      "Run only trusted code: worktree isolation and child cleanup are not an OS sandbox."
+    ],
+    "id": "f9c97fda4618",
+    "case_id": "fd9d26c32d77",
+    "recorded_at": "2026-09-04T21:32:07.509442+00:00"
+  },
+  "decision_id": "2ada5258f04a"
+}
