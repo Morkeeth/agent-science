@@ -55,3 +55,11 @@ Unknown operations intentionally have no automatic resolution/retry action in th
 Cancellation cannot revoke a request already in flight; it prevents the next operation. Version checks also detect writers outside the night-run lock, but do not make those other modules participate in the lock.
 
 Source context contains bounded excerpts; it does not claim that omitted source text was inspected. Model-selected queries remain explicitly authored public queries; this module does not infer scientific truth or make a claim that every material research gap was exhausted.
+
+## Repository-start integration fix
+
+Research start now includes matching general research and the selected repository's cases. It scans globally ranked result pages before filtering, so a first page dominated by another repository cannot hide general studies. Explicit-root `research_search.find` and visibility behavior remain unchanged.
+
+The usage annotation now states that counters cover engine-dispatched operations only. Host reasoning and separate `science_case` source reads are outside these counters; total model calls/tokens/work are not inferred. Reading an older run also receives this clarified annotation.
+
+Validation: `python3 -m pytest tests/test_night_runs.py tests/test_research_search.py -q` — **40 passed in 0.97s**. Root/global/other-repository selection and more than one ranked page were exercised with temporary saved fixtures.

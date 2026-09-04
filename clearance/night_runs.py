@@ -10,6 +10,7 @@ from clearance import cases, research, research_search
 from clearance.safe_fetch import validate_url
 
 DEFAULTS = dict(discovery_calls=8, document_reads=20, reasoning_calls=12, rounds=3)
+USAGE_BASIS = 'Conservative reserved capacity for engine-dispatched operations only, including offline work and unknown outcomes. Excludes host reasoning and separate science_case tool reads. Not observed API calls, total investigation work, tokens, or billing.'
 
 
 def _connect(db):
@@ -39,7 +40,9 @@ def get(run_id, *, db=None):
         row = con.execute('SELECT body FROM night_runs WHERE id=?', (run_id,)).fetchone()
     if row is None:
         raise ValueError('research run not found')
-    return json.loads(row[0])
+    run=json.loads(row[0])
+    run['usage_basis']=USAGE_BASIS
+    return run
 
 
 @contextmanager
@@ -61,6 +64,27 @@ def _limits(value):
     if any(type(v) is not int or v < 0 for v in out.values()):
         raise ValueError('limits must be nonnegative integers')
     return out
+
+
+def _prior_research(question, root, db):
+    if root is None:
+        return research_search.find(question, db=db, limit=5)
+    selected=[]
+    offset=0
+    wanted=str(Path(root).resolve())
+    # Search global pages before applying research-start scope. Restricting the
+    # underlying search to a repo would exclude all general research; filtering
+    # just its first page would let unrelated repositories hide relevant studies.
+    while True:
+        page=research_search.find(question, db=db, limit=100, offset=offset)
+        selected.extend(row for row in page['cases'] if row.get('root') in (None,wanted))
+        if len(selected)>5 or not page['has_more']:
+            break
+        offset=page['next_offset']
+    return {**page, 'root':wanted, 'cases':selected[:5], 'limit':5, 'offset':0,
+            'has_more':len(selected)>5, 'next_offset':None,
+            'scope':'General research plus cases attached to this repository; unrelated repositories excluded.',
+            'limits':page['limits']+['Research start scans global result pages before filtering scope; this saved selection is not a paginated search endpoint.']}
 
 
 def start(question, *, root=None, case_id=None, challenge=False, policy=None, db=None):
@@ -90,7 +114,7 @@ def start(question, *, root=None, case_id=None, challenge=False, policy=None, db
         evidence=[], trace=[], changes=[], claims=[], limits=['Planned investigation; no online check has run.']), db=db)
     if not isinstance(question, str) or not question.strip():
         raise ValueError('question is required')
-    prior = research_search.find(question, db=db, root=root, limit=5)
+    prior = _prior_research(question, root, db)
     challenges = []
     if challenge:
         from clearance import synthesis
@@ -106,7 +130,7 @@ def start(question, *, root=None, case_id=None, challenge=False, policy=None, db
                question_map=[dict(id='q1', question=question, gap='; '.join(challenges) if challenge else 'Inspect original evidence and identify unresolved scope.',
                                   competing_explanation='', importance='material')], steps=[], cursor=0,
                limits=limits, aggregate=aggregate, usage=dict.fromkeys(DEFAULTS, 0),
-               usage_basis='Conservative reserved capacity, including offline work and unknown outcomes; not observed API calls or billing.',
+               usage_basis=USAGE_BASIS,
                observed_usage=dict(reasoning_responses=0, provider_completed=0, document_reads=0, online_fetches=0, cached_reads=0),
                billing=None, stop_reason='host or explicitly configured reasoning adapter required', created_at=cases.now())
     return _save(run, db)

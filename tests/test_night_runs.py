@@ -287,5 +287,40 @@ class RunTests(unittest.TestCase):
         self.assertEqual(corrected['case_version'],run['case_version']+2)
         self.assertEqual(corrected['steps'][-1]['state'],'completed')
 
+    def test_repo_start_includes_general_and_same_repo_only(self):
+        from clearance import research, research_search
+        here=Path(self.tmp.name)/'here';other=Path(self.tmp.name)/'other'
+        here.mkdir();other.mkdir()
+        general=research.import_report('Memory for coding','A general controlled fixture.',db=self.db)
+        same=research.import_report('Memory for coding','A repository controlled fixture.',root=here,db=self.db)
+        unrelated=research.import_report('Memory for coding','An unrelated controlled fixture.',root=other,db=self.db)
+        run=self.start(root=here)
+        found={row['case_id'] for row in run['prior_research']['cases']}
+        self.assertIn(general['id'],found)
+        self.assertIn(same['id'],found)
+        self.assertNotIn(unrelated['id'],found)
+        explicit=research_search.find('memory coding',root=here,db=self.db)
+        self.assertNotIn(general['id'],{row['case_id'] for row in explicit['cases']})
+        self.assertIn('engine-dispatched operations only',run['usage_basis'])
+        self.assertIn('Excludes host reasoning and separate science_case tool reads',run['usage_basis'])
+
+    def test_repo_start_scans_past_unrelated_high_ranked_page(self):
+        import copy
+        from clearance import research
+        here=Path(self.tmp.name)/'here';other=Path(self.tmp.name)/'other'
+        here.mkdir();other.mkdir()
+        template=research.import_report('Memory coding help','Memory coding help fixture.',root=other,db=self.db)
+        for index in range(105):
+            data={k:copy.deepcopy(v) for k,v in template.items() if k not in ('decisions','experiments','coverage','freshness')}
+            data['id']='unrelated'+str(index)
+            cases._save(data,db=self.db)
+        general=research.import_report('Memory','General fixture.',db=self.db)
+        same=research.import_report('Memory','Local fixture.',root=here,db=self.db)
+        run=self.start(root=here)
+        found={row['case_id'] for row in run['prior_research']['cases']}
+        self.assertIn(general['id'],found)
+        self.assertIn(same['id'],found)
+        self.assertTrue(all(row.get('root') in (None,str(here.resolve())) for row in run['prior_research']['cases']))
+
 
 if __name__=='__main__':unittest.main()
