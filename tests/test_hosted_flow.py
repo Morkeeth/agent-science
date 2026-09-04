@@ -146,6 +146,25 @@ class HostedFlow(unittest.TestCase):
             self.assertEqual(caught.exception.status,409)
             self.assertEqual(budget.status('alice')['used'],0)
 
+    def test_cloud_alias_redirects_forms_to_canonical_origin(self):
+        with patch.dict(os.environ,{'AGENT_SCIENCE_ALLOW_HTTP':'0','AGENT_SCIENCE_PUBLIC_ORIGIN':'https://workspace.example'}):
+            code,headers,_=self.request('GET','/login',token=None,headers={'Host':'old-alias.example'})
+            self.assertEqual(code,303)
+            self.assertEqual(headers['Location'],'https://workspace.example/login')
+            self.assertIn('Strict-Transport-Security',headers)
+
+    def test_old_cases_remain_reachable_with_pagination(self):
+        with WorkspaceStore.from_env().workspace('alice') as ws:
+            for i in range(21):cases.create('Saved question '+str(i),db=ws.db)
+            ws.commit()
+        first=self.request('GET','/api/cases')[2]
+        second=self.request('GET','/api/cases?page=2')[2]
+        self.assertEqual(len(first['cases']),20)
+        self.assertTrue(first['has_more'])
+        self.assertEqual(len(second['cases']),1)
+        self.assertFalse(second['has_more'])
+        self.assertFalse({c['id'] for c in first['cases']} & {c['id'] for c in second['cases']})
+
     def test_bad_input_never_reaches_provider(self):
         for data in [[], {'request_id':'x','question':'Q'}, {'request_id':'long-request-0001','question':'x'*1501},
                      {'request_id':'long-request-0002','question':'Q','live':'false'},

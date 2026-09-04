@@ -19,7 +19,7 @@ from urllib.parse import parse_qs, urlsplit
 from clearance import cases
 from cloud.case_auth import Auth
 from cloud.case_budget import Budget, Rejected
-from cloud.case_storage import WorkspaceStore, Conflict
+from cloud.case_storage import WorkspaceStore, Conflict, StorageLimit
 from cloud import case_pages
 
 MAX_BODY = 32768
@@ -112,7 +112,7 @@ class WorkspaceHTTP:
         h.send_response(code)
         for key, value in {
             'Content-Type': content_type, 'Content-Length': str(len(body)),
-            'Cache-Control': 'no-store', 'Referrer-Policy': 'no-referrer',
+            'Cache-Control': 'no-store', 'Referrer-Policy': 'same-origin',
             'X-Content-Type-Options': 'nosniff', 'X-Frame-Options': 'DENY',
             'Content-Security-Policy': "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'",
             'Connection': 'close',
@@ -129,9 +129,12 @@ class WorkspaceHTTP:
         h.close_connection = True
         h.wfile.write(body)
 
+    def allowed_origins(self):
+        configured = [os.getenv('AGENT_SCIENCE_PUBLIC_ORIGIN',''), *os.getenv('AGENT_SCIENCE_ALLOWED_ORIGINS','').split('|')]
+        return {origin.rstrip('/') for origin in configured if origin}
+
     def origin(self):
-        expected = os.getenv('AGENT_SCIENCE_PUBLIC_ORIGIN', '').rstrip('/')
-        if not expected or self.h.headers.get('Origin') != expected:
+        if self.h.headers.get('Origin') not in self.allowed_origins():
             raise HTTPError(403, 'This form must be submitted from the workspace address.')
 
     def body(self):
@@ -162,9 +165,12 @@ class WorkspaceHTTP:
             self.route()
         except (HTTPError, Rejected) as exc:
             self.send(exc.status, {'error': str(exc)} if self.api else case_pages.error_page(str(exc), exc.status))
+        except StorageLimit:
+            self.send(413, {'error': 'Workspace storage is full. Saved cases remain readable. Ask the operator to raise the workspace limit before retrying; any admitted research attempt remains counted.'} if self.api else
+                      case_pages.error_page('Workspace storage is full. Saved cases remain readable. Ask the operator to raise the workspace limit before retrying; any admitted research attempt remains counted.', 413))
         except Conflict:
-            self.send(409, {'error': 'Workspace changed during this request. Reload; no newer data was overwritten.'} if self.api else
-                      case_pages.error_page('Workspace changed during this request. Reload; no newer data was overwritten.', 409))
+            self.send(409, {'error': 'Workspace changed during this request. Reload; no newer data was overwritten. This request was not saved and its admitted research attempt remains counted.'} if self.api else
+                      case_pages.error_page('Workspace changed during this request. Reload; no newer data was overwritten. This request was not saved and its admitted research attempt remains counted.', 409))
         except ValueError:
             self.send(400, {'error': 'Case, version or evidence was not found, or the input was invalid.'} if self.api else
                       case_pages.error_page('Case, version or evidence was not found, or the input was invalid.', 400))
@@ -185,6 +191,12 @@ class WorkspaceHTTP:
         if h.command == 'GET' and path == '/health':
             return self.send(200, {'ok': True, 'service': 'agent-science', 'mode': 'private-workspaces',
                                    'revision': os.getenv('K_REVISION', 'local')})
+        expected_origin = os.getenv('AGENT_SCIENCE_PUBLIC_ORIGIN', '').rstrip('/')
+        if self.secure and h.command == 'GET' and not self.api and expected_origin:
+            # Cloud Run has multiple aliases. Forms and session cookies must use
+            # the configured canonical origin, not whichever alias was bookmarked.
+            if h.headers.get('Host', '').lower() not in {urlsplit(origin).netloc.lower() for origin in self.allowed_origins()}:
+                return self.send(303, location=expected_origin + parsed.path + ('?'+parsed.query if parsed.query else ''))
         self.auth = self.auth or Auth()
         tenant, session = self.auth.identify(h.headers)
         if path == '/login':
@@ -295,6 +307,8 @@ class WorkspaceHTTP:
                         raise HTTPError(400, 'Select at least one verified quote from this version.')
                     if payload['supersedes'] and not any(d['id']==payload['supersedes'] and not d.get('superseded_by') for d in current['decisions']):
                         raise HTTPError(409, 'Decision was already superseded or does not belong to this case.')
+            if ws.db.stat().st_size >= self.store.max_bytes:
+                raise StorageLimit('workspace is full')
             budget.reserve(tenant, rid, fingerprint, payload['live'])
             if payload['action'] == 'decisions':
                 result_case = cases.decide(payload['case_id'],payload['statement'],payload['rationale'],payload['evidence_ids'],db=ws.db,supersedes=payload['supersedes'])

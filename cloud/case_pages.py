@@ -60,7 +60,7 @@ def shell(title, body, csrf='', authenticated=True):
            f'<form method="post" action="/logout">{hidden("csrf", csrf)}<button>Sign out</button></form></nav>') if authenticated else ''
     return ('<!doctype html><html lang="en"><head><meta charset="utf-8">'
             '<meta name="viewport" content="width=device-width,initial-scale=1">'
-            '<meta name="referrer" content="no-referrer">'
+            '<meta name="referrer" content="same-origin">'
             f'<title>{esc(title)} · Agent Science</title><style>{CSS}</style></head><body>'
             '<a class="skip" href="#main">Skip to content</a><header><div class="top">'
             '<a class="brand" href="/cases">Agent <span>Science</span></a>' + nav + '</div></header>'
