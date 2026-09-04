@@ -1,0 +1,1 @@
+{"baseline":"e12ca6f7c4ad489b8e20bb16c307470635b0883d","status":"building","lanes":[{"id":"A","owner":"autonomous investigation","status":"assigned","commit":null},{"id":"B","owner":"evidence and synthesis","status":"assigned","commit":null},{"id":"C","owner":"daily workflow","status":"assigned","commit":null}],"live_validation":"not authorized: no aggregate spending policy"}
