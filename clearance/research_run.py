@@ -18,6 +18,7 @@ import uuid
 from urllib.parse import urlsplit
 
 from clearance import cases, discovery, research
+from clearance import study as study_ids
 
 STOP_REASONS = (
     'evidence_sufficient',
@@ -378,6 +379,7 @@ def _synthesize(data, run):
         conclusion = 'Some claims are supported as assessed; contrary evidence may still reverse them.'
     else:
         conclusion = 'No claim is settled; evidence was collected under explicit limits.'
+    studies = study_ids.group_documents([e['url'] for e in data.get('evidence', [])])
     return {
         'case_version': data['version'],
         'conclusion': conclusion,
@@ -390,6 +392,7 @@ def _synthesize(data, run):
         'unresolved_gaps': [n['gap'] for n in run['question_map'] if n['status'] == 'open'],
         'strongest_challenge': strongest,
         'falsification_condition': falsification,
+        'studies': [{'identity': s['identity'], 'id': s['id'], 'urls': s['urls']} for s in studies],
         'meaning': 'Synthesis summarizes this run; it is not an automatic scientific verdict.',
     }
 
