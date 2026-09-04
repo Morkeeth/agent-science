@@ -307,11 +307,35 @@ Full record: `fleet-ops (internal)/retros/QWEN-LOSS-RETRO-2026-08-30.md` (correc
 
 ---
 
-## 🎯 NOW — NIGHTPLAN 2026-09-05 · Lane A adaptive research
+## 🎯 NOW — NIGHTPLAN 2026-09-05b · Lane B evidence + conditional conclusions
+
+**Slice:** Study identity · structured conditions · claim relationships · separated synthesis · strongest challenge/falsification · answer-version diff. Extend Lane A; do not rewrite it.
+
+### Build (shipped this session — each box RUN)
+
+- [x] DOI/arXiv + HTML/PDF mirrors → one study; title-only merge refused — `python3 -m pytest -q tests/test_lane_b_evidence.py::test_five_mirrors_of_one_paper_are_one_study tests/test_lane_b_evidence.py::test_title_only_merge_is_refused` → **passed**
+- [x] Conditions extracted with source spans; missing stays unknown — `…::test_conditions_extracted_with_spans_missing_unknown` → **passed**
+- [x] Claim graph: support / contradiction / different_scope / context / unresolved — `…::test_different_task_papers_are_not_auto_contradiction` → **passed**
+- [x] Synthesis separates empirical vs official vs adoption vs local measurement — `…::test_synthesis_separates_evidence_kinds_and_names_falsification` → **passed**
+- [x] Each material conclusion has strongest challenge + falsification — same test + `bash scripts/demo_lane_b_evidence.sh` → **DEMO LANE B OK**
+- [x] Answer-version diff: changed source vs newly available vs reinterpretation — `…::test_answer_version_diff_distinguishes_change_kinds` → **passed**
+- [x] Red→green tests: duplicate paper→one study; different-task ≠ auto-contradiction; fabricated quote rejected — `python3 -m pytest -q tests/test_lane_b_evidence.py` → **9 passed** (first collection ImportError was the red)
+- [x] Naive/null baseline arms — `python3 scripts/eval_lane_b_baseline.py` → shipping identity **2** > naive **1** (title-merge false-positive on paper B) > null **1**; scope shipping `different_scope` vs naive `contradicts`
+- [x] Receipt — `docs/CLOUD-RECEIPT-nightplan-lane-b-2026-09-05.md`
+
+### BLOCKED / Oscar door
+
+- Live six-topic field pass (no Parallel/Gemini keys on this VM)
+- Film / Devpost / key rotation / hosted secret redeploy
+- Lane C (followed questions, update ranking, experiment protocols)
+
+---
+
+## 🎯 NOW (prior) — NIGHTPLAN 2026-09-05 · Lane A adaptive research
 
 **Slice:** Persist research runs; challenge = new investigation against a pinned answer; interrupt/resume; CLI/MCP surface.
 
-### Build (shipped this session)
+### Build (shipped)
 
 - [x] ResearchRun + question map + adaptive loop — `clearance/research_run.py` · verified: `python3 -m pytest -q tests/test_research_run.py` → **7 passed**
 - [x] Challenge revises answer — `bash scripts/demo_research_challenge.sh` → **DEMO OK · CONTESTED**
@@ -549,6 +573,7 @@ bash scripts/verify_cold_clone.sh                                               
 
 | When | What | Command | Outcome |
 |------|------|---------|---------|
+| 2026-09-05 overnight b | Lane B evidence engine | `pytest tests/test_lane_b_evidence.py` · `demo_lane_b_evidence.sh` · `eval_lane_b_baseline.py` | **9 passed** · DEMO LANE B OK · shipping 2>naive 1 (title-merge FP) · scope different_scope |
 | 2026-09-05 overnight | Lane A research engine | `pytest tests/test_research_run.py` · `demo_research_challenge.sh` · `eval_research_challenge_baseline.py` | **7 passed** · DEMO OK CONTESTED · adaptive 1 > naive 0 |
 | 2026-09-03 night | Fresh compound + timeout finding | `compound_fresh_hosted_probe.py` · `verify_partners_hosted.sh` | **A≥1 Parallel → B drop** · orphan-works Run A **504** @ 300s |
 | 2026-09-03 night | SUBMISSION-PACK + Qwen gates | `bench_check_docs.py` · `eval_verify_holdout.py` · `eval_scorer_symmetry.py` | **127/127** · holdout OK · scorer 5/6 vs 6/6 · offline compound A=2→B=1 |

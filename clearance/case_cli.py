@@ -116,7 +116,7 @@ def add_parser(sub):
             p.add_argument('--supersedes',help='active assessment ID on this claim to replace')
             p.add_argument('--claim',help='existing imported/authored claim ID')
             p.add_argument('--statement',help='new claim text when no --claim is supplied')
-            p.add_argument('--relation',required=True,choices=['supports','contradicts','context','unresolved'])
+            p.add_argument('--relation',required=True,choices=['supports','contradicts','different_scope','context','unresolved'])
             p.add_argument('--reason',required=True)
             p.add_argument('--evidence')
             p.add_argument('--quote',help='exact source passage, 20–4000 characters')

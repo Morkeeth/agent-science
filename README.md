@@ -111,11 +111,17 @@ agent-science research challenge CASE_ID --version 2 --max-steps 4
 agent-science research resume RUN_ID
 agent-science research show RUN_ID
 
-# Offline stranger demo (no key, no network)
+# Lane B: separated synthesis + answer-version diff
+agent-science research synthesize CASE_ID
+agent-science research compare CASE_ID --from-version 2
+
+# Offline stranger demos (no key, no network)
 bash scripts/demo_research_challenge.sh
+bash scripts/demo_lane_b_evidence.sh
+python3 scripts/eval_lane_b_baseline.py   # shipping vs title-merge vs null
 ```
 
-MCP exposes the same actions through `science_research` (`research`, `challenge`, `resume`, `show`, `list`, `cancel`). Live discovery still requires `--live` / `live=true` and configured providers. Without a model reasoner, the local planner proposes gaps and searches; assessments still need exact source quotes.
+MCP exposes the same actions through `science_research` (`research`, `challenge`, `resume`, `show`, `list`, `cancel`, `synthesize`, `compare`). Live discovery still requires `--live` / `live=true` and configured providers. Without a model reasoner, the local planner proposes gaps and searches; assessments still need exact source quotes. Study identity collapses DOI/arXiv HTML/PDF mirrors; title resemblance never merges. Different-task papers are `different_scope`, not automatic contradictions.
 
 ## Assess a claim against evidence
 
@@ -125,7 +131,7 @@ After reading a source with `case source`, record your interpretation with an ex
 agent-science case assess CASE_ID --version 2 --claim CLAIM_ID --relation supports --evidence EVIDENCE_ID --quote "Exact passage copied from this source snapshot" --reason "Why this result supports this claim, and where it applies"
 ```
 
-Use `--statement` instead of `--claim` to add a new claim. Relations are `supports`, `contradicts`, `context` and `unresolved`. The first three require an exact 20–4000 character source quote; unresolved claims may have no source. Quote occurrence is mechanically checked. The interpretation remains authored by the user or agent; it is not an automatic entailment judgment or a confidence score.
+Use `--statement` instead of `--claim` to add a new claim. Relations are `supports`, `contradicts`, `different_scope`, `context` and `unresolved`. The first four (except unresolved) require an exact 20–4000 character source quote; unresolved claims may have no source. Quote occurrence is mechanically checked. The interpretation remains authored by the user or agent; it is not an automatic entailment judgment or a confidence score. Qualitative interview designs cannot be recorded as `supports` for a causal effectiveness claim.
 
 The brief shows supporting and opposing assessments, open questions and stale evidence. Opposing active assessments produce `CONTESTED`. Use `--supersedes ASSESSMENT_ID` with `--claim` to replace an assessment, preserving its historical version. Refresh checks source changes; affected claims enter `case review` alongside affected decisions. Separate hosts are listed for visibility, never counted as independent experiments.
 

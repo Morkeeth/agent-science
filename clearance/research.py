@@ -140,8 +140,8 @@ def investigate(case_id,version,*,query='',sources=(),providers=('parallel',),li
 
 
 def assess(case_id,version,*,statement,relation,rationale,evidence_id=None,quote=None,claim_id=None,supersedes=None,db=None):
-    if relation not in ('supports','contradicts','context','unresolved'):
-        raise ValueError('relation must be supports, contradicts, context or unresolved')
+    if relation not in ('supports','contradicts','different_scope','context','unresolved'):
+        raise ValueError('relation must be supports, contradicts, different_scope, context or unresolved')
     if not isinstance(rationale,str) or not 1<=len(rationale.strip())<=5000:
         raise ValueError('assessment needs a rationale of at most 5000 characters')
     if claim_id and statement is not None:raise ValueError('provide claim_id or a new statement, not both')
@@ -162,6 +162,16 @@ def assess(case_id,version,*,statement,relation,rationale,evidence_id=None,quote
         evidence=next((e for e in data['evidence'] if e['id']==evidence_id),None)
         if not evidence or not isinstance(quote,str) or not 20<=len(quote)<=4000 or quote not in evidence.get('snapshot_text',''):
             raise ValueError('assessment requires an exact 20–4000 character quote from this case source snapshot')
+        # Lane B gate: qualitative interview designs cannot support causal effectiveness claims.
+        if relation == 'supports':
+            from clearance import claim_graph, conditions as conditions_mod
+            gate = claim_graph.validate_assessment_relation(
+                relation, statement=claim['statement'],
+                evidence_text=evidence.get('snapshot_text') or '',
+                evidence_conditions=conditions_mod.extract(evidence.get('snapshot_text') or '', url=evidence.get('url')),
+            )
+            if not gate['ok']:
+                raise ValueError(gate['reason'])
         anchor={'evidence_id':evidence_id,'quote':quote,'snapshot_hash':evidence['snapshot_hash'],'url':evidence['url']}
     claim['assessments'].append({'id':uuid.uuid4().hex[:12],'relation':relation,'rationale':rationale.strip(),
         'evidence_version':version,'supersedes':supersedes,'at':cases.now(),'authorship':'user_or_agent','anchor':anchor,

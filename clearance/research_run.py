@@ -17,7 +17,7 @@ import sqlite3
 import uuid
 from urllib.parse import urlsplit
 
-from clearance import cases, discovery, research
+from clearance import cases, claim_graph, conditions, discovery, research, synthesis
 from clearance import study as study_ids
 
 STOP_REASONS = (
@@ -358,43 +358,8 @@ def _mark_gap(run, gap_id, status, inspected=None):
 
 
 def _synthesize(data, run):
-    brief = research.brief(data)
-    material = [c for c in brief['claims'] if c['state'] != 'UNRESOLVED'] or brief['claims']
-    strongest = None
-    falsification = None
-    for node in run['question_map']:
-        if node['intent'] == 'challenge' or node['status'] == 'open':
-            strongest = node['subquestion']
-            falsification = node['proposed_search']
-            if node['intent'] == 'challenge':
-                break
-    if not strongest and material:
-        strongest = f'Find contrary evidence for: {material[0]["statement"][:200]}'
-        falsification = strongest
-    contested = [c for c in brief['claims'] if c['state'] == 'CONTESTED']
-    supported = [c for c in brief['claims'] if c['state'] == 'SUPPORTED_AS_ASSESSED']
-    if contested:
-        conclusion = 'Material claims are contested after challenge/investigation.'
-    elif supported:
-        conclusion = 'Some claims are supported as assessed; contrary evidence may still reverse them.'
-    else:
-        conclusion = 'No claim is settled; evidence was collected under explicit limits.'
-    studies = study_ids.group_documents([e['url'] for e in data.get('evidence', [])])
-    return {
-        'case_version': data['version'],
-        'conclusion': conclusion,
-        'conditions': [
-            'Quote occurrence is verified; entailment is authored.',
-            f"Run kind={run['kind']}; stop_reason={run.get('stop_reason')}",
-        ],
-        'evidence_for': [c['id'] for c in supported],
-        'evidence_against': [c['id'] for c in contested],
-        'unresolved_gaps': [n['gap'] for n in run['question_map'] if n['status'] == 'open'],
-        'strongest_challenge': strongest,
-        'falsification_condition': falsification,
-        'studies': [{'identity': s['identity'], 'id': s['id'], 'urls': s['urls']} for s in studies],
-        'meaning': 'Synthesis summarizes this run; it is not an automatic scientific verdict.',
-    }
+    """Lane B synthesis: separated kinds, claim graph, per-conclusion falsification."""
+    return synthesis.synthesize(data, run=run)
 
 
 def start_research(question, *, root=None, sources=(), live=False, db=None,
@@ -716,8 +681,25 @@ def advance(run_id, *, live=False, db=None, max_steps=None):
                 return _save_run(run, db=db)
 
 
+def _support_conditions(claim, data):
+    """Conditions from the claim's supporting source — used for scope checks."""
+    evidence = {e['id']: e for e in data.get('evidence', [])}
+    for a in claim.get('assessments', []):
+        if a.get('relation') != 'supports':
+            continue
+        eid = (a.get('anchor') or {}).get('evidence_id')
+        if eid and eid in evidence:
+            e = evidence[eid]
+            return conditions.extract(e.get('snapshot_text') or '', url=e.get('url'))
+    return conditions.extract('')
+
+
 def _maybe_challenge_assess(run, data, gap, *, db):
-    """If a new snapshot contains an explicit contrary cue, record a contradicts assessment."""
+    """If a new snapshot contains an explicit contrary cue, record contradicts OR different_scope.
+
+    Lane B: different tasks are not automatic contradictions. Scope is checked against
+    the supporting study's extracted conditions before writing contradicts.
+    """
     target_claim = gap.get('target_claim_id')
     claims = {c['id']: c for c in data.get('claims', [])}
     claim = claims.get(target_claim)
@@ -746,8 +728,19 @@ def _maybe_challenge_assess(run, data, gap, *, db):
         except ValueError:
             return data
 
-    contrary = re.compile(r'\b(increas\w+|worsen\w+|fail\w+|not (?:help|improve)|no (?:benefit|effect)|harm\w+|contradict\w+)\b', re.I)
+    support_cond = _support_conditions(claim, data)
+    support_urls = {
+        (a.get('anchor') or {}).get('url')
+        for a in claim.get('assessments', []) if a.get('relation') == 'supports'
+    }
+    contrary = re.compile(
+        r'\b(increas\w+|worsen\w+|fail\w+|not (?:help|improve)|no (?:benefit|effect)|'
+        r'harm\w+|contradict\w+|did not improve|decreas\w+)\b',
+        re.I,
+    )
     for e in data['evidence']:
+        if e.get('url') in support_urls:
+            continue
         text = e.get('snapshot_text') or ''
         quote = e.get('quote') or ''
         candidate = quote if contrary.search(quote or '') else None
@@ -757,23 +750,41 @@ def _maybe_challenge_assess(run, data, gap, *, db):
                 if 20 <= len(span) <= 400 and contrary.search(span) and span in text:
                     candidate = span
                     break
-        if not candidate or e.get('status') != 'QUOTE_VERIFIED' and candidate not in text:
-            if candidate and candidate in text:
-                pass
-            else:
-                continue
-        # Avoid duplicate contradicts on same evidence.
-        if any(a.get('anchor', {}).get('evidence_id') == e['id'] and a['relation'] == 'contradicts'
+        if not candidate or candidate not in text:
+            continue
+        # Avoid duplicate assessments on same evidence.
+        if any(a.get('anchor', {}).get('evidence_id') == e['id']
+               and a['relation'] in ('contradicts', 'different_scope')
                for a in claim.get('assessments', [])):
             continue
+        proposed, _new_cond = claim_graph.challenge_relation_for_new_evidence(
+            claim_statement=claim.get('statement', ''),
+            claim_support_conditions=support_cond,
+            new_evidence_text=text,
+            new_evidence_url=e.get('url'),
+            suggests_conflict=True,
+        )
+        relation = proposed['relation']
+        if relation == 'unresolved':
+            # Keep searching; do not write a weak auto-contradiction.
+            continue
+        if relation == 'context':
+            continue
+        rationale = (
+            'Challenge found a conflicting direction on a different task/scope; recorded as different_scope, not contradiction.'
+            if relation == 'different_scope'
+            else 'Challenge investigation found a same-scope passage that conflicts with the pinned claim direction.'
+        )
+        if relation == 'different_scope' and proposed.get('scope_fields'):
+            rationale += f" Scope fields: {', '.join(proposed['scope_fields'])}."
         try:
             data = research.assess(
                 data['id'], data['version'], claim_id=claim['id'], statement=None,
-                relation='contradicts',
-                rationale='Challenge investigation found a passage that conflicts with the pinned claim direction.',
+                relation=relation, rationale=rationale,
                 evidence_id=e['id'], quote=candidate, db=db,
             )
             claim = next(c for c in data['claims'] if c['id'] == claim['id'])
+            support_cond = _support_conditions(claim, data)
         except ValueError:
             continue
     return data
@@ -824,6 +835,16 @@ def render_run(run):
         lines += ['', 'Answer:', a['conclusion'],
                   f"Strongest challenge: {a.get('strongest_challenge')}",
                   f"Falsification: {a.get('falsification_condition')}"]
+        if a.get('by_kind'):
+            lines.append('Evidence kinds: ' + ', '.join(
+                f"{k}={len(v)}" for k, v in a['by_kind'].items()
+            ))
+        if a.get('material_conclusions'):
+            lines.append('Material conclusions:')
+            for c in a['material_conclusions'][:5]:
+                lines.append(f"  [{c.get('state')}] {c.get('statement', '')[:160]}")
+                lines.append(f"    challenge: {c.get('strongest_challenge')}")
+                lines.append(f"    falsify: {c.get('falsification_condition')}")
         if a.get('unresolved_gaps'):
             lines.append('Unresolved:')
             for g in a['unresolved_gaps'][:8]:

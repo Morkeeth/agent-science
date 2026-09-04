@@ -179,7 +179,7 @@ TOOLS.append({
         "max_documents": {"type":"integer","minimum":1,"maximum":40,"default":12},
         "claim_id": {"type":"string"},
         "quote": {"type":"string","description":"Exact source snapshot passage for an authored assessment"},
-        "relation": {"type":"string","enum":["supports","contradicts","context","unresolved"]},
+        "relation": {"type":"string","enum":["supports","contradicts","different_scope","context","unresolved"]},
         "question": {"type": "string"}, "case_id": {"type": "string"},
         "root": {"type": "string", "description": "Local user repo for context"},
         "live": {"type": "boolean", "default": False},
@@ -192,14 +192,16 @@ TOOLS.append({
 
 TOOLS.append({
     "name": "science_research",
-    "description": "Adaptive research loop: start an investigation, challenge a pinned case version (new investigation for overturning evidence), resume a paused run, or show/list/cancel runs. Challenge is not agreeing prose. Interruption preserves completed evidence and does not repeat finished discovery calls.",
+    "description": "Adaptive research loop: start an investigation, challenge a pinned case version (new investigation for overturning evidence), resume a paused run, synthesize separated evidence kinds, compare answer versions, or show/list/cancel runs. Challenge is not agreeing prose. Interruption preserves completed evidence and does not repeat finished discovery calls.",
     "inputSchema": {"type": "object", "properties": {
-        "action": {"type": "string", "enum": ["research", "challenge", "resume", "show", "list", "cancel"]},
+        "action": {"type": "string", "enum": ["research", "challenge", "resume", "show", "list", "cancel", "synthesize", "compare"]},
         "db": {"type": "string"},
         "question": {"type": "string"},
         "case_id": {"type": "string"},
         "run_id": {"type": "string"},
-        "version": {"type": "integer", "description": "Pin this case version for challenge"},
+        "version": {"type": "integer", "description": "Pin this case version for challenge/synthesize"},
+        "from_version": {"type": "integer", "description": "Earlier answer version for compare"},
+        "to_version": {"type": "integer", "description": "Later answer version for compare (default latest)"},
         "root": {"type": "string"},
         "live": {"type": "boolean", "default": False},
         "plan_only": {"type": "boolean", "default": False},
@@ -282,6 +284,21 @@ def handle_tool(name: str, arguments: dict) -> str:
                 return json.dumps(result, indent=2)
             elif action == "cancel":
                 result = research_run.cancel(arguments.get("run_id", ""), db=db)
+            elif action == "synthesize":
+                from clearance import cases, synthesis
+                data = cases.get(arguments.get("case_id", ""), version=arguments.get("version"), db=db)
+                run = research_run.get_run(arguments["run_id"], db=db) if arguments.get("run_id") else None
+                return json.dumps(synthesis.synthesize(data, run=run), indent=2)
+            elif action == "compare":
+                from clearance import cases, synthesis
+                case_id = arguments.get("case_id", "")
+                from_version = arguments.get("from_version")
+                if type(from_version) is not int:
+                    raise ValueError("compare requires from_version")
+                older = cases.get(case_id, version=from_version, db=db)
+                to_version = arguments.get("to_version")
+                newer = cases.get(case_id, version=to_version, db=db) if to_version is not None else cases.get(case_id, db=db)
+                return json.dumps(synthesis.diff_answers(older, newer), indent=2)
             else:
                 raise ValueError("unknown research action")
             return json.dumps(research_run.public_run(result), indent=2)

@@ -1,10 +1,10 @@
-"""CLI for adaptive research runs: research / challenge / resume."""
+"""CLI for adaptive research runs: research / challenge / resume / compare / synthesize."""
 import argparse
 import json
 import sqlite3
-from clearance import research_run
+from clearance import cases, research_run, synthesis
 
-KNOWN = frozenset({'start', 'challenge', 'resume', 'show', 'list', 'cancel'})
+KNOWN = frozenset({'start', 'challenge', 'resume', 'show', 'list', 'cancel', 'compare', 'synthesize'})
 
 
 def preprocess_argv(argv):
@@ -64,6 +64,25 @@ def run(args):
             return 0
         elif args.action == 'cancel':
             result = research_run.cancel(args.run_id, db=db)
+        elif args.action == 'synthesize':
+            data = cases.get(args.case_id, version=getattr(args, 'version', None), db=db)
+            run = None
+            if getattr(args, 'run_id', None):
+                run = research_run.get_run(args.run_id, db=db)
+            result = synthesis.synthesize(data, run=run)
+            print(json.dumps(result, indent=2) if args.json else synthesis.render_synthesis(result), end='\n')
+            return 0
+        elif args.action == 'compare':
+            latest = cases.get(args.case_id, db=db)
+            from_version = args.from_version
+            if from_version is None:
+                raise ValueError('--from-version is required for compare')
+            older = cases.get(args.case_id, version=from_version, db=db)
+            to_version = getattr(args, 'to_version', None)
+            newer = cases.get(args.case_id, version=to_version, db=db) if to_version else latest
+            result = synthesis.diff_answers(older, newer)
+            print(json.dumps(result, indent=2) if args.json else synthesis.render_diff(result), end='\n')
+            return 0
         else:
             raise ValueError(f'unknown research action: {args.action}')
 
@@ -132,3 +151,15 @@ def add_parser(sub):
     p = actions.add_parser('cancel', help='cancel a run')
     _common(p)
     p.add_argument('run_id')
+
+    p = actions.add_parser('synthesize', help='Lane B synthesis: separated kinds + challenges')
+    _common(p)
+    p.add_argument('case_id')
+    p.add_argument('--version', type=int)
+    p.add_argument('--run-id', help='optional research run to bind gaps/challenges')
+
+    p = actions.add_parser('compare', help='diff answer versions: changed vs new vs reinterpretation')
+    _common(p)
+    p.add_argument('case_id')
+    p.add_argument('--from-version', type=int, required=True)
+    p.add_argument('--to-version', type=int, help='default: latest')

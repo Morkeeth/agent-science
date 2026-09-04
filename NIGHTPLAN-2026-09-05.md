@@ -1,6 +1,6 @@
 # Agent Science: overnight research engine
 
-Status: **Lane A landed on branch `cursor/nightplan-research-engine-b1eb`** — adaptive research run + challenge + resume; CLI/MCP wired; offline demo and naive baseline eval exit 0. Lanes B/C and live six-topic field pass remain open. Receipt: `docs/CLOUD-RECEIPT-nightplan-2026-09-05.md`.
+Status: **Lane A landed** on `cursor/nightplan-research-engine-b1eb`. **Lane B landed** on `cursor/nightplan-lane-b-evidence-0a46` — study identity, conditions, claim graph (`different_scope`), separated synthesis, answer diffs; offline demo + baseline eval exit 0. Lane C and live six-topic field pass remain open. Receipts: `docs/CLOUD-RECEIPT-nightplan-2026-09-05.md` · `docs/CLOUD-RECEIPT-nightplan-lane-b-2026-09-05.md`.
 Baseline: e12ca6f7c4ad489b8e20bb16c307470635b0883d · plan commit `69cc6b1`.
 
 ## Morning product target
