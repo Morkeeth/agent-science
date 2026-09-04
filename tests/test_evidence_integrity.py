@@ -220,6 +220,20 @@ def test_economics_counts_reuse_separately_from_successful_live_answers():
         assert stats["dictionary_hit_rate"] == 0.5
 
 
+def test_registry_cannot_resurrect_old_quote_after_new_same_verdict_observation():
+    with tempfile.TemporaryDirectory() as d:
+        db=Path(d)/"claims.db";con=L.connect(db)
+        L.record(con,term="Acme",assertion=POSITIVE,verdict="GREEN",production="first",
+                 citation_url="https://example.org/terms",quoted_terms=POSITIVE)
+        D.lookup(POSITIVE,db=db)
+        L.log_query(con,query=POSITIVE,result={"label":"SOURCED","verdict":"GREEN",
+            "established":POSITIVE,"citation_url":"https://example.org/new","quoted_terms":"A different passage."})
+        with Network():
+            result=D.lookup(POSITIVE,db=db,live=False)
+        assert result["source"] not in ("registry","dictionary_exact")
+        assert any(t["outcome"]=="unsettled" for t in result["trace"])
+
+
 if __name__ == "__main__":
     tests = [fn for name, fn in list(globals().items()) if name.startswith("test_")]
     for test in tests:

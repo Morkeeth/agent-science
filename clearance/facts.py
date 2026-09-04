@@ -161,7 +161,7 @@ def _admissible(locator: Locator, claim: Claim, body: str,
 def judge_claim(claim: Claim, *, fetch: bool = False,
                 locator: Locator = DEFAULT, live_search: bool = False,
                 search_candidates: int = _DEFAULT_CANDIDATES,
-                semantic: Optional[bool] = None) -> Verdict:
+                semantic: Optional[bool] = None, refresh: bool = False) -> Verdict:
     """`semantic` forces the semantic guard on/off; None follows the process default.
 
     It is threaded to EVERY verify() call site below — the named-source path, the search
@@ -172,6 +172,7 @@ def judge_claim(claim: Claim, *, fetch: bool = False,
     # spans; a trail on one of them would be an audit page that quietly omits two
     # thirds of what the engine looked at, which is worse than no audit page.
     trail: list = []
+    fresh = {"refresh": True} if refresh else {}
 
     def unknown(reason: str, cause: str, **kw) -> Verdict:
         kw.setdefault("trail", tuple(trail))
@@ -193,7 +194,7 @@ def judge_claim(claim: Claim, *, fetch: bool = False,
             cands = _search.find_sources(
                 objective=f"Find a primary source that states verbatim: {claim.text}",
                 queries=queries, live=live_search, max_results=search_candidates,
-                term=(claim.must_contain or "").strip().lower()[:120])
+                term=(claim.must_contain or "").strip().lower()[:120], **fresh)
             probe_note = None
         if cands is None:
             return unknown(
@@ -209,7 +210,7 @@ def judge_claim(claim: Claim, *, fetch: bool = False,
         # like enough.
         read, verified = 0, []
         for c in cands:
-            body = instruments.document(c.url, fetch=fetch)
+            body = instruments.document(c.url, fetch=fetch, **fresh)
             if body is None:
                 continue
             read += 1
@@ -237,11 +238,11 @@ def judge_claim(claim: Claim, *, fetch: bool = False,
                            "record. Not encyclopaedias, blogs or aggregators."),
                 queries=[f"{term} official text", f"{term} legislation register"],
                 live=live_search, max_results=search_candidates,
-                term=(claim.must_contain or "").strip().lower()[:120] + ":escalation")
+                term=(claim.must_contain or "").strip().lower()[:120] + ":escalation", **fresh)
             for c in (more or []):
                 if any(c.url == u for u, _ in verified):
                     continue
-                body = instruments.document(c.url, fetch=fetch)
+                body = instruments.document(c.url, fetch=fetch, **fresh)
                 if body is None:
                     continue
                 read += 1
@@ -257,13 +258,13 @@ def judge_claim(claim: Claim, *, fetch: bool = False,
             cands = _search.find_sources(
                 objective=f"Find a primary source that states verbatim: {claim.text}",
                 queries=queries, live=True, max_results=search_candidates,
-                term=(claim.must_contain or "").strip().lower()[:120])
+                term=(claim.must_contain or "").strip().lower()[:120], **fresh)
             probe_note = None
             if cands:
                 for c in cands:
                     if any(c.url == u for u, _ in verified):
                         continue
-                    body = instruments.document(c.url, fetch=fetch)
+                    body = instruments.document(c.url, fetch=fetch, **fresh)
                     if body is None:
                         continue
                     read += 1
@@ -294,7 +295,7 @@ def judge_claim(claim: Claim, *, fetch: bool = False,
             f"none states this claim; probe was {probe!r}",
             SEARCH_FOUND_NOTHING)
 
-    body = instruments.document(claim.source_url, fetch=fetch)
+    body = instruments.document(claim.source_url, fetch=fetch, **fresh)
     if body is None:
         return unknown(
             f"source {claim.source_url} has never been fetched — "

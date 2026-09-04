@@ -160,6 +160,31 @@ TOOLS = [
 ]
 
 
+TOOLS.append({
+    "name": "science_case",
+    "description": "Create a versioned research case, inspect evidence, save an authored decision, or refresh cited sources to see which decisions require review. Stored locally. Quote occurrence is verified; support is not inferred. Repo context never enters web queries. Experiments execute only through the explicit local CLI.",
+    "inputSchema": {"type": "object", "properties": {
+        "action": {"type": "string", "enum": ["create", "show", "refresh", "decide", "list", "source"]},
+        "db": {"type": "string", "description": "Optional local case database, matching CLI --db"},
+        "version": {"type": "integer"}, "evidence_id": {"type": "string"},
+        "offset": {"type": "integer", "default": 0}, "limit": {"type": "integer", "default": 12000},
+        "question": {"type": "string"}, "case_id": {"type": "string"},
+        "root": {"type": "string", "description": "Local user repo for context"},
+        "live": {"type": "boolean", "default": False},
+        "sources": {"type": "array", "items": {"type": "string"}},
+        "official_domains": {"type": "array", "items": {"type": "string"}},
+        "statement": {"type": "string"}, "rationale": {"type": "string"},
+        "evidence_ids": {"type": "array", "items": {"type": "string"}}
+    }, "required": ["action"]}
+})
+
+for tool in TOOLS:
+    if tool["name"] in ("science_lookup", "science_search", "science_visibility"):
+        tool["inputSchema"]["properties"]["refresh"] = {"type": "boolean", "default": False, "description": "Bypass cached verdicts; live=true fetches current sources"}
+    if tool["name"] == "science_visibility":
+        tool["inputSchema"]["properties"]["root"] = {"type": "string", "description": "Your local repo, never the hosted server repo"}
+
+
 def _read_message():
     while True:
         line = sys.stdin.readline()
@@ -180,12 +205,31 @@ def _send_message(msg):
 
 
 def handle_tool(name: str, arguments: dict) -> str:
+    if name == "science_case":
+        from clearance import cases
+        action = arguments.get("action")
+        db=arguments.get("db")
+        try:
+            if action == "create":
+                data = cases.create(arguments.get("question", ""), root=arguments.get("root"),
+                    live=arguments.get("live", False), sources=arguments.get("sources", []),
+                    official_domains=arguments.get("official_domains", []),db=db)
+            elif action == "show": data = cases.get(arguments.get("case_id", ""), version=arguments.get("version"),db=db)
+            elif action == "source": return json.dumps(cases.source(arguments.get("case_id", ""), arguments.get("evidence_id", ""), version=arguments.get("version"), offset=arguments.get("offset",0), limit=arguments.get("limit",12000),db=db), indent=2)
+            elif action == "refresh": data = cases.refresh(arguments.get("case_id", ""), live=arguments.get("live", False),db=db)
+            elif action == "decide": data = cases.decide(arguments.get("case_id", ""), arguments.get("statement", ""), arguments.get("rationale", ""), arguments.get("evidence_ids", []),db=db)
+            elif action == "list": return json.dumps([cases.public_view(r) for r in cases.recent(db=db)], indent=2)
+            else: raise ValueError("unknown case action")
+            return json.dumps(cases.public_view(data), indent=2)
+        except (ValueError, OSError) as exc:
+            return json.dumps({"error": str(exc)})
     if name in ("science_lookup", "science_search"):
         live = arguments.get("live", name == "science_search")
         return json.dumps(stack_search.lookup(
             arguments["query"],
             subject=arguments.get("subject", "stack"),
             live=live,
+            refresh=bool(arguments.get("refresh", False)),
         ), indent=2)
 
     if name == "science_popular":
@@ -211,6 +255,8 @@ def handle_tool(name: str, arguments: dict) -> str:
             live=bool(arguments.get("live", False)),
             subject=arguments.get("subject", "stack"),
             full=bool(full),
+            root=arguments.get("root"),
+            refresh=bool(arguments.get("refresh", False)),
             personal=not bool(arguments.get("no_personal", False)),
         )
         return visibility.format_panel(data)

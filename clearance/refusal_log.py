@@ -379,7 +379,7 @@ def search_registry(con, query: str, *, limit: int = 5, log: bool = True, reuse:
         latest = con.execute(
             "SELECT * FROM queries WHERE lower(trim(query_text)) = lower(trim(?)) ORDER BY id DESC LIMIT 1",
             (q,)).fetchone()
-        if latest and latest["asked_at"] >= best["first_seen_at"] and latest["verdict"] != best["verdict"]:
+        if latest and latest["asked_at"] >= best["first_seen_at"] and any(latest[field] != best.get(field) for field in ("verdict", "cause", "citation_url", "quoted_terms")):
             result.update(label="UNKNOWN", verdict="UNKNOWN", cause="newer_result_differs",
                           why="A newer result differs from this saved claim; re-evaluate it.", unsettled=True)
         if reuse and not result["unsettled"]:

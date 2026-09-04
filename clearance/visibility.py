@@ -19,7 +19,7 @@ _PRACTICES = _ROOT / "docs" / "inspiration" / "PRACTICES-CORPUS.md"
 
 
 def _tokens(q: str) -> set[str]:
-    return {t for t in re.findall(r"[a-z0-9]{3,}", q.lower()) if t}
+    return {t for t in re.findall(r"[a-z0-9]{3,}", q.lower()) if t} - {"the", "and", "for", "with", "best", "practice", "practices", "what", "how", "does", "should"}
 
 
 def _alias_hits(query: str) -> list[dict]:
@@ -50,22 +50,13 @@ def _field_hits(query: str, *, full: bool = False) -> dict:
     gh, blogs = [], []
     for row in data.get("github") or []:
         blob = f"{row.get('repo', '')} {row.get('why', '')}".lower()
-        if toks & set(re.findall(r"[a-z0-9]{3,}", blob)) or not toks:
+        if toks & set(re.findall(r"[a-z0-9]{3,}", blob)):
             gh.append(row)
     for row in data.get("blogs_and_docs") or []:
         blob = f"{row.get('title', '')} {row.get('kind', '')}".lower()
-        if toks & set(re.findall(r"[a-z0-9]{3,}", blob)) or not toks:
+        if toks & set(re.findall(r"[a-z0-9]{3,}", blob)):
             blogs.append(row)
-    if not gh:
-        gh = sorted(
-            data.get("github") or [],
-            key=lambda r: r.get("stars") or 0,
-            reverse=True,
-        )
-    else:
-        gh = sorted(gh, key=lambda r: r.get("stars") or 0, reverse=True)
-    if not blogs:
-        blogs = list(data.get("blogs_and_docs") or [])
+    gh = sorted(gh, key=lambda r: r.get("stars") or 0, reverse=True)
     n = 99 if full else 5
     return {
         "github": gh[:n],
@@ -96,8 +87,6 @@ def _practices_hits(query: str, *, full: bool = False) -> list[dict]:
         blob = f"{row['who']} {row['practice']} {row['source']}".lower()
         if toks & set(re.findall(r"[a-z0-9]{3,}", blob)):
             hits.append(row)
-    if full and not hits:
-        hits = all_rows
     return hits[: (20 if full else 6)]
 
 
@@ -106,56 +95,18 @@ def _peer_queries(query: str, *, limit: int = 8) -> list[dict]:
     peers = []
     for row in query_analytics.popular_queries(limit=50):
         ex = (row.get("example") or row.get("qnorm") or "")
-        if toks & _tokens(ex) or not toks:
+        if toks & _tokens(ex):
             peers.append(row)
-    if not peers:
-        peers = query_analytics.popular_queries(limit=limit)
     return peers[:limit]
 
 
 def _lookup_angles(query: str, primary: dict, aliases: list[dict], *, live: bool) -> list[dict]:
     """Query variants and tier routes attempted for this visibility ask."""
-    from clearance.dictionary import canonical_query, COST_CHEAP, COST_FREE, COST_LIVE
-
-    angles: list[dict] = []
-    canon = canonical_query(query)
-    variants = list(dict.fromkeys([query.strip(), canon]))
-    for v in variants:
-        angles.append({"variant": v, "route": "dictionary_exact", "tier": COST_FREE})
-        if v != query.strip():
-            angles.append({"variant": v, "route": "alias_canonical", "tier": COST_FREE})
-    angles.append({"variant": "registry_fuzzy", "route": "registry", "tier": COST_FREE})
-    angles.append({"variant": canon, "route": "cheap_routing", "tier": COST_CHEAP})
-    tier = primary.get("cost_tier") or "?"
-    source = primary.get("source") or "primary"
-    angles.append({
-        "variant": query.strip(),
-        "route": source,
-        "tier": tier,
-        "hit": primary.get("label"),
-    })
-    if live and tier != COST_LIVE:
-        angles.append({
-            "variant": query.strip(),
-            "route": "live_skipped",
-            "tier": COST_LIVE,
-            "reason": "resolved before live tier",
-        })
-    elif not live and primary.get("label") == "NOT_CLEARED":
-        angles.append({
-            "variant": query.strip(),
-            "route": "live_not_attempted",
-            "tier": COST_LIVE,
-            "reason": "live=false — dictionary miss only",
-        })
-    elif live and tier == COST_LIVE:
-        angles.append({
-            "variant": query.strip(),
-            "route": "live_parallel",
-            "tier": COST_LIVE,
-            "hit": primary.get("label"),
-        })
-    return angles
+    return [
+        {**event, "variant": event.get("query", query), "tier": event.get("tier", "—"),
+         "hit": event.get("outcome", "unknown")}
+        for event in primary.get("trace", [])
+    ]
 
 
 def _compute_transparency(
@@ -176,13 +127,9 @@ def _compute_transparency(
     has_peers = bool(peer_queries)
     tier = primary.get("cost_tier") or "?"
 
-    shallow = (
-        tier in ("free", "cheap")
-        and primary.get("label") in ("SOURCED", "UNSOURCED", "UNKNOWN", "CONTRARY_TO_RESEARCH")
-        and not has_field
-        and not has_practices
-        and not has_peers
-    )
+    # Unverified links and peer queries cannot prove research depth.
+    shallow = True  # Single-answer lookup does not establish multi-source breadth.
+
 
     buckets = {
         "github": len(gh),
@@ -234,6 +181,8 @@ def panel(
     subject: str = "stack",
     full: bool = False,
     personal: bool = True,
+    root: Path | str | None = None,
+    refresh: bool = False,
 ) -> dict[str, Any]:
     """Visibility panel — full=True for complete agentic-truth rundown.
 
@@ -242,7 +191,7 @@ def panel(
     from clearance import personal_truth
 
     local = personal_truth.lookup_local(query) if personal else None
-    primary = stack_search.lookup(query, live=live, subject=subject)
+    primary = stack_search.lookup(query, live=live, subject=subject, refresh=refresh)
     out: dict[str, Any] = {
         "query": query,
         "mode": "full" if full else "standard",
@@ -289,7 +238,7 @@ def panel(
     )
     if full:
         from clearance import stack_fit
-        out["stack_fit"] = stack_fit.score(query, root=_ROOT)
+        out["stack_fit"] = stack_fit.score(query, root=root) if root else {"fit": "unassessed", "improvement": "Attach your repo locally to capture context and run an experiment.", "stack": {}}
         out["shelf_stats"] = stack_search.stats()
         out["popular_bundle"] = {
             "top_reused": query_analytics.top_terms(limit=8),
@@ -525,14 +474,22 @@ def render_html(data: dict, *, query: str = "") -> str:
             f'<p class="warn">IMBALANCE: <strong>{_esc(imb.get("dominant"))}</strong> '
             f'({imb.get("share")}) — {_esc(imb.get("note"))}</p>'
         )
-    elif not shallow:
-        imb_html = '<p class="ok">Source mix balanced — field, peers, and dictionary all represented.</p>'
+
 
     shallow_html = (
-        '<p class="warn">SHALLOW ROUTE — dictionary/cheap only; no field depth.</p>'
+        '<p class="warn">Limited evidence — a single-answer lookup does not establish multi-source breadth.</p>'
         if shallow
-        else '<p class="ok">Full route — field signals, peers, and dictionary searched.</p>'
+        else '<p class="ok">Live discovery returned a citation. Source breadth still requires review.</p>'
     )
+
+    context_rows = "".join(
+        f'<li><a href="{_esc(row.get("url"))}">{_esc(row.get("title"))}</a></li>'
+        for row in (data.get("field") or {}).get("blogs_and_docs", [])
+    )
+    practice_rows = "".join(f'<li>{_esc(row.get("who"))}: {_esc(row.get("practice"))} · {_esc(row.get("source"))}</li>' for row in data.get("agentic_practices", []))
+    candidate_rows = "".join(f'<li>{_esc(row.get("established"))}<br><a href="{_esc(row.get("citation_url"))}">{_esc(row.get("citation_url"))}</a></li>' for row in p.get("candidates", [])[:8])
+    candidate_html = f'<div class="panel"><h2>Related claims</h2><p>These are different assertions. Their saved verdicts do not answer this question.</p><ul>{candidate_rows}</ul></div>' if candidate_rows else ""
+    context_html = f'<div class="panel"><h2>Related sources · context, not verified support</h2><ul>{context_rows or "<li>No related blogs or docs found in the local catalog.</li>"}</ul><ul>{practice_rows or "<li>No related practitioner entries found.</li>"}</ul><p class="meta">Catalog read: {_esc((data.get("field") or {}).get("read_at") or "unknown")}</p></div>'
 
     return f"""<!DOCTYPE html>
 <html lang="en"><head>
@@ -571,14 +528,15 @@ th{{color:var(--muted);font-weight:500}}
 </style></head><body><div class="wrap">
 <nav><a href="/">desk</a><a href="/front">clearance</a><a href="/truths/ui">truths</a><a href="/registry">registry</a></nav>
 
-<div class="track"><strong>Paste a script.</strong> Every checkable claim returns a verbatim quote and source URL — or <strong>refused with cause</strong>. E&amp;O and clearance are one vertical on the truth layer.</div>
+<div class="track"><strong>What should you believe or use?</strong> Inspect the evidence, see the actual search attempts, and take the question into a repo experiment.</div>
 
 <h1>Websearch visibility</h1>
 <p class="lead">Truth layer for what agentic builders believe and use. Not one answer — every angle searched, field signals, and a primary verdict.</p>
 
 <form method="get" action="/visibility/ui">
   <input type="text" name="q" value="{_esc(q)}" placeholder="e.g. ralph loop agentic" required>
-  <button type="submit">Run full visibility</button>
+  <label><input type="checkbox" name="live" value="true"> Search the web</label>
+  <button type="submit">Inspect evidence</button>
 </form>
 
 <div class="panel">
@@ -603,5 +561,7 @@ th{{color:var(--muted);font-weight:500}}
   <table><tr><th>★</th><th>repo</th><th>why</th></tr>{gh_rows or '<tr><td colspan="3">no match</td></tr>'}</table>
 </div>
 
-<p class="meta">JSON: <a href="/visibility?q={_esc(q)}">/visibility</a> · sealed compound A=1→B=0 · <a href="/partners">partners</a></p>
+{candidate_html}
+{context_html}
+<p class="meta">JSON: <a href="/visibility?q={_esc(q)}">/visibility</a> · <a href="/partners">partners</a></p>
 </div></body></html>"""

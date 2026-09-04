@@ -128,14 +128,14 @@ def _record(con, *, term: str, query: str, v, production: str) -> None:
     )
 
 
-def _cheap_route(query: str, *, subject: str, con, trace: list) -> Optional[dict]:
+def _cheap_route(query: str, *, subject: str, con, trace: list, refresh: bool = False) -> Optional[dict]:
     """Construct known-primary URL, fetch, string-verify — no paid APIs."""
     term = _distinctive_term(query)
     if not routing.candidates_for(text=query, must_contain=term):
         trace.append({"route": "primary_route", "query": query, "outcome": "no_candidate"})
         return None
     claim = Claim("Q1", query, None, term)
-    v = judge_claim(claim, locator=DEFAULT, live_search=False, fetch=True)
+    v = judge_claim(claim, locator=DEFAULT, live_search=False, fetch=True, **({"refresh": True} if refresh else {}))
     label = refusal_log.surface_label(verdict=v.verdict, cause=v.cause)
     trace.append({"route": "primary_route", "query": query, "outcome": label,
                   "reason": v.cause or v.reason})
@@ -205,7 +205,7 @@ def lookup(query: str, *, subject: str = "stack", live: bool = False,
                     reg["source"] = "registry"
                     return finish(reg)
 
-        cheap = _cheap_route(raw, subject=subject, con=con, trace=trace)
+        cheap = _cheap_route(raw, subject=subject, con=con, trace=trace, **({"refresh": True} if refresh else {}))
         if cheap and refusal_log.is_settled_for_reuse(verdict=cheap.get("verdict"), cause=cheap.get("cause")):
             return finish(cheap, COST_CHEAP)
         if not live:
@@ -220,7 +220,7 @@ def lookup(query: str, *, subject: str = "stack", live: bool = False,
         claim = Claim("Q1", raw, None, term)
         mdl = model or os.environ.get("GEMINI_MODEL", "gemini-3.5-flash-lite")
         try:
-            v = judge_claim(claim, locator=GeminiLocator(model=mdl), live_search=True, fetch=True)
+            v = judge_claim(claim, locator=GeminiLocator(model=mdl), live_search=True, fetch=True, **({"refresh": True} if refresh else {}))
         except RuntimeError as e:
             trace.append({"route": "live_search", "query": raw, "outcome": "error", "reason": str(e)})
             return finish({"label": "NOT_CLEARED", "cause": "search_failed",

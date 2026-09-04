@@ -76,42 +76,12 @@ def _improvement_line(query: str, stack: list[str]) -> str:
 
 def score(query: str, *, root: Path | str | None = None) -> dict[str, Any]:
     """Score how well a query/truth fits the detected stack."""
-    det = detect_stack(root)
-    stack = det["stack"]
-    toks = _tokens(query)
-    qlow = query.lower()
-
-    fit = "partial"
-    reasons: list[str] = []
-
-    if det["has_agents_md"] and any(k in qlow for k in ("agent", "science", "lookup", "mcp", "fleet")):
-        fit = "fits"
-        reasons.append("AGENTS.md present — fleet websearch contract matches")
-    elif det["has_cursor"] and any(k in toks for k in ("cursor", "mcp", "claude")):
-        fit = "fits"
-        reasons.append(".cursor/ present — editor-native agent stack")
-    elif "python" in stack and any(k in toks for k in ("python", "pytest", "clearance", "registry")):
-        fit = "fits"
-        reasons.append("Python repo — clearance module is first-class here")
-    elif "node" in stack and "python" not in stack and "python" in qlow:
-        fit = "mismatch"
-        reasons.append("Node stack — Python clearance module is adjacent not native")
-    elif stack == ["unknown"]:
-        fit = "partial"
-        reasons.append("no stack markers — generic truth layer value only")
-
-    if fit == "partial" and not reasons:
-        if len(toks & {"ralph", "loop", "agent", "context", "verify", "registry"}) >= 2:
-            fit = "fits"
-            reasons.append("agentic-practice query matches builder stack")
-        else:
-            reasons.append("weak marker overlap — verify at primary before adopting")
-
+    det = detect_stack(root or Path.cwd())
     return {
         "query": query,
-        "fit": fit,
-        "improvement": _improvement_line(query, stack),
-        "reasons": reasons,
+        "fit": "unassessed",
+        "improvement": "Compare the proposed practice against a pinned baseline on this repo.",
+        "reasons": ["Stack markers are context; they do not demonstrate that a practice helps."],
         "stack": det,
     }
 

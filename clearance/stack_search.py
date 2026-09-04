@@ -74,15 +74,15 @@ def _verdict_to_stack(v: Verdict, *, query: str, source: str,
 
 
 def search(query: str, *, subject: str = _DEFAULT_SUBJECT, live: bool = True,
-           db: Path | str | None = None, model: str = _DEFAULT_MODEL) -> dict:
+           db: Path | str | None = None, model: str = _DEFAULT_MODEL, refresh: bool = False) -> dict:
     """Live websearch — use dictionary.lookup() for daily free/cheap path first."""
-    return dictionary.lookup(query, subject=subject, live=live, db=db, model=model)
+    return dictionary.lookup(query, subject=subject, live=live, db=db, model=model, refresh=refresh)
 
 
 def lookup(query: str, *, subject: str = _DEFAULT_SUBJECT, live: bool = False,
-           db: Path | str | None = None, model: str = _DEFAULT_MODEL) -> dict:
+           db: Path | str | None = None, model: str = _DEFAULT_MODEL, refresh: bool = False) -> dict:
     """Truth dictionary — free registry, cheap routing, live only when asked."""
-    return dictionary.lookup(query, subject=subject, live=live, db=db, model=model)
+    return dictionary.lookup(query, subject=subject, live=live, db=db, model=model, refresh=refresh)
 
 
 def stats(*, db: Path | str | None = None) -> dict:
