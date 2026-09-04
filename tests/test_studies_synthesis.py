@@ -118,3 +118,73 @@ def test_concurrent_same_version_has_one_writer(saved):
         outcomes=list(pool.map(lambda _:write(),range(2)))
     assert sorted(map(str,outcomes))==['2','stale']
     assert cases.get(data['id'],db=db)['version']==2
+
+
+def test_challenge_can_replace_an_interpretation_without_erasing_history(saved):
+    db,data=saved
+    original=synthesis.apply(data['id'],1,{'findings':[finding()]},db=db)
+    claim=original['claims'][0];old_id=claim['assessments'][0]['id']
+    changed=synthesis.apply(data['id'],2,{'findings':[finding(relation='contradicts',
+        claim_id=claim['id'],supersedes=old_id,rationale='An authored challenge changes the interpretation of the same evidence.')]},db=db)
+    assert synthesis.build(changed)['conclusions'][0]['relation']=='contradicts'
+    assert len(synthesis.build(changed)['conclusions'])==1
+    assert len(changed['claims'][0]['assessments'])==2
+    assert synthesis.build(cases.get(data['id'],version=2,db=db))['conclusions'][0]['relation']=='supports'
+    report=synthesis.compare(data['id'],2,db=db)
+    assert report['material_change'] and report['affected_claim_ids']==[claim['id']]
+
+
+def test_cross_source_condition_goes_stale(saved):
+    db,data=saved
+    second=copy.deepcopy(data['evidence'][0]);second.update(id='e2',url='https://example.org/second')
+    data['evidence'].append(second);data['version']=2;cases._save(data,db=db)
+    condition={'field':'task','value':'repository coding tasks','evidence_id':'e2','quote':QUOTE}
+    revised=synthesis.apply(data['id'],2,{'findings':[finding(conditions=[condition])]},db=db)
+    revised['version']=4;revised['evidence'][1]['snapshot_hash']='changed';cases._save(revised,db=db)
+    answer=synthesis.build(cases.get(data['id'],db=db))
+    assert answer['conclusions'][0]['state']=='REVIEW_REQUIRED'
+    assert answer['conclusions'][0]['conditions'][0]['state']=='REVIEW_REQUIRED'
+    assert synthesis.compare(data['id'],3,db=db)['material_change']
+
+
+def test_retraction_metadata_disables_prior_conclusion(saved):
+    db,data=saved
+    revised=synthesis.apply(data['id'],1,{'findings':[finding()]},db=db)
+    revised['version']=3;revised['evidence'][0]['retracted']=True;cases._save(revised,db=db)
+    assert synthesis.build(cases.get(data['id'],db=db))['conclusions'][0]['state']=='REVIEW_REQUIRED'
+    assert synthesis.compare(data['id'],2,db=db)['evidence_changes'][0]['kind']=='source_metadata_changed'
+    with pytest.raises(ValueError):synthesis.apply(data['id'],3,{'findings':[finding()]},db=db)
+
+
+def test_numerical_substring_does_not_count_as_source_result(saved):
+    db,data=saved
+    with pytest.raises(ValueError,match='numerical assertion'):
+        synthesis.apply(data['id'],1,{'findings':[finding(statement='There were 2 tasks')]},db=db)
+
+
+def test_contradiction_can_name_a_different_number_and_is_contested(saved):
+    db,data=saved
+    revised=synthesis.apply(data['id'],1,{'findings':[finding(statement='The study used 20 tasks'),
+        finding(statement='The study used 20 tasks',relation='contradicts',quote=TEXT)]},db=db)
+    assert {c['claim_state'] for c in synthesis.build(revised)['conclusions']}=={'CONTESTED'}
+    assert synthesis.build(revised)['conclusions'][0]['competing_interpretations']
+    synthesis.apply(data['id'],2,{'findings':[finding(statement='The study used 90 tasks',relation='contradicts')]},db=db)
+
+
+def test_interpretation_change_flags_decision(saved):
+    db,data=saved
+    # Existing decision API requires QUOTE_VERIFIED source; fixture explicitly sets it.
+    data['version']=2;data['evidence'][0].update(status='QUOTE_VERIFIED',quote=QUOTE);cases._save(data,db=db)
+    cases.decide(data['id'],'Use a memory trial','Authored fixture rationale',['e1'],expected_version=2,db=db)
+    synthesis.apply(data['id'],2,{'findings':[finding()]},db=db)
+    report=synthesis.compare(data['id'],2,db=db)
+    assert len(report['affected_decision_ids'])==1
+    assert report['affected_decisions'][0]['review']['state']=='REVIEW_REQUIRED'
+
+
+def test_local_measurements_remove_script_and_output(saved):
+    _,data=saved
+    data['experiments']=[{'id':'test-run','acceptance_source':'private script',
+        'runs':[{'output_tail':'private output','exit_code':0}]}]
+    measurement=synthesis.build(data)['local_measurements'][0]
+    assert 'acceptance_source' not in measurement and 'output_tail' not in measurement['runs'][0]
