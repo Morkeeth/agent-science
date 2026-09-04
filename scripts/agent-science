@@ -1,0 +1,10 @@
+#!/usr/bin/env python3
+"""Run Agent Science from any working directory; preserve the user's repo cwd."""
+from pathlib import Path
+import sys
+
+sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
+from clearance.stack_cli import main
+
+if __name__ == '__main__':
+    raise SystemExit(main())

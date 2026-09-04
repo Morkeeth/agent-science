@@ -91,7 +91,7 @@ class CaseTests(unittest.TestCase):
 
     def test_mcp_round_trip(self):
         data=json.loads(handle_tool('science_case',{'action':'create','question':'Fresh agent sessions','sources':[self.url]}))
-        saved=json.loads(handle_tool('science_case',{'action':'decide','case_id':data['id'],'statement':'Run a local trial','rationale':'Source gives a hypothesis','evidence_ids':[data['evidence'][0]['id']]}))
+        saved=json.loads(handle_tool('science_case',{'action':'decide','case_id':data['id'],'version':data['version'],'statement':'Run a local trial','rationale':'Source gives a hypothesis','evidence_ids':[data['evidence'][0]['id']]}))
         self.assertEqual(saved['decisions'][0]['review']['state'],'UNCHANGED_IN_SNAPSHOT')
         self.assertEqual(json.loads(handle_tool('science_case',{'action':'show','case_id':data['id']}))['id'],data['id'])
 
@@ -171,6 +171,7 @@ class ExperimentTests(unittest.TestCase):
             check.write_text('import pathlib,sys\npathlib.Path(sys.argv[0]).write_text("print(123)\\n")\n')
             mutated=compare(case['id'],repo=repo,baseline=baseline,candidate=candidate,check=check,runs=2,db=db)
             self.assertFalse(mutated['valid'])
+            with self.assertRaises(ValueError):cases.decide(case['id'],'Cannot cite invalid run','Script changed',[],experiment_ids=[mutated['id']],expected_version=1,db=db)
             self.assertTrue(all(not r['acceptance_unchanged'] for r in mutated['runs']))
             check.write_text('import subprocess,sys\nsubprocess.Popen([sys.executable,"-c","import time; time.sleep(60)"])\nprint("x"*10000)\n')
             cleaned=compare(case['id'],repo=repo,baseline=baseline,candidate=candidate,check=check,runs=1,db=db)
@@ -178,6 +179,17 @@ class ExperimentTests(unittest.TestCase):
             self.assertTrue(all(r['capture_complete'] and r['output_truncated'] for r in cleaned['runs']))
             self.assertTrue(all(len(r['output_tail'])<=2000 for r in cleaned['runs']))
             with self.assertRaises(ValueError):compare(case['id'],repo=repo,baseline=candidate,candidate=candidate,check=check,db=db)
+            decision=subprocess.run([sys.executable,'-m','clearance','case','decide',case['id'],'--db',str(db),'--version','1','--experiment',result['id'],'--statement','Use candidate for this fixture','--reason','Candidate passed 2/2; baseline passed 0/2 on this fixed check. No general quality claim.','--json'],capture_output=True,text=True)
+            self.assertEqual(decision.returncode,0,decision.stdout+decision.stderr)
+            bound=json.loads(decision.stdout)['decisions'][-1]
+            self.assertEqual(bound['experiment_ids'],[result['id']])
+            self.assertEqual(bound['evidence_ids'],[])
+            other=cases.create('Separate case',db=db)
+            with self.assertRaises(ValueError):cases.decide(other['id'],'Foreign run','Must not cross cases',[],experiment_ids=[result['id']],expected_version=1,db=db)
+            check.write_text('import pathlib,sys\npathlib.Path(sys.argv[0]).write_text("print(123)\\n")\n')
+            invalid_cli=subprocess.run([sys.executable,'-m','clearance','case','experiment',case['id'],'--db',str(db),'--repo',str(repo),'--baseline',baseline,'--candidate',candidate,'--check',str(check),'--runs','1','--json'],capture_output=True,text=True)
+            self.assertEqual(invalid_cli.returncode,2,invalid_cli.stdout+invalid_cli.stderr)
+            self.assertFalse(json.loads(invalid_cli.stdout)['valid'])
 
 
 if __name__=='__main__':unittest.main()

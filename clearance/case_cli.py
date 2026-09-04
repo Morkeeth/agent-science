@@ -1,7 +1,8 @@
 """CLI entry points for a research case and its measured decisions."""
 import json
 import subprocess
-from clearance import cases
+import sqlite3
+from clearance import cases, case_review
 
 
 def run(args):
@@ -12,36 +13,56 @@ def run(args):
         elif args.action=='show':data=cases.get(args.case_id,version=args.version,db=db)
         elif args.action=='source':
             data=cases.source(args.case_id,args.evidence,db=db,version=args.version,offset=args.offset,limit=args.limit)
-            print(json.dumps(data,indent=2) if args.json else data['text'])
+            if args.json:
+                print(json.dumps(data,indent=2))
+            else:
+                print(f"Source {data['evidence_id']} · case {data['case_id']} · version {data['version']}\n{data['url']}\nSHA-256 {data['sha256']}\nFetched: {data.get('fetched_at') or 'unknown'}\n")
+                print(data['text'])
+                if data['next_offset'] is not None:
+                    print(f"\nMore source text: repeat with --version {data['version']} --offset {data['next_offset']}")
             return 0
         elif args.action=='refresh':data=cases.refresh(args.case_id,live=args.live,db=db)
-        elif args.action=='decide':data=cases.decide(args.case_id,args.statement,args.reason,args.evidence,db=db)
+        elif args.action=='decide':data=cases.decide(args.case_id,args.statement,args.reason,args.evidence,db=db,supersedes=args.supersedes,expected_version=args.version,experiment_ids=args.experiment)
         elif args.action=='experiment':
             from clearance.experiments import compare
             result=compare(args.case_id,repo=args.repo,baseline=args.baseline,candidate=args.candidate,
                            check=args.check,runs=args.runs,timeout=args.timeout,db=db)
-            print(json.dumps(cases.experiment_summary(result),indent=2) if args.json else result['summary'])
-            return 0
+            if args.json:
+                print(json.dumps(cases.experiment_summary(result),indent=2))
+            else:
+                print(f"Experiment {result['id']} · case {args.case_id} · evidence v{result['case_version']}\n{result['summary']}\nBaseline: {result['pins']['baseline']}\nCandidate: {result['pins']['candidate']}\nAcceptance SHA-256: {result['acceptance_sha256']}\nThis measures the selected check on these commits, not general practice superiority.")
+            return 0 if result['valid'] else 2
         else:
-            rows=cases.recent(db=db)
-            print(json.dumps([cases.public_view(r) for r in rows],indent=2) if args.json else '\n'.join(f"{r['id']} · v{r['version']} · {r['question']}" for r in rows))
+            result=case_review.index(db=db,root=args.root,query=args.query,review_only=args.action=='review',limit=args.limit,offset=args.offset,include_cases=args.json and args.action=='list')
+            full_cases=result.pop('case_data',[])
+            if args.json:
+                # Preserve list's existing JSON array shape. Review is a paginated report.
+                print(json.dumps(result if args.action=='review' else ({**result,'cases':full_cases} if args.page_info else full_cases),indent=2))
+            else:
+                print(case_review.render(result,review_only=args.action=='review',db=db),end='')
             return 0
         print(json.dumps(cases.public_view(data),indent=2) if args.json else cases.format_case(data),end='\n')
         return 0
-    except (ValueError, OSError, subprocess.SubprocessError) as exc:
-        print(f'Cannot complete case action: {exc}')
+    except (ValueError, OSError, sqlite3.Error, subprocess.SubprocessError) as exc:
+        print(json.dumps({'error':str(exc)}) if args.json else f'Cannot complete case action: {exc}')
         return 2
 
 
 def add_parser(sub):
     case=sub.add_parser('case',help='research a question, preserve decisions and compare repo revisions')
     actions=case.add_subparsers(dest='action',required=True)
-    for action in ('create','show','refresh','decide','list','experiment','source'):
+    for action in ('create','show','refresh','decide','list','experiment','source','review'):
         p=actions.add_parser(action)
         p.add_argument('--db',help='local case database override')
         p.add_argument('--json',action='store_true')
         p.set_defaults(func=run)
-        if action not in ('create','list'):p.add_argument('case_id')
+        if action not in ('create','list','review'):p.add_argument('case_id')
+        if action in ('list','review'):
+            p.add_argument('--root',help='only cases attached to this local repo')
+            p.add_argument('--query',default='',help='find saved questions; no web request')
+            p.add_argument('--limit',type=int,default=20)
+            p.add_argument('--offset',type=int,default=0)
+            p.add_argument('--page-info',action='store_true',help='include pagination metadata in JSON list')
         if action=='create':
             p.add_argument('question')
             p.add_argument('--root',help='your repository; only local context hashes are stored')
@@ -54,9 +75,12 @@ def add_parser(sub):
             p.add_argument('--offset',type=int,default=0)
             p.add_argument('--limit',type=int,default=12000)
         if action=='decide':
+            p.add_argument('--version',type=int,required=True,help='evidence version you inspected')
+            p.add_argument('--supersedes',help='active decision ID this replaces; preserves its history')
             p.add_argument('--statement',required=True)
             p.add_argument('--reason',required=True)
-            p.add_argument('--evidence',action='append',required=True,help='verified quote ID (repeatable)')
+            p.add_argument('--evidence',action='append',default=[],help='verified quote ID (repeatable)')
+            p.add_argument('--experiment',action='append',default=[],help='valid measured experiment ID (repeatable)')
         if action=='experiment':
             p.add_argument('--repo',default='.')
             p.add_argument('--baseline',required=True,help='Git ref resolved once before execution')

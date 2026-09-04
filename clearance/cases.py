@@ -34,20 +34,30 @@ def connect(db=None):
     path.parent.mkdir(parents=True, exist_ok=True)
     con = sqlite3.connect(path, timeout=10)
     con.row_factory = sqlite3.Row
-    con.executescript('''
-        CREATE TABLE IF NOT EXISTS cases(id TEXT PRIMARY KEY, created_at TEXT NOT NULL);
-        CREATE TABLE IF NOT EXISTS revisions(case_id TEXT, version INTEGER, body TEXT NOT NULL,
-            PRIMARY KEY(case_id,version));
-        CREATE TABLE IF NOT EXISTS decisions(id TEXT PRIMARY KEY,case_id TEXT,version INTEGER,
-            statement TEXT,rationale TEXT,evidence_ids TEXT,created_at TEXT);
-        CREATE TABLE IF NOT EXISTS experiments(id TEXT PRIMARY KEY,case_id TEXT,body TEXT NOT NULL);
-    ''')
-    columns = {r[1] for r in con.execute('PRAGMA table_info(decisions)')}
-    if 'supersedes' not in columns:
-        con.execute('ALTER TABLE decisions ADD COLUMN supersedes TEXT')
+    try:
+        con.executescript('''
+            CREATE TABLE IF NOT EXISTS cases(id TEXT PRIMARY KEY, created_at TEXT NOT NULL);
+            CREATE TABLE IF NOT EXISTS revisions(case_id TEXT, version INTEGER, body TEXT NOT NULL,
+                PRIMARY KEY(case_id,version));
+            CREATE TABLE IF NOT EXISTS decisions(id TEXT PRIMARY KEY,case_id TEXT,version INTEGER,
+                statement TEXT,rationale TEXT,evidence_ids TEXT,created_at TEXT);
+            CREATE TABLE IF NOT EXISTS experiments(id TEXT PRIMARY KEY,case_id TEXT,body TEXT NOT NULL);
+        ''')
+        columns = {r[1] for r in con.execute('PRAGMA table_info(decisions)')}
+        if not {'supersedes', 'experiment_ids'} <= columns:
+            # Re-read under the writer lock: another process may have upgraded it.
+            con.execute('BEGIN IMMEDIATE')
+            columns = {r[1] for r in con.execute('PRAGMA table_info(decisions)')}
+            if 'supersedes' not in columns:
+                con.execute('ALTER TABLE decisions ADD COLUMN supersedes TEXT')
+            if 'experiment_ids' not in columns:
+                con.execute("ALTER TABLE decisions ADD COLUMN experiment_ids TEXT NOT NULL DEFAULT '[]'")
+            con.commit()
+        con.execute('CREATE UNIQUE INDEX IF NOT EXISTS one_decision_successor ON decisions(supersedes) WHERE supersedes IS NOT NULL')
         con.commit()
-    con.execute('CREATE UNIQUE INDEX IF NOT EXISTS one_decision_successor ON decisions(supersedes) WHERE supersedes IS NOT NULL')
-    con.commit()
+    except Exception:
+        con.close()
+        raise
     return con
 
 
@@ -61,6 +71,7 @@ def get(case_id, *, db=None, version=None):
         out['decisions'] = [dict(r) for r in con.execute('SELECT * FROM decisions WHERE case_id=? AND version<=? ORDER BY created_at',(case_id,out['version']))]
         for d in out['decisions']:
             d['evidence_ids'] = json.loads(d['evidence_ids'])
+            d['experiment_ids'] = json.loads(d['experiment_ids'])
             original = con.execute('SELECT body FROM revisions WHERE case_id=? AND version=?',(case_id,d['version'])).fetchone()
             old = json.loads(original['body']) if original else {}
             d['review'] = decision_review(d, old, out)
@@ -246,21 +257,30 @@ def decision_review(decision, original, current):
             'meaning':'This compares saved evidence versions. Check freshness.new_fetches to see whether the web was checked. Changes require review, not automatic reversal.'}
 
 
-def decide(case_id, statement, rationale, evidence_ids, *, db=None, supersedes=None):
+def decide(case_id, statement, rationale, evidence_ids, *, db=None, supersedes=None, expected_version=None, experiment_ids=()):
     data=get(case_id,db=db)
-    if not statement.strip() or not rationale.strip() or not evidence_ids:
-        raise ValueError('a decision needs a statement, rationale and at least one evidence ID')
+    if expected_version is not None and (type(expected_version) is not int or expected_version != data['version']):
+        raise ValueError('evidence version changed; read the latest case before deciding')
+    if not statement.strip() or not rationale.strip() or not (evidence_ids or experiment_ids):
+        raise ValueError('a decision needs a statement, rationale and at least one evidence or experiment ID')
     available={e['id'] for e in data['evidence'] if e['status']=='QUOTE_VERIFIED'}
     if not set(evidence_ids)<=available:
         raise ValueError('each evidence ID must name a verified quote in this case version')
+    measured={e['id'] for e in data['experiments'] if e.get('valid') is True}
+    if not set(experiment_ids)<=measured:
+        raise ValueError('each experiment ID must name a valid experiment in this case')
     if supersedes and not any(d['id']==supersedes and not d.get('superseded_by') for d in data['decisions']):
         raise ValueError('supersedes must name an active decision in this case')
     did=uuid.uuid4().hex[:12]
     with closing(connect(db)) as con, con:
+        con.execute('BEGIN IMMEDIATE')
+        latest=con.execute('SELECT MAX(version) FROM revisions WHERE case_id=?',(case_id,)).fetchone()[0]
+        if latest != data['version']:
+            raise ValueError('evidence changed while deciding; read the latest case and retry')
         if supersedes and con.execute('SELECT 1 FROM decisions WHERE case_id=? AND supersedes=?',(case_id,supersedes)).fetchone():
             raise ValueError('decision was already superseded; reload')
-        con.execute('INSERT INTO decisions(id,case_id,version,statement,rationale,evidence_ids,created_at,supersedes) VALUES(?,?,?,?,?,?,?,?)',
-            (did,case_id,data['version'],statement.strip(),rationale.strip(),json.dumps(list(dict.fromkeys(evidence_ids))),now(),supersedes or None))
+        con.execute('INSERT INTO decisions(id,case_id,version,statement,rationale,evidence_ids,created_at,supersedes,experiment_ids) VALUES(?,?,?,?,?,?,?,?,?)',
+            (did,case_id,data['version'],statement.strip(),rationale.strip(),json.dumps(list(dict.fromkeys(evidence_ids))),now(),supersedes or None,json.dumps(list(dict.fromkeys(experiment_ids)))))
     return get(case_id,db=db)
 
 
@@ -320,6 +340,8 @@ def format_case(data):
     if not data['evidence']:lines += ['No evidence retrieved. Enable live research or provide source URLs.','']
     for d in data.get('decisions',[]):
         lines += [f"Decision {d['id']} · {d['review']['state']}",d['statement'],d['rationale']]
+        if d.get('supersedes'):lines += [f"Replaces decision: {d['supersedes']}"]
+        if d.get('experiment_ids'):lines += ["Measured experiments: "+', '.join(d['experiment_ids'])]
         for c in d['review']['changes']:lines += [f"  {c['kind']}: {c.get('url',c.get('reason',''))}"]
     for e in data.get('experiments',[]):
         lines += [f"Experiment {e['id']}: {e['summary']}"]

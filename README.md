@@ -2,7 +2,24 @@
 
 Research a builder question, inspect the source evidence, and record a decision that can change when its evidence changes.
 
-Agent Science combines public-source discovery with versioned cases, available locally or in a private hosted workspace. The CLI and MCP interface keep the question, exact source quotations, source snapshots, actual search attempts, repo context and decision history together.
+Agent Science is a CLI/MCP research companion for coding work. Public-source discovery, versioned evidence, decisions and repo experiments work locally without a hosted account. The CLI and MCP interface keep the question, exact source quotations, source snapshots, actual search attempts, repo context and decision history together.
+
+## Use it from your terminal
+
+From this checkout, install the local command once:
+
+```bash
+python3 scripts/install-cli.py
+```
+
+Then run `agent-science` from your own repository. It preserves that working directory, so `--root .` captures your repo rather than Agent Science's checkout. The installer uses `~/.local/bin` and never replaces an unrelated command. Add that directory to your PATH if it is not already there.
+
+```bash
+agent-science case review --root .
+agent-science case list --query "fresh sessions" --root .
+```
+
+The longer `python3 -m clearance` form below works from this checkout too.
 
 ## Start a research case
 
@@ -23,7 +40,7 @@ The result includes a case ID and evidence IDs. Use those IDs with:
 ```text
 python3 -m clearance case show CASE_ID
 python3 -m clearance case source CASE_ID --evidence EVIDENCE_ID
-python3 -m clearance case decide CASE_ID --statement "The decision" --reason "Why this evidence matters" --evidence EVIDENCE_ID
+python3 -m clearance case decide CASE_ID --version 1 --statement "The decision" --reason "Why this evidence matters" --evidence EVIDENCE_ID
 python3 -m clearance case refresh CASE_ID --live
 python3 -m clearance case show CASE_ID --version 1
 ```
@@ -31,6 +48,23 @@ python3 -m clearance case show CASE_ID --version 1
 A decision cites one case version. Refresh retains old snapshots and flags dependent decisions when their source text changes, a source becomes unavailable, or the repo context changes. It does not silently reverse the decision. An offline refresh checks stored snapshots only; its output reports cached reads separately from web fetches.
 
 **A verified quote proves that a source contains those words. It does not, by itself, prove that the source supports the question.** Cases leave that relationship unassessed. Inspect the source snapshot before recording an authored decision. Stars, search categories and a paper title are not evidence of effectiveness.
+
+## Return to decisions that need review
+
+```bash
+python3 -m clearance case review --root .
+python3 -m clearance case list --query "fresh sessions" --root .
+```
+
+These commands inspect saved cases without web requests. Review filtering happens before pagination, so an older unresolved decision is not hidden behind newer cases. Use `--limit` and `--offset` to page through matching cases; `list --json --page-info` adds pagination metadata while plain `list --json` retains its array shape.
+
+Read the current case and its source version, then replace a decision with your revised reasoning:
+
+```text
+python3 -m clearance case decide CASE_ID --version 2 --supersedes DECISION_ID --statement "Revised choice" --reason "What changed and why it matters" --evidence EVIDENCE_ID
+```
+
+`--version` is required: a refresh between reading and saving rejects the stale decision. Superseding retains the old decision and its evidence history. Source output names its case version, fetch time and content hash; long documents include the next offset.
 
 ## Test a practice on your repo
 
@@ -41,6 +75,14 @@ python3 -m clearance case experiment CASE_ID --repo . --baseline BASE_COMMIT --c
 ```
 
 The case repo must match the experiment repo. The acceptance script runs with that revision as its working directory and Python import path. Both revisions must have their required runtime dependencies available. The tool does not install packages or execute commands from research pages.
+
+The result names its experiment ID and pinned commits. Cite that measured result directly in a decision:
+
+```text
+python3 -m clearance case decide CASE_ID --version 1 --experiment EXPERIMENT_ID --statement "The choice supported by this check" --reason "Measured result and limits"
+```
+
+A decision can cite source IDs, valid experiment IDs, or both. Experiments from another case and invalid runs are rejected. The measurement stays bounded to its selected check and commits; it is not a general recommendation.
 
 Use independent acceptance criteria. A test copied from the implementation can defend the same bug. Modified acceptance scripts invalidate the experiment; child processes are cleaned up after each run. This is a runner for trusted local code, not an OS sandbox. API cost, human rework and general practice superiority are not inferred from pass counts or wall time.
 
@@ -53,7 +95,7 @@ python3 -m clearance lookup "a specific factual assertion" --live --refresh
 python3 -m clearance serve
 ```
 
-`science_case` provides create, show, source, decide, refresh and list over MCP. Experiments require the explicit local CLI. `science_visibility` shows actual lookup attempts and matched catalog context. `science_lookup` reuses only the same settled assertion; `refresh=true` bypasses verdict, document and search caches. An unsupported keyword match cannot become a research-conflict verdict.
+`science_case` provides create, show, source, decide, refresh, list and review over MCP. Decide requires `version` and accepts `supersedes` and `experiment_ids`. List/review accept `root`, `query`, `page_size` and `offset`; `page_info=true` adds list pagination metadata. Rejected tool actions set `isError=true`. Experiments require the explicit local CLI. `science_visibility` shows actual lookup attempts and matched catalog context. `science_lookup` reuses only the same settled assertion; `refresh=true` bypasses verdict, document and search caches. An unsupported keyword match cannot become a research-conflict verdict.
 
 The local browser desk remains available for documentary clearance. The [hosted service](https://agent-science-568004190078.us-central1.run.app) is a separate deployment; these local changes are not automatically deployed there.
 
@@ -76,7 +118,7 @@ Source fetches accept public HTTP(S) only, pin validated DNS addresses, revalida
 MIT licensed.
 
 
-## Private hosted workspaces
+## Optional hosted evidence inspector
 
 [Open the workspace](https://agent-science-33kamss2jq-uc.a.run.app/cases). [Build and verification receipt](docs/BUILD-HOSTED-CASES-2026-09-04.md).
 

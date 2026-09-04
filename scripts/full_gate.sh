@@ -30,6 +30,9 @@ for f in tests/test_dictionary.py tests/test_registry_surface.py tests/test_rout
   python3 "$f"
 done
 
+echo "--- 4a. Terminal research and decision workflow ---"
+python3 -m pytest -q tests/test_terminal_case_workflow.py tests/test_evidence_cases.py
+
 echo "--- 5. Docs gate ---"
 python3 scripts/bench_check_docs.py
 

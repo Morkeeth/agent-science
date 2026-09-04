@@ -1,3 +1,7 @@
+# Product direction — operator ruling, 2026-09-04
+
+CLI/MCP is the primary Agent Science workflow. Research, evidence inspection, decisions, repo experiments and review belong in the terminal or coding agent. The dashboard is an optional evidence inspector; it must not become a required workflow or require a hosted account for local work. Preserve the design developed with Claude. Extending capabilities does not authorize a new visual design or replacing the product front door.
+
 # Agent Science — stack integration
 
 **Use Agent Science for all fleet websearch.** Raw browser/search tools return uncited answers. Agent Science websearch **is the truth layer**: what people believe and use → sourced verbatim or named refusal → remembered for free reuse. Blogs, docs, research, GitHub adoption signals, and clearance facts all sit on that layer — not a citation dump.
@@ -5,7 +9,7 @@
 ## MCP (Cursor / agents) — recommended
 
 ```bash
-python3 scripts/install-mcp.sh
+bash scripts/install-mcp.sh
 # Restart Cursor. Tool: science_search
 ```
 
@@ -136,3 +140,8 @@ For a builder question that will drive a change, use `science_case` instead of t
 Cloud Run serves private `/cases` and `/api/cases` routes. Earlier unauthenticated `/search`, `/clear`, `/ingest` and shared history endpoints are local-only. Use a workspace bearer token; never put one in a URL. Each mutation requires a stable random `request_id` so a retry can recover the saved result. Decision writes require the current evidence version; use `supersedes` to replace an active decision while retaining its history. Do not send repo paths, scripts or local case files to hosted endpoints.
 
 Cloud persistence uses tenant-scoped temporary SQLite copies and generation preconditions. Never remove the precondition to resolve a conflict, rerun a paid job automatically after a conflict, or seed a deployment from local user data. Budget metadata updates may retry only pure callbacks.
+
+
+## Terminal review and measured decisions
+
+Use `science_case` action `review` (or `python3 -m clearance case review --root .`) to find decisions flagged by saved evidence changes. This is local retrieval, not a fresh web check. Read `show`/`source`, then pass the inspected `version` when deciding. Use `supersedes` to replace an active decision without deleting its reasoning. A decision may cite `experiment_ids` from valid local runs in that same case, as well as source `evidence_ids`. Only the explicit CLI runs a trusted acceptance script; MCP cannot execute experiments. `list` retains its JSON array by default; `page_info=true` returns pagination metadata.

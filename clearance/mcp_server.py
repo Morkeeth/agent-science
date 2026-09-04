@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import json
 import sys
+import sqlite3
 
 from clearance import ingest, query_analytics, stack_search
 
@@ -164,10 +165,15 @@ TOOLS.append({
     "name": "science_case",
     "description": "Create a versioned research case, inspect evidence, save an authored decision, or refresh cited sources to see which decisions require review. Stored locally. Quote occurrence is verified; support is not inferred. Repo context never enters web queries. Experiments execute only through the explicit local CLI.",
     "inputSchema": {"type": "object", "properties": {
-        "action": {"type": "string", "enum": ["create", "show", "refresh", "decide", "list", "source"]},
+        "action": {"type": "string", "enum": ["create", "show", "refresh", "decide", "list", "source", "review"]},
         "db": {"type": "string", "description": "Optional local case database, matching CLI --db"},
-        "version": {"type": "integer"}, "evidence_id": {"type": "string"},
-        "offset": {"type": "integer", "default": 0}, "limit": {"type": "integer", "default": 12000},
+        "version": {"type": "integer", "description": "Required for decide: the evidence version you inspected; optional historical version for show/source"}, "evidence_id": {"type": "string"},
+        "offset": {"type": "integer", "default": 0}, "limit": {"type": "integer", "description": "Source chunk characters (default 12000); list/review page size alias when page_size is absent"},
+        "query": {"type": "string", "description": "Local saved-question filter for list/review"},
+        "page_info": {"type": "boolean", "default": False, "description": "Include has_more/next_offset in list result; default retains legacy array"},
+        "experiment_ids": {"type": "array", "items": {"type": "string"}, "description": "Valid local experiment IDs cited by this decision; may replace source evidence IDs"},
+        "page_size": {"type": "integer", "default": 20, "minimum": 1, "maximum": 100},
+        "supersedes": {"type": "string", "description": "Active decision ID to replace; requires version you inspected"},
         "question": {"type": "string"}, "case_id": {"type": "string"},
         "root": {"type": "string", "description": "Local user repo for context"},
         "live": {"type": "boolean", "default": False},
@@ -206,10 +212,21 @@ def _send_message(msg):
 
 def handle_tool(name: str, arguments: dict) -> str:
     if name == "science_case":
-        from clearance import cases
+        from clearance import cases, case_review
         action = arguments.get("action")
         db=arguments.get("db")
         try:
+            for key in ("live","page_info"):
+                if key in arguments and type(arguments[key]) is not bool:
+                    raise ValueError(f"{key} must be a boolean")
+            for key in ("sources","official_domains","evidence_ids","experiment_ids"):
+                if key in arguments and (not isinstance(arguments[key],list) or any(not isinstance(v,str) for v in arguments[key])):
+                    raise ValueError(f"{key} must be an array of strings")
+            for key in ("question","case_id","statement","rationale","query","supersedes","root","db","evidence_id"):
+                if key in arguments and not isinstance(arguments[key],str):
+                    raise ValueError(f"{key} must be text")
+            if "version" in arguments and (type(arguments["version"]) is not int or arguments["version"]<1):
+                raise ValueError("version must be a positive integer")
             if action == "create":
                 data = cases.create(arguments.get("question", ""), root=arguments.get("root"),
                     live=arguments.get("live", False), sources=arguments.get("sources", []),
@@ -217,11 +234,19 @@ def handle_tool(name: str, arguments: dict) -> str:
             elif action == "show": data = cases.get(arguments.get("case_id", ""), version=arguments.get("version"),db=db)
             elif action == "source": return json.dumps(cases.source(arguments.get("case_id", ""), arguments.get("evidence_id", ""), version=arguments.get("version"), offset=arguments.get("offset",0), limit=arguments.get("limit",12000),db=db), indent=2)
             elif action == "refresh": data = cases.refresh(arguments.get("case_id", ""), live=arguments.get("live", False),db=db)
-            elif action == "decide": data = cases.decide(arguments.get("case_id", ""), arguments.get("statement", ""), arguments.get("rationale", ""), arguments.get("evidence_ids", []),db=db)
-            elif action == "list": return json.dumps([cases.public_view(r) for r in cases.recent(db=db)], indent=2)
+            elif action == "decide":
+                if type(arguments.get("version")) is not int:
+                    raise ValueError("decide requires the evidence version you inspected")
+                data = cases.decide(arguments.get("case_id", ""), arguments.get("statement", ""), arguments.get("rationale", ""), arguments.get("evidence_ids", []),db=db,supersedes=arguments.get("supersedes"),expected_version=arguments["version"],experiment_ids=arguments.get("experiment_ids",[]))
+            elif action in ("list", "review"):
+                result=case_review.index(db=db,root=arguments.get("root"),query=arguments.get("query",""),review_only=action=="review",limit=arguments.get("page_size",arguments.get("limit",20)),offset=arguments.get("offset",0),include_cases=action=="list")
+                if action=="list":
+                    full_cases=result.pop("case_data")
+                    result={**result,"cases":full_cases}
+                return json.dumps(result if action=="review" or arguments.get("page_info") else result["cases"],indent=2)
             else: raise ValueError("unknown case action")
             return json.dumps(cases.public_view(data), indent=2)
-        except (ValueError, OSError) as exc:
+        except (ValueError, OSError, sqlite3.Error) as exc:
             return json.dumps({"error": str(exc)})
     if name in ("science_lookup", "science_search"):
         live = arguments.get("live", name == "science_search")
@@ -319,7 +344,7 @@ def main():
                 "result": {
                     "protocolVersion": "2024-11-05",
                     "capabilities": {"tools": {"listChanged": False}},
-                    "serverInfo": {"name": "agent-science", "version": "0.2.0"},
+                    "serverInfo": {"name": "agent-science", "version": "0.3.0"},
                 },
             })
         elif method == "notifications/initialized":
@@ -328,11 +353,22 @@ def main():
             _send_message({"jsonrpc": "2.0", "id": msg_id, "result": {"tools": TOOLS}})
         elif method == "tools/call":
             params = msg.get("params", {})
-            text = handle_tool(params.get("name", ""), params.get("arguments", {}))
+            try:
+                if not isinstance(params,dict) or not isinstance(params.get("arguments",{}),dict):
+                    raise ValueError("tool arguments must be an object")
+                text = handle_tool(params.get("name", ""), params.get("arguments", {}))
+                try:
+                    payload=json.loads(text)
+                except json.JSONDecodeError:
+                    payload=None  # Some tools intentionally return Markdown.
+                failed=isinstance(payload,dict) and "error" in payload
+            except (ValueError,TypeError,KeyError,OSError,sqlite3.Error) as exc:
+                text=json.dumps({"error":str(exc)})
+                failed=True
             _send_message({
                 "jsonrpc": "2.0",
                 "id": msg_id,
-                "result": {"content": [{"type": "text", "text": text}], "isError": False},
+                "result": {"content": [{"type": "text", "text": text}], "isError": failed},
             })
         elif msg_id is not None:
             _send_message({
