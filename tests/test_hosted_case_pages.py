@@ -28,7 +28,7 @@ class Page(HTMLParser):
         if tag == 'form':
             self.current = {'attributes':d,'fields':[]}
             self.forms.append(self.current)
-        if tag in ('input','textarea') and self.current is not None:
+        if tag in ('input','textarea','select') and self.current is not None:
             self.current['fields'].append(d)
 
     def handle_endtag(self, tag):
@@ -163,6 +163,56 @@ def test_empty_case_discloses_missing_evidence_and_has_no_decision_form():
     assert 'No route events were recorded' in text
     assert 'Decision recording needs a source quote' in text
     assert not [f for f in Page(text).forms if f['attributes']['action'].endswith('/decisions')]
+
+
+def test_superseded_decisions_keep_history_and_link_to_the_active_successor():
+    case=case_fixture()
+    original=case['decisions'][0]
+    original['superseded_by']='d2'
+    original['review']['state']='SUPERSEDED'
+    successor=copy.deepcopy(original)
+    successor.update(id='d2',version=2,statement='Use bounded fresh sessions.',supersedes='d1',superseded_by=None,
+                     review={'state':'UNCHANGED_IN_SNAPSHOT','changes':[]})
+    case['decisions'].append(successor)
+    text=P.detail(case,'csrf')
+    page=Page(text)
+    assert 'SUPERSEDED' in text and 'Evidence changes at the time of review' in text
+    assert 'Ten tasks.' in text and 'Twelve tasks.' in text
+    assert 'decision-d1' in page.ids and 'decision-d2' in page.ids
+    assert '#decision-d2' in [a['href'] for a in page.links]
+    assert '#decision-d1' in [a['href'] for a in page.links]
+    assert P.review_count(case)==0
+    assert 'REVIEW REQUIRED' not in P.dashboard([case],'csrf',{})
+    options=[attrs for tag,attrs in page.tags if tag=='option']
+    assert [o['value'] for o in options]==['','d2'], options
+
+
+def test_revision_select_has_escaped_bounded_labels_and_server_statement_limit():
+    case=case_fixture()
+    case['decisions'][0]['statement']='<script>alert(1)</script>'+'A'*150
+    text=P.detail(case,'csrf')
+    page=Page(text)
+    form=next(f for f in page.forms if f['attributes']['action'].endswith('/decisions'))
+    fields={f['name']:f for f in form['fields']}
+    assert fields['statement']['maxlength']=='2000'
+    assert fields['supersedes']['id']=='supersedes'
+    assert '<option value="">New independent decision</option>' in text
+    assert 'Replace: &lt;script&gt;alert(1)&lt;/script&gt;' in text
+    assert case['decisions'][0]['statement'] not in text
+    assert not [tag for tag,attrs in page.tags if tag=='script']
+    assert not any('selected' in attrs for tag,attrs in page.tags if tag=='option')
+    # A prior snapshot still shows the original review state supplied by the store.
+    case['version']=1;case['latest_version']=2
+    historical=P.detail(case,'csrf')
+    assert 'REVIEW REQUIRED' in historical and 'SUPERSEDED' not in historical
+    assert not [tag for tag,attrs in Page(historical).tags if tag=='select']
+
+
+def test_pages_use_the_hosted_service_cool_palette():
+    for token in ('--paper:#e9ecef','--card:#f7f8fa','--ink:#14161c','--rule:#c5cad3'):
+        assert token in P.CSS
+    for retired in ('#e8e6e1','#f5f4f0','#16181d','#c9c5bd'):
+        assert retired not in P.CSS
 
 
 if __name__=='__main__':
