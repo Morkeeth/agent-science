@@ -30,6 +30,19 @@ Source fetching is restricted to public HTTP(S), including DNS-pinned destinatio
 
 The acceptance script in `review/acceptance/evidence_contract.py` is held constant across both experiment arms. It checks four polarity combinations and the uncertainty-to-support failure from the audit. Its scope is evidence integrity, not a benchmark of agent-session strategies.
 
+## Measured acceptance run
+
+The new runner tested Agent Science itself with the unchanged five-check acceptance script:
+
+- Baseline `7d93fd522aa182d6659ddb0f4001b4dfa96dccb0`: 0/3 acceptance runs passed.
+- Candidate `ac5bd76edceb9ad687e97304684f46fd198480e5`: 3/3 acceptance runs passed.
+- Acceptance SHA-256: `2446d5137d15a9bb2e09d8076c2b49f958183177181f069afc8c344777badec6`.
+- The raw run, quotes and authored decision are in local case `8312f894985e`, outside git. The source is the public project's README at its pinned prior revision; that README supplies a contract, not proof of implementation correctness.
+
+This is one deterministic acceptance script with five checks repeated across three pairs. It is not fifteen independent research tasks and says nothing about fresh-session effectiveness. Later case provenance/error-message refinements do not change the tested verifier, and receive their own regression tests.
+
+All 36 test entry points at `ac5bd76` exited successfully; the pytest-only holdout file was executed through pytest rather than counted as a silent script. The new case suite subsequently passed 14 tests after review refinements; source-refresh tests passed 2. The document-count gate matched 128/128 tracked controls, which is a historical subset rather than the total current test count.
+
 ## Boundaries still open
 
 - New case and experiment flows are local CLI/MCP. The hosted service is unchanged. Shared authentication, per-user request budgets and coordinated multi-instance persistence require the deployment slice.

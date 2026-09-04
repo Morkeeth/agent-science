@@ -113,14 +113,14 @@ def _kind(url, official_domains):
     return 'web_source'
 
 
-def _collect(question, *, live=False, refresh=False, sources=(), official_domains=(), max_per_angle=2, excerpts=None, titles=None, include_discovery=False):
+def _collect(question, *, live=False, refresh=False, sources=(), official_domains=(), max_per_angle=2, excerpts=None, titles=None, origin_angles=None, include_discovery=False):
     evidence, trace, seen = [], [], set()
     angles = [
         ('research', 'Find empirical research with methods, sample sizes and limitations relevant to: '+question, question+' empirical study'),
         ('official_docs', 'Find official documentation describing behavior and limitations relevant to: '+question, question+' official documentation'),
         ('practice', 'Find practitioner reports and working implementations, including failures, relevant to: '+question, question+' implementation experience limitations'),
     ]
-    candidates = [('provided', search.Candidate(url,(titles or {}).get(url) or ((urlparse(url).hostname or '')+urlparse(url).path),(excerpts or {}).get(url) or '')) for url in sources]
+    candidates = [('revisit' if url in (origin_angles or {}) else 'provided', search.Candidate(url,(titles or {}).get(url) or ((urlparse(url).hostname or '')+urlparse(url).path),(excerpts or {}).get(url) or '')) for url in sources]
     if not sources or include_discovery:
         for angle, objective, query in angles:
             events = []
@@ -136,7 +136,7 @@ def _collect(question, *, live=False, refresh=False, sources=(), official_domain
             continue
         seen.add(candidate.url)
         entry = {'id': digest(candidate.url)[:16], 'url':candidate.url,'title':candidate.title,
-                 'angle':angle,'kind':_kind(candidate.url,official_domains),'relation':'not_assessed'}
+                 'angle':(origin_angles or {}).get(candidate.url,angle),'kind':_kind(candidate.url,official_domains),'relation':'not_assessed'}
         try:
             # Offline mode reads only a pre-existing document; it never fetches.
             snapshot = instruments.document_snapshot(candidate.url,refresh=refresh,fetch=live)
@@ -195,7 +195,9 @@ def changes(old, new):
         a,b=before.get(eid),after.get(eid)
         if not a: kind='source_added'
         elif not b: kind='not_returned' # discovery absence is not a source retraction
-        elif b['status']=='UNAVAILABLE': kind='source_unavailable'
+        elif b['status']=='UNAVAILABLE':
+            if a['status']=='UNAVAILABLE': continue
+            kind='source_unavailable'
         elif a.get('snapshot_hash') != b.get('snapshot_hash'): kind='source_changed'
         elif a.get('status')=='QUOTE_VERIFIED' and b.get('status')!='QUOTE_VERIFIED': kind='quote_unavailable'
         else: continue
@@ -211,7 +213,7 @@ def refresh(case_id, *, live=False, db=None):
     # Revisit every cited URL even if the discovery rankings have changed.
     sources=list(dict.fromkeys(old['provided_sources']+[e['url'] for e in old['evidence']]))
     evidence,trace=_collect(old['question'],live=live,refresh=live,sources=sources,official_domains=old['official_domains'],
-        excerpts={e['url']:e.get('quote') for e in old['evidence']},titles={e['url']:e.get('title') for e in old['evidence']},include_discovery=not old['provided_sources'])
+        excerpts={e['url']:e.get('quote') for e in old['evidence']},titles={e['url']:e.get('title') for e in old['evidence']},origin_angles={e['url']:e.get('angle') for e in old['evidence']},include_discovery=not old['provided_sources'])
     new={k:v for k,v in old.items() if k not in ('decisions','experiments','coverage','freshness')}
     new.update(version=old['version']+1,checked_at=now(),evidence=evidence,trace=trace)
     if old.get('repo'):

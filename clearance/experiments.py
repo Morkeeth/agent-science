@@ -30,7 +30,10 @@ def compare(case_id, *, repo, baseline, candidate, check, runs=3, timeout=60, db
     # Capture before either arm. Nothing under test supplies its own acceptance rule.
     check_bytes=check.read_bytes()
     def resolve(ref):
-        return subprocess.check_output(['git','-C',str(repo),'rev-parse','--verify',ref+'^{commit}'],text=True,stderr=subprocess.PIPE,timeout=10).strip()
+        try:
+            return subprocess.check_output(['git','-C',str(repo),'rev-parse','--verify',ref+'^{commit}'],text=True,stderr=subprocess.PIPE,timeout=10).strip()
+        except subprocess.SubprocessError:
+            raise ValueError(f'Git revision does not resolve to a commit: {ref!r}') from None
     pins={'baseline':resolve(baseline),'candidate':resolve(candidate)}
     if pins['baseline']==pins['candidate']:
         raise ValueError('baseline and candidate resolve to the same commit')

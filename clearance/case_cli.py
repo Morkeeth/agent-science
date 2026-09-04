@@ -1,5 +1,6 @@
 """CLI entry points for a research case and its measured decisions."""
 import json
+import subprocess
 from clearance import cases
 
 
@@ -27,7 +28,7 @@ def run(args):
             return 0
         print(json.dumps(cases.public_view(data),indent=2) if args.json else cases.format_case(data),end='\n')
         return 0
-    except (ValueError, OSError) as exc:
+    except (ValueError, OSError, subprocess.SubprocessError) as exc:
         print(f'Cannot complete case action: {exc}')
         return 2
 

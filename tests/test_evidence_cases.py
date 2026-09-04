@@ -116,6 +116,8 @@ class CaseTests(unittest.TestCase):
         cases.decide(data['id'],'Try it','Local test hypothesis',[data['evidence'][0]['id']],db=self.db)
         refreshed=cases.refresh(data['id'],db=self.db)
         self.assertEqual(refreshed['evidence'][0]['quote'],data['evidence'][0]['quote'])
+        self.assertEqual(refreshed['evidence'][0]['angle'],data['evidence'][0]['angle'])
+        self.assertEqual(refreshed['evidence'][0]['title'],data['evidence'][0]['title'])
         self.assertEqual(refreshed['decisions'][0]['review']['state'],'UNCHANGED_IN_SNAPSHOT')
 
     def test_source_drilldown_is_versioned_and_paginated(self):
@@ -137,6 +139,7 @@ class CaseTests(unittest.TestCase):
         with patch.object(instruments,'fetch_public',side_effect=AssertionError('network forbidden')):
             data=cases.create('Fresh sessions',sources=['https://example.org/not-cached'],db=self.db)
         self.assertEqual(data['evidence'][0]['status'],'UNAVAILABLE')
+        self.assertEqual(cases.refresh(data['id'],db=self.db)['changes'],[])
 
 
 class ExperimentTests(unittest.TestCase):
@@ -160,7 +163,11 @@ class ExperimentTests(unittest.TestCase):
             self.assertEqual(git('rev-parse','HEAD'),candidate)
             self.assertEqual(git('status','--porcelain'),'')
             self.assertEqual(len([l for l in git('worktree','list','--porcelain').splitlines() if l.startswith('worktree ')]),1)
-            self.assertEqual(len(cases.get(case['id'],db=db)['experiments']),1)
+            saved=cases.get(case['id'],db=db)
+            self.assertEqual(len(saved['experiments']),1)
+            self.assertNotIn('acceptance_source',cases.public_view(saved)['experiments'][0])
+            self.assertNotIn('output_tail',cases.public_view(saved)['experiments'][0]['runs'][0])
+            with self.assertRaises(ValueError):compare(case['id'],repo=repo,baseline='missing-revision',candidate=candidate,check=check,db=db)
             check.write_text('import pathlib,sys\npathlib.Path(sys.argv[0]).write_text("print(123)\\n")\n')
             mutated=compare(case['id'],repo=repo,baseline=baseline,candidate=candidate,check=check,runs=2,db=db)
             self.assertFalse(mutated['valid'])

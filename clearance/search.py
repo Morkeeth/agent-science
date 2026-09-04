@@ -261,6 +261,7 @@ def find_sources(objective: str, queries: list[str], *, mode: str = "advanced",
         raise
     event.update(outcome="completed", search_id=sid, elapsed_ms=round((monotonic()-started)*1000))
     out = _candidates_from_payload(payload)
+    event.update(candidates=len(out[:max_results]), urls=[c.url for c in out[:max_results]])
     cache[ck] = [c.__dict__ for c in out]
     if term_key:
         cache[term_key] = cache[ck]
