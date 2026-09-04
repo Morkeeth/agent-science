@@ -1,5 +1,0 @@
-@voice am_michael
-@lang b
-@pause 400
-
-Agent Science — the truth layer for agentic builders. Open the link. Run your search. See the full panel.

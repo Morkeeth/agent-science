@@ -1,5 +1,8 @@
 @voice am_michael
-@lang b
-@pause 400
+@lang a
+@speed 1.0
+@pause 350
 
-The rule never bends. Cite the document verbatim, or print that you could not. No citation — no verdict. That is enforced in code, not by prompt.
+Every claim it clears joins a shelf. Hundreds of claims, growing every time someone asks.
+The top queries are ranked by asks, with sourced and miss counts.
+The most asked things get cheaper for everyone. | 700

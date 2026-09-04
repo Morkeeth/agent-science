@@ -1,5 +1,8 @@
 @voice am_michael
-@lang b
-@pause 400
+@lang a
+@speed 1.0
+@pause 350
 
-Your agent websearches. You get one answer and a green check. You never see what was skipped.
+Every agentic builder asks the same questions and gets one summarized answer with footnotes.
+You cannot see what was skipped. You cannot tell a real source from a confident guess.
+Agent Science is the truth layer for what people believe and use. | 700

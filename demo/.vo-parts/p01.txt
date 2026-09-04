@@ -1,5 +1,9 @@
 @voice am_michael
-@lang b
-@pause 400
+@lang a
+@speed 1.0
+@pause 350
 
-Agent Science is the truth layer for what builders believe and use. Not another answer engine. When you ask, you should see what was searched — every alias route, every tier — plus what the field actually runs.
+The rule is simple. If no document we read states it, we refuse. We never paraphrase. We never infer.
+So we pointed it at our own pitch headline: ninety four percent of film archives are unclearable for AI training.
+One claim in. Zero sourced. One unsourced. The cause: we searched, and no document we read states it.
+Zero metered calls, because the shelf already remembered the miss. | 700

@@ -1,5 +1,0 @@
-@voice am_michael
-@lang b
-@pause 400
-
-We pointed Agent Science at our own marketing. Five claims from our pitch. Two verified. One misattributed. Two refused — including ninety-four percent of film archives, because the object did not support the headline.
