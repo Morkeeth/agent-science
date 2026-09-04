@@ -1,0 +1,119 @@
+"""Controlled provider fixtures: these tests are not live scientific evidence."""
+import json
+import tempfile
+import unittest
+from pathlib import Path
+from unittest.mock import patch
+from clearance import cases, night_runs
+
+
+class RunTests(unittest.TestCase):
+    def setUp(self):
+        self.tmp=tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.db=str(Path(self.tmp.name)/'cases.db')
+
+    def start(self, **kw):
+        return night_runs.start('When does memory help coding?',db=self.db,**kw)
+
+    def proposal(self, run, kind='finish', **action):
+        return {'case_version':run['case_version'],'next_action':{'kind':kind,'reason':'fixture research step',**action}}
+
+    def test_start_offline_and_host_finish(self):
+        with patch('clearance.research.investigate',side_effect=AssertionError('must not investigate')):
+            run=self.start()
+        self.assertEqual(run['status'],'awaiting_reasoning')
+        self.assertIsNone(cases.get(run['case_id'],db=self.db)['checked_at'])
+        result=night_runs.resume(run['id'],proposal=self.proposal(run),db=self.db)
+        self.assertEqual(result['status'],'completed')
+        self.assertEqual(result['usage']['reasoning_calls'],0)
+
+    def test_stale_and_no_model_stop(self):
+        run=self.start()
+        proposal=self.proposal(run);proposal['case_version']=0
+        with self.assertRaises(ValueError):night_runs.resume(run['id'],proposal=proposal,db=self.db)
+        self.assertEqual(night_runs.resume(run['id'],db=self.db)['status'],'awaiting_reasoning')
+
+    def test_adaptive_fixture_provider_and_original_reads(self):
+        queries=[]
+        def find(provider,query,**kw):
+            queries.append(query)
+            if len(queries)==1:
+                return [cases.search.Candidate('https://fixture.example/original','Fixture original','Memory helped small tasks; repository scale was not tested.')]
+            self.assertIn('repository scale',query)
+            return [cases.search.Candidate('https://fixture.example/failure','Fixture follow-up','Memory failed to help repository scale tasks in this fixture.')]
+        def snapshot(url,**kw):
+            text=('Memory helped small tasks; repository scale was not tested.' if url.endswith('original') else
+                  'Memory failed to help repository scale tasks in this fixture.')
+            return {'text':text,'sha256':cases.digest(text),'cache_hit':True}
+        contexts=[]
+        def reasoner(ctx):
+            contexts.append(ctx)
+            run={'case_version':ctx['case_version']}
+            if not ctx['evidence']:return self.proposal(run,'search',query='memory original result')
+            if len(ctx['evidence'])==1:
+                self.assertIn('repository scale was not tested',ctx['evidence'][0]['snapshot_text'])
+                return {**self.proposal(run,'search',query='memory repository scale replication failure'),
+                        'question_map':[{'id':'scale','question':'Does memory help at repository scale?',
+                                         'gap':'Original fixture did not test repository scale','competing_explanation':'small task effects do not transfer','importance':'material'}]}
+            self.assertIn('failed to help',ctx['evidence'][1]['snapshot_text'])
+            return self.proposal(run)
+        run=self.start()
+        with patch('clearance.discovery.find',side_effect=find),patch('clearance.cases.instruments.document_snapshot',side_effect=snapshot):
+            result=night_runs.resume(run['id'],reasoner=reasoner,db=self.db)
+        self.assertEqual(result['status'],'completed')
+        self.assertEqual(result['case_version'],3)
+        self.assertEqual(len(queries),2)
+        self.assertEqual(result['question_map'][0]['id'],'scale')
+        self.assertEqual(result['usage']['reasoning_calls'],3)
+        self.assertEqual(len(cases.get(run['case_id'],db=self.db)['evidence']),2)
+
+    def test_aggregate_limit_stops_second_run(self):
+        policy={'aggregate':{'id':'fixture-budget','limits':dict(discovery_calls=1,document_reads=2,reasoning_calls=0,rounds=1)}}
+        a=self.start(policy=policy);b=self.start(policy=policy)
+        with patch('clearance.discovery.find',return_value=[]) as find:
+            a=night_runs.resume(a['id'],proposal=self.proposal(a,'search',query='fixture original'),db=self.db)
+            b=night_runs.resume(b['id'],proposal=self.proposal(b,'search',query='fixture replication'),db=self.db)
+        self.assertEqual(find.call_count,1)
+        self.assertEqual(b['stop_reason'],'budget exhausted')
+        self.assertEqual(b['usage']['discovery_calls'],0)
+
+    def test_live_requires_shared_policy(self):
+        a=self.start()
+        with patch('clearance.discovery.find',side_effect=AssertionError('no paid call')):
+            result=night_runs.resume(a['id'],proposal=self.proposal(a,'search',query='fixture'),live=True,db=self.db)
+        self.assertEqual(result['status'],'paused')
+        self.assertEqual(result['usage']['discovery_calls'],0)
+
+    def test_unknown_interrupt_never_retries(self):
+        a=self.start()
+        with patch('clearance.research.investigate',side_effect=KeyboardInterrupt) as invoke:
+            with self.assertRaises(KeyboardInterrupt):
+                night_runs.resume(a['id'],proposal=self.proposal(a,'search',query='fixture'),db=self.db)
+            result=night_runs.resume(a['id'],proposal=self.proposal(a,'search',query='fixture'),db=self.db)
+        self.assertEqual(invoke.call_count,1)
+        self.assertEqual(result['status'],'needs_reconciliation')
+        self.assertEqual(result['usage']['discovery_calls'],1)
+
+    def test_restart_started_operation_is_unknown(self):
+        a=self.start()
+        night_runs._reserve(a,{'reasoning_calls':1},'reasoning',{},self.db,False)
+        with patch('clearance.research.investigate',side_effect=AssertionError('no replay')):
+            result=night_runs.resume(a['id'],db=self.db)
+        self.assertEqual(result['steps'][0]['state'],'unknown')
+        self.assertEqual(result['status'],'needs_reconciliation')
+
+    def test_cancel_preserves_case(self):
+        a=self.start()
+        result=night_runs.cancel(a['id'],db=self.db)
+        self.assertEqual(result['status'],'cancelled')
+        self.assertEqual(night_runs.resume(a['id'],db=self.db)['status'],'cancelled')
+        self.assertEqual(cases.get(a['case_id'],db=self.db)['version'],1)
+
+    def test_source_instructions_cannot_select_shell(self):
+        a=self.start()
+        with self.assertRaises(ValueError):night_runs.resume(a['id'],proposal=self.proposal(a,'shell',command='touch /tmp/no'),db=self.db)
+        self.assertEqual(night_runs.get(a['id'],db=self.db)['steps'],[])
+
+
+if __name__=='__main__':unittest.main()
