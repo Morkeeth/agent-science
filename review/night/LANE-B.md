@@ -30,3 +30,14 @@ Remaining limits:
 - Retraction/supersession controls use available metadata; no online metadata lookup is performed.
 - Challenge/falsification text has structural validation, not proof that the proposed test is decisive.
 - build exposes claim state and competing interpretations but does not automatically choose a winner or aggregate an effect estimate.
+
+## Replay acceptance follow-up — visible unresolved scope
+
+Context-only conclusions now expose an `unresolved relationship` gap. Different-scope assessments expose an `unresolved scope` gap with explicit wording that scope mismatch is not evidence of no effect. Sources with no active interpretation expose `unassessed evidence`. Actual authored support plus context retains `SUPPORTED_AS_ASSESSED`; a separate different-scope source still names its applicability gap without changing the supported claim into a no-effect conclusion.
+
+```text
+python3 -m pytest -q tests/test_studies_synthesis.py tests/test_research_expansion.py
+43 passed in 0.96s
+```
+
+The five added artificial-fixture cases exercise context-only, different-scope-only, source-data-only, support+context and support+different-scope answers. No provider calls or private case data.

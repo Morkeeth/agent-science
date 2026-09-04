@@ -145,9 +145,20 @@ def build(case_data):
                 'authorship':assessment['authorship'], 'meaning':MEANING, 'evidence_version':assessment['evidence_version']}
             conclusions.append(conclusion)
             if state != 'CURRENT' or assessment['relation'] == 'unresolved': gaps.append({'claim_id':claim['id'], 'reason':state if state != 'CURRENT' else 'unresolved'})
+            if state == 'CURRENT' and conclusion['relation'] == 'different_scope':
+                gaps.append({'claim_id':claim['id'], 'assessment_id':assessment['id'],
+                    'reason':'unresolved scope',
+                    'meaning':'This source concerns a different scope. Its relevance to the claim remains unresolved; scope mismatch is not evidence of no effect.'})
+            elif state == 'CURRENT' and conclusion['claim_state'] == 'UNRESOLVED' and assessment['relation'] == 'context':
+                gaps.append({'claim_id':claim['id'], 'assessment_id':assessment['id'],
+                    'reason':'unresolved relationship',
+                    'meaning':'Context alone does not establish support or contradiction for this claim.'})
             if not conclusion['strongest_challenge'] or not conclusion['what_would_change']:
                 gaps.append({'claim_id':claim['id'], 'reason':'missing challenge or falsification condition'})
         if not claim['assessments']: gaps.append({'claim_id':claim['id'], 'reason':'unassessed'})
+    if not conclusions and evidence:
+        gaps.append({'reason':'unassessed evidence', 'evidence_ids':list(evidence),
+            'meaning':'Saved sources have no active authored interpretation; their relationship to the question is unresolved.'})
     gaps += [{'url':u, 'reason':'unread citation'} for u in brief['unread_report_citations']]
     gaps += [{'evidence_id':e['id'], 'reason':'source unavailable'} for e in evidence.values() if e.get('status') == 'UNAVAILABLE']
     return {'case_id':case_data['id'], 'version':case_data['version'], 'question':case_data['question'],

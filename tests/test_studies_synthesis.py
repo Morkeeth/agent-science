@@ -188,3 +188,34 @@ def test_local_measurements_remove_script_and_output(saved):
         'runs':[{'output_tail':'private output','exit_code':0}]}]
     measurement=synthesis.build(data)['local_measurements'][0]
     assert 'acceptance_source' not in measurement and 'output_tail' not in measurement['runs'][0]
+
+
+@pytest.mark.parametrize('relation,reason', [('context','unresolved relationship'), ('different_scope','unresolved scope')])
+def test_context_only_conclusion_exposes_unresolved_gap(saved,relation,reason):
+    db,data=saved
+    updated=synthesis.apply(data['id'],1,{'findings':[finding(relation=relation)]},db=db)
+    answer=synthesis.build(updated)
+    assert answer['conclusions'][0]['claim_state']=='UNRESOLVED'
+    assert answer['conclusions'][0]['relation']==relation
+    assert reason in {g['reason'] for g in answer['gaps']}
+    if relation=='different_scope':
+        assert 'not evidence of no effect' in next(g['meaning'] for g in answer['gaps'] if g['reason']==reason)
+
+
+def test_source_data_without_interpretation_exposes_gap(saved):
+    _,data=saved
+    answer=synthesis.build(data)
+    assert answer['conclusions']==[]
+    assert {'reason':'unassessed evidence','evidence_ids':['e1'],
+        'meaning':'Saved sources have no active authored interpretation; their relationship to the question is unresolved.'} in answer['gaps']
+
+
+@pytest.mark.parametrize('context_relation', ['context','different_scope'])
+def test_support_plus_context_preserves_supported_claim_state(saved,context_relation):
+    db,data=saved
+    updated=synthesis.apply(data['id'],1,{'findings':[finding(),finding(relation=context_relation)]},db=db)
+    answer=synthesis.build(updated)
+    assert {c['claim_state'] for c in answer['conclusions']}=={'SUPPORTED_AS_ASSESSED'}
+    assert {c['relation'] for c in answer['conclusions']}=={'supports',context_relation}
+    assert 'unresolved relationship' not in {g['reason'] for g in answer['gaps']}
+    assert ('unresolved scope' in {g['reason'] for g in answer['gaps']}) == (context_relation=='different_scope')
