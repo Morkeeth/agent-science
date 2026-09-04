@@ -309,7 +309,7 @@ Full record: `fleet-ops (internal)/retros/QWEN-LOSS-RETRO-2026-08-30.md` (correc
 
 ## 🎯 NOW — Night wave 2026-09-04 (artifact claims + pack truth)
 
-**Slice:** Close PRIOR LOSS "every artifact claim measured at submitted commit" with a falsifiable gate + baseline arm; refresh SUBMISSION-PACK / STATUS at object; honest live-compound BLOCKED; deploy prep only (no deploy).
+**Slice:** Close PRIOR LOSS "every artifact claim measured at submitted commit" with a falsifiable gate + baseline arm; refresh SUBMISSION-PACK / STATUS at object; hosted live compound; deploy prep only (no deploy).
 
 ### Build (shipped 2026-09-04)
 
