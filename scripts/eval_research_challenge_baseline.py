@@ -79,12 +79,14 @@ def main():
 
     result = {
         'question': QUESTION,
+        'null_contradict_assessments': 0,
         'naive_contradict_assessments': naive_score,
         'adaptive_contradict_assessments': adaptive_score,
-        'adaptive_wins': adaptive_score > naive_score,
+        'adaptive_wins': adaptive_score > naive_score and adaptive_score > 0,
         'challenge_run_id': run['id'],
         'challenge_stop_reason': run.get('stop_reason'),
         'meaning': (
+            'Null arm = always-silent (no investigation). '
             'Naive arm = fixed create/refresh without an overturn map. '
             'Adaptive arm = research challenge against a pinned supported claim. '
             'Scores count CURRENT contradicts assessments only.'
