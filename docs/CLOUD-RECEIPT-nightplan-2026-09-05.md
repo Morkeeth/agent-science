@@ -2,7 +2,7 @@
 
 **Branch:** `cursor/nightplan-research-engine-b1eb`  
 **Baseline (plan):** `69cc6b12a802789ebb0cfac8951233c6218dfc3f`  
-**HEAD:** `0614d7ef1a0164c13fece93bc65026d2568e2a26`  
+**HEAD at receipt write:** run `git rev-parse origin/cursor/nightplan-research-engine-b1eb` (do not trust a stale hardcoded SHA)  
 **Session:** cloud agent · 2026-09-04/05 overnight
 
 ## Status
