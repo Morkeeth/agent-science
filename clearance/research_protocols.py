@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 import subprocess
 import uuid
+import tempfile
 
 from clearance import cases
 
@@ -46,18 +47,26 @@ def create(case_id, fields, *, root=None, protocol_id=None, db=None):
     if set(fields) - allowed:
         raise ValueError('unknown protocol fields: ' + ', '.join(sorted(set(fields) - allowed)))
     body = dict(fields)
+    kind = body.get('kind', 'code_change')
+    if not isinstance(kind, str) or not kind.strip():
+        raise ValueError('kind must be nonempty text')
     if root:
         body['repo'] = root
     missing = [field for field in REQUIRED if not body.get(field)]
-    for field in ('hypothesis', 'stopping_rule'):
+    for field in ('hypothesis', 'stopping_rule', 'baseline', 'intervention', 'repo'):
         if field in body and (not isinstance(body[field], str) or not body[field].strip()):
             raise ValueError(field + ' must be nonempty text')
     for field in ('claim_refs', 'tasks', 'outcomes'):
         if body.get(field) and not isinstance(body[field], list):
             raise ValueError(field + ' must be a list')
+    for field in ('tasks', 'outcomes'):
+        if any(not isinstance(value, str) or not value.strip() for value in body.get(field, [])):
+            raise ValueError(field + ' require nonempty text entries')
     for ref in body.get('claim_refs', []):
         if not isinstance(ref, dict) or not {'claim_id', 'version'} <= ref.keys():
             raise ValueError('claim_refs require claim_id and version')
+        if type(ref['version']) is not int or not 1 <= ref['version'] <= case['version']:
+            raise ValueError('claim reference version must be an existing case version')
         cited = cases.get(case_id, db=db, version=ref['version'])
         if ref['claim_id'] not in {c['id'] for c in cited.get('claims', [])}:
             raise ValueError('cited claim not found in pinned case version')
@@ -71,16 +80,15 @@ def create(case_id, fields, *, root=None, protocol_id=None, db=None):
             raise ValueError('budget requires runs, timeout and basis')
         if type(budget['runs']) is not int or not 1 <= budget['runs'] <= 10 or type(budget['timeout']) is not int or not 1 <= budget['timeout'] <= 300 or not isinstance(budget['basis'], str) or not budget['basis'].strip():
             raise ValueError('invalid comparison budget')
-    if body.get('repo'):
+    if body.get('repo') and kind == 'code_change':
         for key in ('baseline', 'intervention'):
             if body.get(key):
                 body[key] = _pin(body['repo'], body[key])
     if body.get('baseline') and body.get('baseline') == body.get('intervention'):
         raise ValueError('baseline and intervention must differ')
-    kind = body.get('kind', 'code_change')
     if kind == 'code_change' and not body.get('check_sha256'):
         missing.append('check_sha256')
-    if body.get('check_sha256') and (len(body['check_sha256']) != 64 or any(c not in '0123456789abcdef' for c in body['check_sha256'])):
+    if body.get('check_sha256') and (not isinstance(body['check_sha256'], str) or len(body['check_sha256']) != 64 or any(c not in '0123456789abcdef' for c in body['check_sha256'])):
         raise ValueError('check_sha256 must be a lowercase SHA256 digest of the trusted acceptance script')
     with closing(_connect(db)) as con, con:
         con.execute('BEGIN IMMEDIATE')
@@ -106,15 +114,36 @@ def execute(protocol_id, *, check, trusted=False, version=None, db=None):
     if cases.get(plan['case_id'], db=db)['version'] != plan['case_version']:
         raise ValueError('case changed; create a new protocol version before execution')
     path = Path(check).resolve()
-    if hashlib.sha256(path.read_bytes()).hexdigest() != plan['check_sha256']:
+    if not path.is_file() or path.suffix != '.py':
+        raise ValueError('check must be a Python acceptance script')
+    with path.open('rb') as stream:
+        script = stream.read(200_001)
+    if len(script) > 200_000:
+        raise ValueError('acceptance script exceeds 200 KB')
+    if hashlib.sha256(script).hexdigest() != plan['check_sha256']:
         raise ValueError('acceptance script differs from the frozen protocol')
     receipt = {'id': uuid.uuid4().hex, 'protocol_id': protocol_id, 'protocol_version': plan['version'],
                'state': 'RUNNING', 'started_at': cases.now(), 'experiment_id': None}
     with closing(_connect(db)) as con, con:
+        con.execute('BEGIN IMMEDIATE')
+        prior = con.execute('SELECT body FROM night_protocol_executions WHERE protocol_id=? AND protocol_version=?',
+                            (protocol_id, plan['version'])).fetchone()
+        if prior:
+            saved = json.loads(prior['body'])
+            if saved['state'] in ('COMPLETED', 'INVALID'):
+                return saved
+            raise ValueError('protocol has an unfinished or failed execution; inspect it and create a new protocol version before retrying')
         con.execute('INSERT INTO night_protocol_executions VALUES(?,?,?,?,?)', (receipt['id'], protocol_id, plan['version'], receipt['state'], json.dumps(receipt)))
     try:
-        result = experiments.compare(plan['case_id'], repo=plan['repo'], baseline=plan['baseline'], candidate=plan['intervention'], check=str(path), runs=plan['budget']['runs'], timeout=plan['budget']['timeout'], db=db)
-        receipt.update(state='COMPLETED', experiment_id=result['id'], result=result)
+        # Freeze once before execution. The caller's path can change independently.
+        with tempfile.TemporaryDirectory(prefix='science-protocol-') as directory:
+            captured = Path(directory) / 'acceptance.py'
+            captured.write_bytes(script)
+            result = experiments.compare(plan['case_id'], repo=plan['repo'], baseline=plan['baseline'], candidate=plan['intervention'], check=str(captured), runs=plan['budget']['runs'], timeout=plan['budget']['timeout'], db=db)
+        valid = result.get('valid', False) and result.get('acceptance_sha256') == plan['check_sha256']
+        receipt.update(state='COMPLETED' if valid else 'INVALID', experiment_id=result['id'], result=cases.experiment_summary(result))
+        if not valid:
+            receipt['error'] = 'Runner result is invalid or differs from the protocol acceptance digest.'
     except Exception as exc:
         receipt.update(state='FAILED', error=str(exc))
         raise

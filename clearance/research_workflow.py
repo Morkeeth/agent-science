@@ -1,6 +1,5 @@
 """Local research actions shared by the terminal and MCP; no code execution."""
 from contextlib import closing
-import json
 
 from clearance import cases
 
@@ -30,10 +29,13 @@ def updates(*, db=None):
         if current['version'] == item['version']:
             continue
         report = synthesis.compare(item['case_id'], item['version'], db=db)
-        affected = [d['id'] for d in current['decisions'] if d.get('review', {}).get('state') not in (None, 'CURRENT', 'SUPERSEDED')]
+        if not report.get('material_change', report.get('changed', False)):
+            continue
+        affected = [d['id'] for d in report.get('affected_decisions', [])]
         changes.append({'case_id': item['case_id'], 'from_version': item['version'],
-                        'version': current['version'], 'affected_decisions': affected, 'changes': report})
-    changes.sort(key=lambda x: (-len(x['affected_decisions']), x['case_id']))
+                        'version': current['version'], 'affected_decisions': affected,
+                        'affected_claim_ids': report.get('affected_claim_ids', []), 'changes': report})
+    changes.sort(key=lambda x: (-len(x['affected_decisions']), -len(x['affected_claim_ids']), x['case_id']))
     return {'updates': changes, 'followed_count': len(followed), 'checked_online': False,
             'message': 'Saved changes since follow; no web check performed.' if changes else 'No saved changes since the followed versions. No web check performed.'}
 
@@ -49,6 +51,9 @@ def handle(arguments):
         return follow(arguments['case_id'], db=db)
     if action == 'updates':
         return updates(db=db)
+    if action == 'protocol':
+        from clearance import research_protocols
+        return research_protocols.get(arguments['protocol_id'], version=arguments.get('version'), db=db)
     if action == 'experiment-plan':
         from clearance import research_protocols
         return research_protocols.create(arguments['case_id'], arguments.get('protocol', {}),

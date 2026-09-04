@@ -3,8 +3,6 @@ import argparse
 import hashlib
 import json
 import subprocess
-import sys
-import types
 from copy import deepcopy
 
 import pytest
@@ -17,17 +15,16 @@ def case_store(tmp_path):
     data = {'id': 'case-local', 'version': 1, 'question': 'Does the change pass the fixed acceptance task?',
             'created_at': cases.now(), 'checked_at': 'baseline-marker', 'repo': None,
             'official_domains': [], 'provided_sources': [], 'evidence': [], 'trace': [], 'limits': [],
-            'claims': [{'id': 'claim-local', 'statement': 'Candidate should produce the expected output.'}]}
+            'claims': [{'id': 'claim-local', 'statement': 'Candidate should produce the expected output.', 'assessments': [], 'source_urls': []}]}
     return db, cases._save(data, db=db)
 
 
-def test_follow_reads_do_not_acknowledge_or_check_web(case_store, monkeypatch):
+def test_follow_reads_do_not_acknowledge_or_check_web(case_store):
     db, case = case_store
     assert workflow.follow(case['id'], db=db)['version'] == 1
-    monkeypatch.setitem(sys.modules, 'clearance.synthesis', types.SimpleNamespace(compare=lambda *a, **kw: {'conclusions_changed': ['new condition']}))
+    from clearance import synthesis
     assert workflow.updates(db=db)['updates'] == []
-    case['version'] = 2
-    cases._save(case, db=db)
+    synthesis.apply(case['id'], 1, {'findings': [{'statement': 'The claim remains unresolved.', 'relation': 'unresolved', 'rationale': 'No primary evidence inspected yet.'}]}, db=db)
     first = workflow.updates(db=db)
     assert first == workflow.updates(db=db)
     assert first['checked_online'] is False
