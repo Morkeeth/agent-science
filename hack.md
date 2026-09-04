@@ -574,7 +574,7 @@ bash scripts/verify_cold_clone.sh                                               
 
 | When | What | Command | Outcome |
 |------|------|---------|---------|
-| 2026-09-04 night | Partner honesty night | `partner_honesty_exhibit.py` · `verify_partners_hosted.sh` · evals | **FINDING_RED** soft≠sealed · naive Parallel drop = **log_hits** (search-cache diagnosis retracted) · partners 4/4 · ADK on `/clear` · baseline 5/6 vs 6/6 · track brief on README/PITCH · SUBMISSION public row fixed |
+| 2026-09-04 night | Partner honesty night | `partner_honesty_exhibit.py` · `verify_partners_hosted.sh` · evals | **FINDING_RED** soft≠sealed · naive Parallel drop = **log_hits** (search-cache diagnosis retracted) · warm mini A=0→B=1 gate bug fixed · `search_cache_hits` meter · partners 4/4 · ADK on `/clear` · **128/128** · baseline 5/6 vs 6/6 · track brief on README/PITCH · SUBMISSION public row fixed |
 | 2026-09-03 night | Fresh compound + timeout finding | `compound_fresh_hosted_probe.py` · `verify_partners_hosted.sh` | **A≥1 Parallel → B drop** · orphan-works Run A **504** @ 300s |
 | 2026-09-03 night | SUBMISSION-PACK + Qwen gates | `bench_check_docs.py` · `eval_verify_holdout.py` · `eval_scorer_symmetry.py` | **127/127** · holdout OK · scorer 5/6 vs 6/6 · offline compound A=2→B=1 |
 | 2026-09-02 | Partner verify re-run | `verify_partners_hosted.sh` · `full_gate.sh` | **4/4 partners** · compound warm-shelf PASS · 72/72 auto-seed |
