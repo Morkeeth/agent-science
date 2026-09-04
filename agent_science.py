@@ -55,25 +55,13 @@ WHY = {
 
 
 def _claim_key(text: str, subject: str, must_contain: str = "") -> str:
-    """What makes two claims THE SAME claim.
+    """Identity includes the entire assertion and its production scope.
 
-    Keying on full claim text meant the corpus could only ever compound when the
-    identical sentence recurred - i.e. when the SAME script was re-run. Two productions
-    about the same event phrase the same fact differently, so the hit rate against a
-    genuinely different script was zero by construction, and the pitch's "the second
-    production costs a fraction of the first" was measuring a re-run, not a second
-    production.
-
-    The distinctive term is what identifies the fact: "Directive 2012/28/EU" is the
-    same fact whether the sentence around it says adopted, passed or came into force.
-    Fall back to the full text when a claim has no distinctive term, because keying
-    everything to an empty string would collide unrelated claims - a false cache hit,
-    which is worse than a miss.
+    Anchors retrieve evidence; they cannot equate different predicates, values or
+    negation. Old anchor-keyed rows intentionally miss until re-evaluated.
     """
-    ident = (must_contain or "").strip().lower()
-    basis = ident if len(ident) >= 6 else text.strip().lower()
-    h = hashlib.sha256(f"{subject}\0{basis}".encode()).hexdigest()
-    return h[:20]
+    basis = refusal_log.norm_term(text)
+    return hashlib.sha256(f"{subject}\0{basis}".encode()).hexdigest()
 
 
 def _use(subject: str) -> str:
@@ -98,23 +86,13 @@ def _log_db() -> Path:
 
 
 def _term_of(claim: Claim) -> str:
-    """The distinctive term a cross-production reuse keys on.
-
-    Mirror _claim_key: use the must-contain span when it is substantial, else fall back
-    to the full assertion. Keying an empty/short term would collide unrelated claims —
-    a false cross-subject hit, which is worse than a miss.
-    """
+    """A retrieval anchor; the log independently binds the complete assertion."""
     ident = (claim.must_contain or "").strip()
     return ident if len(ident) >= 6 else claim.text
 
 
 def _log_record(logcon, *, term: str, claim: Claim, v: Verdict, production: str) -> None:
-    """Establish this claim in the cross-production log — clears AND refusals.
-
-    A refusal carries what WOULD settle it (resolves_with); that is the negative-space
-    asset no competitor accumulates. INSERT-OR-IGNORE inside record() means the first
-    production to establish a (term, slot) wins forever, so this is free for the next.
-    """
+    """Store a current observation and retain previous observations in history."""
     is_green = v.verdict == GREEN
     basis = None
     if is_green:
@@ -130,15 +108,13 @@ def _log_record(logcon, *, term: str, claim: Claim, v: Verdict, production: str)
 def _present(v: Verdict) -> str:
     if v.verdict == GREEN:
         return "SOURCED"
+    if v.verdict == "RED":
+        return "REFUTED"
     return LABEL.get(v.cause or "", "UNSOURCED")
 
 
 def _row(v: Verdict, *, corpus_hit: bool = False, asked_as: str = "") -> dict:
-    # A corpus hit keyed on the distinctive term is LOOSER than one keyed on the whole
-    # sentence: two different assertions sharing a term - "2012/28/EU was passed in
-    # 2012" and "2012/28/EU was known as the Orphan Works Directive" - can key the same.
-    # We cannot decide structurally whether that is the same fact, so the substitution
-    # is PRINTED. The reader sees which claim the reused evidence was originally about.
+    # Preserve wording provenance if a caller supplies a different display spelling.
     reused_from = (v.subject_title if corpus_hit and asked_as
                    and asked_as.strip().lower() != v.subject_title.strip().lower()
                    else None)
@@ -183,10 +159,7 @@ def clear_script(
     prior_run = run_history.prior(subject)
     db = corpus_db or corpus.DB
     con = corpus.connect(db)
-    # The cross-production log: the per-subject corpus compounds within ONE subject; this
-    # compounds across EVERY subject that ever ran. A claim proven (or proven-unprovable)
-    # on one subject is reused on the next, keyed on its distinctive term. This is the
-    # moat that was built (clearance/refusal_log.py) but imported nowhere until now.
+    # Same-subject results must respect later observations from other productions.
     logcon = refusal_log.connect(log_db or _log_db())
     extractor = GeminiExtractor(model=model)
     claims_raw = extractor.extract(script)
@@ -203,7 +176,13 @@ def clear_script(
     for c in claims:
         key = _claim_key(c.text, subject, c.must_contain)
         use = _use(subject)
-        hit = corpus.recall(con, key, use)
+        latest = refusal_log.search_registry(logcon, c.text, log=False, reuse=False)
+        hit = corpus.recall(con, key, use, assertion=c.text)
+        if hit and latest.get("established"):
+            if latest.get("unsettled") or any(
+                    getattr(hit, field) != latest.get(field)
+                    for field in ("verdict", "cause", "citation_url", "quoted_terms")):
+                hit = None
         if hit:
             corpus_hits += 1
             reason = f"corpus_hit — {hit.reason}"
@@ -221,18 +200,11 @@ def clear_script(
             rows.append(_row(v, corpus_hit=True, asked_as=c.text))
             continue
 
-        # CROSS-SUBJECT REUSE. The per-subject corpus missed. Before spending a Parallel
-        # search, ask the cross-production log — keyed on the distinctive TERM, so a
-        # differently-worded assertion about the same fact still hits, and a
-        # proven-unprovable claim stays refused without re-searching. This is what makes
-        # a refusal on subject A free on subject B.
+        # Reuse only the current, exact settled assertion. A later uncertain
+        # query also invalidates prior support, even before claims are updated.
         term = _term_of(c)
-        log_row = refusal_log.lookup(logcon, term=term, assertion=c.text)
-        # Independence flags are unfinished work, not settled refusals. Reusing them
-        # forever blocked EUR-Lex primary clears on the hosted shelf.
-        if log_row and not refusal_log.is_settled_for_reuse(
-                verdict=log_row.get("verdict"), cause=log_row.get("cause")):
-            log_row = None
+        log_row = (refusal_log.lookup(logcon, term=term, assertion=c.text)
+                   if latest.get("established") and not latest.get("unsettled") else None)
         if log_row:
             log_hits += 1
             green = log_row["verdict"] == GREEN
@@ -277,8 +249,7 @@ def clear_script(
             quoted_terms=v.quoted_terms,
         )
         corpus.remember(con, [store])
-        # Establish it in the cross-production log too, so the NEXT subject that shares
-        # this distinctive term reuses it — the compounding that crosses subjects.
+        # Publish this observation to the shared current view for other subjects.
         _log_record(logcon, term=term, claim=c, v=v, production=subject)
         rows.append(_row(
             Verdict(
