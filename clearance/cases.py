@@ -5,6 +5,8 @@ Private repo context stays in the local case store and is never a search query.
 """
 from __future__ import annotations
 
+from contextlib import closing
+
 import hashlib
 import json
 import os
@@ -40,11 +42,17 @@ def connect(db=None):
             statement TEXT,rationale TEXT,evidence_ids TEXT,created_at TEXT);
         CREATE TABLE IF NOT EXISTS experiments(id TEXT PRIMARY KEY,case_id TEXT,body TEXT NOT NULL);
     ''')
+    columns = {r[1] for r in con.execute('PRAGMA table_info(decisions)')}
+    if 'supersedes' not in columns:
+        con.execute('ALTER TABLE decisions ADD COLUMN supersedes TEXT')
+        con.commit()
+    con.execute('CREATE UNIQUE INDEX IF NOT EXISTS one_decision_successor ON decisions(supersedes) WHERE supersedes IS NOT NULL')
+    con.commit()
     return con
 
 
 def get(case_id, *, db=None, version=None):
-    with connect(db) as con:
+    with closing(connect(db)) as con, con:
         row = con.execute('SELECT body FROM revisions WHERE case_id=? AND (? IS NULL OR version=?) ORDER BY version DESC LIMIT 1',
                           (case_id, version, version)).fetchone()
         if row is None:
@@ -56,6 +64,11 @@ def get(case_id, *, db=None, version=None):
             original = con.execute('SELECT body FROM revisions WHERE case_id=? AND version=?',(case_id,d['version'])).fetchone()
             old = json.loads(original['body']) if original else {}
             d['review'] = decision_review(d, old, out)
+        successors = {d['supersedes']: d['id'] for d in out['decisions'] if d.get('supersedes')}
+        for d in out['decisions']:
+            if d['id'] in successors:
+                d['superseded_by'] = successors[d['id']]
+                d['review']['state'] = 'SUPERSEDED'
         out['coverage'] = coverage(out['evidence'])
         reads=[e for e in out['trace'] if e['route']=='document' and e['outcome']=='read']
         out['freshness']={'new_fetches':sum(not e.get('cache_hit',False) for e in reads),
@@ -65,9 +78,9 @@ def get(case_id, *, db=None, version=None):
         return out
 
 
-def recent(*, db=None, limit=20):
-    with connect(db) as con:
-        ids = [r['id'] for r in con.execute('SELECT id FROM cases ORDER BY created_at DESC LIMIT ?', (max(1,min(limit,100)),))]
+def recent(*, db=None, limit=20, offset=0):
+    with closing(connect(db)) as con, con:
+        ids = [r['id'] for r in con.execute('SELECT id FROM cases ORDER BY created_at DESC LIMIT ? OFFSET ?', (max(1,min(limit,100)),max(0,offset)))]
     return [get(i, db=db) for i in ids]
 
 
@@ -113,7 +126,7 @@ def _kind(url, official_domains):
     return 'web_source'
 
 
-def _collect(question, *, live=False, refresh=False, sources=(), official_domains=(), max_per_angle=2, excerpts=None, titles=None, origin_angles=None, include_discovery=False):
+def _collect(question, *, live=False, refresh=False, sources=(), official_domains=(), max_per_angle=2, excerpts=None, titles=None, origin_angles=None, include_discovery=False, max_documents=None):
     evidence, trace, seen = [], [], set()
     angles = [
         ('research', 'Find empirical research with methods, sample sizes and limitations relevant to: '+question, question+' empirical study'),
@@ -133,6 +146,9 @@ def _collect(question, *, live=False, refresh=False, sources=(), official_domain
     for angle, candidate in candidates:
         if candidate.url in seen:
             trace.append({'route':'document','angle':angle,'url':candidate.url,'outcome':'skipped','reason':'duplicate URL'})
+            continue
+        if max_documents is not None and len(evidence) >= max_documents:
+            trace.append({'route':'document','angle':angle,'url':candidate.url,'outcome':'skipped','reason':'case source limit reached'})
             continue
         seen.add(candidate.url)
         entry = {'id': digest(candidate.url)[:16], 'url':candidate.url,'title':candidate.title,
@@ -160,7 +176,7 @@ def _collect(question, *, live=False, refresh=False, sources=(), official_domain
 
 
 def _save(data, *, db=None):
-    with connect(db) as con:
+    with closing(connect(db)) as con, con:
         con.execute('INSERT OR IGNORE INTO cases VALUES(?,?)',(data['id'],data['created_at']))
         try:
             con.execute('INSERT INTO revisions VALUES(?,?,?)',(data['id'],data['version'],json.dumps(data)))
@@ -169,7 +185,7 @@ def _save(data, *, db=None):
     return get(data['id'],db=db)
 
 
-def create(question, *, root=None, live=False, sources=(), official_domains=(), db=None):
+def create(question, *, root=None, live=False, sources=(), official_domains=(), db=None, max_documents=None):
     question = question.strip()
     if not question or len(question)>1500:
         raise ValueError('question must contain 1–1500 characters')
@@ -179,7 +195,7 @@ def create(question, *, root=None, live=False, sources=(), official_domains=(), 
     if any(not re.fullmatch(r'[a-z0-9.-]+',d) or '.' not in d for d in official_domains):
         raise ValueError('official domains must be hostnames')
     context = repo_context(root)
-    evidence, trace = _collect(question,live=live,sources=sources,official_domains=official_domains)
+    evidence, trace = _collect(question,live=live,sources=sources,official_domains=official_domains,max_documents=max_documents)
     data = {'id':uuid.uuid4().hex[:12],'version':1,'question':question,'created_at':now(),
             'checked_at':now(),'repo':context,'official_domains':official_domains,'provided_sources':list(sources),
             'evidence':evidence,'trace':trace,'limits':['A verified quote proves occurrence in a source; its relationship to the question still needs assessment.',
@@ -208,12 +224,12 @@ def changes(old, new):
     return out
 
 
-def refresh(case_id, *, live=False, db=None):
+def refresh(case_id, *, live=False, db=None, max_documents=None):
     old=get(case_id,db=db)
     # Revisit every cited URL even if the discovery rankings have changed.
     sources=list(dict.fromkeys(old['provided_sources']+[e['url'] for e in old['evidence']]))
     evidence,trace=_collect(old['question'],live=live,refresh=live,sources=sources,official_domains=old['official_domains'],
-        excerpts={e['url']:e.get('quote') for e in old['evidence']},titles={e['url']:e.get('title') for e in old['evidence']},origin_angles={e['url']:e.get('angle') for e in old['evidence']},include_discovery=not old['provided_sources'])
+        excerpts={e['url']:e.get('quote') for e in old['evidence']},titles={e['url']:e.get('title') for e in old['evidence']},origin_angles={e['url']:e.get('angle') for e in old['evidence']},include_discovery=not old['provided_sources'],max_documents=max_documents)
     new={k:v for k,v in old.items() if k not in ('decisions','experiments','coverage','freshness')}
     new.update(version=old['version']+1,checked_at=now(),evidence=evidence,trace=trace)
     if old.get('repo'):
@@ -230,24 +246,28 @@ def decision_review(decision, original, current):
             'meaning':'This compares saved evidence versions. Check freshness.new_fetches to see whether the web was checked. Changes require review, not automatic reversal.'}
 
 
-def decide(case_id, statement, rationale, evidence_ids, *, db=None):
+def decide(case_id, statement, rationale, evidence_ids, *, db=None, supersedes=None):
     data=get(case_id,db=db)
     if not statement.strip() or not rationale.strip() or not evidence_ids:
         raise ValueError('a decision needs a statement, rationale and at least one evidence ID')
     available={e['id'] for e in data['evidence'] if e['status']=='QUOTE_VERIFIED'}
     if not set(evidence_ids)<=available:
         raise ValueError('each evidence ID must name a verified quote in this case version')
+    if supersedes and not any(d['id']==supersedes and not d.get('superseded_by') for d in data['decisions']):
+        raise ValueError('supersedes must name an active decision in this case')
     did=uuid.uuid4().hex[:12]
-    with connect(db) as con:
-        con.execute('INSERT INTO decisions VALUES(?,?,?,?,?,?,?)',
-            (did,case_id,data['version'],statement.strip(),rationale.strip(),json.dumps(list(dict.fromkeys(evidence_ids))),now()))
+    with closing(connect(db)) as con, con:
+        if supersedes and con.execute('SELECT 1 FROM decisions WHERE case_id=? AND supersedes=?',(case_id,supersedes)).fetchone():
+            raise ValueError('decision was already superseded; reload')
+        con.execute('INSERT INTO decisions(id,case_id,version,statement,rationale,evidence_ids,created_at,supersedes) VALUES(?,?,?,?,?,?,?,?)',
+            (did,case_id,data['version'],statement.strip(),rationale.strip(),json.dumps(list(dict.fromkeys(evidence_ids))),now(),supersedes or None))
     return get(case_id,db=db)
 
 
 def record_experiment(case_id, result, *, db=None):
     get(case_id,db=db)
     result={**result,'id':uuid.uuid4().hex[:12],'case_id':case_id,'recorded_at':now()}
-    with connect(db) as con:
+    with closing(connect(db)) as con, con:
         con.execute('INSERT INTO experiments VALUES(?,?,?)',(result['id'],case_id,json.dumps(result)))
     return result
 

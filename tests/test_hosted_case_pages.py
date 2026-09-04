@@ -77,7 +77,9 @@ def test_new_case_form_contract_csrf_and_allowance_are_explicit():
     assert fields['csrf']['value']=='a<&"'
     uuid.UUID(fields['request_id']['value'])
     assert fields['question']['required'] is None
-    assert 'checked' not in fields['live']
+    assert 'checked' in fields['live']
+    assert 'Without live research, a new case stays empty' in text
+    assert 'Uses one research run' in text
     assert 'Live research sends your question to the search provider' in text
     assert 'research runs' in text and 'not dollar costs' in text
     assert 'Repository uploads' in P.login()

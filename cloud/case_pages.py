@@ -86,11 +86,11 @@ def review_count(case):
 
 
 def live_choice():
-    return ('<label class="check"><input type="checkbox" name="live" value="1">'
-            '<span><strong>Run live research</strong><br><span class="small muted">Live research sends your question to the search provider and fetches public sources. Leave off to use available cached sources.</span></span></label>')
+    return ('<label class="check"><input type="checkbox" name="live" value="1" checked>'
+            '<span><strong>Run live research</strong><br><span class="small muted">Live research sends your question to the search provider and fetches public sources. Uses one research run. Without live research, a new case stays empty; refresh can reread its saved sources.</span></span></label>')
 
 
-def dashboard(case_list, csrf, budget, error=''):
+def dashboard(case_list, csrf, budget, error='', page=1, has_more=False):
     budget = budget or {}
     attention = sum(review_count(c) for c in case_list)
     body = ('<div class="hero"><p class="eyebrow">Your research desk</p><h1>What would change<br>your decision?</h1>'
@@ -115,8 +115,8 @@ def dashboard(case_list, csrf, budget, error=''):
              '<section class="panel"><h3>Research allowance</h3><div class="tiles">')
     for key, label in (('used','Used'), ('limit','Configured limit'), ('remaining','Remaining')):
         body += f'<div class="tile"><strong>{esc(budget.get(key, "—"))}</strong><span class="meta">{label}</span></div>'
-    body += ('</div><p class="quiet">Units are research runs under this workspace’s configured limit. They are not dollar costs.</p></section></aside></div>'
-             '<section id="recent" class="section"><div class="section-head"><h2>Cases to return to</h2><span class="meta">Review required first · then recent</span></div>')
+    body += ('</div><p class="quiet">Units are research runs under this workspace’s configured limit. They are not dollar costs. Failed attempts count. The allowance resets at 00:00 UTC.</p></section></aside></div>'
+             '<section id="recent" class="section"><div class="section-head"><h2>Cases to return to</h2><span class="meta">Review required first on this page</span></div>')
     if not case_list:
         body += '<div class="empty"><h3>Your first case starts with one question.</h3><p>No saved cases yet. Create a case above to collect evidence and record a decision.</p></div>'
     for case in sorted(case_list, key=lambda c: bool(review_count(c)), reverse=True):
@@ -124,7 +124,13 @@ def dashboard(case_list, csrf, budget, error=''):
         badge = f'<span class="badge alert">REVIEW REQUIRED · {n}</span>' if n else '<span class="badge">Saved research case</span>'
         body += (f'<a class="case-row" href="/cases/{segment(case["id"])}">{badge}<h3>{esc(case.get("question"))} →</h3>'
                  f'<p class="meta">Version {esc(case.get("version"))} · {len(case.get("evidence", []))} sources · {len(case.get("decisions", []))} decisions<br>Last case revision {esc(case.get("checked_at"))}</p></a>')
-    return shell('Research cases', body + '</section>', csrf)
+    body += '<nav aria-label="Case pages" class="actions">'
+    if page > 1:
+        body += f'<a href="/cases?page={page-1}">← Newer cases</a>'
+    body += f'<span class="meta">Page {page}</span>'
+    if has_more:
+        body += f'<a href="/cases?page={page+1}">Older cases →</a>'
+    return shell('Research cases', body + '</nav></section>', csrf)
 
 
 KINDS = {'research_repository':'Research repository', 'declared_official':'Declared official source', 'web_source':'Other web source'}
