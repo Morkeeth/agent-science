@@ -22,7 +22,7 @@ The output includes a run ID, a case ID, the current question map and its missin
 
 ## Inspect, continue and challenge
 
-Use the IDs returned by start:
+Use the IDs returned by start. To continue from existing evidence, use `research start "question" --case-id CASE_ID`:
 
 ```text
 agent-science research show RUN_ID
@@ -67,7 +67,7 @@ After approving a bounded policy, supply it on `research start --policy 'JSON_OB
 }
 ```
 
-These are example ceilings, not measured quality thresholds or spending approval. Reuse the aggregate ID for runs sharing one allowance. Dollar costs can remain unknown. Once configured and authorized, the explicit terminal command is `research resume RUN_ID --reasoner gemini --live`. Without those environment values it reports the missing configuration. Supplying `--reasoner` can call the model even when discovery is offline; it still requires the aggregate policy. No paid calls were made for the overnight implementation checks.
+These are example ceilings, not measured quality thresholds or spending approval. Reuse the aggregate ID for runs sharing one allowance. The allowance is shared within the selected cases database. Dollar costs can remain unknown. Engine usage counts exclude host reasoning and separate `science_case` source reads; they are not the total cost of an MCP session. Once configured and authorized, the explicit terminal command is `research resume RUN_ID --reasoner gemini --live`. Without those environment values it reports the missing configuration. Supplying `--reasoner` can call the model even when discovery is offline; it still requires the aggregate policy. No paid calls were made for the overnight implementation checks.
 
 MCP hosts can reason themselves and supply proposals. They cannot use `science_research` to execute repository scripts. Explicit `live:true` applies to source work requested in the proposal and still requires the policy.
 

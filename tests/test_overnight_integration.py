@@ -90,3 +90,27 @@ def test_no_raw_experiment_output_in_new_answer_surface(tmp_path):
     output=json.dumps(synthesis.build(data))
     assert 'PRIVATE_SCRIPT_SENTINEL' not in output
     assert 'PRIVATE_OUTPUT_SENTINEL' not in output
+
+
+def test_context_drilldown_keeps_selected_store_and_stale_run_is_visible(tmp_path):
+    from clearance import night_runs
+    db=tmp_path/'cases.db';data=seed(db)
+    run=night_runs.start(data['question'],case_id=data['id'],db=db)
+    context=night_runs.context(run['id'],db=db)
+    assert context['evidence'][0]['inspect_more']['db']==str(db)
+    assert not context['case_changed_outside_run']
+    synthesis.apply(data['id'],1,{'findings':[finding(data)]},db=db)
+    context=night_runs.context(run['id'],db=db)
+    assert context['case_changed_outside_run']
+    assert context['run_case_version']==1 and context['case_version']==2
+
+
+def test_cli_existing_case_and_broken_store_fail_cleanly(tmp_path):
+    db=tmp_path/'cases.db';data=seed(db)
+    proc=subprocess.run([sys.executable,'-m','clearance','research','start',data['question'],'--case-id',data['id'],'--db',str(db),'--json'],capture_output=True,text=True,timeout=20)
+    assert proc.returncode==0,proc.stderr
+    assert json.loads(proc.stdout)['case_id']==data['id']
+    broken=tmp_path/'broken.db';broken.write_text('not SQLite')
+    proc=subprocess.run([sys.executable,'-m','clearance','research','updates','--db',str(broken),'--json'],capture_output=True,text=True,timeout=20)
+    assert proc.returncode==2 and 'Traceback' not in proc.stderr
+    assert json.loads(proc.stderr)['error']

@@ -1,0 +1,87 @@
+{
+  "mode": "saved-source replay with three independent MCP hosts",
+  "rounds": [
+    {
+      "round": "one",
+      "transcript_sha256": "2eb4f0377c3addd7ba3b58ca4984d1eb39503d7b8276fbcf6a11ba68ce04da01",
+      "tool_calls": 72,
+      "actions": {
+        "science_research:start": 6,
+        "science_research:context": 7,
+        "science_case:source": 43,
+        "science_research:resume": 7,
+        "science_research:show": 7,
+        "science_research:challenge": 1,
+        "science_research:compare": 1
+      },
+      "completed_investigations": 6,
+      "completed_challenges": 1,
+      "errors": 0,
+      "run_ids": [
+        "744018d4726945ab",
+        "83dd950de93940d9",
+        "aa4ef4ce36774a0d",
+        "5e72ab1733744409",
+        "4fd36a3d4ac14179",
+        "c348b0e18d204273",
+        "9d191dd844c64cf6"
+      ]
+    },
+    {
+      "round": "two",
+      "transcript_sha256": "0694ee2f218ed360a747f7f0d69f45a31c68665be2d7ce6a726b93be668a0233",
+      "tool_calls": 65,
+      "actions": {
+        "science_research:start": 6,
+        "science_research:context": 8,
+        "science_case:source": 43,
+        "science_research:resume": 7,
+        "science_research:challenge": 1
+      },
+      "completed_investigations": 6,
+      "completed_challenges": 1,
+      "errors": 0,
+      "run_ids": [
+        "12617b440d1e4f9b",
+        "8627e8cdf8604b40",
+        "d1793c711fe849f7",
+        "c56891cdfa894df0",
+        "63bcc31bcda347e8",
+        "38eae0fba6e94f7b",
+        "fb7bc61902fb4314"
+      ]
+    },
+    {
+      "round": "three",
+      "transcript_sha256": "ca87d957f0b6f243c0290ba8ff6f6d6eb65afb550743b9baa538e1212464bbdb",
+      "tool_calls": 70,
+      "actions": {
+        "science_research:start": 6,
+        "science_research:context": 7,
+        "science_case:source": 42,
+        "science_research:resume": 7,
+        "science_research:show": 7,
+        "science_research:challenge": 1
+      },
+      "completed_investigations": 6,
+      "completed_challenges": 1,
+      "errors": 0,
+      "run_ids": [
+        "9d8ffe2d91b24005",
+        "39b4d91e28a9435b",
+        "ef2aa21f87ce40c4",
+        "218931b7dba446d3",
+        "b42d9b87aaf94d26",
+        "d253c3222a004326",
+        "db921702a61743d7"
+      ]
+    }
+  ],
+  "limits": [
+    "No fresh-web or configured-reasoner API execution",
+    "Engine counters exclude host reasoning and separate source tool reads",
+    "Exact source anchors establish occurrence, not semantic entailment",
+    "Baseline local retrieval and candidate synthesis are different operations; no research-quality lift measured"
+  ],
+  "total_tool_calls": 207
+}

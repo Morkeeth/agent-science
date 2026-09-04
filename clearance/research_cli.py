@@ -1,5 +1,6 @@
 """Research terminal interface. Only this interface permits trusted code execution."""
 import argparse
+import sqlite3
 import json
 import shlex
 import sys
@@ -30,6 +31,7 @@ def add_parser(sub):
         item.add_argument('--json', action='store_true', default=argparse.SUPPRESS)
         if name == 'start':
             item.add_argument('question')
+            item.add_argument('--case-id',help='continue research from this saved case without copying its evidence')
             item.add_argument('--root')
             item.add_argument('--policy', type=_object)
         elif name == 'show':
@@ -66,7 +68,7 @@ def add_parser(sub):
 def run(args):
     try:
         return _run(args)
-    except (ValueError, OSError, argparse.ArgumentTypeError) as exc:
+    except (ValueError, OSError, sqlite3.Error, argparse.ArgumentTypeError) as exc:
         error = {'error': str(exc), 'action': args.action}
         print(json.dumps(error) if getattr(args, 'json', False) else 'Research error: ' + str(exc), file=sys.stderr)
         return 2

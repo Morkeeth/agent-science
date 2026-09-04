@@ -1,6 +1,6 @@
 # Lane A receipt — 2026-09-05
 
-Worktree: `/Users/morkeeth/CODE/agent-science-night-a`.
+Worktree: `agent-science-night-a`.
 Branch: `build/night-investigation-20260905`.
 Base: `007705c` (product baseline `e12ca6f` plus plan/contract).
 Owned files: `clearance/night_runs.py`, `clearance/reasoning.py`, `tests/test_night_runs.py`.

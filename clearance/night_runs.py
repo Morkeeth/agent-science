@@ -7,6 +7,7 @@ from contextlib import closing, contextmanager
 from pathlib import Path
 from urllib.parse import urlparse
 from clearance import cases, research, research_search
+from clearance.research_contract import validate_proposal
 from clearance.safe_fetch import validate_url
 
 DEFAULTS = dict(discovery_calls=8, document_reads=20, reasoning_calls=12, rounds=3)
@@ -147,7 +148,7 @@ def context(run_id, *, db=None):
         row.update(snapshot_text=snapshot[:12000], snapshot_characters=len(snapshot),
                    snapshot_offset=0, snapshot_truncated=len(snapshot)>12000,
                    inspect_more={'action':'source','case_id':data['id'],'version':data['version'],
-                                 'evidence_id':e['id'],'offset':12000})
+                                 'evidence_id':e['id'],'offset':12000, **({'db':str(db)} if db is not None else {})})
         evidence.append(row)
     prior=[]
     for hit in run.get('prior_research',{}).get('cases',[])[:5]:
@@ -160,10 +161,12 @@ def context(run_id, *, db=None):
                 selected.append({'id':claim['id'],'statement':claim['statement'][:1500],
                                  'assessments':assessments[:3]})
         prior.append({'case_id':hit['case_id'],'version':hit['version'],'claims':selected,
+                      **({'db':str(db)} if db is not None else {}),
                       'claim_count':hit.get('claim_count'),
                       'meaning':'Local related research references; inspect and import sources before citing in this case.'})
     answer=synthesis.build(data)
-    return dict(run_id=run_id, case_version=data['version'], question=run['question'],
+    return dict(run_id=run_id, case_version=data['version'], run_case_version=run['case_version'],
+                case_changed_outside_run=data['version']!=run['case_version'], question=run['question'],
                 question_map=run['question_map'], challenge=run['challenge'],
                 challenges=run['challenges'], base_case_version=run['base_case_version'],
                 current_answer={k:(answer[k][:20] if isinstance(answer[k],list) else answer[k]) for k in ('case_id','version','conclusions','gaps','limits') if k in answer},
@@ -181,6 +184,7 @@ def context(run_id, *, db=None):
 
 
 def _validate(proposal, version):
+    validate_proposal(proposal, version)
     if not isinstance(proposal, dict) or type(proposal.get('case_version')) is not int or proposal['case_version'] != version:
         raise ValueError('proposal requires the inspected current case_version')
     action = proposal.get('next_action')

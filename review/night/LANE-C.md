@@ -27,7 +27,7 @@ Final focused test output: `21 passed` (private temporary cases and Git reposito
 ```python
 import clearance
 from clearance import research_cli, research_protocols
-clearance.__path__.insert(0, '/Users/morkeeth/CODE/agent-science-night/clearance')
+clearance.__path__.insert(0, 'INTEGRATION_WORKTREE/clearance')
 from clearance import experiments
 import pytest
 raise SystemExit(pytest.main(['tests/test_research_workflow.py', '-q']))

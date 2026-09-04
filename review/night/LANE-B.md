@@ -1,6 +1,6 @@
 # Lane B — evidence and conditional conclusions
 
-Worktree: `/Users/morkeeth/CODE/agent-science-night-b`
+Worktree: `agent-science-night-b`
 Branch: `build/night-synthesis-20260905`
 First slice: `a744ba9` (11 tests passed).
 

@@ -21,6 +21,24 @@ agent-science case list --query "fresh sessions" --root .
 
 The longer `python3 -m clearance` form below works from this checkout too.
 
+## Investigate a question over time
+
+```bash
+agent-science research "When does persistent memory help coding agents?" --root .
+agent-science research context RUN_ID --json
+agent-science research challenge CASE_ID
+agent-science research follow CASE_ID
+agent-science research updates
+```
+
+The first command saves a local plan and retrieves related prior research. An MCP host can inspect sources and submit structured reasoning through `science_research`; an explicitly configured model adapter can drive the bounded search/read loop. Both use the same proposal validator. A plan awaiting reasoning is not a completed investigation.
+
+Answers retain source anchors, study conditions, competing interpretations, the strongest challenge and what would change the conclusion. Challenges pin the previous answer; comparisons show changes and affected decisions. Followed updates compare saved versions. Explicit update runs check for new evidence only when resumed under a configured policy.
+
+Live calls require an aggregate resource policy. Usage reservations are not billing, and engine counters exclude reasoning and source reads performed separately by the MCP host. Repository experiments use immutable protocols and an explicitly selected trusted acceptance script.
+
+See [the terminal and MCP quickstart](docs/RESEARCH-QUICKSTART.md) for installation, live setup, resume, updates and experiments. The lower-level case commands below remain available.
+
 ## Start a research case
 
 ```bash
