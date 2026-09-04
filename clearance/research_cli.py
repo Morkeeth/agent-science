@@ -2,6 +2,7 @@
 import argparse
 import json
 import shlex
+import sys
 from pathlib import Path
 
 from clearance import research_workflow
@@ -63,6 +64,15 @@ def add_parser(sub):
 
 
 def run(args):
+    try:
+        return _run(args)
+    except (ValueError, OSError, argparse.ArgumentTypeError) as exc:
+        error = {'error': str(exc), 'action': args.action}
+        print(json.dumps(error) if getattr(args, 'json', False) else 'Research error: ' + str(exc), file=sys.stderr)
+        return 2
+
+
+def _run(args):
     arguments = {key: value for key, value in vars(args).items() if value is not None}
     protocol_file = arguments.pop('protocol_file', None)
     if protocol_file:

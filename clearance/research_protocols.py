@@ -65,6 +65,8 @@ def create(case_id, fields, *, root=None, protocol_id=None, db=None):
     for ref in body.get('claim_refs', []):
         if not isinstance(ref, dict) or not {'claim_id', 'version'} <= ref.keys():
             raise ValueError('claim_refs require claim_id and version')
+        if not isinstance(ref['claim_id'], str) or not ref['claim_id'].strip():
+            raise ValueError('claim reference ID must be nonempty text')
         if type(ref['version']) is not int or not 1 <= ref['version'] <= case['version']:
             raise ValueError('claim reference version must be an existing case version')
         cited = cases.get(case_id, db=db, version=ref['version'])

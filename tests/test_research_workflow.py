@@ -205,3 +205,16 @@ def test_renderer_keeps_contested_state_scope_and_reversal():
     assert '[CONTESTED; different_scope]' in text
     assert 'task: review' in text
     assert text.index('No coding task evidence') < text.index('A coding task comparison')
+
+
+def test_cli_missing_reasoner_is_clear_error_not_traceback(case_store, monkeypatch, capsys):
+    db, _ = case_store
+    monkeypatch.delenv('AGENT_SCIENCE_REASONER_MODEL', raising=False)
+    monkeypatch.delenv('AGENT_SCIENCE_REASONER_API_KEY', raising=False)
+    parser = argparse.ArgumentParser()
+    research_cli.add_parser(parser.add_subparsers(dest='command'))
+    args = parser.parse_args(['research', 'resume', 'not-run', '--reasoner', 'gemini', '--db', str(db)])
+    assert args.func(args) == 2
+    error = capsys.readouterr().err
+    assert 'AGENT_SCIENCE_REASONER_MODEL' in error
+    assert 'Traceback' not in error
