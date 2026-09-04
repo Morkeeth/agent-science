@@ -72,7 +72,7 @@ with patch.object(instruments, 'document_snapshot', side_effect=snap({SUPPORT: S
     quiet = updates.run_updates(db=db, refresh=True, live=False)
 assert quiet['summary']['empty'] is True
 
-# Experiment plan stays a plan
+# Experiment plan stays a plan (observation — no runner)
 claim_id = cases.get(case_id, db=db)['claims'][0]['id']
 assert main([
     'research', 'experiment-plan', case_id,
@@ -83,10 +83,55 @@ proto = experiment_protocol.list_protocols(case_id=case_id, db=db)[0]
 assert proto['status'] == 'planned'
 assert proto['execution'] is None
 
+# Executable code_change protocol → trusted runner → linked experiment (still not "the result")
+import subprocess, tempfile, os
+from pathlib import Path
+repo = Path(tempfile.mkdtemp()) / 'repo'
+repo.mkdir()
+check = Path(tempfile.mkdtemp()) / 'accept.py'
+check.write_text('raise SystemExit(0)\n')
+env = {**os.environ, 'GIT_AUTHOR_NAME': 'demo', 'GIT_AUTHOR_EMAIL': 'd@d',
+       'GIT_COMMITTER_NAME': 'demo', 'GIT_COMMITTER_EMAIL': 'd@d'}
+subprocess.run(['git', 'init'], cwd=repo, check=True, capture_output=True)
+(repo / 'x.txt').write_text('base\n')
+subprocess.run(['git', 'add', 'x.txt'], cwd=repo, check=True, capture_output=True, env=env)
+subprocess.run(['git', 'commit', '-m', 'base'], cwd=repo, check=True, capture_output=True, env=env)
+base = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=repo, text=True).strip()
+(repo / 'x.txt').write_text('cand\n')
+subprocess.run(['git', 'add', 'x.txt'], cwd=repo, check=True, capture_output=True, env=env)
+subprocess.run(['git', 'commit', '-m', 'cand'], cwd=repo, check=True, capture_output=True, env=env)
+cand = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=repo, text=True).strip()
+
+with patch.object(instruments, 'document_snapshot', side_effect=snap({SUPPORT: SUPPORT_V1})):
+    measured_case = cases.create(
+        'Does the intervention preserve the acceptance check?',
+        sources=[SUPPORT], root=str(repo), db=db,
+    )
+code_proto = experiment_protocol.create(
+    measured_case['id'],
+    hypothesis='Candidate passes the same acceptance script as baseline.',
+    kind='code_change',
+    repo=str(repo),
+    baseline_ref=base,
+    intervention_ref=cand,
+    acceptance_check=str(check),
+    comparison_budget={'paired_runs': 1, 'timeout_seconds': 30},
+    db=db,
+)
+assert code_proto['status'] == 'planned' and code_proto['executable'] is True
+linked = experiment_protocol.execute(code_proto['id'], db=db)
+assert linked['status'] == 'linked'
+assert linked['execution']['experiment_id']
+assert linked['execution']['valid'] is True
+# Prior version remains the plan/denominator
+v1 = experiment_protocol.get(code_proto['id'], version=1, db=db)
+assert v1['status'] == 'planned' and v1['execution'] is None
+
 print('DEMO OK')
 print(f"case={case_id} follow={follow.get_by_case(case_id, db=db)['id']}")
 print(f"update_run={run['id']} material={run['summary']['material_changes']} top={run['items'][0]['score']['material_effects'][0]['kind']}")
 print(f"quiet_empty={quiet['summary']['empty']}")
 print(f"protocol={proto['id']} status={proto['status']}")
+print(f"code_protocol={linked['id']} status={linked['status']} experiment={linked['execution']['experiment_id']} valid={linked['execution']['valid']}")
 print(f"what_would_change={run['items'][0]['what_would_change_this_answer'][:140]}")
 PY

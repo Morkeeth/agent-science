@@ -214,6 +214,19 @@ def naive_any_change(before, after):
     }
 
 
+def always_silent(_before, _after):
+    """Null arm: never report a material change. Embarrasses recall if it "wins"."""
+    return {
+        'effects': [],
+        'material_effects': [],
+        'top_rank': 0,
+        'material': False,
+        'effect_count': 0,
+        'material_count': 0,
+        'arm': 'always_silent_null',
+    }
+
+
 def run_updates(*, db=None, case_id=None, live=False, refresh=True, limit=50):
     """Explicit update pass over followed questions.
 

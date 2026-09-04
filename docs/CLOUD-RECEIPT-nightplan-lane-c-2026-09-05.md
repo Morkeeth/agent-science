@@ -2,7 +2,7 @@
 
 **Branch:** `cursor/nightplan-lane-c-daily-e6e2`  
 **Base:** `cursor/nightplan-research-engine-b1eb` @ `f5508932ed8df0023bf5e31512aef3981d672bf6`  
-**HEAD at receipt write:** run `git rev-parse HEAD` on this branch (do not trust a stale hardcoded SHA)  
+**HEAD at receipt write:** `70735abea704b8af76d15645601d8f1683db92d5` (re-check with `git rev-parse HEAD`)  
 **Session:** cloud agent · 2026-09-04/05 overnight · Lane C
 
 ## Status
@@ -13,13 +13,15 @@ Lane C daily surface landed: followed questions, explicit ranked update runs, ve
 
 ```bash
 bash scripts/demo_research_day_two.sh
-# → DEMO OK · material=1 · top=decision_review_required · quiet_empty=True · protocol status=planned
+# → DEMO OK · material=1 · top=decision_review_required · quiet_empty=True
+#    · observation protocol status=planned
+#    · code_protocol status=linked · experiment valid=True
 
 bash scripts/demo_research_challenge.sh
 # → DEMO OK · kind=challenge · CONTESTED (Lane A still green)
 
 python3 scripts/eval_updates_ranking_baseline.py
-# → ranked_wins_on_precision=True · ranked FP=0 · naive FP=1
+# → ranked_wins_vs_naive_and_null=True · ranked FP=0 · naive FP=1 · silent TP=0
 
 python3 -m pytest -q tests/test_research_follow.py
 # → 9 passed
@@ -34,9 +36,9 @@ python3 -m pytest -q tests/test_research_follow.py
 |-------|---------|--------|
 | Follow + ranked updates + experiment-plan tests | `python3 -m pytest -q tests/test_research_follow.py` | **9 passed** exit 0 |
 | Lane A still green | `python3 -m pytest -q tests/test_research_run.py` | **7 passed** (16 total with follow) exit 0 |
-| Day-two change report (fixture) | `bash scripts/demo_research_day_two.sh` | exit **0** · `material=1` · `top=decision_review_required` · `quiet_empty=True` · `protocol status=planned` |
+| Day-two change report (fixture) | `bash scripts/demo_research_day_two.sh` | exit **0** · `material=1` · `quiet_empty=True` · observation `planned` · code_change `linked` + `valid=True` |
 | Challenge demo still works | `bash scripts/demo_research_challenge.sh` | exit **0** · `claim_states=['CONTESTED']` |
-| Ranked beats naive on FP precision | `PYTHONPATH=. python3 scripts/eval_updates_ranking_baseline.py` | exit **0** · ranked FP **0** · naive FP **1** · equal TP **2** |
+| Ranked beats naive + null | `PYTHONPATH=. python3 scripts/eval_updates_ranking_baseline.py` | exit **0** · ranked FP **0** · naive FP **1** · silent TP **0** · equal TP **2** vs naive |
 | Plan cannot be renamed to result | `…::test_experiment_plan_is_not_a_result` | passed · `mark_as_result` raises |
 | CLI help exposes commands | `python3 -m clearance research follow\|updates\|experiment-plan --help` | exit 0 |
 

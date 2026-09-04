@@ -77,6 +77,7 @@ def build_case(db, *, change_support: bool, change_noise: bool):
 def score_pair(before, after):
     ranked = updates.score_case_change(before, after)
     naive = updates.naive_any_change(before, after)
+    silent = updates.always_silent(before, after)
     support_id = next(e['id'] for e in before['evidence'] if e['url'] == SUPPORT)
     gold_material = any(
         c.get('evidence_id') == support_id and c['kind'] == 'source_changed'
@@ -86,6 +87,7 @@ def score_pair(before, after):
         'gold_material': gold_material,
         'ranked_material': ranked['material'],
         'naive_material': naive['material'],
+        'silent_material': silent['material'],
         'ranked_top': (ranked['material_effects'][0]['kind'] if ranked['material_effects'] else None),
         'naive_count': naive['material_count'],
         'ranked_count': ranked['material_count'],
@@ -93,6 +95,8 @@ def score_pair(before, after):
         'ranked_false_positive': ranked['material'] and not gold_material,
         'naive_true_positive': naive['material'] and gold_material,
         'naive_false_positive': naive['material'] and not gold_material,
+        'silent_true_positive': silent['material'] and gold_material,
+        'silent_false_positive': silent['material'] and not gold_material,
         'ranked_decision_first': (
             ranked['material'] and ranked['material_effects']
             and ranked['material_effects'][0]['kind'] == 'decision_review_required'
@@ -118,8 +122,10 @@ def main():
 
     ranked_fp = sum(1 for r in rows if r['ranked_false_positive'])
     naive_fp = sum(1 for r in rows if r['naive_false_positive'])
+    silent_fp = sum(1 for r in rows if r['silent_false_positive'])
     ranked_tp = sum(1 for r in rows if r['ranked_true_positive'])
     naive_tp = sum(1 for r in rows if r['naive_true_positive'])
+    silent_tp = sum(1 for r in rows if r['silent_true_positive'])
     decision_first = sum(1 for r in rows if r['ranked_decision_first'])
 
     print('UPDATES RANKING BASELINE')
@@ -127,15 +133,19 @@ def main():
         print(
             f"  {r['fixture']}: gold={r['gold_material']} "
             f"ranked={r['ranked_material']}(top={r['ranked_top']},n={r['ranked_count']}) "
-            f"naive={r['naive_material']}(n={r['naive_count']})"
+            f"naive={r['naive_material']}(n={r['naive_count']}) "
+            f"silent={r['silent_material']}"
         )
-    print(f'ranked_true_positives={ranked_tp} naive_true_positives={naive_tp}')
-    print(f'ranked_false_positives={ranked_fp} naive_false_positives={naive_fp}')
+    print(f'ranked_true_positives={ranked_tp} naive_true_positives={naive_tp} silent_true_positives={silent_tp}')
+    print(f'ranked_false_positives={ranked_fp} naive_false_positives={naive_fp} silent_false_positives={silent_fp}')
     print(f'ranked_decision_first_when_material={decision_first}')
-    ranked_wins = ranked_fp < naive_fp and ranked_tp >= naive_tp
-    print(f'ranked_wins_on_precision={ranked_wins}')
+    ranked_wins = ranked_fp < naive_fp and ranked_tp >= naive_tp and ranked_tp > silent_tp
+    print(f'ranked_wins_vs_naive_and_null={ranked_wins}')
+    if silent_tp == 0 and ranked_fp > silent_fp and ranked_tp == 0:
+        print('FINDING: always-silent null beats ranked (zero FP, equal zero recall) — product is noise.')
+        raise SystemExit(1)
     if not ranked_wins:
-        print('FINDING: ranked arm did not beat naive on false-positive precision at equal recall.')
+        print('FINDING: ranked arm did not beat naive on FP precision at equal recall, or lost recall to null.')
         raise SystemExit(1)
     print('BASELINE OK')
     return 0
