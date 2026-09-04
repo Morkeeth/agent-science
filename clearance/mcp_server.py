@@ -194,7 +194,7 @@ TOOLS.append({
     "name": "science_research",
     "description": "Conduct a persisted investigation: start locally, inspect context, submit a case-version-pinned reasoning proposal with resume, challenge a conclusion, compare versions, follow questions and define experiments. Start makes no external calls. A waiting run is not complete. Only explicit live execution under a configured aggregate policy can fetch/search. Findings are authored interpretations with checked quotations. This tool cannot execute experiments or shell commands.",
     "inputSchema": {"type":"object", "additionalProperties":False, "required":["action"], "properties": {
-        "action":{"type":"string","enum":["start","show","context","resume","cancel","challenge","update","compare","follow","updates","experiment-plan"]},
+        "action":{"type":"string","enum":["start","show","context","resume","cancel","challenge","update","compare","follow","updates","experiment-plan","protocol"]},
         "question":{"type":"string","maxLength":1500},
         "case_id":{"type":"string"}, "run_id":{"type":"string"},
         "root":{"type":"string","description":"Local repository path; contents are not web queries."},

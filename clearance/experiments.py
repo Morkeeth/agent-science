@@ -18,8 +18,10 @@ from pathlib import Path
 from clearance import cases
 
 
-def compare(case_id, *, repo, baseline, candidate, check, runs=3, timeout=60, db=None):
+def compare(case_id, *, repo, baseline, candidate, check, runs=3, timeout=60, db=None, expected_case_version=None):
     case = cases.get(case_id,db=db)
+    if expected_case_version is not None and (type(expected_case_version) is not int or case['version'] != expected_case_version):
+        raise ValueError('case changed before experiment execution; rebuild the protocol')
     repo=Path(repo).resolve(); check=Path(check).resolve()
     if case.get('repo') and Path(case['repo']['root']).resolve()!=repo:
         raise ValueError('experiment repo must match the case repo')
