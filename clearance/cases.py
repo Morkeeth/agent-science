@@ -257,10 +257,48 @@ def refresh(case_id, *, live=False, db=None, max_documents=None):
 
 
 def decision_review(decision, original, current):
+    """Compare saved source and active interpretation state without loading cases."""
     delta=changes(original,current) if original else []
-    relevant=[c for c in delta if c.get('evidence_id') in decision['evidence_ids'] or c['kind']=='repo_changed']
+    cited=set(decision['evidence_ids'])
+    relevant=[c for c in delta if c.get('evidence_id') in cited or c['kind']=='repo_changed']
+
+    def interpretations(data):
+        evidence={e['id']:e for e in data.get('evidence',[])}
+        result={}
+        for claim in data.get('claims',[]):
+            superseded={a.get('supersedes') for a in claim.get('assessments',[])}
+            rows=[]
+            for assessment in claim.get('assessments',[]):
+                if assessment['id'] in superseded: continue
+                anchors=[assessment.get('anchor',{})]+[c.get('anchor',{}) for c in assessment.get('conditions',[])]
+                if not cited.intersection(a.get('evidence_id') for a in anchors): continue
+                fields=('relation','scope_relationship','rationale','anchor','strongest_challenge',
+                        'what_would_change','category','authorship')
+                semantic={key:assessment.get(key) for key in fields}
+                semantic['conditions']=[{key:c.get(key) for key in ('field','value','anchor')}
+                    for c in assessment.get('conditions',[])]
+                semantic['source_state']=[{key:evidence.get(anchor.get('evidence_id'),{}).get(key)
+                    for key in ('id','snapshot_hash','status','retracted','superseded_by')} for anchor in anchors if anchor]
+                rows.append(semantic)
+            if rows:
+                # IDs, timestamps and revision counters alone are not semantic changes.
+                result[claim['id']]={'statement':claim['statement'],
+                    'assessments':sorted({json.dumps(row,sort_keys=True) for row in rows})}
+        return result
+
+    before=interpretations(original or {});after=interpretations(current)
+    for claim_id in sorted(before.keys() | after.keys()):
+        if before.get(claim_id)!=after.get(claim_id):
+            relevant.append({'kind':'interpretation_changed','claim_id':claim_id,
+                'reason':'Active authored reasoning, conditions or anchored source state changed.'})
+    old_sources={e['id']:e for e in (original or {}).get('evidence',[])}
+    for source in current.get('evidence',[]):
+        if source['id'] not in cited: continue
+        for field in ('retracted','superseded_by'):
+            if old_sources.get(source['id'],{}).get(field)!=source.get(field):
+                relevant.append({'kind':'source_metadata_changed','evidence_id':source['id'],'field':field})
     return {'state':'REVIEW_REQUIRED' if relevant else 'UNCHANGED_IN_SNAPSHOT', 'changes':relevant,
-            'meaning':'This compares saved evidence versions. Check freshness.new_fetches to see whether the web was checked. Changes require review, not automatic reversal.'}
+            'meaning':'This compares saved evidence and active authored interpretations. Changes require review, not automatic reversal; no online check is implied.'}
 
 
 def decide(case_id, statement, rationale, evidence_ids, *, db=None, supersedes=None, expected_version=None, experiment_ids=()):

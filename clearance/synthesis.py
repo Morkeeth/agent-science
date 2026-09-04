@@ -57,8 +57,30 @@ def _finding(data, finding, version):
     if relation != 'unresolved':
         numbers = re.findall(r'(?<![\w])\d+(?:\.\d+)?%?', statement)
         source_numbers = set(re.findall(r'(?<![\w])\d+(?:\.\d+)?%?', anchor['quote']))
-        if relation == 'supports' and any(n not in source_numbers for n in numbers):
-            raise ValueError('numerical assertion missing from its source quote; leave unresolved')
+        missing_numbers = set(numbers) - source_numbers
+        if missing_numbers:
+            # A contradiction can name an existing numeric target rather than assert
+            # a new observed result. Require an explicit, current anchored target.
+            target = next((c for c in data.get('claims', []) if c['id'] == finding.get('claim_id')
+                and c['statement'] == statement), None)
+            target_numbers = set()
+            if relation != 'supports' and target:
+                superseded = {a.get('supersedes') for a in target['assessments']}
+                for prior in target['assessments']:
+                    if prior['id'] in superseded or prior['relation'] == 'unresolved': continue
+                    prior_anchor = prior.get('anchor', {})
+                    try:
+                        checked_anchor = _anchor(data, prior_anchor)
+                        if checked_anchor['snapshot_hash'] != prior_anchor.get('snapshot_hash'): continue
+                        for condition in prior.get('conditions', []):
+                            current_anchor = _anchor(data, condition['anchor'])
+                            if current_anchor['snapshot_hash'] != condition['anchor'].get('snapshot_hash'):
+                                raise ValueError('stale target condition')
+                    except (ValueError, KeyError):
+                        continue
+                    target_numbers.update(re.findall(r'(?<![\w])\d+(?:\.\d+)?%?', checked_anchor['quote']))
+            if not missing_numbers <= target_numbers:
+                raise ValueError('numerical assertion missing from its source quote; cite a current anchored target claim_id or leave unresolved')
         designs = ' '.join(c['value'].lower() for c in checked if c['field'] == 'study_design')
         if ('qualitative' in designs or 'interview' in designs) and re.search(r'\b(causes?|causal|increases?|improves?|reduces?)\b', statement, re.I):
             raise ValueError('qualitative study cannot establish causal effectiveness; leave unresolved')
@@ -191,15 +213,9 @@ def compare(case_id, from_version, *, db=None):
         if c['anchor'].get('evidence_id') in touched_evidence
         or any(condition['anchor']['evidence_id'] in touched_evidence for condition in c['conditions'])}
         | {event[side]['claim_id'] for event in reasoning for side in ('before', 'after') if side in event})
-    affected_evidence = touched_evidence | {c['anchor'].get('evidence_id')
-        for c in old_answer['conclusions'] + answer['conclusions'] if c['claim_id'] in affected_claims}
-    affected_decisions = []
-    for decision in new['decisions']:
-        if decision.get('superseded_by'): continue
-        if decision.get('review', {}).get('state') == 'REVIEW_REQUIRED' or affected_evidence.intersection(decision['evidence_ids']):
-            affected_decisions.append({**decision, 'review':{'state':'REVIEW_REQUIRED',
-                'changes':changes, 'affected_claim_ids':affected_claims,
-                'meaning':'Cited evidence or an interpretation using it changed. Authored decision review is required.'}})
+    # Case show, review and update surfaces share the decision's own saved baseline.
+    affected_decisions = [d for d in new['decisions'] if not d.get('superseded_by')
+        and d.get('review', {}).get('state') == 'REVIEW_REQUIRED']
     return {'case_id':case_id, 'from_version':old['version'], 'version':new['version'],
         'evidence_changes':changes, 'reasoning_changes':reasoning, 'changed':bool(changes or reasoning),
         'material_change':bool(affected_claims or affected_decisions), 'affected_claim_ids':affected_claims,

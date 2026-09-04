@@ -168,7 +168,8 @@ def test_contradiction_can_name_a_different_number_and_is_contested(saved):
         finding(statement='The study used 20 tasks',relation='contradicts',quote=TEXT)]},db=db)
     assert {c['claim_state'] for c in synthesis.build(revised)['conclusions']}=={'CONTESTED'}
     assert synthesis.build(revised)['conclusions'][0]['competing_interpretations']
-    synthesis.apply(data['id'],2,{'findings':[finding(statement='The study used 90 tasks',relation='contradicts')]},db=db)
+    with pytest.raises(ValueError,match='numerical assertion'):
+        synthesis.apply(data['id'],2,{'findings':[finding(statement='The study used 90 tasks',relation='contradicts')]},db=db)
 
 
 def test_interpretation_change_flags_decision(saved):
@@ -219,3 +220,69 @@ def test_support_plus_context_preserves_supported_claim_state(saved,context_rela
     assert {c['relation'] for c in answer['conclusions']}=={'supports',context_relation}
     assert 'unresolved relationship' not in {g['reason'] for g in answer['gaps']}
     assert ('unresolved scope' in {g['reason'] for g in answer['gaps']}) == (context_relation=='different_scope')
+
+
+def test_numerical_contradiction_requires_existing_current_anchored_target(saved):
+    db,data=saved
+    text='Artificial result: completion fell by 37% in the trial.'
+    other=copy.deepcopy(data['evidence'][0]);other.update(id='e37',url='https://example.org/37',snapshot_text=text,snapshot_hash=cases.digest(text))
+    data['evidence'].append(other);data['version']=2;cases._save(data,db=db)
+    statement='Completion fell by 37% in the trial.'
+    with pytest.raises(ValueError,match='numerical assertion'):
+        synthesis.apply(data['id'],2,{'findings':[finding(statement=statement,relation='contradicts')]},db=db)
+    prior=synthesis.apply(data['id'],2,{'findings':[finding(statement=statement,quote=text,evidence_id='e37',conditions=[])]},db=db)
+    target=prior['claims'][0]['id']
+    revised=synthesis.apply(data['id'],3,{'findings':[finding(statement=statement,relation='contradicts',claim_id=target)]},db=db)
+    assert synthesis.build(revised)['conclusions'][-1]['claim_state']=='CONTESTED'
+    for bad in ('UNAVAILABLE','retracted','superseded_by','snapshot_hash'):
+        altered=copy.deepcopy(revised);altered['version']=cases.get(data['id'],db=db)['version']+1
+        source=altered['evidence'][1]
+        if bad=='UNAVAILABLE':source['status']='UNAVAILABLE'
+        elif bad=='snapshot_hash':source[bad]='newhash'
+        else:source[bad]=True
+        cases._save(altered,db=db)
+        with pytest.raises(ValueError,match='numerical assertion'):
+            synthesis.apply(data['id'],altered['version'],{'findings':[finding(statement=statement,relation='contradicts',claim_id=target)]},db=db)
+
+
+def test_unassessed_import_cannot_bootstrap_numeric_target(saved):
+    db,data=saved
+    data['claims']=[{'id':'imported','statement':'Completion fell by 37%','origin':'imported_report','assessments':[]}]
+    data['version']=2;cases._save(data,db=db)
+    with pytest.raises(ValueError,match='numerical assertion'):
+        synthesis.apply(data['id'],2,{'findings':[finding(statement='Completion fell by 37%',relation='context',claim_id='imported')]},db=db)
+
+
+def test_decision_review_shares_interpretation_state_and_preserves_history(saved):
+    db,data=saved
+    data['version']=2;data['evidence'][0].update(status='QUOTE_VERIFIED',quote=QUOTE)
+    other=copy.deepcopy(data['evidence'][0]);other.update(id='unrelated',url='https://example.org/unrelated')
+    data['evidence'].append(other);cases._save(data,db=db)
+    prior=synthesis.apply(data['id'],2,{'findings':[finding()]},db=db)
+    cases.decide(data['id'],'Related decision','Fixture rationale',['e1'],expected_version=3,db=db)
+    cases.decide(data['id'],'Unrelated decision','Fixture rationale',['unrelated'],expected_version=3,db=db)
+    claim=prior['claims'][0]
+    updated=synthesis.apply(data['id'],3,{'findings':[finding(claim_id=claim['id'],supersedes=claim['assessments'][0]['id'],
+        rationale='An authored change in scope changes the relevance of this result.')]},db=db)
+    states={d['statement']:d['review']['state'] for d in updated['decisions']}
+    assert states=={'Related decision':'REVIEW_REQUIRED','Unrelated decision':'UNCHANGED_IN_SNAPSHOT'}
+    assert all(d['review']['state']=='UNCHANGED_IN_SNAPSHOT' for d in cases.get(data['id'],version=3,db=db)['decisions'])
+    assert [d['statement'] for d in synthesis.compare(data['id'],3,db=db)['affected_decisions']]==['Related decision']
+    # A replacement with identical semantic content must not invalidate a later decision.
+    cases.decide(data['id'],'Fresh decision','Fixture rationale',['e1'],expected_version=4,db=db)
+    claim=updated['claims'][0];active=claim['assessments'][-1]
+    unchanged=synthesis.apply(data['id'],4,{'findings':[finding(claim_id=claim['id'],supersedes=active['id'],rationale=active['rationale'])]},db=db)
+    assert next(d for d in unchanged['decisions'] if d['statement']=='Fresh decision')['review']['state']=='UNCHANGED_IN_SNAPSHOT'
+
+
+def test_decision_review_tracks_conditions_and_ignores_authored_clock(saved):
+    _,data=saved
+    anchor={'evidence_id':'e1','quote':QUOTE,'snapshot_hash':data['evidence'][0]['snapshot_hash'],'url':data['evidence'][0]['url']}
+    data['claims']=[{'id':'claim','statement':'Fixture statement','assessments':[{'id':'a','relation':'context','rationale':'Fixture',
+        'anchor':{},'conditions':[{'field':'task','value':'repository coding tasks','anchor':anchor,'evidence_version':1}],'at':'before'}]}]
+    current=copy.deepcopy(data);current['claims'][0]['assessments'][0]['at']='after'
+    current['claims'][0]['assessments'][0]['conditions'][0]['evidence_version']=2
+    decision={'evidence_ids':['e1']}
+    assert cases.decision_review(decision,data,current)['state']=='UNCHANGED_IN_SNAPSHOT'
+    current['claims'][0]['assessments'][0]['conditions'][0]['value']='changed authored condition'
+    assert cases.decision_review(decision,data,current)['state']=='REVIEW_REQUIRED'
