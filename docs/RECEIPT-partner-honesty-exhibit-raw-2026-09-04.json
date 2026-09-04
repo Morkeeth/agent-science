@@ -1,6 +1,6 @@
 {
   "finding": {
-    "stamp": "2026-09-04T00:15:26Z",
+    "stamp": "2026-09-04T00:22:38Z",
     "base": "https://agent-science-568004190078.us-central1.run.app",
     "shipping_class": "SOFT_PASS_FLAT",
     "soft_gate": true,
@@ -8,11 +8,18 @@
     "naive_cross_subject_leak": false,
     "naive_parallel_both_fired": true,
     "ship_parallel_delta": 0,
-    "naive_parallel_delta": 0,
+    "naive_parallel_delta": 1,
+    "naive_b_log_hits": 2,
+    "ship_b_log_hits": 1,
+    "parallel_drop_explained_by_log_hits": false,
     "parallel_drop_explained_by_search_cache": false,
+    "ship_cache_gap_A": 0,
+    "ship_cache_gap_B": 1,
+    "naive_cache_gap_A": 0,
+    "naive_cache_gap_B": 0,
     "winner": "shipping_soft_only",
     "health_engine_default": "adk",
-    "shelf_n": 312,
+    "shelf_n": 318,
     "hit_rate": 0.627,
     "queries_logged": 279,
     "partners_ok": true
@@ -26,16 +33,16 @@
     "parallel_sdk": true,
     "parallel_sdk_version": "1.3.2",
     "parallel_transport": "parallel-web",
-    "last_parallel_search_id": null,
+    "last_parallel_search_id": "search_6ef88ae092adeb29e1c82bb41dd15b04",
     "agent_builder": true,
     "adk_version": "2.7.1",
     "engine_default": "adk"
   },
   "stats": {
-    "n": 312,
+    "n": 318,
     "cleared": 35,
-    "refused": 277,
-    "reuses": 138,
+    "refused": 283,
+    "reuses": 144,
     "dictionary_hit_rate": 0.627,
     "queries_logged": 279
   },
@@ -48,12 +55,14 @@
       ],
       "model_routing": "vertex:hack-fleet",
       "parallel_calls": 1,
+      "parallel_api_calls": 1,
       "corpus_hits": 0,
+      "log_hits": 1,
       "corpus_remembered": 2,
       "claims_extracted": 2,
       "sourced": 0,
       "unsourced": 2,
-      "elapsed_s": 22.8
+      "elapsed_s": 28.6
     },
     "B": {
       "engine": "adk",
@@ -63,12 +72,14 @@
       ],
       "model_routing": "vertex:hack-fleet",
       "parallel_calls": 1,
+      "parallel_api_calls": 0,
       "corpus_hits": 1,
+      "log_hits": 1,
       "corpus_remembered": 4,
       "claims_extracted": 3,
       "sourced": 0,
       "unsourced": 3,
-      "elapsed_s": 25.4
+      "elapsed_s": 23.0
     }
   },
   "naive": {
@@ -79,13 +90,15 @@
         "clear_script_tool"
       ],
       "model_routing": "vertex:hack-fleet",
-      "parallel_calls": 1,
+      "parallel_calls": 2,
+      "parallel_api_calls": 2,
       "corpus_hits": 0,
+      "log_hits": 0,
       "corpus_remembered": 2,
       "claims_extracted": 2,
       "sourced": 0,
       "unsourced": 2,
-      "elapsed_s": 46.6
+      "elapsed_s": 33.1
     },
     "B": {
       "engine": "adk",
@@ -95,12 +108,14 @@
       ],
       "model_routing": "vertex:hack-fleet",
       "parallel_calls": 1,
+      "parallel_api_calls": 1,
       "corpus_hits": 0,
-      "corpus_remembered": 2,
-      "claims_extracted": 2,
+      "log_hits": 2,
+      "corpus_remembered": 3,
+      "claims_extracted": 3,
       "sourced": 0,
-      "unsourced": 2,
-      "elapsed_s": 39.4
+      "unsourced": 3,
+      "elapsed_s": 20.9
     }
   },
   "checklist": {

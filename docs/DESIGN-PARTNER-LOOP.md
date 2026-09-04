@@ -17,7 +17,7 @@
      -H 'Content-Type: application/json' \
      -d '{"script":"<paste>","subject":"<their-tag>"}'
    ```
-5. **Second script** on same subject — partner should see `corpus_hits ≥ 1`. **Do not promise Parallel always drops** — overnight honesty runs showed soft flat (1→1) when Run B adds a new claim; film **corpus_hits**, not Parallel alone (`docs/RECEIPT-partner-honesty-night-2026-09-04.md`).
+5. **Second script** on same subject — partner should see `corpus_hits ≥ 1`. **Do not promise Parallel always drops** — overnight honesty runs showed soft flat (1→1) when Run B adds a new claim; Parallel drops across subjects are often **`log_hits`** (cross-production reuse), not same-subject corpus. Film **corpus_hits** (`docs/RECEIPT-partner-honesty-night-2026-09-04.md`).
 
 ### Measured wall times (hosted · 2026-09-04 honesty exhibit)
 

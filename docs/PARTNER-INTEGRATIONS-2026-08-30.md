@@ -4,7 +4,7 @@
 
 Each partner must be **called at runtime** on the default path — not documented only.
 
-**Tonight's runtime stamp (2026-09-04):** `bash scripts/verify_partners_hosted.sh` → health OK · `engine_default: adk` · `/clear` `engine: adk` with `parallel_calls ≥ 1` · compound soft gate PASS. Honesty arm: `python3 scripts/partner_honesty_exhibit.py` — sealed class varies `STRICT_DROP` / `SOFT_PASS_FLAT`; Parallel drop alone is **not** compound proof (search cache). Receipt: `docs/RECEIPT-partner-honesty-night-2026-09-04.md`.
+**Tonight's runtime stamp (2026-09-04):** `bash scripts/verify_partners_hosted.sh` → health OK · `engine_default: adk` · `/clear` `engine: adk` with `parallel_calls ≥ 1` · compound soft gate PASS. Honesty arm: `python3 scripts/partner_honesty_exhibit.py` — sealed class varies `STRICT_DROP` / `SOFT_PASS_FLAT`; naive Parallel drops often = **`log_hits`** (cross-subject), not same-subject corpus. Receipt: `docs/RECEIPT-partner-honesty-night-2026-09-04.md`.
 
 **Live shelf at verify (re-curl, do not carry):** `curl -s …/stats` → n / hit_rate / queries_logged.
 

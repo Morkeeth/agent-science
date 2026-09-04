@@ -49,19 +49,26 @@ def _clear(base: str, script: str, subject: str, label: str) -> dict:
     t0 = time.time()
     with urllib.request.urlopen(req, timeout=300) as resp:
         data = json.loads(resp.read())
-    summary = {
-        "engine": data.get("engine"),
-        "adk_version": data.get("adk_version"),
-        "adk_tool_calls": data.get("adk_tool_calls"),
-        "model_routing": data.get("model_routing"),
-        "parallel_calls": data.get("parallel_calls") or 0,
-        "corpus_hits": data.get("corpus_hits") or 0,
-        "corpus_remembered": data.get("corpus_remembered"),
-        "claims_extracted": data.get("claims_extracted"),
-        "sourced": data.get("sourced"),
-        "unsourced": data.get("unsourced"),
-        "elapsed_s": round(time.time() - t0, 1),
-    }
+    keys_summary = [
+        "engine",
+        "adk_version",
+        "adk_tool_calls",
+        "model_routing",
+        "parallel_calls",
+        "parallel_api_calls",
+        "corpus_hits",
+        "log_hits",
+        "corpus_remembered",
+        "claims_extracted",
+        "sourced",
+        "unsourced",
+    ]
+    summary = {k: data.get(k) for k in keys_summary}
+    summary["parallel_calls"] = summary.get("parallel_calls") or 0
+    summary["parallel_api_calls"] = summary.get("parallel_api_calls")
+    summary["corpus_hits"] = summary.get("corpus_hits") or 0
+    summary["log_hits"] = summary.get("log_hits") or 0
+    summary["elapsed_s"] = round(time.time() - t0, 1)
     print(f"{label} {summary}")
     return summary
 
@@ -208,30 +215,56 @@ def main() -> int:
             "search-cache or routing short-circuit; baseline is contaminated"
         )
 
-    # Parallel delta comparison — search cache alone can drop Parallel on the
-    # overlapping claim even across subjects (naive). Corpus hits are the shelf
-    # signal; Parallel drop without hits is not compound proof.
+    # Parallel delta comparison — three different free paths can drop Parallel:
+    # corpus_hits (same subject), log_hits (cross-subject refusal log), search cache
+    # (parallel_api_calls < claims that reached find_sources). Measure all three;
+    # do not blame search cache without reading log_hits on the object.
     ship_delta = ship_a["parallel_calls"] - ship_b["parallel_calls"]
     naive_delta = naive_a["parallel_calls"] - naive_b["parallel_calls"]
+    naive_log_explains = (
+        naive_parallel_ok
+        and not naive_leaks
+        and naive_delta > 0
+        and (naive_b.get("log_hits") or 0) >= 1
+    )
+    ship_api_a = ship_a.get("parallel_api_calls")
+    ship_api_b = ship_b.get("parallel_api_calls")
+    naive_api_a = naive_a.get("parallel_api_calls")
+    naive_api_b = naive_b.get("parallel_api_calls")
+    # Search-cache signal: claim went to search path but live API calls are lower
+    # than parallel_calls on that run (cache satisfied some finds).
+    def _cache_gap(row: dict) -> int | None:
+        api = row.get("parallel_api_calls")
+        if api is None:
+            return None
+        return max(0, (row.get("parallel_calls") or 0) - api)
+
+    parallel_drop_explained_by_log = naive_log_explains
     parallel_drop_explained_by_cache = (
         naive_parallel_ok
         and not naive_leaks
         and naive_delta > 0
-        and ship_delta > 0
-        and ship_b["corpus_hits"] >= 1
+        and not naive_log_explains
+        and ((_cache_gap(naive_a) or 0) > 0 or (_cache_gap(naive_b) or 0) > 0)
     )
-    if parallel_drop_explained_by_cache:
+    if naive_log_explains:
+        print(
+            "FINDING_RED: naive arm Parallel drop explained by cross-subject "
+            f"log_hits={naive_b.get('log_hits')} (corpus_hits=0). "
+            "Search-cache was a nearer guess — log reuse is the object."
+        )
+    elif parallel_drop_explained_by_cache:
         print(
             "FINDING_RED: naive arm also dropped Parallel "
-            f"(A={naive_a['parallel_calls']}→B={naive_b['parallel_calls']}, hits=0). "
-            "Search-cache on overlapping claim text explains Parallel drop; "
-            "corpus_hits is the compound differentiator, not Parallel alone."
+            f"(A={naive_a['parallel_calls']}→B={naive_b['parallel_calls']}, hits=0, "
+            f"log_hits={naive_b.get('log_hits')}). "
+            "No log_hits — inspect parallel_api_calls vs parallel_calls for cache."
         )
 
     # Who wins on Parallel economics for the overlapping claim path?
     # Shipping wins when sealed_ok against a clean naive (no leak, Parallel fired).
     if sealed_ok and not naive_leaks and naive_parallel_ok:
-        if parallel_drop_explained_by_cache:
+        if parallel_drop_explained_by_log or parallel_drop_explained_by_cache:
             winner = "shipping_on_corpus_hits_only"
         else:
             winner = "shipping_strict"
@@ -256,7 +289,14 @@ def main() -> int:
         "naive_parallel_both_fired": naive_parallel_ok,
         "ship_parallel_delta": ship_delta,
         "naive_parallel_delta": naive_delta,
+        "naive_b_log_hits": naive_b.get("log_hits") or 0,
+        "ship_b_log_hits": ship_b.get("log_hits") or 0,
+        "parallel_drop_explained_by_log_hits": parallel_drop_explained_by_log,
         "parallel_drop_explained_by_search_cache": parallel_drop_explained_by_cache,
+        "ship_cache_gap_A": _cache_gap(ship_a),
+        "ship_cache_gap_B": _cache_gap(ship_b),
+        "naive_cache_gap_A": _cache_gap(naive_a),
+        "naive_cache_gap_B": _cache_gap(naive_b),
         "winner": winner,
         "health_engine_default": health.get("engine_default"),
         "shelf_n": stats.get("n"),

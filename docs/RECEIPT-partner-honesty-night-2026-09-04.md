@@ -41,19 +41,23 @@ Raw JSON from the final honesty run: `docs/RECEIPT-partner-honesty-exhibit-raw-2
 
 | Stamp (UTC) | Shipping class | A→B Parallel | B hits | Sealed (B\<A) | Soft (B≤A) | Naive | Winner |
 |-------------|---------------|-------------:|-------:|:-------------:|:----------:|-------|--------|
-| 00:10:24 | STRICT_DROP | 1→0 | 1 | yes | yes | contaminated (same tokens → search cache zeroed Parallel on A) | shipping_strict* |
-| 00:12:42 | STRICT_DROP | 2→1 | 1 | yes | yes | A=2→B=1 hits=0 · Parallel drop matched shipping | **shipping_on_corpus_hits_only** |
+| 00:10:24 | STRICT_DROP | 1→0 | 1 | yes | yes | contaminated (same tokens) | shipping_strict* |
+| 00:12:42 | STRICT_DROP | 2→1 | 1 | yes | yes | A=2→B=1 hits=0 (log_hits not yet printed) | shipping_on_corpus_hits_only† |
 | 00:15:26 | **SOFT_PASS_FLAT** | 1→1 | 1 | **no** | yes | A=1→B=1 hits=0 | **shipping_soft_only** |
+| 00:22:38 | **SOFT_PASS_FLAT** | 1→1 | 1 | **no** | yes | A=2→B=1 hits=0 **log_hits=2** · API 2→1 | **shipping_soft_only** |
 
-\*First naive arm reused shipping claim text; Parallel search cache (`cache/searches.json` on host) zeroed NAIVE_A. Fixed to distinct tokens before runs 2–3.
+\*First naive arm reused shipping claim text.  
+†00:12 blamed search cache; **00:22 corrected** — mechanism is cross-subject `log_hits`.
 
 ### FINDING_RED (publishable embarrassment)
 
-1. **Soft verify can green while sealed prediction fails.** Run 00:15:26: `SOFT_PASS_FLAT` — soft gate PASS, sealed `B < A` FAIL. Mechanism: Run B extracted an extra new claim (3 vs 2), so Parallel stayed flat while the overlapping claim hit the corpus (`corpus_hits=1`).
-2. **Parallel drop is not compound proof.** Run 00:12:42: naive non-compound arm also dropped Parallel 2→1 with `corpus_hits=0` — explained by Parallel **search-result cache** on the overlapping claim text across subjects. The shelf differentiator is **`corpus_hits`**, not Parallel alone.
-3. **Earlier same-night soft flat** on `verify_partners_hosted.sh` compound-fresh (00:06Z): A=1→B=1 hits=1 — same sealed miss, soft pass.
+1. **Soft verify can green while sealed prediction fails.** Runs 00:15 and 00:22: `SOFT_PASS_FLAT` — soft PASS, sealed `B < A` FAIL. Mechanism: Run B extracted an extra claim; Parallel stayed flat while overlap hit corpus/log.
+2. **Naive Parallel drop = cross-subject `log_hits`, not search cache.** Run 00:22: naive A=2→B=1 Parallel with `corpus_hits=0` and **`log_hits=2`**. An earlier draft blamed search cache (nearer proxy); corrected at object. Search cache is still real (`SHIP_B parallel_api_calls=0` with `parallel_calls=1`) but was not the naive claim-path mechanism.
+3. **First naive arm was contaminated** (same claim text as shipping → Parallel 0 on A). Fixed with distinct tokens before clean runs.
 
-**Pitch correction:** film and Devpost must lead with **corpus_hits rise on repeat subject**, not "Parallel always drops." Sealed long-run A=1→B=0 remains real (`docs/SEALED-PREDICTION-2026-08-31.md`) but is not every fresh probe.
+**Pitch correction:** film **corpus_hits** for same-subject compound; read **log_hits** before calling a Parallel drop "compound"; never claim Parallel always drops.
+
+**WRONG (this agent):** diagnosed search-cache first without printing `log_hits` on the gap report. Fixed in exhibit + finding doc.
 
 ---
 

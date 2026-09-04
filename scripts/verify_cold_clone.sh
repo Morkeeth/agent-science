@@ -47,4 +47,8 @@ python3 scripts/eval_refusal_ablation.py 2>&1 | tail -2
 python3 scripts/eval_scorer_symmetry.py 2>&1 | tail -3
 
 echo
+echo "10. Partner honesty classify (offline — sealed vs soft)..."
+python3 tests/test_partner_honesty_classify.py 2>&1 | tail -1
+
+echo
 echo "=== cold-clone verify OK ==="

@@ -49,7 +49,7 @@ supersedes: docs/PHASE0-LADDER.md ClickHouse-track note (runtime track is Parall
 |------|------|
 | **Category** | Truth layer for what people believe and use — blogs, docs, stars, research, clearance |
 | **One user** | Fleet dev / agent operator who websearches daily *(volume)*; E&O producer *(paying vertical)* |
-| **Killer demo** | Hosted Run A → Run B: `corpus_hits` rise · `parallel_calls` drop on fresh subject — under 60s |
+| **Killer demo** | Hosted Run A → Run B: **`corpus_hits` rise** (Parallel *may* drop; soft flat is real — film hits) — under 60s |
 | **One visual** | `/popular/ui` hit-rate strip + compound metrics side-by-side on desk |
 | **Why now** | Agentic Cinema + E&O/AI-training handshake stall on asset-level provenance; Parallel track requires runtime search |
 
@@ -572,7 +572,7 @@ bash scripts/verify_cold_clone.sh                                               
 
 | When | What | Command | Outcome |
 |------|------|---------|---------|
-| 2026-09-04 night | Partner honesty night | `partner_honesty_exhibit.py` · `verify_partners_hosted.sh` · evals | **FINDING_RED** soft≠sealed · naive Parallel drop via search cache · partners 4/4 · ADK on `/clear` · baseline 5/6 vs 6/6 · track brief on README/PITCH · SUBMISSION public row fixed |
+| 2026-09-04 night | Partner honesty night | `partner_honesty_exhibit.py` · `verify_partners_hosted.sh` · evals | **FINDING_RED** soft≠sealed · naive Parallel drop = **log_hits** (search-cache diagnosis retracted) · partners 4/4 · ADK on `/clear` · baseline 5/6 vs 6/6 · track brief on README/PITCH · SUBMISSION public row fixed |
 | 2026-09-03 night | Fresh compound + timeout finding | `compound_fresh_hosted_probe.py` · `verify_partners_hosted.sh` | **A≥1 Parallel → B drop** · orphan-works Run A **504** @ 300s |
 | 2026-09-03 night | SUBMISSION-PACK + Qwen gates | `bench_check_docs.py` · `eval_verify_holdout.py` · `eval_scorer_symmetry.py` | **127/127** · holdout OK · scorer 5/6 vs 6/6 · offline compound A=2→B=1 |
 | 2026-09-02 | Partner verify re-run | `verify_partners_hosted.sh` · `full_gate.sh` | **4/4 partners** · compound warm-shelf PASS · 72/72 auto-seed |
