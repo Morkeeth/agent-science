@@ -1035,8 +1035,8 @@ def t_refusal_log_write_and_read_agree_on_the_slot():
              verdict=UNKNOWN, production="A", cause="no_independent_source")
     assert L.stats(con)["n"] == 2, \
         "two different assertions about one term merged into a single log row"
-    date_claim = L.lookup(con, term=T, assertion=f"{T} passed in 2012")
-    ident = L.lookup(con, term=T, assertion=f"{T} is called the Orphan Works Directive")
+    date_claim = L.lookup(con, term=T, assertion=f"{T} was adopted in 2012")
+    ident = L.lookup(con, term=T, assertion=f"{T} was known as the Orphan Works Directive")
     assert date_claim["verdict"] == GREEN and ident["verdict"] == UNKNOWN, \
         "the log served a verdict about a different assertion"
 

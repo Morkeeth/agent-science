@@ -24,6 +24,7 @@ def t_exact_query_replay_is_free():
             query="test query alpha",
             result={
                 "label": "SOURCED",
+                "established": "test query alpha",
                 "verdict": "GREEN",
                 "citation_url": "http://example.invalid",
                 "quoted_terms": "exact span",

@@ -14,7 +14,7 @@ from clearance.verdict import GREEN, UNKNOWN
 def t_independence_refuse_is_not_settled_for_reuse():
     assert not L.is_settled_for_reuse(
         verdict="UNKNOWN", cause="no_independent_source")
-    assert L.is_settled_for_reuse(
+    assert not L.is_settled_for_reuse(
         verdict="UNKNOWN", cause="search_found_no_admissible_source")
     assert L.is_settled_for_reuse(verdict="GREEN", cause=None)
 
@@ -38,7 +38,7 @@ def t_green_upgrades_poisoned_independence_row():
     assert L.stats(con)["n"] == 1, "upgrade must not duplicate the row"
 
 
-def t_green_is_not_downgraded_by_later_refuse():
+def t_later_uncertainty_invalidates_a_saved_green():
     con = L.connect(":memory:")
     T = "Directive 2012/28/EU"
     assertion = f"{T} is EU primary law."
@@ -47,7 +47,7 @@ def t_green_is_not_downgraded_by_later_refuse():
     L.record(con, term=T, assertion=assertion, verdict=UNKNOWN,
              production="B", cause="no_independent_source")
     hit = L.lookup(con, term=T, assertion=assertion)
-    assert hit["verdict"] == GREEN
+    assert hit["verdict"] == UNKNOWN and hit["unsettled"]
 
 
 def t_week_tally_counts_cleared_and_caught():

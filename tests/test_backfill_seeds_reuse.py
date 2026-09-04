@@ -1,21 +1,6 @@
-"""Back-fill seeds the cross-production log with a cold-start baseline — proven offline.
+"""Backfill permits exact supported reuse; unresolved claims remain retryable.
 
-The cross-production log (clearance/refusal_log.py) compounds only from NEW runs; it
-starts EMPTY, so nothing seeds it from the verdicts the full-corpus dogfood already
-proved. `clear_corpus.backfill_log` closes that: it runs the dogfood verifier and writes
-every SOURCED claim (and every confidently-UNSOURCED one — the negative-space asset) into
-the log, keyed on the SAME distinctive term the live path (`agent_science._term_of`)
-looks up.
-
-We fake ONLY the network boundaries, exactly as tests/test_cross_subject_reuse.py does:
-`instruments.document` (the fetch) and `search.find_sources` (Parallel). The locator is
-the real shipping StringLocator (DEFAULT) and the verdict rule (`verify`, independence,
-the Verdict constructor) runs for real. We substitute EFFECTS (what the network returns),
-never the RULE (what counts as verified). Ground truth is the fake's own call counter.
-
-THE PROOF: a NEW production on a DIFFERENT subject cites a back-filled claim and reuses it
-from the log with ZERO Parallel calls. It FAILS without the back-fill (the empty-log
-control searches) and PASSES with it.
+Network effects are substituted; the shipping verifier and verdict rules run.
 """
 from __future__ import annotations
 
@@ -70,7 +55,7 @@ def _fake_fetch(url, fetch=False, **kw):
     return {_URL_GREEN: _DOC_GREEN, _URL_SILENT: _DOC_SILENT}.get(url)
 
 
-# --- The NEW production that cites the back-filled claims, phrased DIFFERENTLY. ----------
+# The new production asks the exact backfilled assertions.
 @dataclass
 class _Raw:
     text: str
@@ -78,12 +63,11 @@ class _Raw:
     must_contain: str
 
 
-# Same distinctive term as the back-filled claim, different wording — so the reuse must
-# key on the term and FLAG the wording difference, never silently serve it.
+# Only the exact supported assertion can skip discovery.
 _PROD = [
-    _Raw(f"Records confirm the Act came into force on 1 April 2024, the notes say.",
+    _Raw(_CLAIM_GREEN,
          None, _TERM_GREEN),
-    _Raw(f"The registry holds two million titles, according to the archive.",
+    _Raw(_CLAIM_SILENT,
          None, _TERM_SILENT),
 ]
 
@@ -157,13 +141,13 @@ def test_backfill_writes_the_expected_rows_and_is_idempotent():
         s = refusal_log.lookup(con, term=_TERM_SILENT, assertion=_CLAIM_SILENT)
         assert s["verdict"] == UNKNOWN and s["cause"] == SOURCE_SILENT
 
-        # Idempotent: a second back-fill adds nothing (INSERT OR IGNORE on term+slot).
+        # Repeating backfill retains one current row per assertion, plus history.
         _backfill(corpus_dir, log_db)
         assert refusal_log.stats(refusal_log.connect(log_db))["n"] == 2, \
             "a second back-fill duplicated rows"
 
 
-def test_a_new_subject_reuses_the_backfilled_log_with_zero_parallel_calls():
+def test_new_subject_reuses_backfilled_support_but_retries_unknown():
     with tempfile.TemporaryDirectory() as d:
         tmp = Path(d)
         corpus_dir = _write_corpus(tmp)
@@ -180,35 +164,32 @@ def test_a_new_subject_reuses_the_backfilled_log_with_zero_parallel_calls():
         # SEED the log from the proven corpus.
         _backfill(corpus_dir, tmp / "seed_log.db")
 
-        # (PROOF — pass-with pole.) A DIFFERENT subject, fresh corpus, seeded log. Both
-        # claims overlap the back-filled ones by distinctive term. No Parallel call is
-        # spent — measured at the fake, not just self-reported.
+        # A fresh subject reuses the exact supported claim and retries the unknown.
+        # The network boundary independently counts that one discovery attempt.
         warm_net = _Net()
         warm = _run_production(warm_net, tmp, subject="a-different-subject",
                                corpus_db=tmp / "warm_corpus.db",
                                log_db=tmp / "seed_log.db")
-        assert warm_net.find_calls == 0, \
+        assert warm_net.find_calls == 1, \
             f"production hit the network {warm_net.find_calls} time(s); reuse failed"
-        assert warm["parallel_calls"] == 0, warm["parallel_calls"]
-        assert warm["log_hits"] == 2, warm["log_hits"]
+        assert warm["parallel_calls"] == 1, warm["parallel_calls"]
+        assert warm["log_hits"] == 1, warm["log_hits"]
         assert warm["corpus_hits"] == 0, "a back-filled reuse must not read as same-subject"
 
         by_text = {r["text"]: r for r in warm["rows"]}
 
-        # 1) The proven claim is reused as SOURCED, cites the back-filled URL, and FLAGS
-        #    that the evidence was established under a different wording.
-        force = by_text["Records confirm the Act came into force on 1 April 2024, the notes say."]
+        # The supported claim preserves its exact wording and original citation.
+        force = by_text[_CLAIM_GREEN]
         assert force["label"] == "SOURCED", force
         assert force["citation_url"] == _URL_GREEN
         assert force.get("cross_subject") is True and force["probe"] == "log_hit"
-        assert force.get("reused_from"), "different wording must be flagged, not silently served"
+        assert not force.get("reused_from")
 
-        # 2) The proven-UNPROVABLE claim stays refused, with NO re-search — the negative
-        #    space compounding across subjects.
-        silent = by_text["The registry holds two million titles, according to the archive."]
+        # The unresolved claim is searched again; this network still has no source.
+        silent = by_text[_CLAIM_SILENT]
         assert silent["label"] != "SOURCED"
         assert silent["engine_verdict"] == UNKNOWN
-        assert silent.get("cross_subject") is True
+        assert not silent.get("cross_subject")
 
 
 if __name__ == "__main__":
