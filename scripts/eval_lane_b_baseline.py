@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Lane B baseline arms — numbers re-derived at the object every run.
+"""Lane B baseline arms — every number re-derived by opening fixtures/lane-b/.
 
 Arms:
-  1. naive_title_merge — merges papers by title token overlap (the two-hour mistake)
-  2. naive_auto_contradict — any opposite-direction finding is contradicts, ignoring task
-  3. always_same_study — collapses every URL into one study (null that can beat us)
+  1. naive_title_merge — Jaccard on title tokens (two-hour mistake)
+  2. naive_auto_contradict — opposite verbs ⇒ contradicts, ignoring task
+  3. always_same_study — collapse every URL into one study (null)
   4. shipping — Lane B study identity + scope guard
 
 If a naive or null arm wins a metric, that is the finding — print it loud.
@@ -16,36 +16,24 @@ import re
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
 
 from clearance import claim_graph, conditions, study
 
-PAPER_A = """
-Task: SWE-bench verified repository repair (Python).
-Metric: resolve rate.
-Result: Persistent memory increased resolve rate.
-Limitation: may not generalize beyond Python repair.
-"""
-PAPER_B = """
-Task: HotpotQA multi-hop question answering (English).
-Metric: exact match accuracy.
-Result: Persistent memory did not improve exact match.
-Limitation: not a causal claim about coding effectiveness.
-"""
-PAPER_A_MIRRORS = [
-    'https://arxiv.org/abs/2401.11111',
-    'https://arxiv.org/pdf/2401.11111.pdf',
-    'https://arxiv.org/html/2401.11111',
-    'https://ar5iv.labs.arxiv.org/html/2401.11111',
-    'https://doi.org/10.48550/arXiv.2401.11111',
-]
-PAPER_B_URL = 'https://arxiv.org/abs/2402.22222'
-TITLE_A = 'Persistent memory for coding agents on repository repair'
-TITLE_B = 'Persistent memory for coding agents on multi-hop QA'
+FIXTURE = ROOT / 'fixtures' / 'lane-b'
+MANIFEST = json.loads((FIXTURE / 'MANIFEST.json').read_text())
+
+
+def load_papers():
+    papers = []
+    for row in MANIFEST['papers']:
+        text = (FIXTURE / row['text_file']).read_text()
+        papers.append({**row, 'text': text})
+    return papers
 
 
 def naive_title_merge(titles_and_urls):
-    """Two-hour baseline: Jaccard on title tokens ≥ 0.4 ⇒ same study."""
     groups = []
     for title, url in titles_and_urls:
         tokens = set(re.findall(r'[a-z0-9]+', title.lower()))
@@ -64,7 +52,6 @@ def naive_title_merge(titles_and_urls):
 
 
 def naive_auto_contradict(text_a, text_b):
-    """Ignore scope: opposite verbs ⇒ contradicts."""
     neg = bool(re.search(r'\b(did not|not improve|no benefit|fail|increas\w+ (?:error|harm))\b', text_b, re.I))
     pos = bool(re.search(r'\b(increased|improved|helps?|benefit)\b', text_a, re.I))
     if pos and neg:
@@ -77,42 +64,45 @@ def always_same_study(urls):
 
 
 def main():
-    # --- Study identity metrics ---
-    mirror_urls = PAPER_A_MIRRORS
-    shipping_groups = study.group_documents(mirror_urls + [PAPER_B_URL])
-    shipping_mirror_count = sum(1 for g in shipping_groups if g['id'] == '2401.11111')
-    shipping_total = len(shipping_groups)
+    papers = load_papers()
+    by_id = {p['id']: p for p in papers}
+    swe = by_id['memory-swebench-2401']
+    hot = by_id['memory-hotpotqa-2402']
+    all_urls = [u for p in papers for u in p['urls']]
 
-    title_rows = (
-        [(TITLE_A, u) for u in PAPER_A_MIRRORS] + [(TITLE_B, PAPER_B_URL)]
+    # Truth from the fixture object (manifest), checked against shipping behavior.
+    truth_studies = MANIFEST['truth']['unique_studies_from_all_urls']
+    truth_mirrors = MANIFEST['truth']['swebench_mirror_count']
+    truth_rel = MANIFEST['truth']['swebench_vs_hotpotqa_relation']
+
+    # Re-derive mirror count at the object
+    assert len(swe['urls']) == truth_mirrors, (
+        f"manifest swebench_mirror_count={truth_mirrors} but fixture lists {len(swe['urls'])} URLs"
     )
+
+    shipping_groups = study.group_documents(all_urls)
+    shipping_total = len(shipping_groups)
+    shipping_swe = next((g for g in shipping_groups if g['id'] == '2401.11111'), None)
+    shipping_mirror_ok = bool(shipping_swe and len(shipping_swe['urls']) == truth_mirrors)
+
+    title_rows = [(p['title'], u) for p in papers for u in p['urls']]
     naive_groups = naive_title_merge(title_rows)
-    null_groups = always_same_study(mirror_urls + [PAPER_B_URL])
+    null_groups = always_same_study(all_urls)
 
-    # Correct: 5 mirrors → 1 study; paper B separate → 2 studies total.
-    truth_mirror_studies = 1
-    truth_total_studies = 2
+    def score_identity(total, mirror_ok):
+        return (1 if mirror_ok else 0) + (1 if total == truth_studies else 0)
 
-    def score_identity(n_mirrors_as_one, n_total):
-        # 1 point for collapsing mirrors; 1 point for keeping B separate.
-        mirror_ok = 1 if n_mirrors_as_one == truth_mirror_studies else 0
-        total_ok = 1 if n_total == truth_total_studies else 0
-        return mirror_ok + total_ok
-
-    # For naive title merge: all 5 A mirrors share title A → 1 group; B may merge if overlap high.
-    naive_a = next((g for g in naive_groups if any(u in PAPER_A_MIRRORS for u in g['urls'])), None)
-    naive_mirror_as_one = 1 if naive_a and set(PAPER_A_MIRRORS) <= set(naive_a['urls']) else 0
-    # If B was swallowed into A's group, total studies = 1 (wrong).
+    naive_swe = next((g for g in naive_groups if any(u in swe['urls'] for u in g['urls'])), None)
+    naive_mirror_ok = bool(naive_swe and set(swe['urls']) <= set(naive_swe['urls']))
     naive_total = len(naive_groups)
+    naive_merged_hot = bool(naive_swe and any(u in hot['urls'] for u in naive_swe['urls']))
 
-    shipping_score = score_identity(1 if shipping_mirror_count == 1 else 0, shipping_total)
-    # naive: mirrors collapse via same title (good) but may wrongly merge B
-    naive_score = score_identity(naive_mirror_as_one, naive_total)
-    null_score = score_identity(1 if len(null_groups) == 1 else 0, len(null_groups))
+    shipping_score = score_identity(shipping_total, shipping_mirror_ok)
+    naive_score = score_identity(naive_total, naive_mirror_ok)
+    null_score = score_identity(len(null_groups), len(null_groups) == 1 and truth_mirrors > 0)
 
-    # --- Scope / contradiction metrics ---
-    cond_a = conditions.extract(PAPER_A)
-    cond_b = conditions.extract(PAPER_B)
+    cond_a = conditions.extract(swe['text'])
+    cond_b = conditions.extract(hot['text'])
     shipping_rel = claim_graph.relate_findings(
         statement_a='Persistent memory helps coding repair.',
         conditions_a=cond_a,
@@ -120,68 +110,66 @@ def main():
         conditions_b=cond_b,
         direction_conflict=True,
     )['relation']
-    naive_rel = naive_auto_contradict(PAPER_A, PAPER_B)
+    naive_rel = naive_auto_contradict(swe['text'], hot['text'])
 
-    # Truth: different_scope (not contradicts)
-    shipping_scope_ok = shipping_rel == 'different_scope'
-    naive_scope_ok = naive_rel == 'different_scope'  # naive never emits this
-    null_scope_ok = False  # null has no scope concept; treat as fail
+    # Qualitative gate — open the interview fixture
+    interview = by_id['interview-memory-qual']
+    gate = claim_graph.causal_claim_gate(
+        statement='Persistent memory causally improves coding-agent effectiveness.',
+        conditions=conditions.extract(interview['text']),
+    )
 
     result = {
+        'fixture': str(FIXTURE),
         'identity': {
-            'truth': {'mirror_studies': truth_mirror_studies, 'total_studies': truth_total_studies},
+            'truth': {'total_studies': truth_studies, 'swebench_mirrors': truth_mirrors},
             'shipping': {
                 'groups': [{'identity': g['identity'], 'id': g['id'], 'n_urls': len(g['urls'])}
                            for g in shipping_groups],
                 'score': shipping_score,
+                'mirror_ok': shipping_mirror_ok,
             },
             'naive_title_merge': {
-                'groups': [{'titles': g['titles'], 'n_urls': len(g['urls'])} for g in naive_groups],
+                'n_groups': naive_total,
                 'score': naive_score,
-                'wrongly_merged_b': naive_total < truth_total_studies,
+                'wrongly_merged_hotpotqa': naive_merged_hot,
             },
-            'always_same_study_null': {
-                'groups': null_groups,
-                'score': null_score,
-            },
+            'always_same_study_null': {'n_groups': len(null_groups), 'score': null_score},
         },
         'scope': {
-            'truth_relation': 'different_scope',
+            'truth_relation': truth_rel,
             'shipping_relation': shipping_rel,
             'naive_auto_contradict_relation': naive_rel,
-            'shipping_ok': shipping_scope_ok,
-            'naive_ok': naive_scope_ok,
-            'null_ok': null_scope_ok,
+            'shipping_ok': shipping_rel == truth_rel,
+            'naive_ok': naive_rel == truth_rel,
         },
-        'title_merge_refused': study.merge_by_title(TITLE_A, TITLE_B),
+        'qualitative_causal_gate': gate,
+        'title_merge_refused': study.merge_by_title(swe['title'], hot['title']),
         'verdict': {
             'shipping_identity_beats_null': shipping_score > null_score,
             'shipping_identity_vs_naive': shipping_score - naive_score,
-            'shipping_scope_beats_naive': shipping_scope_ok and not naive_scope_ok,
+            'shipping_scope_beats_naive': shipping_rel == truth_rel and naive_rel != truth_rel,
             'embarrassing': [],
         },
         'meaning': (
-            'Scores re-derived this run. Identity score = mirror-collapse point + separation point. '
-            'Scope truth is different_scope for different tasks.'
+            'Scores re-derived from fixtures/lane-b this run. '
+            'Identity score = mirror-collapse point + total-studies point.'
         ),
     }
-
     emb = result['verdict']['embarrassing']
     if null_score >= shipping_score:
         emb.append('null always_same_study matched or beat shipping on identity score')
     if naive_score > shipping_score:
         emb.append('naive title-merge beat shipping on identity score')
-    if not shipping_scope_ok:
-        emb.append('shipping failed to classify different-task papers as different_scope')
-    if naive_scope_ok and not shipping_scope_ok:
-        emb.append('naive scope arm beat shipping')
-    if result['identity']['naive_title_merge']['wrongly_merged_b']:
-        # This is expected embarrassment of the naive arm — record as finding about baseline.
+    if not result['scope']['shipping_ok']:
+        emb.append('shipping failed swebench vs hotpotqa scope truth')
+    if not gate.get('allowed') is False:
+        emb.append('qualitative causal gate did not refuse')
+    if naive_merged_hot:
         result['verdict']['naive_title_merge_false_positive'] = True
 
     print(json.dumps(result, indent=2))
-    # Exit 0 always when the measurement completed; embarrassment is in the payload.
-    if not shipping_scope_ok or shipping_score < 2:
+    if shipping_score < 2 or not result['scope']['shipping_ok'] or gate.get('allowed') is not False:
         print('LANE_B_EVAL: shipping missed a required point', file=sys.stderr)
         return 1
     print('LANE_B_EVAL OK', file=sys.stderr)

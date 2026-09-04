@@ -1,0 +1,12 @@
+Title: Persistent memory for coding agents on multi-hop QA.
+Abstract: We study whether a persistent memory store improves multi-hop question answering.
+Task: HotpotQA multi-hop question answering (English).
+Population: 200 HotpotQA development questions.
+Model: GPT-4o-mini with retrieval tools.
+Comparator: identical agent without persistent memory.
+Dataset: HotpotQA distractor setting.
+Metric: exact match accuracy.
+Resource budget: 4 retrieval calls and 2k tokens per question.
+Study design: within-subject comparison on fixed questions.
+Limitation: qualitative interview follow-ups are exploratory; this is not a causal claim about coding effectiveness.
+Result: Persistent memory did not improve exact match on HotpotQA under the stated budget.

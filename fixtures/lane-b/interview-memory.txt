@@ -1,0 +1,6 @@
+Title: Engineer interviews on persistent memory.
+We conducted qualitative interviews with twelve engineers about persistent memory.
+Population: twelve professional software engineers.
+Study design: semi-structured qualitative interview study.
+Limitation: exploratory; not a causal claim about effectiveness.
+Practitioners reported that repo-local notes helped continuity on long tasks.

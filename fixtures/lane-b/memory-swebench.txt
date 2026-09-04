@@ -1,0 +1,12 @@
+Title: Persistent memory for coding agents on repository repair.
+Abstract: We study whether a persistent memory store improves coding-agent outcomes.
+Task: SWE-bench verified repository repair (Python).
+Population: 50 repository issues from the SWE-bench verified split.
+Model: Claude 3.5 Sonnet (20241022) with a 32k context window.
+Comparator: identical agent without persistent memory (fresh session each trial).
+Dataset: SWE-bench verified (n=50).
+Metric: resolve rate (% of issues with passing tests).
+Resource budget: 8 agent turns and at most 120 seconds wall time per issue.
+Study design: randomized controlled comparison with matched prompts.
+Limitation: results may not generalize beyond Python repair tasks under the stated budget.
+Result: Persistent memory increased resolve rate from 24% to 38% under the stated budget.

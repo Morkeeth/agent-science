@@ -39,13 +39,14 @@ agent-science research compare CASE_ID --from-version N
 | Synthesis kinds + falsification | `pytest …::test_synthesis_separates_evidence_kinds_and_names_falsification` | passed |
 | Answer version diff kinds | `pytest …::test_answer_version_diff_distinguishes_change_kinds` | passed |
 | Challenge uses Lane B graph | `pytest …::test_challenge_synthesis_uses_lane_b_graph` | passed |
-| Full Lane B suite | `python3 -m pytest -q tests/test_lane_b_evidence.py` | **9 passed** |
+| Full Lane B suite | `python3 -m pytest -q tests/test_lane_b_evidence.py` | **10 passed** |
+| Fixture corpus + assess causal gate | `…::test_fixture_corpus_identity_and_assess_causal_gate` | passed · opens `fixtures/lane-b/` |
 | Stranger demo | `bash scripts/demo_lane_b_evidence.sh` | exit 0 · DEMO LANE B OK |
-| Baseline arms (re-derived) | `python3 scripts/eval_lane_b_baseline.py` | shipping 2 · naive 1 · null 1 · naive_title_merge_false_positive=true |
+| Baseline arms (re-derived from fixtures) | `python3 scripts/eval_lane_b_baseline.py` | shipping 2 · naive 1 · null 1 · naive HotpotQA false-positive · qualitative gate refuses |
 | Lane A still green | `bash scripts/demo_research_challenge.sh` · `pytest tests/test_research_run.py` | DEMO OK CONTESTED · passed |
 | Lane A baseline still green | `python3 scripts/eval_research_challenge_baseline.py` | adaptive_wins=true |
 
-**Red-then-green:** first collection of `tests/test_lane_b_evidence.py` raised `ImportError: cannot import name 'claim_graph'` before modules existed. That was the observed red. After implementation, 9/9 passed.
+**Red-then-green:** first collection of `tests/test_lane_b_evidence.py` raised `ImportError: cannot import name 'claim_graph'` before modules existed. That was the observed red. After implementation, 10/10 passed.
 
 ## What landed
 
@@ -53,11 +54,12 @@ agent-science research compare CASE_ID --from-version N
 - `clearance/conditions.py` — structured conditions with verbatim spans; unknown when absent
 - `clearance/claim_graph.py` — relations including `different_scope`; causal gate for qualitative designs
 - `clearance/synthesis.py` — separated by_kind synthesis; per-conclusion challenge/falsification; `diff_answers`
-- `clearance/research.py` — `different_scope` relation; causal gate on supports
+- `clearance/research.py` — `different_scope` relation; causal gate on supports; brief carries studies + claim graph
 - `clearance/research_run.py` — challenge assessments use scope guard; `_synthesize` → Lane B synthesis
 - CLI/MCP — `research synthesize` · `research compare` · MCP actions match
+- `fixtures/lane-b/` — paper corpus + MANIFEST; baseline eval opens these objects
 - `scripts/demo_lane_b_evidence.sh` · `scripts/eval_lane_b_baseline.py`
-- `tests/test_lane_b_evidence.py` — 9 executed controls
+- `tests/test_lane_b_evidence.py` — 10 executed controls
 
 ## Finding that can embarrass us (kept)
 

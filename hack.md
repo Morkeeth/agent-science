@@ -319,8 +319,8 @@ Full record: `fleet-ops (internal)/retros/QWEN-LOSS-RETRO-2026-08-30.md` (correc
 - [x] Synthesis separates empirical vs official vs adoption vs local measurement — `…::test_synthesis_separates_evidence_kinds_and_names_falsification` → **passed**
 - [x] Each material conclusion has strongest challenge + falsification — same test + `bash scripts/demo_lane_b_evidence.sh` → **DEMO LANE B OK**
 - [x] Answer-version diff: changed source vs newly available vs reinterpretation — `…::test_answer_version_diff_distinguishes_change_kinds` → **passed**
-- [x] Red→green tests: duplicate paper→one study; different-task ≠ auto-contradiction; fabricated quote rejected — `python3 -m pytest -q tests/test_lane_b_evidence.py` → **9 passed** (first collection ImportError was the red)
-- [x] Naive/null baseline arms — `python3 scripts/eval_lane_b_baseline.py` → shipping identity **2** > naive **1** (title-merge false-positive on paper B) > null **1**; scope shipping `different_scope` vs naive `contradicts`
+- [x] Red→green tests: duplicate paper→one study; different-task ≠ auto-contradiction; fabricated quote rejected — `python3 -m pytest -q tests/test_lane_b_evidence.py` → **10 passed** (first collection ImportError was the red)
+- [x] Naive/null baseline arms — `python3 scripts/eval_lane_b_baseline.py` → shipping identity **2** > naive **1** (title-merge false-positive on HotpotQA) ; scope shipping `different_scope` vs naive `contradicts`; opens `fixtures/lane-b/`
 - [x] Receipt — `docs/CLOUD-RECEIPT-nightplan-lane-b-2026-09-05.md`
 
 ### BLOCKED / Oscar door
@@ -573,7 +573,7 @@ bash scripts/verify_cold_clone.sh                                               
 
 | When | What | Command | Outcome |
 |------|------|---------|---------|
-| 2026-09-05 overnight b | Lane B evidence engine | `pytest tests/test_lane_b_evidence.py` · `demo_lane_b_evidence.sh` · `eval_lane_b_baseline.py` | **9 passed** · DEMO LANE B OK · shipping 2>naive 1 (title-merge FP) · scope different_scope |
+| 2026-09-05 overnight b | Lane B evidence engine | `pytest tests/test_lane_b_evidence.py` · `demo_lane_b_evidence.sh` · `eval_lane_b_baseline.py` | **10 passed** · DEMO LANE B OK · shipping 2>naive 1 (title-merge FP) · scope different_scope · fixtures/lane-b |
 | 2026-09-05 overnight | Lane A research engine | `pytest tests/test_research_run.py` · `demo_research_challenge.sh` · `eval_research_challenge_baseline.py` | **7 passed** · DEMO OK CONTESTED · adaptive 1 > naive 0 |
 | 2026-09-03 night | Fresh compound + timeout finding | `compound_fresh_hosted_probe.py` · `verify_partners_hosted.sh` | **A≥1 Parallel → B drop** · orphan-works Run A **504** @ 300s |
 | 2026-09-03 night | SUBMISSION-PACK + Qwen gates | `bench_check_docs.py` · `eval_verify_holdout.py` · `eval_scorer_symmetry.py` | **127/127** · holdout OK · scorer 5/6 vs 6/6 · offline compound A=2→B=1 |

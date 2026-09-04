@@ -192,20 +192,41 @@ def brief(data):
         state=('CONTESTED' if {'supports','contradicts'}<=relations else
                'REVIEW_REQUIRED' if any(a['state']=='REVIEW_REQUIRED' for a in assessments) else
                'SUPPORTED_AS_ASSESSED' if 'supports' in relations else
-               'CONTRADICTED_AS_ASSESSED' if 'contradicts' in relations else 'UNRESOLVED')
+               'CONTRADICTED_AS_ASSESSED' if 'contradicts' in relations else
+               'SCOPED_AS_ASSESSED' if 'different_scope' in relations else 'UNRESOLVED')
         rows.append({**claim,'assessments':assessments,'state':state})
     read_urls={e['url'] for e in data['evidence'] if e.get('snapshot_text')}
     unread=[u for u in data.get('report',{}).get('urls',[]) if u not in read_urls]
+    from clearance import claim_graph, study as study_mod
+    studies = study_mod.build_studies(data.get('evidence', []))
+    graph = claim_graph.from_case(data)
     return {'case_id':data['id'],'version':data['version'],'question':data['question'],'claims':rows,
         'unread_report_citations':unread,'source_hosts':sorted({urlsplit(e['url']).hostname for e in data['evidence'] if urlsplit(e['url']).hostname}),
+        'studies':[{'identity':s['identity'],'id':s['id'],'n_documents':len(s['document_refs']),
+                    'conditions':{f:(s.get('conditions') or {}).get(f) for f in ('task','population','metric','study_design','limitations')}}
+                   for s in studies],
+        'claim_graph':{'edge_relations':sorted({e['relation'] for e in graph['edges']}),
+                       'n_edges':len(graph['edges']),'n_nodes':len(graph['nodes'])},
         'limits':['Assessments are authored interpretations, not automatic scientific verdicts.',
                   'Different hosts do not establish independent experiments.',
+                  'HTML/PDF mirrors of one DOI/arXiv id are one study; titles never merge studies.',
+                  'different_scope means task/population mismatch — not an automatic contradiction.',
                   'This compares saved snapshots; refresh explicitly to check the web.'],
         'next_action':'Inspect unresolved or stale claims and cited sources; add a targeted investigation or design a local experiment.'}
 
 
 def render_brief(result):
     lines=[f"Research brief · {result['case_id']} · version {result['version']}",result['question'],'']
+    if result.get('studies'):
+        lines.append(f"Studies: {len(result['studies'])}")
+        for s in result['studies']:
+            task=((s.get('conditions') or {}).get('task') or {}).get('value') or 'task unknown'
+            lines.append(f"  [{s['identity']}:{s['id']}] docs={s['n_documents']} · {task[:100]}")
+        lines.append('')
+    if result.get('claim_graph'):
+        g=result['claim_graph']
+        lines.append(f"Claim graph: {g.get('n_edges',0)} edges · relations={g.get('edge_relations')}")
+        lines.append('')
     for c in result['claims']:
         lines.extend([f"[{c['state']}] {c['id']}",c['statement']])
         for a in c['assessments']:

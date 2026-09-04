@@ -1,0 +1,40 @@
+{
+  "meaning": "Lane B offline fixtures. Identity and scope scores must be re-derived by opening these texts — not by copying numbers from docs.",
+  "papers": [
+    {
+      "id": "memory-swebench-2401",
+      "title": "Persistent memory for coding agents on repository repair",
+      "urls": [
+        "https://arxiv.org/abs/2401.11111",
+        "https://arxiv.org/pdf/2401.11111.pdf",
+        "https://arxiv.org/html/2401.11111",
+        "https://ar5iv.labs.arxiv.org/html/2401.11111v2",
+        "https://doi.org/10.48550/arXiv.2401.11111"
+      ],
+      "text_file": "memory-swebench.txt"
+    },
+    {
+      "id": "memory-hotpotqa-2402",
+      "title": "Persistent memory for coding agents on multi-hop QA",
+      "urls": [
+        "https://arxiv.org/abs/2402.22222",
+        "https://arxiv.org/pdf/2402.22222.pdf"
+      ],
+      "text_file": "memory-hotpotqa.txt"
+    },
+    {
+      "id": "interview-memory-qual",
+      "title": "Engineer interviews on persistent memory",
+      "urls": [
+        "https://example.org/interview-memory-agents"
+      ],
+      "text_file": "interview-memory.txt"
+    }
+  ],
+  "truth": {
+    "unique_studies_from_all_urls": 3,
+    "swebench_mirror_count": 5,
+    "swebench_vs_hotpotqa_relation": "different_scope",
+    "note": "truth values are checked by scripts that open the fixture texts; do not paste scores into product code."
+  }
+}

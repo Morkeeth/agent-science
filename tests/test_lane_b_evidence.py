@@ -338,3 +338,45 @@ def test_challenge_synthesis_uses_lane_b_graph(tmp_path):
             a['relation'] for c in brief['claims'] for a in c['assessments'] if a['state'] == 'CURRENT'
         }
     assert 'different_scope' in relations or 'CONTESTED' not in states or answer.get('scope_guard') is True
+    assert 'studies' in brief and brief['studies']
+    assert 'claim_graph' in brief
+
+
+def test_fixture_corpus_identity_and_assess_causal_gate(tmp_path):
+    """Open fixtures/lane-b at the object — not embedded strings — and exercise assess gate."""
+    from pathlib import Path
+    import json
+    root = Path(__file__).resolve().parents[1] / 'fixtures' / 'lane-b'
+    manifest = json.loads((root / 'MANIFEST.json').read_text())
+    papers = []
+    for row in manifest['papers']:
+        papers.append({**row, 'text': (root / row['text_file']).read_text()})
+    all_urls = [u for p in papers for u in p['urls']]
+    groups = study.group_documents(all_urls)
+    assert len(groups) == manifest['truth']['unique_studies_from_all_urls']
+    swe = next(p for p in papers if p['id'] == 'memory-swebench-2401')
+    assert len(next(g for g in groups if g['id'] == '2401.11111')['urls']) == len(swe['urls'])
+
+    interview = next(p for p in papers if p['id'] == 'interview-memory-qual')
+    db = tmp_path / 'cases.db'
+    url = interview['urls'][0]
+
+    def snap(u, **kwargs):
+        if u != url:
+            return None
+        return {'text': interview['text'], 'sha256': cases.digest(interview['text']),
+                'fetched_at': '2026-09-05T00:00:00Z', 'cache_hit': True}
+
+    with patch.object(instruments, 'document_snapshot', side_effect=snap):
+        data = cases.create('Does memory causally help?', sources=[url], db=db)
+    eid = data['evidence'][0]['id']
+    quote = 'We conducted qualitative interviews with twelve engineers about persistent memory.'
+    assert quote in interview['text']
+    with pytest.raises(ValueError, match='qualitative_design_not_causal'):
+        research.assess(
+            data['id'], data['version'],
+            statement='Persistent memory causally improves coding-agent effectiveness.',
+            relation='supports',
+            rationale='Must be refused: interview design cannot support causal effectiveness.',
+            evidence_id=eid, quote=quote, db=db,
+        )
