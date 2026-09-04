@@ -47,7 +47,7 @@ Output on this run:
 }
 ```
 
-## Hosted /health (measured 2026-08-30)
+## Hosted /health (measured 2026-09-04 · re-check)
 
 ```bash
 curl -s https://agent-science-568004190078.us-central1.run.app/health | python3 -m json.tool
@@ -60,12 +60,17 @@ curl -s https://agent-science-568004190078.us-central1.run.app/health | python3 
   "gemini": true,
   "gemini_path": "vertex:hack-fleet",
   "parallel": true,
+  "parallel_sdk": true,
+  "parallel_sdk_version": "1.3.2",
   "agent_builder": true,
   "adk_version": "2.7.1",
   "engine_default": "adk"
 }
 ```
 
+**`/clear` stamp (same night):** `engine: adk` · `adk_tool_calls: ["clear_script_tool"]` · `model_routing: vertex:hack-fleet` — see `docs/RECEIPT-partner-honesty-night-2026-09-04.md`.
+
 ## What is NOT proved here
 
 - **Live ADK model call on this VM** — no Vertex ADC or Gemini key locally; tool path proved by Aug 23 receipt (`docs/RECEIPT-agent-builder.md`) and engine-selection tests above.
+- **ADK changes clearance outcomes vs direct** — hosted has no `engine=direct` request override; ADK wraps the same `clear_script_tool` → `agent_science.clear_script`. Overhead is model routing to call the tool, not a second verifier.

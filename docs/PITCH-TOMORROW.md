@@ -8,11 +8,15 @@
 
 ## 30-second pitch (say this first)
 
+> **Track brief:** fact-checking for media content — verbatim evidence or named refusal
+> for every claim in a production script.
+>
 > **You get:** every checkable claim back as a verbatim quote with its source URL, or
 > UNSOURCED with a named reason — plus a truth shelf that compounds so the second ask is free.
 >
-> **Proof:** hosted compound exhibit — Run A **1** Parallel call, Run B **0** with
-> `corpus_hits=1` on repeat. Four partners wired at runtime: Vertex, Parallel, Cloud Run, ADK.
+> **Proof:** hosted desk · four partners at runtime (Vertex, Parallel, Cloud Run, ADK) ·
+> repeat subject shows `corpus_hits ≥ 1` (sealed long-run also dropped Parallel 1→0;
+> fresh probes sometimes stay flat on Parallel when Run B adds a claim — film the hits).
 >
 > **Constraint:** if the document does not contain the exact passage, refuse — never paraphrase,
 > never infer. We refused our own pitch headline in the product because of this rule
@@ -31,8 +35,8 @@
 
 **Proof on camera:**
 1. **Hosted** `/visibility/ui?q=ralph+loop+agentic` — transparency pane + CONTRARY stamp (no CLI needed) · live 2026-09-02: UI shows primary `CONTRARY_TO_RESEARCH` + the transparency pane; the keys `angles_searched`, `shallow_route`, `imbalance` are in the JSON at `/visibility?q=ralph+loop+agentic`
-2. `/truths/ui` — ranked queries, **276 claims** (live 2026-09-02 ~23:40Z; `curl -s …/truths/ui` → `Shelf: 276 claims · hit rate 0.66 · 191 queries logged`; the shelf grows with use — re-curl before saying a number)
-3. Compound: same subject twice → `parallel_calls` drop, `corpus_hits` rise — `docs/SEALED-PREDICTION-2026-08-31.md` (sealed A=1→B=0; warm shelf may show A=0→B=0 with `corpus_hits=1`)
+2. `/truths/ui` — ranked queries; **re-curl before saying a number** — hosted `/stats` 2026-09-04: **312 claims** · hit rate **0.627** · **279** queries logged (shelf grows; older 265/276 figures are stale)
+3. Compound: same subject twice → `corpus_hits` rise; Parallel *may* drop — sealed A=1→B=0 (`docs/SEALED-PREDICTION-2026-08-31.md`); honesty night also measured soft flat 1→1 — `docs/RECEIPT-partner-honesty-night-2026-09-04.md`
 
 **Moat:** Positive truths + negative truths (named refusal) + popularity → self-tuning dictionary. Competitors prove the first script. We prove the **second costs less** — and we show *how we searched*.
 

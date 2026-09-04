@@ -73,7 +73,25 @@ python3 "$ROOT/scripts/compound_hosted_probe.py" "$BASE"
 
 echo
 echo "--- 5. Compound-fresh A/B (Parallel drop on fresh subject) ---"
-python3 "$ROOT/scripts/compound_fresh_hosted_probe.py" "$BASE"
+# Soft gate (exit 0): A_parallel≥1, B_hits≥1, B_parallel≤A.
+# Sealed prediction is stricter (B < A). Print both so soft green cannot hide a sealed miss.
+COMPOUND_OUT="$(python3 "$ROOT/scripts/compound_fresh_hosted_probe.py" "$BASE")"
+echo "$COMPOUND_OUT"
+python3 -c "
+import ast, re, sys
+text = sys.argv[1]
+m = re.search(r'COMPOUND (\{.*\})', text)
+assert m, 'compound-fresh did not print COMPOUND dict'
+d = ast.literal_eval(m.group(1))
+ap, bp, bh = d['A_parallel'], d['B_parallel'], d['B_hits']
+soft = ap >= 1 and bh >= 1 and bp <= ap
+sealed = ap >= 1 and bh >= 1 and bp < ap
+klass = 'STRICT_DROP' if sealed else ('SOFT_PASS_FLAT' if soft and bp == ap else 'FAIL')
+print(f'COMPOUND_CLASS {klass} soft_gate={soft} sealed_strict={sealed}')
+if soft and not sealed:
+    print('NOTE: soft verify PASS; sealed prediction (B < A Parallel) MISS — film corpus_hits, not Parallel drop')
+" "$COMPOUND_OUT"
 
 echo
 echo "=== Partner hosted verify OK === $STAMP"
+echo "Honesty arm (shipping vs naive): python3 scripts/partner_honesty_exhibit.py"

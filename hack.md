@@ -2,7 +2,7 @@
 doc: hack
 project: Agent Science
 phase: SHIP
-last-touched: 2026-09-03 12:10 UTC
+last-touched: 2026-09-04 00:15 UTC
 canonical: true
 event: Agentic Cinema · Parallel track · deadline 2026-09-09 14:00 PDT
 supersedes: docs/PHASE0-LADDER.md ClickHouse-track note (runtime track is Parallel)
@@ -298,7 +298,7 @@ submission craft, supported by a real tendency, **not** as the explanation of th
 - [ ] **Cost from billing**, with the price card's date stated.
 - [x] **Offline path with no API key.**
 - [x] **Honesty & limitations** section carrying our worst number — README §Honesty & limitations; PITCH first screen
-- [ ] **Answer the track brief in the track's own words on the first screen** — judge pack § above; must land on Devpost ¶1 + video 0:00
+- [ ] **Answer the track brief in the track's own words on the first screen** — **CLOSED 2026-09-04** for README + PITCH first screen (`fact-checking for media content — verbatim evidence or named refusal…`); still open for live Devpost ¶1 + video 0:00 (Oscar).
 - [ ] **Video verified attached and public on the live entry page, from a logged-out browser** — not in a checklist file, on the page.
 - [ ] **Every artifact claim measured at the submitted commit.** Four retros of that loss failed this row.
 
@@ -307,7 +307,51 @@ Full record: `fleet-ops (internal)/retros/QWEN-LOSS-RETRO-2026-08-30.md` (correc
 
 ---
 
-## 🎯 NOW — Partner night wave (fresh compound + timeout finding)
+## 🎯 NOW — Partner honesty night (strict sealed vs soft gate + naive arm)
+
+**Slice:** Prove all four partners at runtime again; ship a compound honesty exhibit that can go RED against the sealed prediction; fix stale submission claims; land track-brief words on first screen.
+
+### Build (shipped 2026-09-04)
+
+- [x] Partner honesty exhibit — `python3 scripts/partner_honesty_exhibit.py` (shipping vs naive; STRICT_DROP / SOFT_PASS_FLAT; FINDING_RED on soft≠sealed)
+- [x] Partner doc stamp — `docs/PARTNER-INTEGRATIONS-2026-08-30.md` last-verified 2026-09-04
+- [x] SUBMISSION-PACK truth — public-repo row PUBLIC · controls re-measured date · shelf hint
+- [x] Track brief first screen — README + PITCH open in track's own words
+- [x] Design partner friction — measured latencies + orphan 504 + corpus_hits guidance
+- [x] Live orphan A/B — keys missing → `docs/BLOCKED-live-compound-keys-2026-09-04.md`
+- [x] Qwen eval re-run — baseline 5/6 · ablation 5/6 · shipping 6/6 · holdout OK
+- [x] Receipt — `docs/RECEIPT-partner-honesty-night-2026-09-04.md`
+- [x] Finding — `docs/FINDING-parallel-drop-not-compound-2026-09-04.md`
+- [x] Offline classify control — `python3 tests/test_partner_honesty_classify.py`
+- [x] verify_partners prints `COMPOUND_CLASS` soft vs sealed
+
+### Verify (one command each)
+
+```bash
+git pull && python3 tests/test_watch_it_go_red.py                    # 72/72
+bash scripts/verify_partners_hosted.sh                               # 4/4 partners + COMPOUND_CLASS
+python3 scripts/partner_honesty_exhibit.py                           # arms + sealed class
+python3 tests/test_partner_honesty_classify.py                       # offline classify
+python3 scripts/bench_check_docs.py                                  # 127/127
+python3 scripts/eval_refusal_baseline.py && python3 scripts/eval_refusal_ablation.py
+curl -s …/health | python3 -m json.tool                              # engine_default: adk
+```
+
+### Receipt
+
+- `docs/RECEIPT-partner-honesty-night-2026-09-04.md`
+- `docs/FINDING-parallel-drop-not-compound-2026-09-04.md`
+- `docs/BLOCKED-live-compound-keys-2026-09-04.md`
+
+### BLOCKED
+
+- Local live orphan A/B — **PARALLEL_API_KEY** and **GEMINI_API_KEY** absent on this VM; hosted orphan-works full script still **504 @ 300s**.
+- `git push origin main` — Oscar outward / cloud agents ship via PR branch (`cursor/partner-ambition-night-6515`).
+- Soft verify ≠ sealed — film **corpus_hits**; do not claim Parallel always drops.
+
+---
+
+## 🎯 NOW (prior) — Partner night wave (fresh compound + timeout finding)
 
 **Slice:** Harden partner verify to prove Parallel at runtime; ship fresh compound probe; document orphan-works 504 regression at object.
 
@@ -528,6 +572,7 @@ bash scripts/verify_cold_clone.sh                                               
 
 | When | What | Command | Outcome |
 |------|------|---------|---------|
+| 2026-09-04 night | Partner honesty night | `partner_honesty_exhibit.py` · `verify_partners_hosted.sh` · evals | **FINDING_RED** soft≠sealed · naive Parallel drop via search cache · partners 4/4 · ADK on `/clear` · baseline 5/6 vs 6/6 · track brief on README/PITCH · SUBMISSION public row fixed |
 | 2026-09-03 night | Fresh compound + timeout finding | `compound_fresh_hosted_probe.py` · `verify_partners_hosted.sh` | **A≥1 Parallel → B drop** · orphan-works Run A **504** @ 300s |
 | 2026-09-03 night | SUBMISSION-PACK + Qwen gates | `bench_check_docs.py` · `eval_verify_holdout.py` · `eval_scorer_symmetry.py` | **127/127** · holdout OK · scorer 5/6 vs 6/6 · offline compound A=2→B=1 |
 | 2026-09-02 | Partner verify re-run | `verify_partners_hosted.sh` · `full_gate.sh` | **4/4 partners** · compound warm-shelf PASS · 72/72 auto-seed |

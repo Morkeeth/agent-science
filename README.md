@@ -1,11 +1,15 @@
 # Agent Science
 
+**Track brief (Agentic Cinema · Parallel):** fact-checking for media content — verbatim
+evidence or named refusal for every claim in a production script.
+
 **You get:** every checkable claim back as a verbatim quote with its source URL, or
 UNSOURCED with a named reason — and a truth shelf that compounds so the second ask is
 free.
 
 **Proof:** `bash scripts/full_gate.sh` → FULL GATE OK · **127/127** controls · hosted
-compound A→B Parallel drop measured live (`docs/RECEIPT-partner-integrations-night-2026-09-01.md`).
+partners live (`engine_default: adk`) · compound honesty exhibit
+(`docs/RECEIPT-partner-honesty-night-2026-09-04.md` — film **corpus_hits**, not Parallel alone).
 
 **Constraint:** if the document does not contain the exact passage, refuse — never
 paraphrase, never infer.

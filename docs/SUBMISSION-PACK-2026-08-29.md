@@ -1,6 +1,6 @@
 # SUBMISSION PACK — Agentic Cinema · slice 7
 
-**Date:** 2026-09-03 · **Repo:** https://github.com/Morkeeth/agent-science @ `main`  
+**Date:** 2026-09-04 · **Repo:** https://github.com/Morkeeth/agent-science @ `main`  
 **Hosted:** https://agent-science-568004190078.us-central1.run.app · **Deadline:** 2026-09-09 14:00 PT  
 **Scope:** docs + offline controls — no public repo flip, no video upload, no Devpost submit, no `deploy.sh`
 
@@ -27,13 +27,13 @@ Offline compound receipt writes `docs/COMPOUND-EXHIBIT-2026-08-29.md` with A=2�
 |------|-------------|--------|----------|
 | Video | ≤ 3 min (≤ 180 s) | [ ] | Script: `docs/VIDEO-SCRIPT-2026-08-29.md` — beats sum **178 s** |
 | Devpost | All mandatory fields filled | [ ] | Paste block below (§1–3 from `PITCH.md`) |
-| Public repo | Stranger can clone | [ ] | Private until submit — flip visibility on GitHub |
+| Public repo | Stranger can clone | [x] | **PUBLIC** since 2026-08-22 (`gh repo view` → `visibility: PUBLIC` · re-checked 2026-09-04) |
 | OSI licence | Open-source approved | [x] | `LICENSE` (MIT) |
 | Sealed prediction | Pre-registered, falsifiable | [x] | `docs/SEALED-PREDICTION-2026-08-31.md` — hosted A=1→B=0, corpus_hits=1 |
 | Partner integrations | All four called at runtime | [x] docs | `docs/PARTNER-INTEGRATIONS-2026-08-30.md` |
 | ADK default path | `engine_default: adk` | [x] local / [x] hosted | `docs/RECEIPT-adk-default-path-2026-08-30.md` |
 
-**Controls re-measured 2026-09-03** (run each at object):
+**Controls re-measured 2026-09-04** (run each at object):
 
 | Suite | Command | Result |
 |-------|---------|--------|
@@ -87,7 +87,7 @@ Copy everything between the lines into Devpost project description / inspiration
 When you or your agent websearches, you get a **full visibility panel**: what was searched (every angle, every tier), what the field runs (GitHub ★, blogs, peers), and a primary verdict — **sourced verbatim**, **refused with cause**, or **CONTRARY TO RESEARCH** when practitioners outrun papers. Stack-fit scores whether a truth fits *your* repo. The shelf compounds: ask once, free forever.
 
 **Try it:** https://agent-science-568004190078.us-central1.run.app/visibility/ui?q=ralph+loop+agentic  
-**Truths dashboard:** `/truths/ui` · **265+ claims** on disk
+**Truths dashboard:** `/truths/ui` · **312 claims** on shelf (hosted `/stats` 2026-09-04; re-curl before paste)
 
 Clearance and E&O insurance? One paying vertical on the same layer — sections below.
 
