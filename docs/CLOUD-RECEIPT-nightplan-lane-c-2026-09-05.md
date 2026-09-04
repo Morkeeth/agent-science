@@ -2,7 +2,7 @@
 
 **Branch:** `cursor/nightplan-lane-c-daily-e6e2`  
 **Base:** `cursor/nightplan-research-engine-b1eb` @ `f5508932ed8df0023bf5e31512aef3981d672bf6`  
-**HEAD at receipt write:** `70735abea704b8af76d15645601d8f1683db92d5` (re-check with `git rev-parse HEAD`)  
+**HEAD at receipt write:** `f6aad366c05f086d96d1d9ea8a03ce1529c27c3c` (re-check with `git rev-parse HEAD`)  
 **Session:** cloud agent · 2026-09-04/05 overnight · Lane C
 
 ## Status
