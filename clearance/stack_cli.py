@@ -329,7 +329,10 @@ def main(argv=None) -> int:
 
     from clearance.case_cli import add_parser
     add_parser(sub)
+    from clearance.research_cli import add_parser as add_research_parser, preprocess_argv
+    add_research_parser(sub)
 
+    argv = preprocess_argv(argv)
     args = p.parse_args(argv)
     if args.cmd in ("search", "lookup", "visibility", "stack-fit"):
         args.query = " ".join(args.query)

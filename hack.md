@@ -307,7 +307,28 @@ Full record: `fleet-ops (internal)/retros/QWEN-LOSS-RETRO-2026-08-30.md` (correc
 
 ---
 
-## 🎯 NOW — Partner night wave (fresh compound + timeout finding)
+## 🎯 NOW — NIGHTPLAN 2026-09-05 · Lane A adaptive research
+
+**Slice:** Persist research runs; challenge = new investigation against a pinned answer; interrupt/resume; CLI/MCP surface.
+
+### Build (shipped this session)
+
+- [x] ResearchRun + question map + adaptive loop — `clearance/research_run.py` · verified: `python3 -m pytest -q tests/test_research_run.py` → **7 passed**
+- [x] Challenge revises answer — `bash scripts/demo_research_challenge.sh` → **DEMO OK · CONTESTED**
+- [x] Interrupt/resume skips completed discovery — test_interrupt_resume… passed
+- [x] Naive baseline arm — `python3 scripts/eval_research_challenge_baseline.py` → adaptive 1 > naive 0
+- [x] CLI/MCP — `research start|challenge|resume` · `science_research`
+- [x] Receipt — `docs/CLOUD-RECEIPT-nightplan-2026-09-05.md`
+
+### BLOCKED / Oscar door
+
+- Live six-topic field pass (no Parallel/Gemini keys on this VM)
+- Film / Devpost / key rotation / hosted secret redeploy
+- Lanes B/C (study identity, followed questions, experiment protocols)
+
+---
+
+## 🎯 NOW (prior) — Partner night wave (fresh compound + timeout finding)
 
 **Slice:** Harden partner verify to prove Parallel at runtime; ship fresh compound probe; document orphan-works 504 regression at object.
 
@@ -528,6 +549,7 @@ bash scripts/verify_cold_clone.sh                                               
 
 | When | What | Command | Outcome |
 |------|------|---------|---------|
+| 2026-09-05 overnight | Lane A research engine | `pytest tests/test_research_run.py` · `demo_research_challenge.sh` · `eval_research_challenge_baseline.py` | **7 passed** · DEMO OK CONTESTED · adaptive 1 > naive 0 |
 | 2026-09-03 night | Fresh compound + timeout finding | `compound_fresh_hosted_probe.py` · `verify_partners_hosted.sh` | **A≥1 Parallel → B drop** · orphan-works Run A **504** @ 300s |
 | 2026-09-03 night | SUBMISSION-PACK + Qwen gates | `bench_check_docs.py` · `eval_verify_holdout.py` · `eval_scorer_symmetry.py` | **127/127** · holdout OK · scorer 5/6 vs 6/6 · offline compound A=2→B=1 |
 | 2026-09-02 | Partner verify re-run | `verify_partners_hosted.sh` · `full_gate.sh` | **4/4 partners** · compound warm-shelf PASS · 72/72 auto-seed |

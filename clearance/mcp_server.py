@@ -190,6 +190,27 @@ TOOLS.append({
     }, "required": ["action"]}
 })
 
+TOOLS.append({
+    "name": "science_research",
+    "description": "Adaptive research loop: start an investigation, challenge a pinned case version (new investigation for overturning evidence), resume a paused run, or show/list/cancel runs. Challenge is not agreeing prose. Interruption preserves completed evidence and does not repeat finished discovery calls.",
+    "inputSchema": {"type": "object", "properties": {
+        "action": {"type": "string", "enum": ["research", "challenge", "resume", "show", "list", "cancel"]},
+        "db": {"type": "string"},
+        "question": {"type": "string"},
+        "case_id": {"type": "string"},
+        "run_id": {"type": "string"},
+        "version": {"type": "integer", "description": "Pin this case version for challenge"},
+        "root": {"type": "string"},
+        "live": {"type": "boolean", "default": False},
+        "plan_only": {"type": "boolean", "default": False},
+        "max_steps": {"type": "integer", "description": "Interrupt after N steps; resume later"},
+        "sources": {"type": "array", "items": {"type": "string"}},
+        "providers": {"type": "array", "items": {"type": "string", "enum": ["parallel", "perplexity"]}},
+        "official_domains": {"type": "array", "items": {"type": "string"}},
+        "limit": {"type": "integer", "default": 20}
+    }, "required": ["action"]}
+})
+
 for tool in TOOLS:
     if tool["name"] in ("science_lookup", "science_search", "science_visibility"):
         tool["inputSchema"]["properties"]["refresh"] = {"type": "boolean", "default": False, "description": "Bypass cached verdicts; live=true fetches current sources"}
@@ -217,6 +238,55 @@ def _send_message(msg):
 
 
 def handle_tool(name: str, arguments: dict) -> str:
+    if name == "science_research":
+        from clearance import research_run
+        action = arguments.get("action")
+        db = arguments.get("db")
+        try:
+            for key in ("live", "plan_only"):
+                if key in arguments and type(arguments[key]) is not bool:
+                    raise ValueError(f"{key} must be a boolean")
+            for key in ("sources", "providers", "official_domains"):
+                if key in arguments and (not isinstance(arguments[key], list) or any(not isinstance(v, str) for v in arguments[key])):
+                    raise ValueError(f"{key} must be an array of strings")
+            for key in ("question", "case_id", "run_id", "root", "db"):
+                if key in arguments and not isinstance(arguments[key], str):
+                    raise ValueError(f"{key} must be text")
+            if "version" in arguments and (type(arguments["version"]) is not int or arguments["version"] < 1):
+                raise ValueError("version must be a positive integer")
+            if "max_steps" in arguments and (type(arguments["max_steps"]) is not int or arguments["max_steps"] < 1):
+                raise ValueError("max_steps must be a positive integer")
+            live = arguments.get("live", False)
+            max_steps = arguments.get("max_steps")
+            providers = tuple(arguments.get("providers") or ["parallel"])
+            if action == "research":
+                result = research_run.start_research(
+                    arguments.get("question", ""), root=arguments.get("root"),
+                    sources=arguments.get("sources") or (), live=live, db=db,
+                    providers=providers, official_domains=arguments.get("official_domains") or (),
+                    execute=not arguments.get("plan_only", False), max_steps=max_steps,
+                )
+            elif action == "challenge":
+                result = research_run.start_challenge(
+                    arguments.get("case_id", ""), version=arguments.get("version"),
+                    live=live, db=db, providers=providers,
+                    execute=not arguments.get("plan_only", False), max_steps=max_steps,
+                )
+            elif action == "resume":
+                result = research_run.resume(arguments.get("run_id", ""), live=live, db=db, max_steps=max_steps)
+            elif action == "show":
+                result = research_run.get_run(arguments.get("run_id", ""), db=db)
+            elif action == "list":
+                result = research_run.list_runs(case_id=arguments.get("case_id"), db=db,
+                                                limit=arguments.get("limit", 20))
+                return json.dumps(result, indent=2)
+            elif action == "cancel":
+                result = research_run.cancel(arguments.get("run_id", ""), db=db)
+            else:
+                raise ValueError("unknown research action")
+            return json.dumps(research_run.public_run(result), indent=2)
+        except (ValueError, OSError, sqlite3.Error) as exc:
+            return json.dumps({"error": str(exc)})
     if name == "science_case":
         from clearance import cases, case_review, research, research_search
         action = arguments.get("action")

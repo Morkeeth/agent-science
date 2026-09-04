@@ -95,6 +95,28 @@ Investigation retains prior evidence and records the explicit query, providers, 
 
 Perplexity uses its [first-party Search API](https://docs.perplexity.ai/api-reference/search-post), configured with `PERPLEXITY_API_KEY` or `~/.config/keys/perplexity.key`. Parallel case discovery caches and receipts live in `~/.agent-science/search` (override with `AGENT_SCIENCE_SEARCH_DIR`), outside Git. Live investigation bypasses discovery caches; each attempt, including an unavailable provider, advances the case version. There is no Perplexity cache yet; offline calls explicitly skip it. Missing credentials and failed requests are recorded as unavailable/error attempts, with no fabricated results or automatic paid retries. Request counts are recorded; provider billing is not inferred. Existing lookup/visibility routing remains unchanged; choose providers through `case investigate`.
 
+## Challenge an answer (adaptive research run)
+
+A challenge is a **new investigation** against a pinned case version. It looks for observations that could overturn material claims — not another paragraph agreeing with the first answer. Runs persist a question map, step events, usage limits and an explicit stop reason. Interrupt with `--max-steps` and resume without losing completed evidence or repeating a finished discovery call.
+
+```bash
+# Plan a research run (local question map; no provider calls)
+agent-science research "When does persistent memory help coding agents?" --root . --plan-only
+
+# Or start with explicit sources (offline-friendly)
+agent-science research start "Do fresh sessions reduce repeated errors?" --source https://example.org/study --db /tmp/demo.db
+
+# Challenge the pinned answer — follow-up investigation, not agreeing prose
+agent-science research challenge CASE_ID --version 2 --max-steps 4
+agent-science research resume RUN_ID
+agent-science research show RUN_ID
+
+# Offline stranger demo (no key, no network)
+bash scripts/demo_research_challenge.sh
+```
+
+MCP exposes the same actions through `science_research` (`research`, `challenge`, `resume`, `show`, `list`, `cancel`). Live discovery still requires `--live` / `live=true` and configured providers. Without a model reasoner, the local planner proposes gaps and searches; assessments still need exact source quotes.
+
 ## Assess a claim against evidence
 
 After reading a source with `case source`, record your interpretation with an exact source passage:
