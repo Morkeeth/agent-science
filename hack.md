@@ -323,7 +323,8 @@ Full record: `fleet-ops (internal)/retros/QWEN-LOSS-RETRO-2026-08-30.md` (correc
 - [x] Receipt — `docs/RECEIPT-partner-honesty-night-2026-09-04.md`
 - [x] Finding — `docs/FINDING-parallel-drop-not-compound-2026-09-04.md`
 - [x] Offline classify control — `python3 tests/test_partner_honesty_classify.py`
-- [x] verify_partners prints `COMPOUND_CLASS` soft vs sealed
+- [x] Search cache meter — `clearance/search.py` `cache_hits()` · stamped on gap report as `search_cache_hits` (needs Oscar deploy for hosted)
+- [x] parallel_integration **7/7** · SUBMISSION-PACK total **128/128** (re-derived)
 
 ### Verify (one command each)
 
@@ -332,7 +333,7 @@ git pull && python3 tests/test_watch_it_go_red.py                    # 72/72
 bash scripts/verify_partners_hosted.sh                               # 4/4 partners + COMPOUND_CLASS
 python3 scripts/partner_honesty_exhibit.py                           # arms + sealed class
 python3 tests/test_partner_honesty_classify.py                       # offline classify
-python3 scripts/bench_check_docs.py                                  # 127/127
+python3 scripts/bench_check_docs.py                                  # 128/128
 python3 scripts/eval_refusal_baseline.py && python3 scripts/eval_refusal_ablation.py
 curl -s …/health | python3 -m json.tool                              # engine_default: adk
 ```
@@ -348,6 +349,7 @@ curl -s …/health | python3 -m json.tool                              # engine_
 - Local live orphan A/B — **PARALLEL_API_KEY** and **GEMINI_API_KEY** absent on this VM; hosted orphan-works full script still **504 @ 300s**.
 - `git push origin main` — Oscar outward / cloud agents ship via PR branch (`cursor/partner-ambition-night-6515`).
 - Soft verify ≠ sealed — film **corpus_hits**; do not claim Parallel always drops.
+- Hosted gap reports will show `search_cache_hits` only after Oscar redeploys this branch.
 
 ---
 

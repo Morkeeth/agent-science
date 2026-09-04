@@ -7,7 +7,7 @@ evidence or named refusal for every claim in a production script.
 UNSOURCED with a named reason — and a truth shelf that compounds so the second ask is
 free.
 
-**Proof:** `bash scripts/full_gate.sh` → FULL GATE OK · **127/127** controls · hosted
+**Proof:** `bash scripts/full_gate.sh` → FULL GATE OK · **128/128** controls · hosted
 partners live (`engine_default: adk`) · compound honesty exhibit
 (`docs/RECEIPT-partner-honesty-night-2026-09-04.md` — film **corpus_hits**, not Parallel alone).
 
@@ -54,7 +54,7 @@ python3 -m clearance.stack_cli visibility "ralph loop agentic" --full
 open https://agent-science-568004190078.us-central1.run.app/visibility/ui
 ```
 
-**Proof:** `bash scripts/full_gate.sh` → FULL GATE OK · **127/127** controls
+**Proof:** `bash scripts/full_gate.sh` → FULL GATE OK · **128/128** controls
 
 ---
 
