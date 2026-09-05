@@ -129,6 +129,25 @@ An incoming retraction, correction or explicitly newer pinned version can flag t
 
 ## Freeze and review a repeated evaluation
 
+Prepare a new matched held-out campaign before any result exists. This freezes
+the questions, baseline/candidate arms, rubric and explicit unknown resources in
+the existing campaign store. It makes no web, model or experiment call:
+
+```text
+agent-science research evaluation-prepare --spec-file heldout.json --json
+agent-science research evaluation-show CAMPAIGN_ID --json
+```
+
+The preparation spec must include `operational_rubric` with
+`source_recovery`, `counterevidence` and `experiment_executability`, a
+non-empty `unknown_resources` list, and exactly two arms named `baseline` and
+`candidate`. A prepared campaign is `FROZEN_UNRUN`; its manifest hash is the
+provenance anchor. Import later results with `evaluation-record` only after an
+exact case version and, for executable work, a completed persisted run have
+been checked. A saved plan is never an observation. Use `pass`, `fail` or
+`unknown` for each criterion, then append an independent review with
+`evaluation-review`; unknown evidence remains unknown.
+
 ```text
 agent-science research evaluation-create --spec-file evaluation.json
 agent-science research evaluation-show EVALUATION_ID

@@ -220,7 +220,7 @@ def cmd_mcp(_args: argparse.Namespace) -> int:
 
 def main(argv=None) -> int:
     argv = list(sys.argv[1:] if argv is None else argv)
-    research_actions = {'start','show','context','resume','cancel','reconcile','challenge','update','compare','follow','updates','experiment-plan','protocol','policy','execute-protocol','evaluation-create','evaluation-show','evaluation-record','evaluation-review','source-reviews','source-review','context-trials','context-trial-create','context-trial-show','context-trial-prepare','context-trial-complete','context-trial-abort'}
+    research_actions = {'start','show','context','resume','cancel','reconcile','challenge','update','compare','follow','updates','experiment-plan','protocol','policy','execute-protocol','evaluation-prepare','evaluation-create','evaluation-show','evaluation-record','evaluation-review','source-reviews','source-review','context-trials','context-trial-create','context-trial-show','context-trial-prepare','context-trial-complete','context-trial-abort'}
     if argv and argv[0] == 'research':
         index=1
         while index < len(argv):

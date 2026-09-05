@@ -45,7 +45,7 @@ def handle(arguments):
         raise ValueError('arguments must be an object')
     action = arguments.get('action', 'start')
     db = arguments.get('db')
-    allowed = {'start', 'show', 'context', 'resume', 'cancel', 'reconcile', 'challenge', 'compare', 'follow', 'updates', 'update', 'experiment-plan', 'protocol', 'execute-protocol', 'evaluation-create', 'evaluation-show', 'evaluation-record','evaluation-review','source-reviews','source-review','context-trials','context-trial-create','context-trial-show'}
+    allowed = {'start', 'show', 'context', 'resume', 'cancel', 'reconcile', 'challenge', 'compare', 'follow', 'updates', 'update', 'experiment-plan', 'protocol', 'execute-protocol', 'evaluation-prepare', 'evaluation-create', 'evaluation-show', 'evaluation-record','evaluation-review','source-reviews','source-review','context-trials','context-trial-create','context-trial-show'}
     if not isinstance(action, str) or action not in allowed:
         raise ValueError('Unknown research action')
     for key in ('live',):
@@ -100,6 +100,8 @@ def handle(arguments):
         return context_trials.create(arguments.get('trial_spec',{}),db=db) if action=='context-trial-create' else context_trials.get(arguments['trial_id'],db=db)
     if action.startswith('evaluation-'):
         from clearance import research_evaluation
+        if action=='evaluation-prepare':
+            return research_evaluation.prepare(arguments.get('evaluation_spec',{}),db=db)
         if action=='evaluation-create':
             return research_evaluation.create(arguments.get('evaluation_spec',{}),db=db)
         if action=='evaluation-record':

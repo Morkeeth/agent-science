@@ -194,7 +194,7 @@ TOOLS.append({
     "name": "science_research",
     "description": "Conduct a persisted investigation: start locally, inspect context, submit a case-version-pinned reasoning proposal with resume, challenge a conclusion, compare versions, follow questions, inspect source-reviews, submit a source-review and define experiments. Start makes no external calls. A waiting run is not complete. Only explicit live execution under a configured aggregate policy can fetch/search. Findings are authored interpretations with checked quotations. This tool cannot execute experiments or shell commands.",
     "inputSchema": {"type":"object", "additionalProperties":False, "required":["action"], "properties": {
-        "action":{"type":"string","enum":["start","show","context","resume","cancel","reconcile","challenge","update","compare","follow","updates","experiment-plan","protocol","evaluation-create","evaluation-show","evaluation-record","evaluation-review","source-reviews","source-review","context-trials","context-trial-create","context-trial-show"]},
+        "action":{"type":"string","enum":["start","show","context","resume","cancel","reconcile","challenge","update","compare","follow","updates","experiment-plan","protocol","evaluation-prepare","evaluation-create","evaluation-show","evaluation-record","evaluation-review","source-reviews","source-review","context-trials","context-trial-create","context-trial-show"]},
         "question":{"type":"string","maxLength":1500},
         "case_id":{"type":"string"}, "run_id":{"type":"string"},
         "root":{"type":"string","description":"Local repository path; contents are not web queries."},
@@ -223,7 +223,7 @@ TOOLS.append({
                         "snapshot_hash":{"type":"string","pattern":"^[0-9a-f]{64}$"}}}}}},
         "trial_id":{"type":"string"},
         "trial_spec":{"type":"object","description":"Freeze a local context trial definition with pinned protocol, tasks, instructions, host identity, trusted acceptance hash and limits. Does not run an agent or acceptance script. Prepare/complete/abort are CLI-only."},
-        "evaluation_spec":{"type":"object","description":"Immutable evaluation questions, pinned arms, repetitions, independently authored rubric and resource limits. Does not start research."},
+        "evaluation_spec":{"type":"object","description":"For evaluation-prepare: held-out questions, baseline/candidate arms, operational_rubric (source_recovery, counterevidence, experiment_executability), explicit unknown_resources and optional protocol. For evaluation-create: legacy immutable campaign spec. Neither starts research."},
         "evaluation_review":{"type":"object","description":"Append an independent review to a frozen observation; requires expected_review_version and exact historical source anchors."},
         "observation":{"type":"object","description":"Reviewer-authored judgments tied to actual completed work, exact case version and source anchors; unknown metrics remain unknown."},
         "operation_id":{"type":"string"},

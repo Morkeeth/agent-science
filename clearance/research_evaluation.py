@@ -11,6 +11,7 @@ from clearance import cases, night_runs
 
 CRITERIA = ('original_sources', 'citation_correctness', 'scope_errors', 'contrary_evidence',
             'unresolved_gaps', 'experiment_specificity')
+PREPARATION_CRITERIA = ('source_recovery', 'counterevidence', 'experiment_executability')
 MODES = ('snapshot_replay', 'fresh_web')
 
 
@@ -100,6 +101,56 @@ def create(spec, *, db=None):
     with closing(_connect(db)) as con, con:
         con.execute('INSERT INTO research_campaigns VALUES(?,?)', (result['id'], _json(result)))
     return get(result['id'], db=db)
+
+
+def prepare(spec, *, db=None):
+    """Freeze a matched evaluation after validating its operational rubric.
+
+    This is a thin preparation layer over the existing immutable campaign
+    table. It records what will be checked and what is still unknown; it does
+    not search, call a model, execute an experiment, or create an observation.
+    ``create`` remains available for historical campaigns whose manifests must
+    not be rewritten.
+    """
+    if not isinstance(spec, dict):
+        raise ValueError('spec must be an object')
+    prepared = copy.deepcopy(spec)
+    rubric = prepared.get('operational_rubric')
+    if not isinstance(rubric, dict) or set(rubric) != set(PREPARATION_CRITERIA):
+        raise ValueError('operational_rubric must define source_recovery, counterevidence and experiment_executability')
+    for key, value in rubric.items():
+        _text(value, 'operational rubric ' + key)
+    unknown = prepared.get('unknown_resources')
+    if not isinstance(unknown, list) or not unknown:
+        raise ValueError('unknown_resources must be a nonempty list; name unavailable costs or resources explicitly')
+    for value in unknown:
+        _text(value, 'unknown resource')
+    questions = prepared.get('questions')
+    if not isinstance(questions, list) or not questions:
+        raise ValueError('questions must be nonempty')
+    arms = prepared.get('arms')
+    if not isinstance(arms, list) or len(arms) != 2:
+        raise ValueError('prepared campaign requires exactly two matched arms: baseline and candidate')
+    arm_ids = {arm.get('id') for arm in arms if isinstance(arm, dict)}
+    if arm_ids != {'baseline', 'candidate'}:
+        raise ValueError('prepared campaign arms must be named baseline and candidate')
+    if prepared.get('protocol') is not None and not isinstance(prepared['protocol'], dict):
+        raise ValueError('protocol must be an object when provided')
+    protocol = prepared.get('protocol', {})
+    if protocol:
+        for key in ('baseline', 'candidate'):
+            _text(protocol.get(key), 'protocol ' + key)
+    prepared['preparation'] = {
+        'status': 'FROZEN_UNRUN',
+        'operational_rubric': rubric,
+        'unknown_resources': unknown,
+        'protocol': protocol,
+        'result_policy': 'Only completed persisted runs or explicitly authored baseline policies can be recorded; a plan is not evidence.',
+    }
+    result = create(prepared, db=db)
+    result['preparation'] = copy.deepcopy(result['manifest']['preparation'])
+    result['next_action'] = 'Run the pinned baseline/candidate protocol, then import each completed result with exact case and source provenance.'
+    return result
 
 
 def _load(con, campaign_id):
