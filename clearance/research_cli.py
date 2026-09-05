@@ -24,7 +24,7 @@ def add_parser(sub):
     parser.add_argument('--db', default=argparse.SUPPRESS)
     parser.add_argument('--json', action='store_true', default=argparse.SUPPRESS)
     actions = parser.add_subparsers(dest='action', required=True)
-    for name in ('start', 'show', 'context', 'resume', 'cancel', 'reconcile', 'challenge', 'compare', 'follow', 'update', 'updates', 'experiment-plan', 'protocol', 'policy', 'execute-protocol', 'evaluation-create', 'evaluation-show', 'evaluation-record','evaluation-review','context-trials','context-trial-create','context-trial-show','context-trial-prepare','context-trial-complete','context-trial-abort'):
+    for name in ('start', 'show', 'context', 'resume', 'cancel', 'reconcile', 'challenge', 'compare', 'follow', 'update', 'updates', 'experiment-plan', 'protocol', 'policy', 'execute-protocol', 'evaluation-create', 'evaluation-show', 'evaluation-record','evaluation-review','source-reviews','source-review','context-trials','context-trial-create','context-trial-show','context-trial-prepare','context-trial-complete','context-trial-abort'):
         item = actions.add_parser(name)
         item.set_defaults(func=run)
         item.add_argument('--db', default=argparse.SUPPRESS)
@@ -68,6 +68,11 @@ def add_parser(sub):
                 item.add_argument('--observation-file',type=Path,required=True)
             if name=='evaluation-review':
                 item.add_argument('--review-file',type=Path,required=True)
+        elif name in ('source-review','source-reviews'):
+            item.add_argument('case_id')
+            if name=='source-review':
+                item.add_argument('--version',type=int,required=True)
+                item.add_argument('--review-file',type=Path,required=True)
         elif name == 'context-trials':
             item.add_argument('case_id')
             item.add_argument('--case-version',type=int)
@@ -110,7 +115,9 @@ def _run(args):
     arguments = {key: value for key, value in vars(args).items() if value is not None}
     for file_key,object_key in (('spec_file','evaluation_spec'),('observation_file','observation'),('review_file','evaluation_review'),('trial_file','trial_spec')):
         path=arguments.pop(file_key,None)
-        if path:arguments[object_key]=_object(path.read_text())
+        if path:
+            if file_key=='review_file' and arguments['action']=='source-review': object_key='source_review'
+            arguments[object_key]=_object(path.read_text())
     protocol_file = arguments.pop('protocol_file', None)
     if protocol_file:
         arguments['protocol'] = _object(protocol_file.read_text())
@@ -145,6 +152,16 @@ def _run(args):
 def render(result, *, db=None):
     """Compact terminal view; --json retains the full inspectable object."""
     suffix = ' --db ' + shlex.quote(str(db)) if db else ''
+    if result.get('object_type')=='source_reviews':
+        lines=[f"Source reviews for {result['case_id']} v{result['version']}: {len(result['pending'])} pending; {len(result['resolved'])} resolved as authored"]
+        for row in result['pending']+result['resolved']:
+            lines.append(f"{row['assessment_id']} / {row['evidence_id']}: {row['state']}")
+            lines.append(row['statement'])
+            if row['notice_identities']: lines.append('Inspect notices: '+', '.join(row['notice_identities']))
+            if row.get('review'): lines.append('Authored disposition: '+row['review']['disposition'])
+        if not result['pending'] and not result['resolved']: lines.append('No active source warnings attached to assessed conclusions.')
+        lines.append('Registry notices remain on the source. A resolved review is an authored interpretation, not proof of correctness.')
+        return '\n'.join(lines)
     if result.get('object_type')=='case_context_trials':
         lines=[f"Context trials for {result['case_id']} through case v{result['case_version']}"]
         for trial in result['trials']:

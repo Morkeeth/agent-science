@@ -45,20 +45,24 @@ def handle(arguments):
         raise ValueError('arguments must be an object')
     action = arguments.get('action', 'start')
     db = arguments.get('db')
-    allowed = {'start', 'show', 'context', 'resume', 'cancel', 'reconcile', 'challenge', 'compare', 'follow', 'updates', 'update', 'experiment-plan', 'protocol', 'execute-protocol', 'evaluation-create', 'evaluation-show', 'evaluation-record','evaluation-review','context-trials','context-trial-create','context-trial-show'}
+    allowed = {'start', 'show', 'context', 'resume', 'cancel', 'reconcile', 'challenge', 'compare', 'follow', 'updates', 'update', 'experiment-plan', 'protocol', 'execute-protocol', 'evaluation-create', 'evaluation-show', 'evaluation-record','evaluation-review','source-reviews','source-review','context-trials','context-trial-create','context-trial-show'}
     if not isinstance(action, str) or action not in allowed:
         raise ValueError('Unknown research action')
     for key in ('live',):
         if key in arguments and type(arguments[key]) is not bool:
             raise ValueError(key + ' must be a boolean')
-    for key in ('proposal', 'policy', 'protocol', 'evaluation_spec', 'observation', 'evaluation_review', 'trial_spec'):
+    for key in ('proposal', 'policy', 'protocol', 'evaluation_spec', 'observation', 'evaluation_review', 'trial_spec', 'source_review'):
         if key in arguments and arguments[key] is not None and not isinstance(arguments[key], dict):
             raise ValueError(key + ' must be an object')
     for key in ('version', 'from_version', 'case_version'):
         if key in arguments and (type(arguments[key]) is not int or arguments[key] < 1):
             raise ValueError(key + ' must be a positive integer')
     required = []
-    if action=='context-trials':
+    if action in ('source-review','source-reviews'):
+        required=['case_id']
+        if action=='source-review' and 'version' not in arguments:
+            raise ValueError('version is required')
+    elif action=='context-trials':
         required=['case_id']
     elif action=='context-trial-show':
         required=['trial_id']
@@ -83,6 +87,11 @@ def handle(arguments):
             raise ValueError(key + ' is required')
     if action == 'compare' and 'from_version' not in arguments:
         raise ValueError('from_version is required')
+    if action in ('source-review','source-reviews'):
+        from clearance import source_reviews
+        if action=='source-review':
+            return source_reviews.review(arguments['case_id'],arguments['version'],arguments.get('source_review',{}),db=db)
+        return source_reviews.list_pending(arguments['case_id'],db=db)
     if action == 'context-trials':
         from clearance import context_trials
         return context_trials.for_case(arguments['case_id'],case_version=arguments.get('case_version'),db=db)

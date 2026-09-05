@@ -263,6 +263,7 @@ def decision_review(decision, original, current):
     relevant=[c for c in delta if c.get('evidence_id') in cited or c['kind']=='repo_changed']
 
     def interpretations(data):
+        from clearance import source_reviews
         evidence={e['id']:e for e in data.get('evidence',[])}
         result={}
         for claim in data.get('claims',[]):
@@ -275,6 +276,7 @@ def decision_review(decision, original, current):
                 fields=('relation','scope_relationship','rationale','anchor','strongest_challenge',
                         'what_would_change','practical_consequence','category','authorship')
                 semantic={key:assessment.get(key) for key in fields}
+                semantic['source_review']=source_reviews.assessment_status(data,assessment)
                 semantic['conditions']=[{key:c.get(key) for key in ('field','value','anchor')}
                     for c in assessment.get('conditions',[])]
                 semantic['source_state']=[{key:evidence.get(anchor.get('evidence_id'),{}).get(key)
