@@ -94,6 +94,26 @@ class SourceMetadataTests(unittest.TestCase):
             result = sm.inspect(dict(self.e, arxiv_id='1706.03762'), live=True)
             self.assertEqual(fetch.call_count, 2); self.assertEqual(len(result['records']), 2)
 
+    def test_request_count_matches_dispatch(self):
+        samples = [
+            ({'doi':'10.1234/a'}, 1),
+            ({'url':'https://arxiv.org/abs/1706.03762v1'}, 1),
+            ({'doi':'10.1234/a', 'arxiv_id':'1706.03762'}, 2),
+            ({'url':'https://example.org/no-identity'}, 0),
+            ({'doi':'10.1234/a', 'url':'https://doi.org/10.1234/b'}, 0),
+            ({'arxiv_id':'1706.03762', 'url':'https://arxiv.org/abs/1810.04805'}, 0),
+            ({'doi':'10.1234/a', 'url':'https://doi.org/10.1234/b', 'arxiv_id':'1706.03762'}, 1),
+        ]
+        for evidence, expected in samples:
+            with self.subTest(evidence=evidence), patch.object(sm, '_fetch', side_effect=OSError('offline')) as fetch:
+                self.assertEqual(sm.planned_request_count(evidence), expected)
+                fetch.assert_not_called()
+                sm.inspect(evidence, live=True)
+                self.assertEqual(fetch.call_count, expected)
+
+    def test_request_count_rejects_invalid_evidence(self):
+        with self.assertRaisesRegex(ValueError, 'object'): sm.planned_request_count(None)
+
     def test_redirect_refused(self):
         with self.assertRaisesRegex(ValueError,'redirect'):
             sm._NoRedirect().redirect_request(None,None,302,'',{},'http://127.0.0.1')

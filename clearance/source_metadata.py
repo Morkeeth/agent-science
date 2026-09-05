@@ -92,60 +92,79 @@ def _parse(provider, identity, body):
     return relations, versions
 
 
+def _request_plan(evidence):
+    if not isinstance(evidence, dict): raise ValueError('evidence must be an object')
+    identities, pinned, _ = studies._identities(evidence)
+    requests, skipped = [], []
+    # Conflicting same-provider identifiers are not merged or guessed.
+    for prefix, provider in (('doi:', 'crossref'), ('arxiv:', 'arxiv')):
+        selected = sorted(i for i in identities if i.startswith(prefix))
+        if len(selected) > 1:
+            skipped.append({'provider':provider, 'status':'ambiguous', 'errors':['Conflicting explicit identifiers'], 'checked_at':None})
+            continue
+        for identity in selected:
+            key = identity[len(prefix):]
+            url = ('https://api.crossref.org/works/' + urllib.parse.quote(key, safe='') if provider == 'crossref'
+                   else 'https://export.arxiv.org/api/query?' + urllib.parse.urlencode({'id_list':key, 'max_results':1}))
+            requests.append((provider, identity, url))
+    return identities, pinned, requests, skipped
+
+
+def planned_request_count(evidence):
+    """Exact maximum GET count before execution, using the inspector's plan.
+
+    Unsupported or conflicting identities contribute no request. A supported
+    identity for the other registry can still be inspected independently.
+    """
+    return len(_request_plan(evidence)[2])
+
+
 def inspect(evidence, *, live=False):
     """Inspect exact identifiers only. No discovery, body reads, or paid calls.
 
     Callers must serialize/rate-limit repeated arXiv requests per its API terms.
     """
     if type(live) is not bool or not isinstance(evidence, dict): raise ValueError('evidence and boolean live required')
-    identities, pinned, _ = studies._identities(evidence)
+    identities, pinned, requests, skipped = _request_plan(evidence)
     result = {'schema_version':1, 'evidence_id':evidence.get('id'), 'identities':sorted(identities),
               'status':'not_checked', 'records':[], 'relations':[], 'coverage_limits':list(LIMITS)}
     if not live: return result
     if not identities:
         result.update(status='unsupported', errors=['No explicit DOI or arXiv identifier'])
         return result
-    # Conflicting same-provider identifiers are not merged or guessed.
-    for prefix, provider in (('doi:', 'crossref'), ('arxiv:', 'arxiv')):
-        selected = sorted(i for i in identities if i.startswith(prefix))
-        if len(selected) > 1:
-            result['records'].append({'provider':provider, 'status':'ambiguous', 'errors':['Conflicting explicit identifiers'], 'checked_at':None})
-            continue
-        for identity in selected:
-            key = identity[len(prefix):]
-            url = ('https://api.crossref.org/works/' + urllib.parse.quote(key, safe='') if provider == 'crossref'
-                   else 'https://export.arxiv.org/api/query?' + urllib.parse.urlencode({'id_list':key, 'max_results':1}))
-            record = {'provider':provider, 'identity':identity, 'requested_url':url, 'checked_at':None,
-                      'response_hash':None, 'http_status':None, 'relations':[], 'versions':[], 'errors':[], 'status':'failed'}
+    result['records'].extend(skipped)
+    for provider, identity, url in requests:
+        record = {'provider':provider, 'identity':identity, 'requested_url':url, 'checked_at':None,
+                  'response_hash':None, 'http_status':None, 'relations':[], 'versions':[], 'errors':[], 'status':'failed'}
+        try:
+            body, status = _fetch(url)
+            record.update(checked_at=cases.now(), response_hash=hashlib.sha256(body).hexdigest(), http_status=status)
+            relations, versions = _parse(provider, identity, body)
+            record.update(status='checked', relations=relations, versions=versions)
+            if provider == 'arxiv':
+                latest = versions[0]['id']
+                old = [v for v in pinned if v.startswith(identity+'v')]
+                if len(old) == 1 and int(latest.rsplit('v',1)[1]) > int(old[0].rsplit('v',1)[1]):
+                    relations.append({'type':'new-version', 'target':identity, 'target_version':old[0], 'notice':latest, 'field':'entry.id'})
+            result['relations'].extend(relations)
+        except _ResponseTooLarge as exc:
+            record.update(http_status=exc.status, checked_at=cases.now(), response_hash=exc.response_hash,
+                          response_hash_scope='bounded_prefix')
+            record['errors'].append(str(exc))
+        except urllib.error.HTTPError as exc:
+            record.update(http_status=exc.code, checked_at=cases.now())
             try:
-                body, status = _fetch(url)
-                record.update(checked_at=cases.now(), response_hash=hashlib.sha256(body).hexdigest(), http_status=status)
-                relations, versions = _parse(provider, identity, body)
-                record.update(status='checked', relations=relations, versions=versions)
-                if provider == 'arxiv':
-                    latest = versions[0]['id']
-                    old = [v for v in pinned if v.startswith(identity+'v')]
-                    if len(old) == 1 and int(latest.rsplit('v',1)[1]) > int(old[0].rsplit('v',1)[1]):
-                        relations.append({'type':'new-version', 'target':identity, 'target_version':old[0], 'notice':latest, 'field':'entry.id'})
-                result['relations'].extend(relations)
-            except _ResponseTooLarge as exc:
-                record.update(http_status=exc.status, checked_at=cases.now(), response_hash=exc.response_hash,
-                              response_hash_scope='bounded_prefix')
-                record['errors'].append(str(exc))
-            except urllib.error.HTTPError as exc:
-                record.update(http_status=exc.code, checked_at=cases.now())
-                try:
-                    body = exc.read(MAX_BYTES + 1)
-                    record['response_hash'] = hashlib.sha256(body).hexdigest()
-                    if len(body) > MAX_BYTES: record['response_hash_scope'] = 'bounded_prefix'
-                except OSError:
-                    pass
-                finally:
-                    exc.close()
-                record['errors'].append('Registry HTTP ' + str(exc.code))
-            except (ValueError, KeyError, TypeError, ET.ParseError, OSError) as exc:
-                record['errors'].append(type(exc).__name__ + ': ' + str(exc)[:300])
-            result['records'].append(record)
+                body = exc.read(MAX_BYTES + 1)
+                record['response_hash'] = hashlib.sha256(body).hexdigest()
+                if len(body) > MAX_BYTES: record['response_hash_scope'] = 'bounded_prefix'
+            except OSError:
+                pass
+            finally:
+                exc.close()
+            record['errors'].append('Registry HTTP ' + str(exc.code))
+        except (ValueError, KeyError, TypeError, ET.ParseError, OSError) as exc:
+            record['errors'].append(type(exc).__name__ + ': ' + str(exc)[:300])
+        result['records'].append(record)
     checked = sum(r['status'] == 'checked' for r in result['records'])
     result['status'] = 'checked' if checked == len(result['records']) else 'partial' if checked else 'failed'
     return result
