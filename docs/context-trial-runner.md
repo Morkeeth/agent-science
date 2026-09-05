@@ -45,17 +45,21 @@ host must work only there, preserve the instruction file, use a fresh context an
 stop within the attempt ceiling. No model is launched by this module.
 
 `complete(id, attempt_id, expected_version=..., trusted=True)` checks the lease,
-Git ownership, base ancestry, instructions and acceptance hash. It preserves the
-patch and untracked files, executes the captured check with a timeout, caps output
+Git ownership, exact base HEAD, instructions and acceptance hash. The host must
+leave staged or unstaged changes uncommitted. It preserves the
+patch and untracked files (including ignored sources), executes the captured check with a timeout, caps output
 at 64 KiB, kills its process group, and detects changed tracked/untracked files
 or instructions during acceptance. It records acceptance status and elapsed time.
-Only the explicit local CLI exposes prepare/complete. MCP can create and inspect
-plans; it cannot execute the selected script or approve capacity.
+Only the explicit local CLI exposes prepare/complete. MCP creation proposes limits
+and copies selected inputs into local artifact files; trusted CLI preparation is
+the execution acknowledgement. MCP cannot execute the selected script.
 
 `abort(id, attempt_id, expected_version=..., reason=..., trusted=True)` closes an
 unstarted/interrupted host lease. It does not delete work or refund capacity.
 There is no automatic cleanup or retry. A process crash can leave PREPARING or
-CHECKING; inspect the worktree and receipt. CHECKING cannot be retried blindly.
+CHECKING; inspect the worktree and receipt. Aborting an abandoned CHECKING attempt
+records REVIEW_REQUIRED with an unknown external outcome, never success. Stop any
+remaining check process before trusting artifacts. The slot cannot be retried.
 
 All prepared attempts remain in the fixed denominator, including invalid,
 cancelled and timed-out attempts. Unchanged code does not count as a fix. Repeated
@@ -97,3 +101,13 @@ the actual trials linked to a case. `--case-version N` limits this view to proto
 pinned at or before that case version. A historical case filters the linkage; trial
 status remains the current execution status, not a historical execution snapshot.
 Context trials remain separate from two-commit code comparisons.
+
+Acceptance starts Python with `-I -B` and no startup `PYTHONPATH`, loads standard
+check infrastructure, then adds the tested repository for imports. Bytecode caches
+use a fresh external prefix and are excluded from submitted-file capture. Other
+ignored sources are included. Captured patch/file hashes are checked after execution.
+These controls prevent the exercised startup-shadow and receipt-tampering paths;
+they do not contain arbitrary hostile code imported from a repository.
+
+`host_elapsed_seconds` is the elapsed lease from prepared worktree to CLI submission,
+including coordinator dispatch and response delay. It is not pure model latency.

@@ -44,6 +44,7 @@ def test_cli_prepares_executes_and_aborts_while_mcp_only_plans():
         from clearance import cases, context_trials
         other=cases.create('An unrelated case',db=fixture.db)
         assert context_trials.for_case(other['id'],db=fixture.db)['trials']==[]
+        assert context_trials.for_case(trial['manifest']['case_id'],case_version=1,db=fixture.db)['trials']==[]
 
         p=cli('context-trial-show',trial['id'],'--db',fixture.db)
         assert p.returncode==0 and '1/4 attempts finished' in p.stdout
