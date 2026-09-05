@@ -2,6 +2,7 @@
 import copy
 import itertools
 import json
+import math
 import re
 import sqlite3
 import uuid
@@ -105,6 +106,45 @@ def _load(con, campaign_id):
     return result
 
 
+def _runtime_observation(run, arm):
+    """Validate persisted execution attestations without treating missing data as success."""
+    limitations = []
+    if run is None:
+        return {'attested': False, 'engine_elapsed_seconds': None,
+                'limitations': ['No instrumented run; executable and engine duration unknown.']}
+    steps = run.get('steps', [])
+    runtimes = [('run', run.get('runtime'))] + [
+        ('step ' + str(i), step.get('runtime')) for i, step in enumerate(steps)]
+    expected = arm.get('code_ref')
+    for label, runtime in runtimes:
+        clean = (isinstance(runtime, dict) and runtime.get('dirty') is False
+                 and isinstance(runtime.get('code_ref'), str)
+                 and re.fullmatch('[0-9a-f]{40}', runtime['code_ref'])
+                 and isinstance(runtime.get('source_sha256'), str)
+                 and re.fullmatch('[0-9a-f]{64}', runtime['source_sha256']))
+        if clean and expected and runtime['code_ref'] != expected:
+            raise ValueError(label + ' clean runtime code_ref differs from frozen arm')
+        if not clean:
+            limitations.append(label + ' has missing or dirty runtime provenance.')
+    if not expected:
+        limitations.append('Authored baseline policy has no executable code pin.')
+    if not steps:
+        limitations.append('No persisted operation steps.')
+    hashes = {runtime['source_sha256'] for _, runtime in runtimes
+              if isinstance(runtime, dict) and runtime.get('source_sha256')}
+    if len(hashes) > 1:
+        limitations.append('Source bytes changed between run creation and operation steps.')
+    durations = [step.get('elapsed_seconds') for step in steps]
+    duration_known = bool(steps) and all(type(value) in (int, float) and math.isfinite(value)
+                                          and value >= 0 for value in durations)
+    return {'attested': not limitations, 'runtime': run.get('runtime'),
+            'step_runtimes': [step.get('runtime') for step in steps],
+            'engine_elapsed_seconds': sum(durations) if duration_known else None,
+            'duration_basis': 'Measured engine operations only; excludes host waiting and separately issued tools.',
+            'limitations': limitations,
+            'duration_limitations': [] if duration_known else ['One or more operation durations are unobserved.']}
+
+
 def record(campaign_id, observation, *, db=None):
     """Append one reviewed completed outcome; caller metrics are never accepted."""
     if not isinstance(observation, dict):
@@ -194,13 +234,15 @@ def record(campaign_id, observation, *, db=None):
         if not isinstance(error, dict):
             raise ValueError('error must be an object')
         _text(error.get('kind'), 'error kind'); _text(error.get('detail'), 'error detail')
+    runtime_observation = _runtime_observation(run, arm)
     obs.update(recorded_at=cases.now(), manifest_hash=campaign['manifest_hash'],
                case_content_hash=_hash({k: case.get(k) for k in ('id', 'version', 'question', 'claims', 'evidence')}),
                source_snapshots=[{'evidence_id': e['id'], 'url': e['url'], 'snapshot_hash': e['snapshot_hash']} for e in snapshots.values()],
                operational={'observed_usage': run.get('observed_usage') if run else None,
                             'usage_basis': run.get('usage_basis') if run else 'baseline case; no instrumented run',
+                            'engine_elapsed_seconds': runtime_observation['engine_elapsed_seconds'],
                             'latency_seconds': None, 'tokens': None, 'billing': run.get('billing') if run else None},
-               execution_provenance='Code pin is the frozen intended arm; this store does not attest which executable produced a run.')
+               execution_provenance=runtime_observation)
     with closing(_connect(db)) as con, con:
         con.execute('BEGIN IMMEDIATE')
         previous = [json.loads(row[0]) for row in con.execute('SELECT body FROM research_observations WHERE campaign_id=?', (campaign_id,))]
@@ -242,8 +284,18 @@ def get(campaign_id, *, db=None):
                 hashes = lambda item: sorted((s['url'], s['snapshot_hash']) for s in item['source_snapshots'])
                 if hashes(left) != hashes(right):
                     source_differences.append({'question_id': q['id'], 'repetition': r})
+        execution_limits = list(reasons)
+        if not paired:
+            execution_limits.append('No paired completed observations.')
+        if source_differences:
+            execution_limits.append('Paired observations have different source exposure; effects cannot be attributed to code alone.')
+        paired_rows = [slots[(arm_id, q['id'], r)] for q, r in itertools.product(manifest['questions'], range(1, manifest['repetitions'] + 1))
+                       if (a['id'], q['id'], r) in slots and (b['id'], q['id'], r) in slots for arm_id in (a['id'], b['id'])]
+        if any(not row['execution_provenance'].get('attested') for row in paired_rows):
+            execution_limits.append('One or more paired executions lack clean provenance matching the frozen code pin.')
         pairs.append({'arms': [a['id'], b['id']], 'comparable_design': not reasons,
-                      'paired_observations': paired, 'reasons': reasons, 'different_source_exposure': source_differences,
+                      'paired_observations': paired, 'reasons': reasons,
+                      'comparable_execution': not execution_limits, 'execution_limitations': execution_limits, 'different_source_exposure': source_differences,
                       'limit': 'Recorded design comparability only; executable provenance and judgment quality require independent review.'})
     result.update(observations=observations, coverage={'recorded': len(observations), 'denominator': manifest['denominator'], 'missing_slots': missing},
                   error_inventory=[dict(e, arm_id=o['arm_id'], question_id=o['question_id'], repetition=o['repetition']) for o in observations for e in o['errors']],

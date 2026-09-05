@@ -182,3 +182,77 @@ def test_retrieval_plan_cannot_be_recorded_as_baseline(saved):
     obs.update(arm_id='baseline', case_id=case['id'], case_version=case['version'])
     with pytest.raises(ValueError, match='empty plan'):
         evaluation.record(campaign['id'], obs, db=db)
+
+
+def instrument_run(db, obs, *, dirty=False, code_ref='a'*40, missing_duration=False, step_ref=None):
+    """Substitute measured filesystem/timer effects in a real persisted completed run."""
+    run = night_runs.get(obs['run_id'], db=db)
+    run['runtime'] = {'code_ref': code_ref, 'source_sha256': 'd'*64, 'dirty': dirty, 'basis': 'Artificial instrumentation control'}
+    for step in run['steps']:
+        step['runtime'] = dict(run['runtime'], code_ref=step_ref or code_ref)
+        if missing_duration:
+            step.pop('elapsed_seconds', None)
+        else:
+            step['elapsed_seconds'] = 0.25
+    night_runs._save(run, db)
+    return run
+
+
+def test_clean_runtime_wrong_code_rejected(saved):
+    db, campaign, obs = saved
+    instrument_run(db, obs, code_ref='b'*40)
+    with pytest.raises(ValueError, match='clean runtime code_ref differs'):
+        evaluation.record(campaign['id'], obs, db=db)
+
+
+def test_mixed_step_runtime_wrong_code_rejected(saved):
+    db, campaign, obs = saved
+    instrument_run(db, obs, step_ref='b'*40)
+    with pytest.raises(ValueError, match='step.*code_ref differs'):
+        evaluation.record(campaign['id'], obs, db=db)
+
+
+def test_dirty_provenance_retains_unknown_execution(saved):
+    db, campaign, obs = saved
+    instrument_run(db, obs, dirty=True, code_ref='b'*40, missing_duration=True)
+    result = evaluation.record(campaign['id'], obs, db=db)
+    row = result['observations'][0]
+    assert row['execution_provenance']['attested'] is False
+    assert row['operational']['engine_elapsed_seconds'] is None
+    assert result['paired_comparability'][0]['comparable_execution'] is False
+
+
+def test_clean_runtime_copies_observed_operation_duration(saved):
+    db, campaign, obs = saved
+    run = instrument_run(db, obs)
+    result = evaluation.record(campaign['id'], obs, db=db)
+    row = result['observations'][0]
+    assert row['execution_provenance']['attested'] is True
+    assert row['operational']['engine_elapsed_seconds'] == len(run['steps']) * 0.25
+    assert row['operational']['latency_seconds'] is None
+
+
+@pytest.mark.parametrize('changed_source', [False, True])
+def test_paired_clean_runtime_executions_and_source_exposure(saved, changed_source):
+    db, _, obs = saved
+    value = spec()
+    value['arms'][1] = dict(value['arms'][0], id='other', code_ref='b'*40)
+    campaign = evaluation.create(value, db=db)
+    for arm, pin in [('candidate', 'a'*40), ('other', 'b'*40)]:
+        if arm == 'other' and changed_source:
+            case = cases.get(obs['case_id'], db=db)
+            case['version'] += 1
+            case['evidence'][0]['snapshot_text'] += ' Extra source material.'
+            case['evidence'][0]['snapshot_hash'] = cases.digest(case['evidence'][0]['snapshot_text'])
+            cases._save(case, db=db)
+        run = night_runs.start(QUESTION, case_id=obs['case_id'], db=db)
+        run = night_runs.resume(run['id'], proposal={'case_version': run['case_version'], 'findings': [],
+            'next_action': {'kind': 'finish', 'reason': 'Artificial paired runtime control.'}}, db=db)
+        changed = copy.deepcopy(obs)
+        changed.update(arm_id=arm, run_id=run['id'], case_version=run['case_version'])
+        instrument_run(db, changed, code_ref=pin)
+        result = evaluation.record(campaign['id'], changed, db=db)
+    pair = result['paired_comparability'][0]
+    assert pair['comparable_execution'] is (not changed_source)
+    assert bool(pair['different_source_exposure']) is changed_source
+    assert bool(pair['execution_limitations']) is changed_source

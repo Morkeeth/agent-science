@@ -41,3 +41,11 @@ python3 -m pytest -q tests/test_research_evaluation.py tests/test_night_runs.py 
 ```
 
 The evaluation suite contains 21 controls with actual SQLite cases and completed host-proposal runs. Controls fired for fabricated quotations, changed snapshot bytes, planned runs, mismatched questions/versions/limits/modes, mutable commit aliases, unknown metric injection, duplicate slots, reuse of completed runs, retrospective campaign freezes, empty baseline plans and false fresh-web declarations. Cases contain explicitly artificial source content and are not scientific findings. `git diff --check` passed.
+
+## Runtime provenance follow-up
+
+Observations now inspect the run and every operation's stored runtime provenance. A known clean commit that differs from the frozen arm is rejected. Missing or dirty provenance remains recordable with explicit limitations and cannot produce `comparable_execution: true`. Code pins, clean source hashes, matching output tasks, modes, limits and source exposure must all hold for observed paired executions to pass the structural comparison. This does not establish scientific correctness or causal attribution beyond those controls.
+
+`operational.engine_elapsed_seconds` sums measured monotonic operation durations only when every step has a finite nonnegative measurement. It excludes host waiting and separately issued tools. Missing measurements remain null; total investigation latency and model tokens are still unknown. Recording time remains independent.
+
+Actual follow-up verification: `python3 -m pytest -q tests/test_research_evaluation.py` — **27 passed**. Added controls exercise clean commit mismatch, changed commit between steps, dirty provenance, missing duration, measured operation summation and source-exposure differences. Runtime instrumentation inputs are artificial effects attached to real persisted completed runs; they are not scientific results or real clean-build attestations.
