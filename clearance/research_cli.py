@@ -158,7 +158,11 @@ def render(result, *, db=None):
             lines.append(f"{row['assessment_id']} / {row['evidence_id']}: {row['state']}")
             lines.append(row['statement'])
             if row['notice_identities']: lines.append('Inspect notices: '+', '.join(row['notice_identities']))
-            if row.get('review'): lines.append('Authored disposition: '+row['review']['disposition'])
+            if row.get('review'):
+                lines.append('Authored disposition: '+row['review']['disposition'])
+                if not row.get('review_binding_current',True): lines.append('Saved review no longer matches the current evidence.')
+            for failure in row.get('notice_failures',[]):
+                lines.append(failure['notice_identity']+': '+failure['reason'].replace('_',' '))
         if not result['pending'] and not result['resolved']: lines.append('No active source warnings attached to assessed conclusions.')
         lines.append('Registry notices remain on the source. A resolved review is an authored interpretation, not proof of correctness.')
         return '\n'.join(lines)

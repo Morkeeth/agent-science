@@ -47,3 +47,10 @@ decision; no automatic reversal is implied.
 No semantic truth score is produced. An exact quote can still be interpreted
 incorrectly. A review is visible with its rationale so another reader can challenge
 it against the retained source version.
+
+A later review remains authoritative even if the source body returns to an older
+version. A partial registry response cannot erase a previously observed warning.
+Distinct notice identities need distinct, unambiguous saved evidence; conflicting
+DOI redirects are not treated as two inspected notices. Error codes identify missing,
+stale, ambiguous, unavailable or separately flagged notice evidence. The response
+after a review is pinned to that committed case version.
