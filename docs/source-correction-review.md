@@ -45,7 +45,11 @@ and `source_review`. CLI and MCP use the same validator.
 
 Registry warnings, body timestamps and historical cases stay intact. A different
 warning, changed original or notice body, changed condition, or new assessment
-reopens review. Retracted or superseded evidence cannot be cleared by this action.
+reopens review. Retraction, withdrawal, removal, partial-retraction and supersession
+warnings cannot be cleared by this action. An expression of concern can receive an
+explicit scoped review; it is not silently relabeled a retraction. Exact DOI mirrors
+share warnings, while version-specific arXiv notices apply to their named version.
+Each assessment still needs its own review. The terminal names inherited warnings.
 A resolved conclusion can still cause a saved decision to need review because its
 supporting interpretation changed. Inspect the comparison before replacing that
 decision; no automatic reversal is implied.

@@ -157,6 +157,8 @@ def render(result, *, db=None):
         for row in result['pending']+result['resolved']:
             lines.append(f"{row['assessment_id']} / {row['evidence_id']}: {row['state']}")
             lines.append(row['statement'])
+            if row.get('warning_inherited_from'): lines.append('Warning also recorded on: '+', '.join(row['warning_inherited_from']))
+            if row.get('non_rehabilitable'): lines.append('Cannot clear by acknowledgment: '+', '.join(row['non_rehabilitable']))
             if row['notice_identities']: lines.append('Inspect notices: '+', '.join(row['notice_identities']))
             if row.get('review'):
                 lines.append('Authored disposition: '+row['review']['disposition'])
