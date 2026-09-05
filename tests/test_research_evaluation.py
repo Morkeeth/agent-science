@@ -261,3 +261,94 @@ def test_paired_clean_runtime_executions_and_source_exposure(saved, changed_sour
     assert pair['comparable_execution'] is (not changed_source)
     assert bool(pair['different_source_exposure']) is changed_source
     assert bool(pair['execution_limitations']) is changed_source
+
+
+def review_input(obs):
+    return {'arm_id': obs['arm_id'], 'question_id': obs['question_id'], 'repetition': obs['repetition'],
+            'expected_review_version': 0, 'reviewer': 'Independent reviewer', 'judgments': copy.deepcopy(obs['judgments']),
+            'errors': [{'kind': 'missing contrary evidence', 'detail': 'Independent fixture review found no contrary paper.'}]}
+
+
+def test_review_appends_history_and_preserves_original(saved):
+    db, campaign, obs = saved
+    evaluation.record(campaign['id'], obs, db=db)
+    with cases.connect(db) as con:
+        original_bytes = con.execute('SELECT body FROM research_observations').fetchone()[0]
+    request = review_input(obs)
+    request['judgments']['citation_correctness'].update(status='pass', rationale='Inspected the actual pinned quotation.',
+        anchors=[{'evidence_id': 'e1', 'quote': TEXT}])
+    result = evaluation.review(campaign['id'], request, db=db)
+    reviewed = result['observations'][0]
+    assert reviewed['review_version'] == 1
+    assert reviewed['judgments']['citation_correctness']['status'] == 'unknown'
+    assert reviewed['current_review']['judgments']['citation_correctness']['status'] == 'pass'
+    assert reviewed['current_review']['case_version'] == obs['case_version']
+    assert reviewed['current_review']['case_content_hash'] == reviewed['case_content_hash']
+    assert result['review_coverage']['observations_with_reviews'] == 1
+    assert 'citation_correctness' not in result['review_coverage']['unknown_remaining'][0]['criteria']
+    assert result['error_inventory'][0]['source'] == 'review'
+    request['expected_review_version'] = 1
+    request['judgments']['citation_correctness']['status'] = 'unknown'
+    result = evaluation.review(campaign['id'], request, db=db)
+    assert [r['version'] for r in result['observations'][0]['reviews']] == [1, 2]
+    with cases.connect(db) as con:
+        assert con.execute('SELECT body FROM research_observations').fetchone()[0] == original_bytes
+
+
+def test_review_rejects_fabrication_and_uses_original_case_version(saved):
+    db, campaign, obs = saved
+    evaluation.record(campaign['id'], obs, db=db)
+    newer = cases.get(obs['case_id'], db=db)
+    newer['version'] += 1
+    newer['evidence'][0]['snapshot_text'] += ' Later-only statement.'
+    newer['evidence'][0]['snapshot_hash'] = cases.digest(newer['evidence'][0]['snapshot_text'])
+    cases._save(newer, db=db)
+    request = review_input(obs)
+    request['judgments']['citation_correctness'].update(status='pass',
+        anchors=[{'evidence_id': 'e1', 'quote': 'Later-only statement.'}])
+    with pytest.raises(ValueError, match='does not occur'):
+        evaluation.review(campaign['id'], request, db=db)
+    request['judgments']['citation_correctness']['anchors'][0]['quote'] = TEXT
+    result = evaluation.review(campaign['id'], request, db=db)
+    assert result['observations'][0]['current_review']['case_version'] == obs['case_version']
+
+
+def test_review_stale_and_concurrent_guard(saved):
+    from concurrent.futures import ThreadPoolExecutor
+    db, campaign, obs = saved
+    evaluation.record(campaign['id'], obs, db=db)
+    request = review_input(obs)
+    def attempt(_):
+        try:
+            evaluation.review(campaign['id'], request, db=db)
+            return 'saved'
+        except ValueError as exc:
+            return str(exc)
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        outcomes = list(pool.map(attempt, range(2)))
+    assert outcomes.count('saved') == 1
+    assert sum('review version changed' in x for x in outcomes) == 1
+    with pytest.raises(ValueError, match='review version changed'):
+        evaluation.review(campaign['id'], request, db=db)
+    assert len(evaluation.get(campaign['id'], db=db)['observations'][0]['reviews']) == 1
+
+
+def test_review_refuses_changed_original_evidence(saved):
+    db, campaign, obs = saved
+    evaluation.record(campaign['id'], obs, db=db)
+    case = cases.get(obs['case_id'], version=obs['case_version'], db=db)
+    case['evidence'][0]['snapshot_text'] = 'Replaced historical source bytes.'
+    case['evidence'][0]['snapshot_hash'] = cases.digest(case['evidence'][0]['snapshot_text'])
+    with cases.connect(db) as con:
+        con.execute('UPDATE revisions SET body=? WHERE case_id=? AND version=?', (json.dumps(case), case['id'], case['version']))
+    with pytest.raises(ValueError, match='integrity check'):
+        evaluation.review(campaign['id'], review_input(obs), db=db)
+
+
+@pytest.mark.parametrize('value', [-1, True, '0', None])
+def test_review_expected_version_requires_exact_integer(saved, value):
+    db, campaign, obs = saved
+    evaluation.record(campaign['id'], obs, db=db)
+    request = review_input(obs); request['expected_review_version'] = value
+    with pytest.raises(ValueError, match='nonnegative integer'):
+        evaluation.review(campaign['id'], request, db=db)

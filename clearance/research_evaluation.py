@@ -35,7 +35,11 @@ def _connect(db):
         CREATE TABLE IF NOT EXISTS research_observations(
         campaign_id TEXT NOT NULL, arm_id TEXT NOT NULL, question_id TEXT NOT NULL,
         repetition INTEGER NOT NULL, body TEXT NOT NULL,
-        PRIMARY KEY(campaign_id,arm_id,question_id,repetition));''')
+        PRIMARY KEY(campaign_id,arm_id,question_id,repetition));
+        CREATE TABLE IF NOT EXISTS research_evaluation_reviews(
+        campaign_id TEXT NOT NULL, arm_id TEXT NOT NULL, question_id TEXT NOT NULL,
+        repetition INTEGER NOT NULL, version INTEGER NOT NULL, body TEXT NOT NULL,
+        PRIMARY KEY(campaign_id,arm_id,question_id,repetition,version));''')
     return con
 
 
@@ -145,6 +149,38 @@ def _runtime_observation(run, arm):
             'duration_limitations': [] if duration_known else ['One or more operation durations are unobserved.']}
 
 
+def _validate_review_content(obs, snapshots):
+    judgments = obs.get('judgments')
+    if not isinstance(judgments, dict) or set(judgments) != set(CRITERIA):
+        raise ValueError('all six manual judgments are required; use unknown when unmeasured')
+    _text(obs.get('reviewer'), 'reviewer')
+    for name, judgment in judgments.items():
+        if not isinstance(judgment, dict) or judgment.get('status') not in ('pass', 'fail', 'unknown'):
+            raise ValueError('judgment status must be pass, fail or unknown')
+        _text(judgment.get('rationale'), name + ' rationale')
+        anchors = judgment.get('anchors')
+        if not isinstance(anchors, list):
+            raise ValueError('judgment anchors must be a list')
+        if judgment['status'] == 'pass' and name in ('original_sources', 'citation_correctness', 'contrary_evidence') and not anchors:
+            raise ValueError(name + ' pass requires inspected source anchors')
+        for anchor in anchors:
+            if not isinstance(anchor, dict):
+                raise ValueError('anchor must be an object')
+            source = snapshots.get(anchor.get('evidence_id'))
+            quote = _text(anchor.get('quote'), 'anchor quote')
+            if not source or source.get('status') == 'UNAVAILABLE' or quote not in source['snapshot_text']:
+                raise ValueError('review anchor does not occur in pinned source snapshot')
+            anchor['snapshot_hash'] = source['snapshot_hash']
+        judgment['basis'] = 'manual_judgment; anchor occurrence does not establish entailment'
+    errors = obs.setdefault('errors', [])
+    if not isinstance(errors, list):
+        raise ValueError('errors must be a list')
+    for error in errors:
+        if not isinstance(error, dict):
+            raise ValueError('error must be an object')
+        _text(error.get('kind'), 'error kind'); _text(error.get('detail'), 'error detail')
+
+
 def record(campaign_id, observation, *, db=None):
     """Append one reviewed completed outcome; caller metrics are never accepted."""
     if not isinstance(observation, dict):
@@ -205,35 +241,7 @@ def record(campaign_id, observation, *, db=None):
             snapshots[evidence['id']] = evidence
     if arm['kind'] == 'retrieval' and not snapshots:
         raise ValueError('retrieval outcome requires saved source snapshots; an empty plan is not a completed baseline')
-    judgments = obs.get('judgments')
-    if not isinstance(judgments, dict) or set(judgments) != set(CRITERIA):
-        raise ValueError('all six manual judgments are required; use unknown when unmeasured')
-    _text(obs.get('reviewer'), 'reviewer')
-    for name, judgment in judgments.items():
-        if not isinstance(judgment, dict) or judgment.get('status') not in ('pass', 'fail', 'unknown'):
-            raise ValueError('judgment status must be pass, fail or unknown')
-        _text(judgment.get('rationale'), name + ' rationale')
-        anchors = judgment.get('anchors')
-        if not isinstance(anchors, list):
-            raise ValueError('judgment anchors must be a list')
-        if judgment['status'] == 'pass' and name in ('original_sources', 'citation_correctness', 'contrary_evidence') and not anchors:
-            raise ValueError(name + ' pass requires inspected source anchors')
-        for anchor in anchors:
-            if not isinstance(anchor, dict):
-                raise ValueError('anchor must be an object')
-            source = snapshots.get(anchor.get('evidence_id'))
-            quote = _text(anchor.get('quote'), 'anchor quote')
-            if not source or source.get('status') == 'UNAVAILABLE' or quote not in source['snapshot_text']:
-                raise ValueError('review anchor does not occur in pinned source snapshot')
-            anchor['snapshot_hash'] = source['snapshot_hash']
-        judgment['basis'] = 'manual_judgment; anchor occurrence does not establish entailment'
-    errors = obs.setdefault('errors', [])
-    if not isinstance(errors, list):
-        raise ValueError('errors must be a list')
-    for error in errors:
-        if not isinstance(error, dict):
-            raise ValueError('error must be an object')
-        _text(error.get('kind'), 'error kind'); _text(error.get('detail'), 'error detail')
+    _validate_review_content(obs, snapshots)
     runtime_observation = _runtime_observation(run, arm)
     obs.update(recorded_at=cases.now(), manifest_hash=campaign['manifest_hash'],
                case_content_hash=_hash({k: case.get(k) for k in ('id', 'version', 'question', 'claims', 'evidence')}),
@@ -261,11 +269,65 @@ def record(campaign_id, observation, *, db=None):
     return get(campaign_id, db=db)
 
 
+def review(campaign_id, review_object, *, db=None):
+    """Append an independent authored review of an immutable observed outcome."""
+    if not isinstance(review_object, dict):
+        raise ValueError('review must be an object')
+    allowed = {'arm_id', 'question_id', 'repetition', 'expected_review_version',
+               'reviewer', 'judgments', 'errors'}
+    if set(review_object) - allowed:
+        raise ValueError('unknown review fields; evidence binding is selected from the original observation')
+    item = copy.deepcopy(review_object)
+    expected = item.get('expected_review_version')
+    if type(expected) is not int or expected < 0:
+        raise ValueError('expected_review_version must be a nonnegative integer')
+    if type(item.get('repetition')) is not int or item['repetition'] < 1:
+        raise ValueError('repetition must be a positive integer')
+    slot = (campaign_id, _text(item.get('arm_id'), 'arm_id'),
+            _text(item.get('question_id'), 'question_id'), item['repetition'])
+    with closing(_connect(db)) as con:
+        campaign = _load(con, campaign_id)
+        row = con.execute('SELECT body FROM research_observations WHERE campaign_id=? AND arm_id=? AND question_id=? AND repetition=?', slot).fetchone()
+        if row is None:
+            raise ValueError('completed observation not found for review')
+        original = json.loads(row[0])
+    case = cases.get(original['case_id'], version=original['case_version'], db=db)
+    content_hash = _hash({k: case.get(k) for k in ('id', 'version', 'question', 'claims', 'evidence')})
+    if content_hash != original['case_content_hash'] or original['manifest_hash'] != campaign['manifest_hash']:
+        raise ValueError('original observation evidence or manifest integrity check failed')
+    snapshots = {}
+    for evidence in case['evidence']:
+        text = evidence.get('snapshot_text')
+        if text is not None:
+            if not isinstance(text, str) or cases.digest(text) != evidence.get('snapshot_hash'):
+                raise ValueError('source snapshot integrity check failed')
+            snapshots[evidence['id']] = evidence
+    _validate_review_content(item, snapshots)
+    item.update(version=expected + 1, recorded_at=cases.now(), case_id=original['case_id'],
+                case_version=original['case_version'], case_content_hash=original['case_content_hash'],
+                manifest_hash=original['manifest_hash'], observation_hash=_hash(original),
+                basis='Independent authored review; source occurrence is not semantic proof.')
+    with closing(_connect(db)) as con, con:
+        con.execute('BEGIN IMMEDIATE')
+        current = con.execute('SELECT COALESCE(MAX(version),0) FROM research_evaluation_reviews WHERE campaign_id=? AND arm_id=? AND question_id=? AND repetition=?', slot).fetchone()[0]
+        if current != expected:
+            raise ValueError('review version changed; inspect the current review before appending')
+        con.execute('INSERT INTO research_evaluation_reviews VALUES(?,?,?,?,?,?)', (*slot, item['version'], _json(item)))
+    return get(campaign_id, db=db)
+
+
 def get(campaign_id, *, db=None):
     with closing(_connect(db)) as con:
         result = _load(con, campaign_id)
         observations = [json.loads(r[0]) for r in con.execute(
             'SELECT body FROM research_observations WHERE campaign_id=? ORDER BY question_id,repetition,arm_id', (campaign_id,))]
+        reviews = [json.loads(r[0]) for r in con.execute(
+            'SELECT body FROM research_evaluation_reviews WHERE campaign_id=? ORDER BY version', (campaign_id,))]
+    for observation in observations:
+        observation['reviews'] = [r for r in reviews if (r['arm_id'], r['question_id'], r['repetition']) ==
+                                  (observation['arm_id'], observation['question_id'], observation['repetition'])]
+        observation['current_review'] = observation['reviews'][-1] if observation['reviews'] else None
+        observation['review_version'] = observation['current_review']['version'] if observation['current_review'] else 0
     manifest = result['manifest']
     slots = {(o['arm_id'], o['question_id'], o['repetition']): o for o in observations}
     missing = [{'arm_id': a['id'], 'question_id': q['id'], 'repetition': r}
@@ -297,7 +359,13 @@ def get(campaign_id, *, db=None):
                       'paired_observations': paired, 'reasons': reasons,
                       'comparable_execution': not execution_limits, 'execution_limitations': execution_limits, 'different_source_exposure': source_differences,
                       'limit': 'Recorded design comparability only; executable provenance and judgment quality require independent review.'})
-    result.update(observations=observations, coverage={'recorded': len(observations), 'denominator': manifest['denominator'], 'missing_slots': missing},
-                  error_inventory=[dict(e, arm_id=o['arm_id'], question_id=o['question_id'], repetition=o['repetition']) for o in observations for e in o['errors']],
+    unknown_remaining = [{'arm_id': o['arm_id'], 'question_id': o['question_id'], 'repetition': o['repetition'],
+                          'criteria': [key for key, judgment in (o['current_review'] or o)['judgments'].items() if judgment['status'] == 'unknown']}
+                         for o in observations]
+    result.update(review_coverage={'observations_with_reviews': sum(bool(o['reviews']) for o in observations),
+                  'recorded_observations': len(observations), 'unknown_remaining': [item for item in unknown_remaining if item['criteria']]},
+                  observations=observations, coverage={'recorded': len(observations), 'denominator': manifest['denominator'], 'missing_slots': missing},
+                  error_inventory=[dict(e, source='observation', arm_id=o['arm_id'], question_id=o['question_id'], repetition=o['repetition']) for o in observations for e in o['errors']] +
+                      [dict(e, source='review', review_version=r['version'], arm_id=r['arm_id'], question_id=r['question_id'], repetition=r['repetition']) for r in reviews for e in r['errors']],
                   paired_comparability=pairs, quality_summary='Manual criteria are retained separately. No automatic truth score or confidence percentage.')
     return result

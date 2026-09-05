@@ -49,3 +49,11 @@ Observations now inspect the run and every operation's stored runtime provenance
 `operational.engine_elapsed_seconds` sums measured monotonic operation durations only when every step has a finite nonnegative measurement. It excludes host waiting and separately issued tools. Missing measurements remain null; total investigation latency and model tokens are still unknown. Recording time remains independent.
 
 Actual follow-up verification: `python3 -m pytest -q tests/test_research_evaluation.py` — **27 passed**. Added controls exercise clean commit mismatch, changed commit between steps, dirty provenance, missing duration, measured operation summation and source-exposure differences. Runtime instrumentation inputs are artificial effects attached to real persisted completed runs; they are not scientific results or real clean-build attestations.
+
+## Independent review after recording
+
+`review(campaign_id, review_object, *, db=None)` appends an immutable review to a recorded outcome. Fields are `arm_id`, `question_id`, `repetition`, `expected_review_version` (0 for the first review), `reviewer`, all six `judgments` using the same anchor validator, and optional `errors`. Evidence identifiers, case version, manifest hash and content hash are selected from the original observation; callers cannot replace them. Later case revisions cannot supply quotations to a review of an earlier observed answer.
+
+The original observation remains unchanged. `get` adds `review_version`, `reviews` and `current_review` to each observation; historical reviews remain readable. `review_coverage` reports observed outcomes with appended reviews and criteria still unknown in the current review (or original judgments when no review exists). `error_inventory` distinguishes original observation errors from each historical review's errors by source and review version. It is an inventory, not a count of currently unresolved errors.
+
+Actual verification: **35 evaluation tests passed**. Additional exercised controls cover optimistic stale/concurrent review rejection, fabricated or later-version quotations, tampered historical evidence, exact integer versions, preservation of original observation bytes and readable review history. No provider calls were made.
