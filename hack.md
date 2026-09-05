@@ -317,11 +317,13 @@ Full record: `fleet-ops (internal)/retros/QWEN-LOSS-RETRO-2026-08-30.md` (correc
 - [x] Use-bar session template — `docs/USE-BAR-SESSION-TEMPLATE.md` (blank; Oscar fills after one real search)
 - [x] Cold compound fix — overlapping offline B claims match A verbatim under assertion-integrity reuse; public main was exit 3
 - [x] Hosted desk demo honesty — `scripts/demo_clearance_desk.sh` exits 2 on `mode=private-workspaces`
+- [x] One-command gate — `bash scripts/cinema_pack_gate.sh`
 - [x] Receipt — `docs/CLOUD-RECEIPT-cinema-pack-2026-09-05.md`
 
 ### Verify (one command each)
 
 ```bash
+bash scripts/cinema_pack_gate.sh                                     # CINEMA PACK GATE OK
 bash scripts/verify_cold_clone.sh                                    # exit 0
 python3 scripts/compound_exhibit_receipt.py                          # A=2→B=1 · corpus_hits B=2
 bash scripts/demo_clearance_desk.sh                                  # exit 2 BLOCKED private-workspaces

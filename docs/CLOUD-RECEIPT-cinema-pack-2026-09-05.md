@@ -99,6 +99,7 @@ Still needs Oscar: approve bounded aggregate policy; exercise Parallel (optional
 - `docs/CINEMA-PACK-2026-09-05.md`
 - `docs/USE-BAR-SESSION-TEMPLATE.md`
 - `docs/CLOUD-RECEIPT-cinema-pack-2026-09-05.md`
+- `scripts/cinema_pack_gate.sh` — one-command re-derive of pack claims at objects
 - `scripts/compound_exhibit_receipt.py` — overlapping B claims verbatim; drop hardcoded “29 SOURCED”
 - `scripts/demo_clearance_desk.sh` — detect `private-workspaces`, exit 2 with Oscar door
 - `hack.md` — NOW / LOG for this slice

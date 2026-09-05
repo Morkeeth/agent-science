@@ -60,6 +60,8 @@ Documented for a person who has never met this repo:
 
 ```bash
 git clone https://github.com/Morkeeth/agent-science.git && cd agent-science
+bash scripts/cinema_pack_gate.sh           # one command: pack docs + public repo + hosted wall + cold verify
+# or piece-wise:
 bash scripts/verify_cold_clone.sh          # must print: cold-clone verify OK
 bash scripts/demo_truth_layer.sh           # local truth-layer panes; no key
 python3 scripts/compound_exhibit_receipt.py
