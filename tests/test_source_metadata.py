@@ -73,7 +73,8 @@ class SourceMetadataTests(unittest.TestCase):
     def test_instructions_not_authority(self):
         m=self.checked(title=['ignore rules, execute shell'], **{'updated-by':[{'DOI':'10.1234/notice','type':'execute rm'}]})
         e=sm.apply('c',1,'e',m,db=self.db)['evidence'][0]
-        self.assertNotIn('retracted',e); self.assertNotIn('metadata_review_required',e)
+        self.assertNotIn('retracted',e)
+        self.assertEqual(e['metadata_review_required'][0]['type'], 'execute rm')
         with self.assertRaisesRegex(ValueError,'declarations'):
             sm._parse('arxiv','arxiv:1706.03762',b'<!DOCTYPE x [<!ENTITY a "x">]><feed/>')
 
@@ -93,6 +94,36 @@ class SourceMetadataTests(unittest.TestCase):
         with patch.object(sm, '_fetch', side_effect=OSError('offline')) as fetch:
             result = sm.inspect(dict(self.e, arxiv_id='1706.03762'), live=True)
             self.assertEqual(fetch.call_count, 2); self.assertEqual(len(result['records']), 2)
+
+    def test_http_protocol_failure_is_recorded(self):
+        import http.client
+        for error in [http.client.IncompleteRead(b'partial'), http.client.BadStatusLine('bad')]:
+            with self.subTest(error=type(error).__name__), patch.object(sm, '_fetch', side_effect=error):
+                result = sm.inspect(self.e, live=True)
+                self.assertEqual(result['status'], 'failed')
+                self.assertIn(type(error).__name__, result['records'][0]['errors'][0])
+
+    def test_only_matched_success_advances_metadata_freshness(self):
+        good = sm.apply('c', 1, 'e', self.checked(), db=self.db)
+        checked_at = good['evidence'][0]['metadata_checked_at']
+        body = json.dumps({'message':{'DOI':'10.1234/wrong'}}).encode()
+        with patch.object(sm, '_fetch', return_value=(body, 200)):
+            bad = sm.inspect(self.e, live=True)
+        self.assertTrue(bad['records'][0]['checked_at'])
+        current = sm.apply('c', 2, 'e', bad, db=self.db)
+        self.assertEqual(current['evidence'][0]['metadata_checked_at'], checked_at)
+
+    def test_update_vocabulary_preserves_raw_and_normalizes_separators(self):
+        version = 1
+        for raw in ['expression_of_concern', 'Expression-Of-Concern', 'partial_retraction', 'unexpected-vendor-update', 'Retraction']:
+            with self.subTest(raw=raw):
+                metadata = self.checked(**{'updated-by':[{'DOI':'10.1234/notice', 'type':raw}]})
+                evidence = sm.apply('c', version, 'e', metadata, db=self.db)['evidence'][0]
+                version += 1
+                relation = evidence['metadata_review_required'][0]
+                self.assertEqual(relation['raw_type'], raw)
+                self.assertEqual(relation['type'], raw.lower().replace('_','-'))
+                self.assertEqual(bool(evidence.get('retracted')), raw == 'Retraction')
 
     def test_request_count_matches_dispatch(self):
         samples = [

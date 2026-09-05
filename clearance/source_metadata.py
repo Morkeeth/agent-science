@@ -4,6 +4,7 @@ Crossref update direction matters: a retraction notice is not itself retracted.
 An absent relation means unknown coverage, never a clean bill of health.
 """
 import hashlib
+import http.client
 import json
 import re
 import threading
@@ -71,10 +72,10 @@ def _parse(provider, identity, body):
                 other = _doi(item.get('DOI'))
                 if not other: continue
                 kind = item.get('type')
-                # Unknown relation names remain data and have no state effect.
+                # Preserve registry vocabulary; unknown incoming updates still need review.
                 if not isinstance(kind, str) or len(kind) > 100: continue
                 target, notice = (identity, other) if field == 'updated-by' else (other, identity)
-                relations.append({'type':kind, 'target':target, 'notice':notice,
+                relations.append({'type':kind.strip().lower().replace('_', '-'), 'raw_type':kind, 'target':target, 'notice':notice,
                                   'field':field, 'source':item.get('source'), 'updated':item.get('updated')})
     else:
         if b'<!DOCTYPE' in body.upper() or b'<!ENTITY' in body.upper():
@@ -157,12 +158,12 @@ def inspect(evidence, *, live=False):
                 body = exc.read(MAX_BYTES + 1)
                 record['response_hash'] = hashlib.sha256(body).hexdigest()
                 if len(body) > MAX_BYTES: record['response_hash_scope'] = 'bounded_prefix'
-            except OSError:
+            except (OSError, http.client.HTTPException):
                 pass
             finally:
                 exc.close()
             record['errors'].append('Registry HTTP ' + str(exc.code))
-        except (ValueError, KeyError, TypeError, ET.ParseError, OSError) as exc:
+        except (ValueError, KeyError, TypeError, ET.ParseError, OSError, http.client.HTTPException) as exc:
             record['errors'].append(type(exc).__name__ + ': ' + str(exc)[:300])
         result['records'].append(record)
     checked = sum(r['status'] == 'checked' for r in result['records'])
@@ -189,7 +190,7 @@ def apply(case_id, version, evidence_id, metadata, *, db=None):
         ids, pinned, _ = studies._identities(evidence)
         if metadata.get('identities') != sorted(ids): raise ValueError('metadata identity mismatch')
         evidence['source_metadata'] = metadata
-        times = [r['checked_at'] for r in metadata.get('records', []) if r.get('checked_at')]
+        times = [r['checked_at'] for r in metadata.get('records', []) if r.get('checked_at') and r.get('status') == 'checked' and r.get('identity') in ids]
         if times: evidence['metadata_checked_at'] = max(times)
         effects = []
         for record in metadata.get('records', []):
@@ -199,8 +200,10 @@ def apply(case_id, version, evidence_id, metadata, *, db=None):
                 kind = relation.get('type')
                 if record['provider'] == 'crossref' and relation.get('field') == 'updated-by':
                     if kind == 'retraction': evidence['retracted'] = True
-                    if kind in ('retraction', 'correction', 'erratum', 'expression-of-concern', 'withdrawal'):
-                        effects.append(relation)
+                    # Every exact incoming registry update is inspectable, even
+                    # when its vocabulary is unfamiliar. Only explicit retraction
+                    # has the stronger retracted effect.
+                    effects.append(relation)
                 if record['provider'] == 'arxiv' and kind == 'new-version' and relation.get('target_version') in pinned:
                     evidence['superseded_by'] = relation['notice']; effects.append(relation)
         # Missing records never clear earlier explicit flags.
