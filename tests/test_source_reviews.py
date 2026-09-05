@@ -16,7 +16,7 @@ def fixture(db):
     """Reusable synthetic case for actual CLI/MCP review flows."""
     evidence=[dict(id='paper',url='https://doi.org/10.1234/paper',snapshot_text=BODY,snapshot_hash=cases.digest(BODY),status='QUOTE_VERIFIED',kind='research',checked_at='2026-01-01T00:00:00Z'),
               dict(id='notice',url='https://doi.org/10.1234/notice',snapshot_text=NOTICE,snapshot_hash=cases.digest(NOTICE),status='QUOTE_VERIFIED',kind='research',checked_at='2026-01-01T00:00:00Z')]
-    cases._save(dict(id='correction-case',version=1,created_at=cases.now(),question='Does the scoped task finding survive the correction?',evidence=evidence,trace=[],decisions=[]),db=db)
+    cases._save(dict(id='correction-case',version=1,created_at=cases.now(),question='Does the scoped task finding survive the correction?',evidence=evidence,trace=[],decisions=[],provided_sources=[e['url'] for e in evidence],official_domains=[]),db=db)
     data=synthesis.apply('correction-case',1,{'findings':[dict(statement='Coding tasks used a fixed comparator.',relation='supports',rationale='The source explicitly describes this scoped task design.',evidence_id='paper',quote=BODY,strongest_challenge='The correction could change the comparator or evaluated tasks.',what_would_change='An inspected notice changing the task comparator would reverse this assessment.')]},db=db)
     payload=json.dumps({'message':{'DOI':'10.1234/paper','updated-by':[dict(DOI='10.1234/notice',type='correction')]}}).encode()
     with patch.object(source_metadata,'_fetch',return_value=(payload,200)):
@@ -196,3 +196,64 @@ class SourceReviewTests(unittest.TestCase):
         pending=source_reviews.list_pending(self.data['id'],db=self.db)['pending'][0]
         self.assertEqual('notice_retracted',pending['notice_failures'][0]['reason'])
         self.assertTrue(pending['review_binding_current'])
+
+    def test_withdrawn_removed_and_partial_retraction_are_not_acknowledgments(self):
+        for kind in ('withdrawal','removal','partial_retraction','expression_of_concern'):
+            with self.subTest(kind=kind):
+                db=Path(self.temp.name)/(kind+'.db');data=fixture(db)
+                payload=json.dumps({'message':{'DOI':'10.1234/paper','updated-by':[dict(DOI='10.1234/notice',type=kind)]}}).encode()
+                with patch.object(source_metadata,'_fetch',return_value=(payload,200)):
+                    metadata=source_metadata.inspect(data['evidence'][0],live=True)
+                data=source_metadata.apply(data['id'],data['version'],'paper',metadata,db=db)
+                self.assertFalse(data['evidence'][0].get('retracted',False))
+                p=proposal(data,db)
+                if kind=='expression_of_concern':
+                    self.assertEqual(1,len(source_reviews.review(data['id'],data['version'],p,db=db)['resolved']))
+                else:
+                    with self.assertRaisesRegex(ValueError,'cannot be rehabilitated'):
+                        source_reviews.review(data['id'],data['version'],p,db=db)
+                    self.assertEqual('REVIEW_REQUIRED',synthesis.build(data)['conclusions'][0]['state'])
+
+    def test_same_doi_mirror_inherits_warning_and_needs_separate_assessment_review(self):
+        self.write(lambda d:d['evidence'].append(dict(id='mirror',url='https://dx.doi.org/10.1234/paper?download=pdf',snapshot_text=BODY,snapshot_hash=cases.digest(BODY),status='QUOTE_VERIFIED',kind='research')))
+        data=cases.get(self.data['id'],db=self.db)
+        data=research.assess(data['id'],data['version'],statement='A mirror assessment shares the study warning.',relation='supports',rationale='This mirror represents the exact same DOI and study.',evidence_id='mirror',quote=BODY,db=self.db)
+        self.assertEqual('REVIEW_REQUIRED',research.brief(data)['claims'][-1]['state'])
+        pending=source_reviews.list_pending(data['id'],db=self.db)['pending']
+        mirror=next(row for row in pending if row['evidence_id']=='mirror')
+        self.assertEqual(['paper'],mirror['warning_inherited_from'])
+        self.submit()
+        self.assertEqual('REVIEW_REQUIRED',research.brief(cases.get(data['id'],db=self.db))['claims'][-1]['state'])
+
+    def test_same_study_mirror_cannot_be_its_own_notice(self):
+        self.write(lambda d:d['evidence'].append(dict(id='mirror',url='https://dx.doi.org/10.1234/paper?download=pdf',snapshot_text=NOTICE,snapshot_hash=cases.digest(NOTICE),status='QUOTE_VERIFIED',kind='research')))
+        data=cases.get(self.data['id'],db=self.db)
+        payload=json.dumps({'message':{'DOI':'10.1234/paper','updated-by':[dict(DOI='10.1234/paper',type='correction')]}}).encode()
+        with patch.object(source_metadata,'_fetch',return_value=(payload,200)):
+            metadata=source_metadata.inspect(data['evidence'][0],live=True)
+        data=source_metadata.apply(data['id'],data['version'],'paper',metadata,db=self.db)
+        p=proposal(data,self.db)
+        p['notices'].append(dict(notice_identity='doi:10.1234/paper',evidence_id='mirror',quote=NOTICE,snapshot_hash=cases.digest(NOTICE)))
+        with self.assertRaisesRegex(ValueError,'notice_same_study'):self.submit(p)
+
+    def test_arxiv_supersession_applies_only_to_exact_old_version(self):
+        old=dict(id='old',url='https://arxiv.org/abs/2401.00001v1',snapshot_text=BODY,snapshot_hash=cases.digest(BODY),status='QUOTE_VERIFIED',metadata_review_required=[dict(type='new-version',target='arxiv:2401.00001',target_version='arxiv:2401.00001v1',notice='arxiv:2401.00001v2')],superseded_by='arxiv:2401.00001v2')
+        mirror=dict(id='old-pdf',url='https://arxiv.org/pdf/2401.00001v1',snapshot_text=BODY,snapshot_hash=cases.digest(BODY),status='QUOTE_VERIFIED')
+        newer=dict(id='new',url='https://arxiv.org/abs/2401.00001v2',snapshot_text=BODY,snapshot_hash=cases.digest(BODY),status='QUOTE_VERIFIED')
+        data=dict(evidence=[old,mirror,newer])
+        self.assertEqual(['new-version'],source_reviews._non_rehabilitable(source_reviews.effective_source(data,mirror)))
+        self.assertFalse(source_reviews.effective_source(data,newer).get('metadata_review_required'))
+        self.assertFalse(source_reviews.effective_source(data,dict(newer,id='unknown',url='https://arxiv.org/abs/2401.00001')).get('metadata_review_required'))
+
+    def test_unresolved_binds_exact_missing_snapshot_without_invented_hash(self):
+        self.write(lambda d:d['evidence'][0].update(snapshot_text=None,snapshot_hash=None,status='UNAVAILABLE'))
+        row=source_reviews.list_pending(self.data['id'],db=self.db)['pending'][0]
+        p=copy.deepcopy(self.proposal);p.update(source_snapshot_hash=row['source_snapshot_hash'],disposition='unresolved',notices=[],rationale='The source snapshot is unavailable and the correction effect remains unknown.')
+        result=self.submit(p)
+        self.assertIsNone(result['reviews'][-1]['source_snapshot_hash'])
+        self.assertEqual(1,len(result['pending']))
+        for disposition in ('unaffected','revise'):
+            p['disposition']=disposition
+            with self.subTest(disposition=disposition),self.assertRaisesRegex(ValueError,'only unresolved'):self.submit(p)
+        p.update(disposition='unresolved',source_snapshot_hash='invented')
+        with self.assertRaisesRegex(ValueError,'fingerprint changed'):self.submit(p)

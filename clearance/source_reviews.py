@@ -24,6 +24,59 @@ def _warnings(source):
     return sorted(warnings, key=lambda value: json.dumps(value, sort_keys=True))
 
 
+
+NON_REHABILITABLE = {'retraction', 'partial-retraction', 'withdrawal', 'withdrawn', 'removal', 'removed', 'new-version'}
+
+
+def effective_source(data, source):
+    """Derive warnings across exact identifiers; never merge by prose/title.
+
+    DOI notices apply to that DOI's mirrors. Version-specific arXiv notices only
+    apply to their explicit target version, never the current/newer version.
+    """
+    identities, versions, _ = studies._identities(source)
+    warnings = list(_warnings(source))
+    inherited = set()
+    for sibling in data.get('evidence', []):
+        if sibling.get('id') == source.get('id'):
+            continue
+        sibling_ids, sibling_versions, _ = studies._identities(sibling)
+        for warning in _warnings(sibling):
+            if not isinstance(warning, dict):
+                continue
+            target = warning.get('target')
+            if target not in identities:
+                continue
+            if target.startswith('arxiv:'):
+                target_version = warning.get('target_version')
+                if target_version:
+                    if target_version not in versions:
+                        continue
+                elif not (versions and versions == sibling_versions):
+                    continue
+            warnings.append(warning); inherited.add(sibling['id'])
+        # Older imported records may retain a retraction flag without its notice.
+        common = identities & sibling_ids
+        exact = any(i.startswith('doi:') for i in common) or (bool(common) and bool(versions) and versions == sibling_versions)
+        if exact and sibling.get('retracted'):
+            warnings.append({'type':'retraction', 'target':sorted(common)[0], 'notice':None, 'basis':'saved study retraction flag'})
+            inherited.add(sibling['id'])
+        if common and versions and versions == sibling_versions and sibling.get('superseded_by'):
+            warnings.append({'type':'new-version', 'target':sorted(common)[0], 'target_version':sorted(versions)[0],
+                             'notice':sibling['superseded_by'], 'basis':'saved version supersession flag'})
+            inherited.add(sibling['id'])
+    unique = {json.dumps(w, sort_keys=True):w for w in warnings}
+    result = dict(source)
+    if unique:
+        result['metadata_review_required'] = [unique[key] for key in sorted(unique)]
+    result['warning_inherited_from'] = sorted(inherited)
+    return result
+
+
+def _non_rehabilitable(source):
+    return sorted({str(w.get('type', '')).lower().replace('_', '-') for w in _warnings(source)
+                   if isinstance(w, dict) and str(w.get('type', '')).lower().replace('_', '-') in NON_REHABILITABLE})
+
 def _assessment_hash(data, assessment):
     claim = next((c for c in data.get('claims', []) if any(a['id'] == assessment['id'] for a in c['assessments'])), {})
     # Derived presentation fields must not alter the committed assessment binding.
@@ -36,7 +89,7 @@ def _available(source):
     text = source.get('snapshot_text')
     return (source.get('status') != 'UNAVAILABLE' and isinstance(text, str) and bool(text)
             and source.get('snapshot_hash') == cases.digest(text)
-            and not source.get('retracted') and not source.get('superseded_by'))
+            and not source.get('retracted') and not source.get('superseded_by') and not _non_rehabilitable(source))
 
 
 def _notice_failure(data, notice):
@@ -44,6 +97,7 @@ def _notice_failure(data, notice):
     source = next((e for e in data.get('evidence', []) if e['id'] == notice['evidence_id']), None)
     if source is None:
         return 'notice_evidence_missing'
+    source = effective_source(data, source)
     identities, versions, _ = studies._identities(source)
     for prefix in ('doi:', 'arxiv:'):
         if len([identity for identity in identities if identity.startswith(prefix)]) > 1:
@@ -79,7 +133,7 @@ def _notice_current(data, notice):
 
 def assessment_status(data, assessment):
     """Stable semantic rows used by brief, synthesis and decision review."""
-    sources = {e['id']:e for e in data.get('evidence', [])}
+    sources = {e['id']:effective_source(data, e) for e in data.get('evidence', [])}
     anchors = [assessment.get('anchor', {})] + [c.get('anchor', {}) for c in assessment.get('conditions', [])]
     rows = []
     for evidence_id in sorted({a['evidence_id'] for a in anchors if a.get('evidence_id')}):
@@ -104,7 +158,7 @@ def assessment_status(data, assessment):
                     and all(_notice_current(data, n) for n in latest['notices']))
         rows.append({'assessment_id':assessment['id'], 'evidence_id':evidence_id,
             'source_snapshot_hash':source.get('snapshot_hash'), 'warning_fingerprint':fingerprint,
-            'warnings':warnings, 'notice_identities':sorted({w.get('notice') for w in warnings if isinstance(w, dict) and w.get('notice')}),
+            'warnings':warnings, 'warning_inherited_from':source.get('warning_inherited_from', []), 'non_rehabilitable':_non_rehabilitable(source), 'notice_identities':sorted({w.get('notice') for w in warnings if isinstance(w, dict) and w.get('notice')}),
             'state':'RESOLVED_AS_AUTHORED' if resolved else 'REVIEW_REQUIRED',
             'review_binding_current':binding_current,
             'notice_failures':[{'notice_identity':n['notice_identity'], 'evidence_id':n['evidence_id'], 'reason':failure}
@@ -134,9 +188,12 @@ def review(case_id, version, proposal, *, db=None):
         raise ValueError('source review requires exact fields: ' + ', '.join(sorted(required)))
     if not isinstance(proposal['disposition'], str) or proposal['disposition'] not in ('unaffected', 'revise', 'unresolved'):
         raise ValueError('disposition must be unaffected, revise or unresolved')
-    for field in ('assessment_id', 'evidence_id', 'source_snapshot_hash', 'warning_fingerprint'):
+    for field in ('assessment_id', 'evidence_id', 'warning_fingerprint'):
         if not isinstance(proposal[field], str) or not proposal[field]:
             raise ValueError(field + ' must be nonempty text')
+    snapshot = proposal['source_snapshot_hash']
+    if not (isinstance(snapshot, str) and bool(snapshot)) and not (snapshot is None and proposal['disposition'] == 'unresolved'):
+        raise ValueError('source_snapshot_hash must be nonempty text; only unresolved may bind an exact missing snapshot')
     if not isinstance(proposal['rationale'], str) or not 20 <= len(proposal['rationale'].strip()) <= 5000:
         raise ValueError('source review needs a substantive 20–5000 character rationale')
     if not isinstance(proposal['notices'], list) or len(proposal['notices']) > 30:
@@ -161,7 +218,9 @@ def review(case_id, version, proposal, *, db=None):
             raise ValueError('assessment does not use this warning source')
         if any(proposal[key] != target[key] for key in ('source_snapshot_hash', 'warning_fingerprint')):
             raise ValueError('source body or warning fingerprint changed')
-        source = next(e for e in data['evidence'] if e['id'] == proposal['evidence_id'])
+        source = effective_source(data, next(e for e in data['evidence'] if e['id'] == proposal['evidence_id']))
+        if proposal['disposition'] == 'unaffected' and _non_rehabilitable(source):
+            raise ValueError('source cannot be rehabilitated: ' + ', '.join(_non_rehabilitable(source)))
         if proposal['disposition'] == 'unaffected' and not _available(source):
             raise ValueError('unavailable, retracted or superseded source cannot be rehabilitated')
         identities = set(target['notice_identities'])
@@ -174,6 +233,11 @@ def review(case_id, version, proposal, *, db=None):
                 raise ValueError('notice identity, evidence_id and snapshot_hash must be nonempty text')
             if notice['notice_identity'] not in identities or notice['notice_identity'] in seen:
                 raise ValueError('notice identity is unrelated or duplicated')
+            notice_source = next((e for e in data['evidence'] if e['id'] == notice['evidence_id']), {})
+            target_ids, _, _ = studies._identities(source)
+            notice_ids, _, _ = studies._identities(notice_source)
+            if target_ids & notice_ids:
+                raise ValueError('notice_same_study: a mirror of the warned study cannot establish an independent correction notice')
             failure = _notice_failure(data, notice)
             if failure:
                 raise ValueError(failure + ': inspect the named notice evidence and submit its current exact anchor')

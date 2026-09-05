@@ -176,7 +176,7 @@ def assess(case_id,version,*,statement,relation,rationale,evidence_id=None,quote
 
 def brief(data):
     from clearance import source_reviews
-    evidence={e['id']:e for e in data['evidence']};rows=[]
+    evidence={e['id']:source_reviews.effective_source(data,e) for e in data['evidence']};rows=[]
     for claim in data.get('claims',[]):
         assessments=[]
         superseded={a.get('supersedes') for a in claim['assessments']}

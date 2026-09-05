@@ -7,7 +7,7 @@ import json
 import re
 import uuid
 from contextlib import closing
-from clearance import cases, research, studies
+from clearance import cases, research, studies, source_reviews
 
 RELATIONS = {'supports', 'contradicts', 'context', 'unresolved', 'different_scope'}
 MEANING = 'Authored interpretation. Exact quote occurrence is checked; entailment is not mechanically established.'
@@ -146,7 +146,7 @@ def build(case_data):
     brief = research.brief(case_data)
     grouped = studies.group(case_data['evidence'])
     by_evidence = {eid:s for s in grouped for eid in s['evidence_ids']}
-    evidence = {e['id']:e for e in case_data['evidence']}
+    evidence = {e['id']:source_reviews.effective_source(case_data,e) for e in case_data['evidence']}
     conclusions = []; gaps = []
     for claim in brief['claims']:
         for assessment in claim['assessments']:
