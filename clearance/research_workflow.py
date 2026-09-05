@@ -45,20 +45,20 @@ def handle(arguments):
         raise ValueError('arguments must be an object')
     action = arguments.get('action', 'start')
     db = arguments.get('db')
-    allowed = {'start', 'show', 'context', 'resume', 'cancel', 'reconcile', 'challenge', 'compare', 'follow', 'updates', 'update', 'experiment-plan', 'protocol', 'execute-protocol', 'evaluation-create', 'evaluation-show', 'evaluation-record'}
+    allowed = {'start', 'show', 'context', 'resume', 'cancel', 'reconcile', 'challenge', 'compare', 'follow', 'updates', 'update', 'experiment-plan', 'protocol', 'execute-protocol', 'evaluation-create', 'evaluation-show', 'evaluation-record','evaluation-review'}
     if not isinstance(action, str) or action not in allowed:
         raise ValueError('Unknown research action')
     for key in ('live',):
         if key in arguments and type(arguments[key]) is not bool:
             raise ValueError(key + ' must be a boolean')
-    for key in ('proposal', 'policy', 'protocol', 'evaluation_spec', 'observation'):
+    for key in ('proposal', 'policy', 'protocol', 'evaluation_spec', 'observation', 'evaluation_review'):
         if key in arguments and arguments[key] is not None and not isinstance(arguments[key], dict):
             raise ValueError(key + ' must be an object')
     for key in ('version', 'from_version', 'case_version'):
         if key in arguments and (type(arguments[key]) is not int or arguments[key] < 1):
             raise ValueError(key + ' must be a positive integer')
     required = []
-    if action in ('evaluation-show','evaluation-record'):
+    if action in ('evaluation-show','evaluation-record','evaluation-review'):
         required=['evaluation_id']
     elif action == 'reconcile':
         required = ['run_id', 'operation_id', 'acknowledgement']
@@ -85,6 +85,8 @@ def handle(arguments):
             return research_evaluation.create(arguments.get('evaluation_spec',{}),db=db)
         if action=='evaluation-record':
             return research_evaluation.record(arguments['evaluation_id'],arguments.get('observation',{}),db=db)
+        if action=='evaluation-review':
+            return research_evaluation.review(arguments['evaluation_id'],arguments.get('evaluation_review',{}),db=db)
         return research_evaluation.get(arguments['evaluation_id'],db=db)
     if action == 'execute-protocol':
         raise ValueError('Protocol execution is CLI-only; select a trusted script in the terminal.')

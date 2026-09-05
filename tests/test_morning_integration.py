@@ -2,6 +2,7 @@
 import json
 import subprocess
 import sys
+import pytest
 from unittest.mock import patch
 from clearance import cases, research, synthesis, night_runs, research_policy, source_metadata, research_evaluation
 
@@ -32,13 +33,16 @@ def test_registry_action_reserves_policy_and_updates_decision_without_changing_b
     data=cases.decide(data['id'],'Try a controlled context comparison.','Limited to selected tasks.',[e['id']],expected_version=2,db=db)
     run=night_runs.start(QUESTION,case_id=data['id'],policy={**LIMITS,'aggregate':{'id':'fixture','limits':LIMITS}},db=db)
     proposal={'case_version':2,'next_action':{'kind':'metadata','evidence_id':e['id'],'reason':'Check the primary registry for a correction.','metadata':{'retracted':True}}}
+    with pytest.raises(ValueError,match='registry results'):
+        night_runs.resume(run['id'],proposal=proposal,live=True,db=db)
+    proposal['next_action'].pop('metadata')
     with patch.object(source_metadata,'_fetch',side_effect=AssertionError('unapproved request')):
         assert night_runs.resume(run['id'],proposal=proposal,live=True,db=db)['status']=='paused'
     research_policy.approve({'aggregate':{'id':'fixture','limits':LIMITS}},db=db)
     body=json.dumps({'message':{'DOI':'10.1234/trial','updated-by':[{'DOI':'10.1234/correction','type':'correction'}]}}).encode()
     with patch.object(source_metadata,'_fetch',return_value=(body,200)) as fetched:
         done=night_runs.resume(run['id'],proposal=proposal,live=True,db=db)
-    assert fetched.call_count==1 and done['usage']['document_reads']==2
+    assert fetched.call_count==1 and done['usage']['document_reads']==1
     assert done['observed_usage']['metadata_responses']==1
     after=cases.get(data['id'],db=db)
     assert after['version']==3 and after['checked_at']==data['checked_at']
@@ -53,6 +57,8 @@ def test_registry_action_reserves_policy_and_updates_decision_without_changing_b
     with patch('clearance.instruments.document_snapshot',return_value={'text':TEXT,'sha256':cases.digest(TEXT),'cache_hit':True}):
         refreshed=cases.refresh(data['id'],db=db)
     assert refreshed['evidence'][0]['metadata_review_required']
+    revised=synthesis.apply(data['id'],refreshed['version'],{'findings':[dict(f,statement='This corrected source needs further interpretation.')]},db=db)
+    assert all(c['state']=='REVIEW_REQUIRED' for c in synthesis.build(revised)['conclusions'])
 
 
 def test_evaluation_cli_and_mcp_keep_frozen_denominator_and_unknowns(tmp_path):
@@ -78,3 +84,35 @@ def test_evaluation_cli_and_mcp_keep_frozen_denominator_and_unknowns(tmp_path):
     assert recorded['observations'][0]['operational']['latency_seconds'] is None
     result,error=mcp({'action':'evaluation-record','evaluation_id':campaign['id'],'observation':observation,'db':db})
     assert result['isError'] and 'duplicate' in error['error']
+    review={k:observation[k] for k in ('arm_id','question_id','repetition','reviewer','judgments')}
+    review['expected_review_version']=0
+    review['judgments']['citation_correctness']={'status':'pass','rationale':'Exact fixture passage inspected; no scientific effectiveness claim.',
+        'anchors':[{'evidence_id':data['evidence'][0]['id'],'quote':TEXT}]}
+    result,reviewed=mcp({'action':'evaluation-review','evaluation_id':campaign['id'],'evaluation_review':review,'db':db})
+    assert not result['isError'],reviewed
+    assert reviewed['observations'][0]['review_version']==1
+    assert reviewed['observations'][0]['judgments']['citation_correctness']['status']=='unknown'
+    path=tmp_path/'review.json';path.write_text(json.dumps(review))
+    p=subprocess.run([sys.executable,'-m','clearance','research','evaluation-review',campaign['id'],'--review-file',str(path),'--db',db,'--json'],text=True,capture_output=True,timeout=30)
+    assert p.returncode==2 and 'version' in p.stderr
+    review['expected_review_version']=1;path.write_text(json.dumps(review))
+    p=subprocess.run([sys.executable,'-m','clearance','research','evaluation-review',campaign['id'],'--review-file',str(path),'--db',db,'--json'],text=True,capture_output=True,timeout=30)
+    assert p.returncode==0,p.stderr
+    assert json.loads(p.stdout)['observations'][0]['review_version']==2
+
+
+def test_metadata_offline_then_live_and_failed_receipt(tmp_path):
+    db=str(tmp_path/'retry.db');data=seed(db)
+    limits={**LIMITS,'document_reads':1}
+    policy={**limits,'aggregate':{'id':'one-read','limits':limits}}
+    research_policy.approve(policy,db=db)
+    run=night_runs.start(QUESTION,case_id=data['id'],policy=policy,db=db)
+    proposal={'case_version':1,'next_action':{'kind':'metadata','evidence_id':data['evidence'][0]['id'],'reason':'Inspect registry status.'}}
+    offline=night_runs.resume(run['id'],proposal=proposal,db=db)
+    assert offline['case_version']==1 and offline['usage'].get('document_reads',0)==0
+    with patch.object(source_metadata,'_fetch',side_effect=OSError('network unavailable')) as fetch:
+        online=night_runs.resume(run['id'],proposal=proposal,live=True,db=db)
+    assert fetch.call_count==1
+    assert online['case_version']==1 and online['usage']['document_reads']==1
+    assert online['steps'][-1]['observed_events'][0]['outcome']=='failed'
+    assert cases.get(data['id'],db=db)['version']==1

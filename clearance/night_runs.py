@@ -413,7 +413,7 @@ def resume(run_id, *, proposal=None, reasoner=None, live=False, db=None):
                 if action['offset']>len(selected['snapshot_text']):
                     raise ValueError('source page offset exceeds the stored snapshot length')
             previous=next((s for s in reversed(run['steps']) if s['kind'] in ('search','read','metadata') and s['state']=='completed'),None)
-            if previous and kind in ('search','read','metadata') and _signature(previous['payload']['next_action'])==_signature(action):
+            if previous and not (kind=='metadata' and any(e.get('outcome')=='not_checked' for e in previous.get('observed_events',[]))) and kind in ('search','read','metadata') and _signature(previous['payload']['next_action'])==_signature(action):
                 run.setdefault('stops',[]).append({'reason':'diminishing new evidence','at':cases.now(),'case_version':run['case_version']})
                 run.update(status='stopped',stop_reason='diminishing new evidence: repeated identical action; inspect the saved gap or supply a bounded host finish')
                 return _save(run,db)
@@ -422,7 +422,9 @@ def resume(run_id, *, proposal=None, reasoner=None, live=False, db=None):
                 metadata_target=next((e for e in current['evidence'] if e['id']==action['evidence_id']),None)
                 if metadata_target is None:raise ValueError('metadata evidence not found in inspected case')
             counts={}
-            if kind=='metadata' and live:counts={'document_reads':2,'rounds':1}
+            if kind=='metadata' and live:
+                from clearance import source_metadata
+                counts={'document_reads':source_metadata.planned_request_count(metadata_target),'rounds':1}
             if kind=='search': counts={'discovery_calls':len(action.get('providers',['parallel'])),'document_reads':len(action.get('providers',['parallel']))*2,'rounds':1}
             if kind=='read': counts={'document_reads':len(action['urls']),**({} if paging else {'rounds':1})}
             step=_reserve(run,counts,kind,copy.deepcopy(proposal),db,live and kind!='finish' and not paging)
@@ -447,7 +449,7 @@ def resume(run_id, *, proposal=None, reasoner=None, live=False, db=None):
                 if kind=='metadata':
                     from clearance import source_metadata
                     metadata=source_metadata.inspect(metadata_target,live=live)
-                    if live:
+                    if live and metadata['status'] in ('checked','partial') and any(r.get('status')=='checked' for r in metadata['records']):
                         current=source_metadata.apply(run['case_id'],current['version'],metadata_target['id'],metadata,db=db)
                     step['observed_events']=[{'route':'source_metadata','outcome':r['status'],
                         'provider':r['provider'],'url':r.get('requested_url'),'response_hash':r.get('response_hash'),

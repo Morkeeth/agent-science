@@ -123,7 +123,7 @@ The execution result includes its actual experiment ID and links back to the pro
 
 ## Check corrections and source versions
 
-After inspecting the source ID, a host can submit `next_action: {"kind":"metadata","evidence_id":"SOURCE_ID","reason":"Check for registry corrections or newer versions"}` with the current `case_version`. Explicit live execution under the approved policy checks at most two fixed primary-registry endpoints (Crossref and arXiv), reserving two document reads and one round. Offline execution does not query a registry. Registry response hashes and check times remain separate from source-body freshness.
+After inspecting the source ID, a host can submit `next_action: {"kind":"metadata","evidence_id":"SOURCE_ID","reason":"Check for registry corrections or newer versions"}` with the current `case_version`. Explicit live execution under the approved policy checks at most two fixed primary-registry endpoints (Crossref and arXiv), reserving one document read per planned endpoint and one round. Offline execution does not query a registry. Registry response hashes and check times remain separate from source-body freshness.
 
 An incoming retraction, correction or explicitly newer pinned version can flag the conclusion and its decisions for review. A retraction notice is not automatically retracted itself. Missing metadata does not clear earlier flags or prove that no correction exists. Source-body refresh preserves known registry status.
 
@@ -133,10 +133,15 @@ An incoming retraction, correction or explicitly newer pinned version can flag t
 agent-science research evaluation-create --spec-file evaluation.json
 agent-science research evaluation-show EVALUATION_ID
 agent-science research evaluation-record EVALUATION_ID --observation-file observation.json
+agent-science research evaluation-review EVALUATION_ID --review-file review.json
 ```
 
-MCP exposes these three actions with `evaluation_spec`, `evaluation_id` and `observation`. The specification fixes question IDs and expected distinctions, independently authored rubric, arms, resource limits, evidence modes and repetitions before runs begin. See `review/morning/EVALUATION.md` for the complete schema. This operation makes no provider call.
+MCP exposes these four actions with `evaluation_spec`, `evaluation_id`, `observation` and `evaluation_review`. The specification fixes question IDs and expected distinctions, independently authored rubric, arms, resource limits, evidence modes and repetitions before runs begin. See `review/morning/EVALUATION.md` for the complete schema. This operation makes no provider call.
 
 Each observation binds manual judgments and source anchors to an actual case version and completed run. Duplicate runs cannot fill additional repetitions. Saved-source replay cannot be marked fresh web. The report lists missing slots, errors and paired comparability; retrieval and synthesis are different tasks. Runtime source hashes and clean local Git pins provide bounded provenance; they do not attest dependencies, hardware, loaded-module state or models. Engine-operation duration excludes host waiting and separately issued tools. Unknown latency, tokens and billing stay unknown.
 
 Practical consequences are explicitly authored inferences. Answers group empirical findings, official constraints and field adoption; reports of use never become measured effectiveness merely through grouping.
+
+An independent review appends a version to the original observation; it does not replace the run or the original judgments. Supply `arm_id`, `question_id`, `repetition`, `expected_review_version` (zero for the first review), `reviewer`, all six `judgments` and optional `errors`. Concurrent or stale writers are rejected. Historical case and source hashes bind every review to the evidence actually observed.
+
+Metadata requests use public registry GETs without a paid search provider. The CLI still requires an approved aggregate capacity policy for live requests; a free-only policy can set discovery and reasoning limits to zero. An offline check can be followed by a live check. Failed registry checks retain their receipts on the run without creating an evidence revision. Correction flags make conclusions and decisions require review; they do not assert that every passage in a corrected paper is false. New interpretations of those passages remain explicitly flagged. Retractions and superseded sources cannot supply new synthesis anchors.

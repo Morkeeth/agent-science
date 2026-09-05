@@ -24,7 +24,7 @@ def add_parser(sub):
     parser.add_argument('--db', default=argparse.SUPPRESS)
     parser.add_argument('--json', action='store_true', default=argparse.SUPPRESS)
     actions = parser.add_subparsers(dest='action', required=True)
-    for name in ('start', 'show', 'context', 'resume', 'cancel', 'reconcile', 'challenge', 'compare', 'follow', 'update', 'updates', 'experiment-plan', 'protocol', 'policy', 'execute-protocol', 'evaluation-create', 'evaluation-show', 'evaluation-record'):
+    for name in ('start', 'show', 'context', 'resume', 'cancel', 'reconcile', 'challenge', 'compare', 'follow', 'update', 'updates', 'experiment-plan', 'protocol', 'policy', 'execute-protocol', 'evaluation-create', 'evaluation-show', 'evaluation-record','evaluation-review'):
         item = actions.add_parser(name)
         item.set_defaults(func=run)
         item.add_argument('--db', default=argparse.SUPPRESS)
@@ -62,10 +62,12 @@ def add_parser(sub):
                 item.add_argument('--protocol-id')
         elif name == 'evaluation-create':
             item.add_argument('--spec-file',type=Path,required=True)
-        elif name in ('evaluation-show','evaluation-record'):
+        elif name in ('evaluation-show','evaluation-record','evaluation-review'):
             item.add_argument('evaluation_id')
             if name=='evaluation-record':
                 item.add_argument('--observation-file',type=Path,required=True)
+            if name=='evaluation-review':
+                item.add_argument('--review-file',type=Path,required=True)
         elif name == 'policy':
             item.add_argument('--policy-file',type=Path,required=True)
             item.add_argument('--approve',action='store_true',required=True)
@@ -89,7 +91,7 @@ def run(args):
 
 def _run(args):
     arguments = {key: value for key, value in vars(args).items() if value is not None}
-    for file_key,object_key in (('spec_file','evaluation_spec'),('observation_file','observation')):
+    for file_key,object_key in (('spec_file','evaluation_spec'),('observation_file','observation'),('review_file','evaluation_review')):
         path=arguments.pop(file_key,None)
         if path:arguments[object_key]=_object(path.read_text())
     protocol_file = arguments.pop('protocol_file', None)
