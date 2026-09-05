@@ -26,23 +26,23 @@ python, parallel-web (Parallel Search SDK 1.3.2), gemini (Vertex AI), google-clo
 
 ## Try it in 60 seconds (judges)
 
-Browser, no clone:
+**Hosted (measured 2026-09-05):** revision `agent-science-00026-zel`, mode `private-workspaces`.
+Unauthenticated `/health` returns JSON; `/`, `/visibility/ui`, `/truths/ui`, `/search`, and `POST /clear` hit a **Sign in** wall (or 401). Do not treat open UI URLs as the stranger demo on this revision.
 
-- Websearch companion with the full search shown: https://agent-science-568004190078.us-central1.run.app/visibility/ui?q=ralph+loop+agentic
-- Clearance desk (paste a script): https://agent-science-568004190078.us-central1.run.app/
-- Truths dashboard: https://agent-science-568004190078.us-central1.run.app/truths/ui
-- Partner manifest: https://agent-science-568004190078.us-central1.run.app/health
+- Public health only: https://agent-science-568004190078.us-central1.run.app/health
 
-Terminal, no keys:
+**Terminal, no keys (authoritative stranger path):**
 
 ```
 git clone https://github.com/Morkeeth/agent-science.git && cd agent-science
 bash scripts/verify_cold_clone.sh
+python3 tests/test_registry_surface.py -q
+python3 scripts/compound_exhibit_receipt.py
+python3 scripts/eval_artifact_claims.py
 bash scripts/demo_truth_layer.sh
-bash scripts/demo_clearance_desk.sh
 ```
 
-A fresh clone of that repository ran those three commands on 2026-09-03 with exit code 0, 0, 0 (72/72 mutation-watched controls, 127/127 doc-checked controls, holdout OK, registry 16/16, eval delta +1).
+A cold path on 2026-09-05 re-measured: watch_it_go_red **72/72**, registry **16/16**, bench_check_docs **128/128**, offline compound A=**2**→B=**1** with corpus_hits=**2**, artifact-claims OK after pack honesty.
 
 ## About the project
 
@@ -52,23 +52,21 @@ Paste a documentary script. Every checkable claim comes back one of two ways: SO
 
 The same engine is a websearch companion for agentic builders. Ask "ralph loop agentic" and you get a primary verdict (sourced, refused with cause, or CONTRARY TO RESEARCH when practitioner adoption outruns the papers) plus the whole search: every variant tried, every route and cost tier, and an imbalance warning when the evidence is GitHub stars only.
 
-Every claim it clears joins a shelf. A claim proven, or proven unprovable, once is free for every production afterward. On the hosted URL today: 298 claims, 244 queries logged, dictionary hit rate 0.639, 121 reuses across 23 productions.
+Every claim it clears joins a shelf. A claim proven, or proven unprovable, once is free for every production afterward. Re-measure dictionary stats locally with `python3 -m clearance stats` or on a workspace-authenticated hosted session — do not carry a hosted claim count from an older open revision.
 
 ### Technological implementation
 
-- Parallel Search API at runtime through the official parallel-web SDK (1.3.2), used for discovery on a dictionary miss; the hosted `/health` endpoint reports `parallel_sdk: true` and `parallel_transport: parallel-web`.
+- Parallel Search API at runtime through the official parallel-web SDK (1.3.2), used for discovery on a dictionary miss.
 - Gemini on Vertex AI (`gemini-3.5-flash`) extracts claims and proposes candidate passages; it is never allowed to write the verdict.
-- Google Cloud Run hosts the desk, the websearch companion and the JSON API; the shelf (the refusal log and the corpus SQLite files) is pulled from and pushed to a Google Cloud Storage bucket around each write (`CORPUS_GCS_URI` and `REFUSAL_LOG_GCS_URI`, set by `deploy.sh`).
-- Agent Development Kit (2.7.1) is the default clearance engine (`engine_default: adk`; the report names the tool call `clear_script_tool`).
+- Google Cloud Run hosts private workspaces (2026-09-05: `/health` public; desk and search behind Sign in). Workspace shelf data is tenant-scoped — do not seed cloud from local user case DBs.
+- Agent Development Kit (2.7.1) is the default clearance engine on the local/ADK path (`engine_default: adk` in local health when configured).
 - Verbatim verification is deterministic code: the fetched document must contain the proposed span, or the row is refused. An independence check refuses claims where every supporting document derives from one origin.
 - Three cost tiers: free (registry replay and alias hit), cheap (URL routing to EUR-Lex, arXiv and the rights vocabularies), live (Parallel plus Gemini). `science_lookup` defaults to the free tier.
-- Controls: 127 checks across 11 suites, 72 of them mutation-watched (each one is shown to go red when the rule it guards is removed); a refusal holdout set hash-pinned on 2026-09-03 (its last content change is the 2026-08-31 semantic-guard commit, so it is a regression pin, not a pre-tuning freeze); a symmetric scorer that judges baseline and shipping arms on delivered labels only (baseline 5/6, shipping 6/6, McNemar p = 1.0 at n = 6, stated as a real but not significant delta).
+- Controls (re-measured 2026-09-05): **128** checks across 11 pack suites, **72** mutation-watched; refusal holdout hash-pinned; symmetric scorer baseline 5/6 vs shipping 6/6; artifact-claims gate re-measures pack claims at the submitted commit.
 
 ### Design
 
-One product, two doors on the same layer. The desk at `/` takes narration and returns a gap report: claims, sourced, unsourced, Parallel calls, a buyer-week strip (claims cleared vs caught over seven days, the number a clearance desk reports upward), a compounding strip (Parallel API vs corpus hits on this run), then every row with its verdict, cause, URL and quoted span. The websearch companion at `/visibility/ui` shows the verdict and the route table under it. The truths dashboard at `/truths/ui` ranks what people actually ask with sourced and miss counts. Refusals sit in the same column as evidence, on purpose: what the desk cannot prove is the report the buyer pays for.
-
-Measured on the hosted desk on 2026-09-03: the pitch headline "94% of film archives are unclearable for AI training" returned 1 claim, 0 sourced, 1 UNSOURCED, cause `search_found_no_admissible_source`, 0 Parallel calls. One line about Directive 2012/28/EU returned 1 claim, 1 SOURCED, the EUR-Lex URL, the verbatim span, source class PRIMARY (EU primary law), 0 Parallel calls and 1 corpus hit, in 18 seconds.
+One product, two doors on the same layer. Locally, the desk takes narration and returns a gap report; `python3 -m clearance visibility --full` shows the websearch companion panes. On the 2026-09-05 hosted revision those UI doors require workspace Sign in — film the local CLI path or an authenticated session, not an open URL.
 
 ### Potential impact
 

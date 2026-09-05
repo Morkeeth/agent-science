@@ -2,7 +2,7 @@
 doc: hack
 project: Agent Science
 phase: SHIP
-last-touched: 2026-09-03 12:10 UTC
+last-touched: 2026-09-05 00:20 UTC
 canonical: true
 event: Agentic Cinema · Parallel track · deadline 2026-09-09 14:00 PDT
 supersedes: docs/PHASE0-LADDER.md ClickHouse-track note (runtime track is Parallel)
@@ -295,19 +295,58 @@ submission craft, supported by a real tendency, **not** as the explanation of th
 - [x] **Baseline steelmanned** — raw rows printed by eval scripts; RC5 is now the single discordant item (baseline GREEN, shipping UNKNOWN)
 - [x] **Statistic matched to n** — Wilson 95% CI + McNemar in baseline/ablation scripts
 - [x] **Scorer symmetrical** — `python3 scripts/eval_scorer_symmetry.py` · delivered SOURCED/UNSOURCED labels only; baseline **5/6** vs shipping **6/6** (RC5 discordant)
-- [ ] **Cost from billing**, with the price card's date stated.
+- [ ] **Cost from billing**, with the price card's date stated. *(2026-09-05: list-price stand-in shipped — `scripts/eval_cost_price_card.py` reads `parallel.ai/pricing` with date; billing console still Oscar-only / unchecked)*
 - [x] **Offline path with no API key.**
 - [x] **Honesty & limitations** section carrying our worst number — README §Honesty & limitations; PITCH first screen
 - [ ] **Answer the track brief in the track's own words on the first screen** — judge pack § above; must land on Devpost ¶1 + video 0:00
 - [ ] **Video verified attached and public on the live entry page, from a logged-out browser** — not in a checklist file, on the page.
-- [ ] **Every artifact claim measured at the submitted commit.** Four retros of that loss failed this row.
+- [x] **Every artifact claim measured at the submitted commit.** — `python3 scripts/eval_artifact_claims.py` (2026-09-05: watched RED on hosted open-UI + Private-until-submit lies, then pack corrected)
 
 Full record: `fleet-ops (internal)/retros/QWEN-LOSS-RETRO-2026-08-30.md` (corrected) ·
 `QWEN-FIELD-TEST-2026-08-30.md` (the n=40 falsification) · playbook lesson 97.
 
 ---
 
-## 🎯 NOW — Partner night wave (fresh compound + timeout finding)
+## 🎯 NOW — Night wave 2026-09-05 · Sep 9 submit gaps (build lane)
+
+**Slice:** Artifact-claims gate (embarrass pack lies) · restore offline compound under exact-assertion · SUBMISSION-PACK truth · cost price-card gate · deploy prep for private-workspaces · live compound BLOCKED receipt.
+
+### Build (shipped 2026-09-05)
+
+- [x] Compound exhibit fix — exact-assertion overlap in `compound-mini-B.txt` · `docs/FINDING-compound-exact-assertion-2026-09-05.md`
+- [x] Qwen gate: every artifact claim at commit — `python3 scripts/eval_artifact_claims.py` (watched RED 13/16 → OK after pack honesty)
+- [x] Cost from **price card** (not billing) — `python3 scripts/eval_cost_price_card.py` · card date stated
+- [x] SUBMISSION-PACK truth — public repo [x] · hosted login wall · stranger block + artifact gate
+- [x] Deploy prep only — `docs/DEPLOY-PREP-2026-09-05.md` (no deploy run)
+- [x] Live compound BLOCKED — keys missing · hosted `/clear` 401 · offline receipt authoritative
+
+### Verify (one command each)
+
+```bash
+git pull && python3 tests/test_watch_it_go_red.py                    # 72/72
+python3 scripts/bench_check_docs.py                                  # 128/128
+python3 scripts/compound_exhibit_receipt.py; echo $?                 # A=2→B=1 hits=2 · exit 0
+python3 scripts/eval_artifact_claims.py                              # ARTIFACT CLAIMS OK
+python3 scripts/eval_cost_price_card.py                              # shipping saves vs naive
+python3 scripts/eval_refusal_baseline.py && python3 scripts/eval_scorer_symmetry.py
+curl -sS https://agent-science-568004190078.us-central1.run.app/health
+```
+
+### Receipt
+
+- `docs/RECEIPT-night-wave-2026-09-05.md`
+- `docs/FINDING-compound-exact-assertion-2026-09-05.md`
+- `docs/DEPLOY-PREP-2026-09-05.md`
+
+### BLOCKED
+
+- Live compound / orphan-works hosted — **no Parallel/Gemini keys** on VM; hosted `POST /clear` **401**
+- Cost **from billing console** — Oscar only; price-card gate is the offline stand-in
+- Video + Devpost paste scrub for remaining open-UI marketing — Oscar
+
+---
+
+## 🎯 NOW (prior) — Partner night wave (fresh compound + timeout finding)
 
 **Slice:** Harden partner verify to prove Parallel at runtime; ship fresh compound probe; document orphan-works 504 regression at object.
 
@@ -528,6 +567,7 @@ bash scripts/verify_cold_clone.sh                                               
 
 | When | What | Command | Outcome |
 |------|------|---------|---------|
+| 2026-09-05 night | Artifact claims + compound fix + pack honesty | `eval_artifact_claims.py` · `compound_exhibit_receipt.py` · `eval_cost_price_card.py` | Watched **RED 13/16** (login wall + public-repo lie) → pack fixed → **OK**; compound A=2→B=1 restored under exact-assertion; live compound **BLOCKED** (no keys · `/clear` 401) |
 | 2026-09-03 night | Fresh compound + timeout finding | `compound_fresh_hosted_probe.py` · `verify_partners_hosted.sh` | **A≥1 Parallel → B drop** · orphan-works Run A **504** @ 300s |
 | 2026-09-03 night | SUBMISSION-PACK + Qwen gates | `bench_check_docs.py` · `eval_verify_holdout.py` · `eval_scorer_symmetry.py` | **127/127** · holdout OK · scorer 5/6 vs 6/6 · offline compound A=2→B=1 |
 | 2026-09-02 | Partner verify re-run | `verify_partners_hosted.sh` · `full_gate.sh` | **4/4 partners** · compound warm-shelf PASS · 72/72 auto-seed |

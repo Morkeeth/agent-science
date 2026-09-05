@@ -1,23 +1,25 @@
 # SUBMISSION PACK — Agentic Cinema · slice 7
 
-**Date:** 2026-09-03 · **Repo:** https://github.com/Morkeeth/agent-science @ `main`  
+**Date:** 2026-09-05 · **Repo:** https://github.com/Morkeeth/agent-science @ `main`  
 **Hosted:** https://agent-science-568004190078.us-central1.run.app · **Deadline:** 2026-09-09 14:00 PT  
-**Scope:** docs + offline controls — no public repo flip, no video upload, no Devpost submit, no `deploy.sh`
+**Scope:** docs + offline controls — no video upload, no Devpost submit, no `deploy.sh`  
+**Hosted mode (measured 2026-09-05):** `private-workspaces` · revision `agent-science-00026-zel` · `/health` public · `/search`, `/registry`, `/visibility/ui`, `/clear` require workspace login (Sign in / bearer token). Do not sell open stranger hosted search on Devpost until Oscar flips a public exhibit path.
 
 ---
 
-## Stranger one-command block (cold clone, no keys)
+## Stranger one-command block (cold clone, no keys, no network beyond git)
 
 ```bash
 git clone https://github.com/Morkeeth/agent-science.git && cd agent-science
 bash scripts/verify_cold_clone.sh
 python3 tests/test_registry_surface.py -q
 python3 scripts/compound_exhibit_receipt.py
+python3 scripts/eval_artifact_claims.py
 bash scripts/demo_truth_layer.sh
 python3 ask_registry.py "agentlint" | head -5
 ```
 
-Offline compound receipt writes `docs/COMPOUND-EXHIBIT-2026-08-29.md` with A=2→B=1 Parallel, corpus_hits≥1 — no Gemini/Parallel keys required.
+Offline compound receipt writes `docs/COMPOUND-EXHIBIT-2026-08-29.md` with A=2→B=1 Parallel, corpus_hits≥1 — no Gemini/Parallel keys required. Overlapping claims must be **exact assertion text** (paraphrase is not a corpus hit after `f61635e`).
 
 ---
 
@@ -26,14 +28,14 @@ Offline compound receipt writes `docs/COMPOUND-EXHIBIT-2026-08-29.md` with A=2�
 | Gate | Requirement | Status | Evidence |
 |------|-------------|--------|----------|
 | Video | ≤ 3 min (≤ 180 s) | [ ] | Script: `docs/VIDEO-SCRIPT-2026-08-29.md` — beats sum **178 s** |
-| Devpost | All mandatory fields filled | [ ] | Paste block below (§1–3 from `PITCH.md`) |
-| Public repo | Stranger can clone | [ ] | Private until submit — flip visibility on GitHub |
+| Devpost | All mandatory fields filled | [ ] | Paste block below (§1–3 from `PITCH.md`) — **rewrite hosted URLs for login wall** |
+| Public repo | Stranger can clone | [x] | **PUBLIC** since 2026-08-22 (`api.github.com` `private=false`) |
 | OSI licence | Open-source approved | [x] | `LICENSE` (MIT) |
 | Sealed prediction | Pre-registered, falsifiable | [x] | `docs/SEALED-PREDICTION-2026-08-31.md` — hosted A=1→B=0, corpus_hits=1 |
 | Partner integrations | All four called at runtime | [x] docs | `docs/PARTNER-INTEGRATIONS-2026-08-30.md` |
-| ADK default path | `engine_default: adk` | [x] local / [x] hosted | `docs/RECEIPT-adk-default-path-2026-08-30.md` |
+| ADK default path | `engine_default: adk` | [x] local / [ ] hosted shape changed | Local `test_adk_default_path` 5/5; hosted `/health` no longer prints `engine_default` under private-workspaces |
 
-**Controls re-measured 2026-09-03** (run each at object):
+**Controls re-measured 2026-09-05** (run each at object):
 
 | Suite | Command | Result |
 |-------|---------|--------|
@@ -52,10 +54,12 @@ Offline compound receipt writes `docs/COMPOUND-EXHIBIT-2026-08-29.md` with A=2�
 | docs gate | `python3 scripts/bench_check_docs.py` | **128/128 match** |
 | holdout freeze | `python3 scripts/eval_verify_holdout.py` | **4 files pinned** |
 | scorer symmetry | `python3 scripts/eval_scorer_symmetry.py` | baseline **5/6** vs shipping **6/6** on delivered labels |
+| artifact claims | `python3 scripts/eval_artifact_claims.py` | baseline trusts pack; shipping re-measures at object |
+| cost (price card) | `python3 scripts/eval_cost_price_card.py` | list price from `parallel.ai/pricing` — **not** billing console |
 
-**Compound exhibit (offline, 2026-09-03):** `python3 scripts/compound_exhibit_receipt.py` · A=**2**→B=**1** Parallel · B corpus hits=**2** — `docs/COMPOUND-EXHIBIT-2026-08-29.md`. Live hosted (2026-08-31): `long_run_goal.sh` · A=**1**→B=**0** · sealed `docs/SEALED-PREDICTION-2026-08-31.md`. Orphan-works full script: run B **504** — do not claim on video.
+**Compound exhibit (offline, 2026-09-05):** `python3 scripts/compound_exhibit_receipt.py` · A=**2**→B=**1** Parallel · B corpus hits=**2** — `docs/COMPOUND-EXHIBIT-2026-08-29.md`. Exact-assertion overlap required. Live hosted compound **BLOCKED 2026-09-05:** no `PARALLEL_API_KEY`/`GEMINI_API_KEY` on this VM; hosted `POST /clear` returns **401** (private-workspaces). Prior sealed hosted (2026-08-31): `long_run_goal.sh` · A=**1**→B=**0** · `docs/SEALED-PREDICTION-2026-08-31.md`. Orphan-works full script: **504** — do not claim on video.
 
-**Eval gate:** `docs/QWEN-EVAL-GATE-2026-08-30.md` — baseline **5/6 = 0.833** vs shipping **6/6 = 1.000**, delta +1 (RC5); McNemar p=1.0000 at n=6. Holdout + symmetrical scorer re-run 2026-09-03: `docs/RECEIPT-night-wave-2026-09-03.md`.
+**Eval gate:** `docs/QWEN-EVAL-GATE-2026-08-30.md` — baseline **5/6 = 0.833** vs shipping **6/6 = 1.000**, delta +1 (RC5); McNemar p=1.0000 at n=6. Artifact-claims + cost price-card gates: `docs/RECEIPT-night-wave-2026-09-05.md`.
 
 ---
 
@@ -86,8 +90,8 @@ Copy everything between the lines into Devpost project description / inspiration
 
 When you or your agent websearches, you get a **full visibility panel**: what was searched (every angle, every tier), what the field runs (GitHub ★, blogs, peers), and a primary verdict — **sourced verbatim**, **refused with cause**, or **CONTRARY TO RESEARCH** when practitioners outrun papers. Stack-fit scores whether a truth fits *your* repo. The shelf compounds: ask once, free forever.
 
-**Try it:** https://agent-science-568004190078.us-central1.run.app/visibility/ui?q=ralph+loop+agentic  
-**Truths dashboard:** `/truths/ui` · **265+ claims** on disk
+**Try it locally (no keys):** `python3 -m clearance visibility "ralph loop agentic" --full`  
+**Hosted:** `/health` is public; `/visibility/ui`, `/truths/ui`, `/search` hit a **Sign in** wall under `private-workspaces` (measured 2026-09-05 on rev `agent-science-00026-zel`). Workspace token required — do not paste open UI URLs as the stranger demo until Oscar restores a public exhibit path.
 
 Clearance and E&O insurance? One paying vertical on the same layer — sections below.
 
@@ -133,10 +137,10 @@ market.
 
 | | |
 |---|---|
-| Repo | `https://github.com/Morkeeth/agent-science` @ `e6793ab` |
+| Repo | `https://github.com/Morkeeth/agent-science` (public since 2026-08-22) — measure SHA at submit |
 | Entry point | `python3 agent_science.py <script.txt>` — Gemini + Parallel **live by default** |
-| Hosted | https://agent-science-568004190078.us-central1.run.app — `POST /clear` · `GET /corpus` |
-| Controls | registry **16/16** · cross-subject reuse **2/2** · compound exhibit B **1** Parallel vs A **2** (offline) |
+| Hosted | https://agent-science-568004190078.us-central1.run.app — mode `private-workspaces`; `/health` public; `/clear` **401** without workspace token |
+| Controls | registry **16/16** · cross-subject reuse **2/2** · compound exhibit B **1** Parallel vs A **2** (offline, exact-assertion) |
 | License | `LICENSE` (MIT) |
 | Gap report | `fixtures/gap-report-600.md` — **561 of 600 (94%)** not sellable as-is |
 | Second question | `fixtures/shift-ai-training-vs-noncommercial.md` — 247 of 600 flip |
@@ -164,9 +168,9 @@ object was.
 
 ## Oscar checklist (outward acts — not done in this slice)
 
-- [ ] `git push` + flip repo to public on GitHub
-- [ ] Record video from `docs/VIDEO-SCRIPT-2026-08-29.md` (≤ 180 s)
+- [x] Repo public on GitHub (since 2026-08-22) — no flip needed
+- [ ] Record video from `docs/VIDEO-SCRIPT-2026-08-29.md` (≤ 180 s) — film **local** visibility or authenticated hosted, not open `/visibility/ui`
 - [ ] Upload video to Devpost
-- [ ] Paste Devpost block + fill remaining fields (built with, links, screenshot)
+- [ ] Paste Devpost block + fill remaining fields (built with, links, screenshot) — **scrub open hosted UI claims**
 - [ ] Seal prediction hash in Devpost / commit message after live A/B
-- [ ] `bash deploy.sh` — hosted `engine_default: adk` + durable corpus shelf (slice 1)
+- [ ] `bash deploy.sh` — private-workspaces candidate + promote (see `docs/DEPLOY-PREP-2026-09-05.md`); optional public exhibit path if judges need no-login demo

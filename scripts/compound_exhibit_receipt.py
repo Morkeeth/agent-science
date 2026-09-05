@@ -67,6 +67,9 @@ class _Raw:
 
 
 # Fixed claim lists mirroring compound-mini scripts — extraction is NOT simulated live.
+# B reuses A's exact assertion text for the overlapping claims. After
+# f61635e, paraphrase overlap is intentionally NOT a corpus hit — the exhibit
+# must prove compounding under that rule, not under the old paraphrase shortcut.
 _OFFLINE_CLAIMS = {
     "A": [
         _Raw("In 2012 the European Union passed Directive 2012/28/EU, the Orphan Works Directive.",
@@ -75,9 +78,9 @@ _OFFLINE_CLAIMS = {
              None, "29 October 2014"),
     ],
     "B": [
-        _Raw("Europe's answer was Directive 2012/28/EU — known as the Orphan Works Directive —",
+        _Raw("In 2012 the European Union passed Directive 2012/28/EU, the Orphan Works Directive.",
              None, "Directive 2012/28/EU"),
-        _Raw("and the deadline for national transposition was 29 October 2014.",
+        _Raw("Member states had until 29 October 2014 to bring it into national law.",
              None, "29 October 2014"),
         _Raw("The British Library has estimated that forty percent of its copyrighted collection is orphaned.",
              None, "forty percent"),
@@ -228,6 +231,9 @@ def _write_receipt(run: dict, *, backfill_rows: int) -> None:
         "",
         f"- Run B parallel < Run A: **{'yes' if pb < pa else 'NO — exhibit failed'}**",
         f"- corpus_hits B ≥ 1: **{'yes' if b['corpus_hits'] >= 1 else 'NO'}**",
+        "",
+        "Overlap rule: B must reuse **exact assertion text** from A "
+        "(paraphrase is not a corpus hit after same-subject integrity).",
         "",
     ]
 

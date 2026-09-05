@@ -1,0 +1,66 @@
+Artifact claims @ /workspace
+Commit: 69cc6b12a802789ebb0cfac8951233c6218dfc3f
+Host: https://agent-science-568004190078.us-central1.run.app
+
+Baseline arm: trust SUBMISSION-PACK / paste numbers (no object re-run)
+Shipping arm: re-measure each claim at its object
+
+  OK   suite:watch_it_go_red        pack='72/72'
+       measured=72/72
+       object: python3 tests/test_watch_it_go_red.py
+  OK   suite:adk_default_path       pack='5/5'
+       measured=5/5
+       object: python3 tests/test_adk_default_path.py
+  OK   suite:registry_surface       pack='16/16'
+       measured=16/16
+       object: python3 tests/test_registry_surface.py
+  OK   suite:cross_subject_reuse    pack='2/2'
+       measured=2/2
+       object: python3 tests/test_cross_subject_reuse.py
+  OK   suite:backfill_seeds_reuse   pack='2/2'
+       measured=2/2
+       object: python3 tests/test_backfill_seeds_reuse.py
+  OK   suite:clear_corpus           pack='4/4'
+       measured=4/4
+       object: python3 tests/test_clear_corpus.py
+  OK   suite:search_path            pack='5/5'
+       measured=5/5
+       object: python3 tests/test_search_path.py
+  OK   suite:source_map             pack='3/3'
+       measured=3/3
+       object: python3 tests/test_source_map.py
+  OK   suite:refusal_correctness    pack='6/6'
+       measured=6/6
+       object: python3 tests/test_refusal_correctness.py
+  OK   suite:partner_runtime        pack='7/7'
+       measured=7/7
+       object: python3 tests/test_partner_runtime.py
+  OK   suite:parallel_integration   pack='6/6'
+       measured=6/6
+       object: python3 tests/test_parallel_integration.py
+  OK   compound:offline             pack='A=2→B=1 hits=2'
+       measured=A=2→B=1 hits=2
+       object: python3 scripts/compound_exhibit_receipt.py
+  OK   hosted:health                pack='hosted /health 200 ok'
+       measured=HTTP 200 body='{"ok": true, "service": "agent-science", "mode": "private-workspaces", "revision": "agent-science-00026-zel"}'
+       object: curl https://agent-science-568004190078.us-central1.run.app/health
+  FAIL hosted:search                pack='pack still implies open stranger /search'
+       measured=first=303 loc='https://agent-science-33kamss2jq-uc.a.run.app/search?q=Directive+2012/28/EU&live=false'; follow=200 final=https://agent-science-33kamss2jq-uc.a.run.app/login; login_wall=True; pack_honest=False
+       object: curl -D- https://agent-science-568004190078.us-central1.run.app/search?q=...&live=false
+  FAIL hosted:visibility            pack='pack/Devpost still sells open /visibility/ui'
+       measured=first=303 loc='https://agent-science-33kamss2jq-uc.a.run.app/visibility/ui?q=ralph'; follow=200 final=https://agent-science-33kamss2jq-uc.a.run.app/login; login_wall=True; pack_honest=False
+       object: curl -L https://agent-science-568004190078.us-central1.run.app/visibility/ui
+  FAIL github:public                pack='pack still says Private until submit'
+       measured=private=False visibility=public
+       object: GET https://api.github.com/repos/Morkeeth/agent-science
+
+Baseline:  16/16 = 1.000  16/16 = 1.000  95% CI [0.806, 1.000]
+Shipping:  13/16 = 0.812  13/16 = 0.812  95% CI [0.570, 0.934]
+Delta (shipping - baseline): -3
+McNemar:   p=0.2500 (b=3 c=0 discordant) — b=3 c=0 discordant
+FINDING: shipping exposes pack/doc lies the baseline arm cannot see.
+
+ARTIFACT CLAIMS RED — 3 claim(s) false at object:
+  · hosted:search: pack='pack still implies open stranger /search' measured=first=303 loc='https://agent-science-33kamss2jq-uc.a.run.app/search?q=Directive+2012/28/EU&live=false'; follow=200 final=https://agent-science-33kamss2jq-uc.a.run.app/login; login_wall=True; pack_honest=False
+  · hosted:visibility: pack='pack/Devpost still sells open /visibility/ui' measured=first=303 loc='https://agent-science-33kamss2jq-uc.a.run.app/visibility/ui?q=ralph'; follow=200 final=https://agent-science-33kamss2jq-uc.a.run.app/login; login_wall=True; pack_honest=False
+  · github:public: pack='pack still says Private until submit' measured=private=False visibility=public
