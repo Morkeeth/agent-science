@@ -1,8 +1,8 @@
 <!-- STATE:start -->
-## SHARED WORK STATE · revision ae237d991de6 · rendered 2026-09-05 23:48
+## SHARED WORK STATE · revision 78eef209c710 · rendered 2026-09-05 23:49
 One state for Cursor, Codex, Claude and Oscar. Sources, all outside this repo: `~/.local/state/fleet/rulings.jsonl` (Oscar's rulings, local only, supersede rows), `~/CODE/cursor-slask/tasks/TASKS.yaml` (task IDs, Cursor's), `~/.claude/board/config.json` (clocks). Views such as GLANCE, SLASK and ZUP are adapters over the same revision.
 **A CLOSED task stays closed. Do not requeue, re-verify or re-poll it.**
-Before acting, record that you read this revision: `python3 ~/CODE/fleet-ops/state/state.py ack --session <name> --consumer <claude|codex|cursor> --rev ae237d991de6`. In a cloud sandbox instead append `{"session":"<name>","consumer":"cursor","rev":"ae237d991de6","ts":"<iso>"}` to `.fleet/ACK.jsonl` in this repo and commit it.
+Before acting, record that you read this revision: `python3 ~/CODE/fleet-ops/state/state.py ack --session <name> --consumer <claude|codex|cursor> --rev 78eef209c710`. In a cloud sandbox instead append `{"session":"<name>","consumer":"cursor","rev":"78eef209c710","ts":"<iso>"}` to `.fleet/ACK.jsonl` in this repo and commit it.
 
 ### OPEN
 - **AS-CINEMA-2026-09-09** · Agent Science, Agentic Cinema submit pack · owner shared · `agent-science` · due 2026-09-09T14:00
@@ -24,7 +24,7 @@ Before acting, record that you read this revision: `python3 ~/CODE/fleet-ops/sta
 - 2026-09-10T23:59 · ETHOnline hard stop (Stockholm) · open · ARC MAP full product; personal hard stop; build days 4, 5, 7, 10 Sep. Registration/stake previously reported by board, not reverified. Current build: ~/CODE/arc-map/.internal/HANDOFF-2026-09-05.md; Unclaimed blockers are historical, not current registration evidence.
 - 2026-09-15T02:00 · Agent Grinder + MAGNET · AWS Professional Agents · open · 14 Sep 17:00 PDT; 4 rulings blocked on Oscar
 
-### ACKNOWLEDGED THIS REVISION: claude (morkeeth-10 d0bca7 fable)
+### ACKNOWLEDGED THIS REVISION: nobody yet
 <!-- STATE:end -->
 
 # Product direction — operator ruling, 2026-09-04
