@@ -24,7 +24,7 @@ def add_parser(sub):
     parser.add_argument('--db', default=argparse.SUPPRESS)
     parser.add_argument('--json', action='store_true', default=argparse.SUPPRESS)
     actions = parser.add_subparsers(dest='action', required=True)
-    for name in ('start', 'show', 'context', 'resume', 'cancel', 'reconcile', 'challenge', 'compare', 'follow', 'update', 'updates', 'experiment-plan', 'protocol', 'policy', 'execute-protocol', 'evaluation-create', 'evaluation-show', 'evaluation-record','evaluation-review'):
+    for name in ('start', 'show', 'context', 'resume', 'cancel', 'reconcile', 'challenge', 'compare', 'follow', 'update', 'updates', 'experiment-plan', 'protocol', 'policy', 'execute-protocol', 'evaluation-create', 'evaluation-show', 'evaluation-record','evaluation-review','context-trial-create','context-trial-show','context-trial-prepare','context-trial-complete','context-trial-abort'):
         item = actions.add_parser(name)
         item.set_defaults(func=run)
         item.add_argument('--db', default=argparse.SUPPRESS)
@@ -68,6 +68,20 @@ def add_parser(sub):
                 item.add_argument('--observation-file',type=Path,required=True)
             if name=='evaluation-review':
                 item.add_argument('--review-file',type=Path,required=True)
+        elif name == 'context-trial-create':
+            item.add_argument('--trial-file',type=Path,required=True)
+        elif name in ('context-trial-show','context-trial-prepare','context-trial-complete','context-trial-abort'):
+            item.add_argument('trial_id')
+            if name!='context-trial-show':
+                item.add_argument('--expected-version',type=int,required=True)
+                item.add_argument('--trusted',action='store_true',required=True)
+            if name=='context-trial-prepare':
+                item.add_argument('--task',dest='task_id',required=True)
+                item.add_argument('--arm',dest='arm_id',required=True)
+                item.add_argument('--repetition',type=int,required=True)
+            elif name in ('context-trial-complete','context-trial-abort'):
+                item.add_argument('--attempt',dest='attempt_id',required=True)
+                if name=='context-trial-abort':item.add_argument('--reason',required=True)
         elif name == 'policy':
             item.add_argument('--policy-file',type=Path,required=True)
             item.add_argument('--approve',action='store_true',required=True)
@@ -91,7 +105,7 @@ def run(args):
 
 def _run(args):
     arguments = {key: value for key, value in vars(args).items() if value is not None}
-    for file_key,object_key in (('spec_file','evaluation_spec'),('observation_file','observation'),('review_file','evaluation_review')):
+    for file_key,object_key in (('spec_file','evaluation_spec'),('observation_file','observation'),('review_file','evaluation_review'),('trial_file','trial_spec')):
         path=arguments.pop(file_key,None)
         if path:arguments[object_key]=_object(path.read_text())
     protocol_file = arguments.pop('protocol_file', None)
@@ -100,6 +114,15 @@ def _run(args):
     if arguments['action'] == 'policy':
         from clearance import research_policy
         result=research_policy.approve(_object(arguments['policy_file'].read_text()), db=arguments.get('db'))
+    elif arguments['action'] in ('context-trial-prepare','context-trial-complete','context-trial-abort'):
+        from clearance import context_trials
+        kwargs={'expected_version':arguments['expected_version'],'trusted':arguments['trusted'],'db':arguments.get('db')}
+        if arguments['action']=='context-trial-prepare':
+            result=context_trials.prepare(arguments['trial_id'],task_id=arguments['task_id'],arm_id=arguments['arm_id'],repetition=arguments['repetition'],**kwargs)
+        elif arguments['action']=='context-trial-complete':
+            result=context_trials.complete(arguments['trial_id'],arguments['attempt_id'],**kwargs)
+        else:
+            result=context_trials.abort(arguments['trial_id'],arguments['attempt_id'],reason=arguments['reason'],**kwargs)
     elif arguments['action'] == 'resume' and arguments.get('reasoner'):
         from clearance import night_runs, reasoning
         result = night_runs.resume(arguments['run_id'], reasoner=reasoning.configured(),
@@ -119,6 +142,20 @@ def _run(args):
 def render(result, *, db=None):
     """Compact terminal view; --json retains the full inspectable object."""
     suffix = ' --db ' + shlex.quote(str(db)) if db else ''
+    if result.get('object_type')=='context_trial':
+        summary=result['summary'];manifest=result['manifest']
+        lines=[f"Context trial {result['id']} v{result['version']}: {summary['finished']}/{summary['denominator']} attempts finished",
+               f"Accepted by frozen checks: {summary['accepted']}; prepared: {summary['prepared']}"]
+        for arm in manifest['arms']:
+            rows=[a for a in result['attempts'] if a['arm_id']==arm['id']]
+            lines.append(f"{arm['id']}: {sum(a['state']=='ACCEPTED' for a in rows)} accepted / {len(manifest['tasks'])*manifest['repetitions']} planned attempts")
+        for attempt in result['attempts']:
+            if attempt['state'] in ('AWAITING_HOST','PREPARING','CHECKING','UNKNOWN'):
+                lines.append(f"{attempt['id']}: {attempt['task_id']} / {attempt['arm_id']} / repetition {attempt['repetition']} — {attempt['state']}")
+                lines.append('Worktree: '+attempt['worktree'])
+        lines.append('Inspect tasks and receipts: agent-science research context-trial-show '+result['id']+suffix+' --json')
+        lines.append('Selected-task acceptance only. Host isolation is not independently verified; token use and billing remain unknown.')
+        return '\n'.join(lines)
     if 'manifest_hash' in result and 'coverage' in result:
         coverage=result['coverage'];reviews=result.get('review_coverage',{})
         lines=[f"Evaluation {result['id']}: {coverage['recorded']}/{coverage['denominator']} outcomes recorded",

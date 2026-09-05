@@ -75,3 +75,18 @@ unit tests of this runner are only behavioral controls.
 Fresh worktrees share the Git object database. Host isolation is cooperative, not
 a blindness guarantee; a host can inspect other commits. Independent trial claims
 require host traces showing what each context actually received.
+
+## Terminal and MCP
+
+```text
+agent-science research context-trial-create --trial-file trial.json
+agent-science research context-trial-show TRIAL_ID --json
+agent-science research context-trial-prepare TRIAL_ID --task TASK_ID --arm ARM_ID --repetition 1 --expected-version 1 --trusted
+agent-science research context-trial-complete TRIAL_ID --attempt ATTEMPT_ID --expected-version CURRENT_VERSION --trusted
+agent-science research context-trial-abort TRIAL_ID --attempt ATTEMPT_ID --expected-version CURRENT_VERSION --reason "Host did not finish" --trusted
+```
+
+Use the version returned by the previous operation. Prepare returns the assigned
+worktree and task; give only that task and its local instructions to a fresh host.
+MCP `science_research` exposes `context-trial-create` with `trial_spec` and
+`context-trial-show` with `trial_id`. It rejects execution actions.
