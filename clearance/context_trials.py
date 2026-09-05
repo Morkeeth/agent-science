@@ -47,6 +47,25 @@ def get(trial_id, *, db=None):
     return body
 
 
+
+def for_case(case_id, *, case_version=None, db=None):
+    """Retrieve actual trial summaries separately from code-comparison results."""
+    case = cases.get(case_id, version=case_version, db=db)
+    with closing(_connect(db)) as con:
+        rows = [json.loads(row['body']) for row in con.execute('SELECT body FROM context_trials ORDER BY id')]
+    trials = []
+    for body in rows:
+        manifest = body['manifest']
+        if manifest['case_id'] != case_id or manifest['case_version'] > case['version']:
+            continue
+        trial = get(body['id'], db=db)
+        trials.append({'id': trial['id'], 'version': trial['version'],
+            'case_version': manifest['case_version'], 'protocol_id': manifest['protocol_id'],
+            'protocol_version': manifest['protocol_version'], 'summary': trial['summary']})
+    return {'object_type': 'case_context_trials', 'case_id': case_id,
+            'case_version': case['version'], 'trials': trials}
+
+
 def _update(trial_id, expected_version, change, db):
     with closing(_connect(db)) as con, con:
         con.execute('BEGIN IMMEDIATE')

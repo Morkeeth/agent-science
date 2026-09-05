@@ -45,7 +45,7 @@ def handle(arguments):
         raise ValueError('arguments must be an object')
     action = arguments.get('action', 'start')
     db = arguments.get('db')
-    allowed = {'start', 'show', 'context', 'resume', 'cancel', 'reconcile', 'challenge', 'compare', 'follow', 'updates', 'update', 'experiment-plan', 'protocol', 'execute-protocol', 'evaluation-create', 'evaluation-show', 'evaluation-record','evaluation-review','context-trial-create','context-trial-show'}
+    allowed = {'start', 'show', 'context', 'resume', 'cancel', 'reconcile', 'challenge', 'compare', 'follow', 'updates', 'update', 'experiment-plan', 'protocol', 'execute-protocol', 'evaluation-create', 'evaluation-show', 'evaluation-record','evaluation-review','context-trials','context-trial-create','context-trial-show'}
     if not isinstance(action, str) or action not in allowed:
         raise ValueError('Unknown research action')
     for key in ('live',):
@@ -58,7 +58,9 @@ def handle(arguments):
         if key in arguments and (type(arguments[key]) is not int or arguments[key] < 1):
             raise ValueError(key + ' must be a positive integer')
     required = []
-    if action=='context-trial-show':
+    if action=='context-trials':
+        required=['case_id']
+    elif action=='context-trial-show':
         required=['trial_id']
     elif action in ('evaluation-show','evaluation-record','evaluation-review'):
         required=['evaluation_id']
@@ -81,6 +83,9 @@ def handle(arguments):
             raise ValueError(key + ' is required')
     if action == 'compare' and 'from_version' not in arguments:
         raise ValueError('from_version is required')
+    if action == 'context-trials':
+        from clearance import context_trials
+        return context_trials.for_case(arguments['case_id'],case_version=arguments.get('case_version'),db=db)
     if action in ('context-trial-create','context-trial-show'):
         from clearance import context_trials
         return context_trials.create(arguments.get('trial_spec',{}),db=db) if action=='context-trial-create' else context_trials.get(arguments['trial_id'],db=db)

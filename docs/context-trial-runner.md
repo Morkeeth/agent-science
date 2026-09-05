@@ -80,6 +80,7 @@ require host traces showing what each context actually received.
 
 ```text
 agent-science research context-trial-create --trial-file trial.json
+agent-science research context-trials CASE_ID
 agent-science research context-trial-show TRIAL_ID --json
 agent-science research context-trial-prepare TRIAL_ID --task TASK_ID --arm ARM_ID --repetition 1 --expected-version 1 --trusted
 agent-science research context-trial-complete TRIAL_ID --attempt ATTEMPT_ID --expected-version CURRENT_VERSION --trusted
@@ -90,3 +91,9 @@ Use the version returned by the previous operation. Prepare returns the assigned
 worktree and task; give only that task and its local instructions to a fresh host.
 MCP `science_research` exposes `context-trial-create` with `trial_spec` and
 `context-trial-show` with `trial_id`. It rejects execution actions.
+
+Use `context-trials CASE_ID` (MCP action `context-trials`, `case_id`) to retrieve
+the actual trials linked to a case. `--case-version N` limits this view to protocols
+pinned at or before that case version. A historical case filters the linkage; trial
+status remains the current execution status, not a historical execution snapshot.
+Context trials remain separate from two-commit code comparisons.

@@ -24,7 +24,7 @@ def add_parser(sub):
     parser.add_argument('--db', default=argparse.SUPPRESS)
     parser.add_argument('--json', action='store_true', default=argparse.SUPPRESS)
     actions = parser.add_subparsers(dest='action', required=True)
-    for name in ('start', 'show', 'context', 'resume', 'cancel', 'reconcile', 'challenge', 'compare', 'follow', 'update', 'updates', 'experiment-plan', 'protocol', 'policy', 'execute-protocol', 'evaluation-create', 'evaluation-show', 'evaluation-record','evaluation-review','context-trial-create','context-trial-show','context-trial-prepare','context-trial-complete','context-trial-abort'):
+    for name in ('start', 'show', 'context', 'resume', 'cancel', 'reconcile', 'challenge', 'compare', 'follow', 'update', 'updates', 'experiment-plan', 'protocol', 'policy', 'execute-protocol', 'evaluation-create', 'evaluation-show', 'evaluation-record','evaluation-review','context-trials','context-trial-create','context-trial-show','context-trial-prepare','context-trial-complete','context-trial-abort'):
         item = actions.add_parser(name)
         item.set_defaults(func=run)
         item.add_argument('--db', default=argparse.SUPPRESS)
@@ -68,6 +68,9 @@ def add_parser(sub):
                 item.add_argument('--observation-file',type=Path,required=True)
             if name=='evaluation-review':
                 item.add_argument('--review-file',type=Path,required=True)
+        elif name == 'context-trials':
+            item.add_argument('case_id')
+            item.add_argument('--case-version',type=int)
         elif name == 'context-trial-create':
             item.add_argument('--trial-file',type=Path,required=True)
         elif name in ('context-trial-show','context-trial-prepare','context-trial-complete','context-trial-abort'):
@@ -142,6 +145,13 @@ def _run(args):
 def render(result, *, db=None):
     """Compact terminal view; --json retains the full inspectable object."""
     suffix = ' --db ' + shlex.quote(str(db)) if db else ''
+    if result.get('object_type')=='case_context_trials':
+        lines=[f"Context trials for {result['case_id']} through case v{result['case_version']}"]
+        for trial in result['trials']:
+            summary=trial['summary']
+            lines.append(f"{trial['id']}: {summary['finished']}/{summary['denominator']} finished; {summary['accepted']} accepted by frozen checks; protocol {trial['protocol_id']} v{trial['protocol_version']}")
+        if not result['trials']: lines.append('No context trials recorded for this case version.')
+        return '\n'.join(lines)
     if result.get('object_type')=='context_trial':
         summary=result['summary'];manifest=result['manifest']
         lines=[f"Context trial {result['id']} v{result['version']}: {summary['finished']}/{summary['denominator']} attempts finished",
