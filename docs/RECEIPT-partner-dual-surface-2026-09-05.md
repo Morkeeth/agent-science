@@ -25,6 +25,7 @@ Write-up: `docs/FINDING-hosted-partner-strip-2026-09-05.md`
 | Defense-in-depth health | `cloud/case_http.py` |
 | Deploy checklist (desk + workspace) | `deploy.sh` — `AGENT_BUILDER=1`, corpus GCS, Vertex project, candidate tag |
 | Control suite | `tests/test_hosted_partner_surfaces.py` (5) |
+| Local prove (no deploy) | `bash scripts/demo_partner_dual_surface.sh` |
 | Partner doc refresh | `docs/PARTNER-INTEGRATIONS-2026-08-30.md` |
 | Design partner gate note | `docs/DESIGN-PARTNER-LOOP.md` |
 | Live compound | **BLOCKED** — `docs/BLOCKED-live-compound-2026-09-05.md` |
