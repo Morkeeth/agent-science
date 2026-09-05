@@ -22,7 +22,12 @@ def spec():
 
 
 @pytest.fixture
-def saved(tmp_path):
+def saved(tmp_path, monkeypatch):
+    # Filesystem provenance is an instrumentation effect; controls below attach
+    # explicit clean/dirty captures to real completed runs when testing that rule.
+    monkeypatch.setattr(night_runs.execution_provenance, 'capture', lambda: {
+        'code_ref': None, 'source_sha256': None, 'dirty': None,
+        'basis': 'Artificial fixture; executable provenance unmeasured'})
     db = tmp_path / 'isolated-evaluation.db'
     campaign = evaluation.create(spec(), db=db)
     case = cases.create(QUESTION, db=db)
