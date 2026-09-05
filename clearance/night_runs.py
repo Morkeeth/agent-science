@@ -424,7 +424,9 @@ def resume(run_id, *, proposal=None, reasoner=None, live=False, db=None):
             counts={}
             if kind=='metadata' and live:
                 from clearance import source_metadata
-                counts={'document_reads':source_metadata.planned_request_count(metadata_target),'rounds':1}
+                planned=source_metadata.planned_request_count(metadata_target)
+                if not planned:raise ValueError('metadata requires an unambiguous supported DOI or arXiv identifier; no capacity reserved')
+                counts={'document_reads':planned,'rounds':1}
             if kind=='search': counts={'discovery_calls':len(action.get('providers',['parallel'])),'document_reads':len(action.get('providers',['parallel']))*2,'rounds':1}
             if kind=='read': counts={'document_reads':len(action['urls']),**({} if paging else {'rounds':1})}
             step=_reserve(run,counts,kind,copy.deepcopy(proposal),db,live and kind!='finish' and not paging)

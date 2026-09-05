@@ -353,3 +353,12 @@ def test_adoption_keeps_its_own_answer_group(saved):
     rendered=research_cli.render(answer)
     assert rendered.index('Empirical findings')<rendered.index('Field adoption')
     assert 'reported use, not measured effectiveness' in rendered
+
+
+def test_doi_resolver_query_and_fragment_do_not_create_another_study():
+    evidence=[{'id':'plain','url':'https://doi.org/10.1234/abc'},
+              {'id':'query','url':'https://doi.org/10.1234/abc?via=ihub#abstract'},
+              {'id':'encoded','url':'https://dx.doi.org/10.1234%2Fabc?download=1'}]
+    grouped=studies.group(evidence)
+    assert len(grouped)==1 and grouped[0]['id']=='doi:10.1234/abc'
+    assert set(grouped[0]['evidence_ids'])=={'plain','query','encoded'}

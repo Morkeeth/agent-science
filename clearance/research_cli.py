@@ -119,6 +119,17 @@ def _run(args):
 def render(result, *, db=None):
     """Compact terminal view; --json retains the full inspectable object."""
     suffix = ' --db ' + shlex.quote(str(db)) if db else ''
+    if 'manifest_hash' in result and 'coverage' in result:
+        coverage=result['coverage'];reviews=result.get('review_coverage',{})
+        lines=[f"Evaluation {result['id']}: {coverage['recorded']}/{coverage['denominator']} outcomes recorded",
+               f"Independent reviews: {reviews.get('observations_with_reviews',0)}/{coverage['recorded']} recorded outcomes",
+               'Unknown scientific judgments: '+str(sum(len(row['criteria']) for row in reviews.get('unknown_remaining',[]))),
+               'Frozen manifest: '+result['manifest_hash']]
+        for pair in result.get('paired_comparability',[]):
+            lines.append('Comparison: '+('matched design' if pair.get('comparable_design') else 'unmatched design')+'; '+('matched recorded execution' if pair.get('comparable_execution') else 'execution comparability not established'))
+        lines.append('Full evidence and review history: agent-science research evaluation-show '+result['id']+suffix+' --json')
+        lines.append('Authored reviews are not automatic measures of truth.')
+        return '\n'.join(lines)
     if 'updates' in result:
         lines = [result['message']]
         for item in result['updates']:

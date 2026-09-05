@@ -73,7 +73,7 @@ def test_evaluation_cli_and_mcp_keep_frozen_denominator_and_unknowns(tmp_path):
     assert p.returncode==0,p.stderr
     campaign=json.loads(p.stdout)
     data=seed(db);run=night_runs.start(QUESTION,case_id=data['id'],policy=LIMITS,db=db)
-    run=night_runs.resume(run['id'],proposal={'case_version':1,'next_action':{'kind':'finish','reason':'Artificial source does not establish an effect.'}},db=db)
+    run=night_runs.resume(run['id'],proposal={'case_version':1,'next_action':{'kind':'finish','reason':'Artificial source does not establish an effect.'},'findings':[{'statement':'General effectiveness remains unresolved.','relation':'unresolved','rationale':'This fixture does not establish a general effect.'}]},db=db)
     observation={'arm_id':'candidate','question_id':'q','repetition':1,'case_id':data['id'],'case_version':run['case_version'],'run_id':run['id'],
         'question_hash':cases.digest(QUESTION),'mode':'snapshot_replay','resource_limits':LIMITS,'reviewer':'independent fixture reviewer',
         'judgments':{k:{'status':'unknown','rationale':'Not measured in this artificial entry-point test.','anchors':[]} for k in research_evaluation.CRITERIA}}
@@ -115,4 +115,16 @@ def test_metadata_offline_then_live_and_failed_receipt(tmp_path):
     assert fetch.call_count==1
     assert online['case_version']==1 and online['usage']['document_reads']==1
     assert online['steps'][-1]['observed_events'][0]['outcome']=='failed'
+    assert cases.get(data['id'],db=db)['version']==1
+
+
+def test_unsupported_metadata_reserves_no_capacity(tmp_path):
+    db=str(tmp_path/'unsupported.db')
+    data=research.import_report(QUESTION,'Source.[1]\n\n[1] https://example.org/no-identifier',db=db)
+    run=night_runs.start(QUESTION,case_id=data['id'],policy=LIMITS,db=db)
+    proposal={'case_version':1,'next_action':{'kind':'metadata','evidence_id':data['evidence'][0]['id'],'reason':'Inspect registry status.'}}
+    with pytest.raises(ValueError,match='no capacity reserved'):
+        night_runs.resume(run['id'],proposal=proposal,live=True,db=db)
+    after=night_runs.get(run['id'],db=db)
+    assert after['usage']==run['usage'] and after['steps']==run['steps']
     assert cases.get(data['id'],db=db)['version']==1
