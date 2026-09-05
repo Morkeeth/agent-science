@@ -1,0 +1,27 @@
+{
+  "baseline": "ea05a1009778f754608da3825e36c85fc702f591",
+  "status": "building",
+  "lanes": [
+    {
+      "owner": "source metadata",
+      "branch": "build/science-metadata-20260905",
+      "commit": null,
+      "status": "implementing",
+      "receipt": "review/morning/METADATA.md"
+    },
+    {
+      "owner": "frozen evaluation",
+      "branch": "build/science-evaluation-20260905",
+      "commit": null,
+      "status": "implementing",
+      "receipt": "review/morning/EVALUATION.md"
+    },
+    {
+      "owner": "coordinator",
+      "branch": "build/adaptive-research-night-20260905",
+      "status": "integrating and validating"
+    }
+  ],
+  "live_policy": "prepared; awaiting explicit approval",
+  "publication": "not authorized"
+}

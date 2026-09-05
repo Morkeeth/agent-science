@@ -24,7 +24,7 @@ def add_parser(sub):
     parser.add_argument('--db', default=argparse.SUPPRESS)
     parser.add_argument('--json', action='store_true', default=argparse.SUPPRESS)
     actions = parser.add_subparsers(dest='action', required=True)
-    for name in ('start', 'show', 'context', 'resume', 'cancel', 'reconcile', 'challenge', 'compare', 'follow', 'update', 'updates', 'experiment-plan', 'protocol', 'policy', 'execute-protocol'):
+    for name in ('start', 'show', 'context', 'resume', 'cancel', 'reconcile', 'challenge', 'compare', 'follow', 'update', 'updates', 'experiment-plan', 'protocol', 'policy', 'execute-protocol', 'evaluation-create', 'evaluation-show', 'evaluation-record'):
         item = actions.add_parser(name)
         item.set_defaults(func=run)
         item.add_argument('--db', default=argparse.SUPPRESS)
@@ -60,6 +60,12 @@ def add_parser(sub):
                 item.add_argument('--protocol', type=_object, default={})
                 item.add_argument('--protocol-file', type=Path)
                 item.add_argument('--protocol-id')
+        elif name == 'evaluation-create':
+            item.add_argument('--spec-file',type=Path,required=True)
+        elif name in ('evaluation-show','evaluation-record'):
+            item.add_argument('evaluation_id')
+            if name=='evaluation-record':
+                item.add_argument('--observation-file',type=Path,required=True)
         elif name == 'policy':
             item.add_argument('--policy-file',type=Path,required=True)
             item.add_argument('--approve',action='store_true',required=True)
@@ -83,6 +89,9 @@ def run(args):
 
 def _run(args):
     arguments = {key: value for key, value in vars(args).items() if value is not None}
+    for file_key,object_key in (('spec_file','evaluation_spec'),('observation_file','observation')):
+        path=arguments.pop(file_key,None)
+        if path:arguments[object_key]=_object(path.read_text())
     protocol_file = arguments.pop('protocol_file', None)
     if protocol_file:
         arguments['protocol'] = _object(protocol_file.read_text())
@@ -147,9 +156,18 @@ def render(result, *, db=None):
         lines = [f"{result.get('question', 'Research answer')} (v{result['version']})"]
         if not result['conclusions']:
             lines.append('No assessed conclusion yet.')
-        for conclusion in result['conclusions']:
+        categories={'empirical_findings':'Empirical findings','official_constraints':'Official constraints',
+            'field_adoption':'Field adoption — reported use, not measured effectiveness','unclassified':'Unclassified evidence'}
+        ordered=sorted(result['conclusions'],key=lambda c:list(categories).index(c.get('category','unclassified')))
+        previous_category=None
+        for conclusion in ordered:
+            category=conclusion.get('category','unclassified')
+            if category!=previous_category:
+                lines.append(categories[category]);previous_category=category
             lines.append(f"[{conclusion.get('claim_state', conclusion['state'])}; {conclusion['relation']}] {conclusion['statement']}")
             lines.append('Evidence class: ' + conclusion.get('category','unclassified'))
+            if conclusion.get('practical_consequence'):
+                lines.append('Practical consequence (inference): ' + conclusion['practical_consequence'])
             lines.append('Rationale: ' + conclusion['rationale'])
             for condition in conclusion.get('conditions', []):
                 lines.append(f"Scope — {condition['field']}: {condition['value']}")

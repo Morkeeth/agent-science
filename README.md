@@ -37,6 +37,8 @@ Answers retain source anchors, study conditions, competing interpretations, the 
 
 Live calls require an aggregate resource policy approved through the explicit local CLI; MCP cannot approve its own capacity. Usage reservations are not billing, and engine counters exclude reasoning and source reads performed separately by the MCP host. Repository experiments use immutable protocols and an explicitly selected trusted acceptance script.
 
+Research can also check primary registry corrections and pinned source versions, and freeze repeated evaluation campaigns with exact source/run references. Practical consequences remain labelled inferences; unmatched baselines and unknown measurements stay visible.
+
 See [the terminal and MCP quickstart](docs/RESEARCH-QUICKSTART.md) for installation, live setup, resume, updates and experiments. The lower-level case commands below remain available.
 
 ## Start a research case

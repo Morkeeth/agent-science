@@ -126,6 +126,8 @@ def investigate(case_id,version,*,query='',sources=(),providers=('parallel',),li
         official_domains=data['official_domains'],excerpts={u:found[u].excerpt for u in new_urls},
         titles={u:found[u].title for u in new_urls}) if new_urls else ([],[]))
     for e in evidence:
+        for key in ('source_metadata','metadata_checked_at','metadata_review_required','retracted','superseded_by'):
+            if key in prior.get(e['url'],{}):e[key]=copy.deepcopy(prior[e['url']][key])
         e['discovered_by']=list(dict.fromkeys(prior.get(e['url'],{}).get('discovered_by',[])+origins.get(e['url'],[])))
         e['discovery_query']=query or prior.get(e['url'],{}).get('discovery_query','')
     for url in prior.keys() & origins.keys():

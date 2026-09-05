@@ -120,3 +120,23 @@ The CLI captures the trusted script once, checks its digest, and gives the runne
 Each protocol version has one execution attempt. Repeating a completed execution retrieves its stored result. An interrupted or failed attempt is visible and cannot silently rerun; inspect the case's experiments, then create a new protocol version with `experiment-plan ... --protocol-id PROTOCOL_ID` and a complete replacement protocol file if another attempt is needed. A changed case requires a new protocol version too.
 
 The execution result includes its actual experiment ID and links back to the protocol version. `research protocol` retains those links, and `case show CASE_ID` retrieves the experiment through its case. Raw script source and process output are omitted from protocol responses. A passing check establishes only its named acceptance criteria. It does not establish a general research finding.
+
+## Check corrections and source versions
+
+After inspecting the source ID, a host can submit `next_action: {"kind":"metadata","evidence_id":"SOURCE_ID","reason":"Check for registry corrections or newer versions"}` with the current `case_version`. Explicit live execution under the approved policy checks at most two fixed primary-registry endpoints (Crossref and arXiv), reserving two document reads and one round. Offline execution does not query a registry. Registry response hashes and check times remain separate from source-body freshness.
+
+An incoming retraction, correction or explicitly newer pinned version can flag the conclusion and its decisions for review. A retraction notice is not automatically retracted itself. Missing metadata does not clear earlier flags or prove that no correction exists. Source-body refresh preserves known registry status.
+
+## Freeze and review a repeated evaluation
+
+```text
+agent-science research evaluation-create --spec-file evaluation.json
+agent-science research evaluation-show EVALUATION_ID
+agent-science research evaluation-record EVALUATION_ID --observation-file observation.json
+```
+
+MCP exposes these three actions with `evaluation_spec`, `evaluation_id` and `observation`. The specification fixes question IDs and expected distinctions, independently authored rubric, arms, resource limits, evidence modes and repetitions before runs begin. See `review/morning/EVALUATION.md` for the complete schema. This operation makes no provider call.
+
+Each observation binds manual judgments and source anchors to an actual case version and completed run. Duplicate runs cannot fill additional repetitions. Saved-source replay cannot be marked fresh web. The report lists missing slots, errors and paired comparability; retrieval and synthesis are different tasks. Runtime source hashes and clean local Git pins provide bounded provenance; they do not attest dependencies, hardware, loaded-module state or models. Engine-operation duration excludes host waiting and separately issued tools. Unknown latency, tokens and billing stay unknown.
+
+Practical consequences are explicitly authored inferences. Answers group empirical findings, official constraints and field adoption; reports of use never become measured effectiveness merely through grouping.

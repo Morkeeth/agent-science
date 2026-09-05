@@ -245,7 +245,7 @@ def refresh(case_id, *, live=False, db=None, max_documents=None):
         excerpts={e['url']:e.get('quote') for e in old['evidence']},titles={e['url']:e.get('title') for e in old['evidence']},origin_angles={e['url']:e.get('angle') for e in old['evidence']},include_discovery=not old['provided_sources'] and not old.get('report'),max_documents=max_documents) if sources or not old.get('report') else ([],[])
     previous={e['id']:e for e in old['evidence']}
     for entry in evidence:
-        for key in ('discovered_by','discovery_query'):
+        for key in ('discovered_by','discovery_query','source_metadata','metadata_checked_at','metadata_review_required','retracted','superseded_by'):
             if key in previous.get(entry['id'],{}):entry[key]=previous[entry['id']][key]
     new={k:v for k,v in old.items() if k not in ('decisions','experiments','coverage','freshness')}
     new.update(version=old['version']+1,checked_at=now(),evidence=evidence,trace=trace)
@@ -273,12 +273,12 @@ def decision_review(decision, original, current):
                 anchors=[assessment.get('anchor',{})]+[c.get('anchor',{}) for c in assessment.get('conditions',[])]
                 if not cited.intersection(a.get('evidence_id') for a in anchors): continue
                 fields=('relation','scope_relationship','rationale','anchor','strongest_challenge',
-                        'what_would_change','category','authorship')
+                        'what_would_change','practical_consequence','category','authorship')
                 semantic={key:assessment.get(key) for key in fields}
                 semantic['conditions']=[{key:c.get(key) for key in ('field','value','anchor')}
                     for c in assessment.get('conditions',[])]
                 semantic['source_state']=[{key:evidence.get(anchor.get('evidence_id'),{}).get(key)
-                    for key in ('id','snapshot_hash','status','retracted','superseded_by')} for anchor in anchors if anchor]
+                    for key in ('id','snapshot_hash','status','retracted','superseded_by','metadata_review_required')} for anchor in anchors if anchor]
                 rows.append(semantic)
             if rows:
                 # IDs, timestamps and revision counters alone are not semantic changes.
@@ -294,7 +294,7 @@ def decision_review(decision, original, current):
     old_sources={e['id']:e for e in (original or {}).get('evidence',[])}
     for source in current.get('evidence',[]):
         if source['id'] not in cited: continue
-        for field in ('retracted','superseded_by'):
+        for field in ('retracted','superseded_by','metadata_review_required'):
             if old_sources.get(source['id'],{}).get(field)!=source.get(field):
                 relevant.append({'kind':'source_metadata_changed','evidence_id':source['id'],'field':field})
     return {'state':'REVIEW_REQUIRED' if relevant else 'UNCHANGED_IN_SNAPSHOT', 'changes':relevant,
