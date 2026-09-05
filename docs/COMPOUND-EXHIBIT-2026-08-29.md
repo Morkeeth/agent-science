@@ -1,6 +1,6 @@
 # COMPOUND EXHIBIT — orphan-works A/B
 
-**Date:** 2026-09-03 00:07 UTC · **Subject:** `orphan-works` · **Mode:** offline
+**Date:** 2026-09-05 08:32 UTC · **Subject:** `orphan-works` · **Mode:** offline
 **Fixtures:** `compound-mini-A.txt` → `compound-mini-B.txt`
 
 ## Quantified compounding
@@ -25,7 +25,7 @@ Ground-truth Parallel calls at fake boundary (Run A only): `3`
 
 ## Registry backfill
 
-`python3 clear_corpus.py research-corpus --backfill` → **0 rows** (29 SOURCED + proven-unprovable refusals) in `cache/refusal_log.db`
+`python3 clear_corpus.py research-corpus --backfill` → **1 rows** (count re-derived at `refusal_log.stats` — do not carry a stale SOURCED figure) in `cache/refusal_log.db`
 
 ## Controls
 
@@ -52,7 +52,7 @@ PASS  test_visibility_ui_renders_transparency
 
 ```
 PASS  test_not_gameable_reuse_carries_the_original_verdict_both_poles
-PASS  test_second_subject_reuses_the_log_and_spends_no_parallel_call
+PASS  test_second_subject_reuses_support_and_retries_unsettled_claim
 
 2/2 passed
 ```

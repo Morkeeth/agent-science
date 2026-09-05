@@ -74,10 +74,12 @@ _OFFLINE_CLAIMS = {
         _Raw("Member states had until 29 October 2014 to bring it into national law.",
              None, "29 October 2014"),
     ],
+    # Overlapping assertions must match Run A verbatim: same-subject corpus recall
+    # (f61635e) refuses reuse when assertion text differs. Paraphrase is a new search.
     "B": [
-        _Raw("Europe's answer was Directive 2012/28/EU — known as the Orphan Works Directive —",
+        _Raw("In 2012 the European Union passed Directive 2012/28/EU, the Orphan Works Directive.",
              None, "Directive 2012/28/EU"),
-        _Raw("and the deadline for national transposition was 29 October 2014.",
+        _Raw("Member states had until 29 October 2014 to bring it into national law.",
              None, "29 October 2014"),
         _Raw("The British Library has estimated that forty percent of its copyrighted collection is orphaned.",
              None, "forty percent"),
@@ -257,7 +259,8 @@ def _write_receipt(run: dict, *, backfill_rows: int) -> None:
         "## Registry backfill",
         "",
         f"`python3 clear_corpus.py research-corpus --backfill` → **{backfill_rows} rows** "
-        f"(29 SOURCED + proven-unprovable refusals) in `cache/refusal_log.db`",
+        f"(count re-derived at `refusal_log.stats` — do not carry a stale SOURCED figure) "
+        f"in `cache/refusal_log.db`",
         "",
         "## Controls",
         "",

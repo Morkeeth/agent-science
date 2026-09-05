@@ -2,7 +2,7 @@
 doc: hack
 project: Agent Science
 phase: SHIP
-last-touched: 2026-09-03 12:10 UTC
+last-touched: 2026-09-05 08:35 UTC
 canonical: true
 event: Agentic Cinema · Parallel track · deadline 2026-09-09 14:00 PDT
 supersedes: docs/PHASE0-LADDER.md ClickHouse-track note (runtime track is Parallel)
@@ -307,7 +307,43 @@ Full record: `fleet-ops (internal)/retros/QWEN-LOSS-RETRO-2026-08-30.md` (correc
 
 ---
 
-## 🎯 NOW — Partner night wave (fresh compound + timeout finding)
+## 🎯 NOW — Cinema pack 2026-09-05 (stop at Oscar doors)
+
+**Slice:** Agent-complete Sep 9 submission pack — paste fields, cold stranger path, use-bar template, NIGHTRUN live-gap re-derive, receipt. No outward acts.
+
+### Build (shipped 2026-09-05)
+
+- [x] Cinema pack — `docs/CINEMA-PACK-2026-09-05.md` (paste fields · URLs · public check · video placeholder · Oscar doors)
+- [x] Use-bar session template — `docs/USE-BAR-SESSION-TEMPLATE.md` (blank; Oscar fills after one real search)
+- [x] Cold compound fix — overlapping offline B claims match A verbatim under assertion-integrity reuse; public main was exit 3
+- [x] Hosted desk demo honesty — `scripts/demo_clearance_desk.sh` exits 2 on `mode=private-workspaces`
+- [x] Receipt — `docs/CLOUD-RECEIPT-cinema-pack-2026-09-05.md`
+
+### Verify (one command each)
+
+```bash
+bash scripts/verify_cold_clone.sh                                    # exit 0
+python3 scripts/compound_exhibit_receipt.py                          # A=2→B=1 · corpus_hits B=2
+bash scripts/demo_clearance_desk.sh                                  # exit 2 BLOCKED private-workspaces
+curl -sS https://agent-science-568004190078.us-central1.run.app/health
+curl -sS https://api.github.com/repos/Morkeeth/agent-science         # private:false
+ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 demo/demo-final.mp4
+bash scripts/privacy_grep.sh && python3 tests/test_secret_surfaces.py
+python3 tests/test_same_subject_integrity.py                         # 8/8
+```
+
+### Receipt
+
+- `docs/CLOUD-RECEIPT-cinema-pack-2026-09-05.md`
+- `docs/CINEMA-PACK-2026-09-05.md`
+
+### BLOCKED (Oscar only)
+
+- Key rotate · YouTube/Vimeo · Devpost submit · hosted public judge-surface decision · approved live research policy / six-topic live field pass
+
+---
+
+## 🎯 NOW (prior) — Partner night wave (fresh compound + timeout finding)
 
 **Slice:** Harden partner verify to prove Parallel at runtime; ship fresh compound probe; document orphan-works 504 regression at object.
 
@@ -528,6 +564,7 @@ bash scripts/verify_cold_clone.sh                                               
 
 | When | What | Command | Outcome |
 |------|------|---------|---------|
+| 2026-09-05 | Cinema pack + cold compound fix | `verify_cold_clone.sh` · `demo_clearance_desk.sh` · hosted `/health` | Pack + receipt · cold **0** · desk **2** private-workspaces · public main compound was **3** |
 | 2026-09-03 night | Fresh compound + timeout finding | `compound_fresh_hosted_probe.py` · `verify_partners_hosted.sh` | **A≥1 Parallel → B drop** · orphan-works Run A **504** @ 300s |
 | 2026-09-03 night | SUBMISSION-PACK + Qwen gates | `bench_check_docs.py` · `eval_verify_holdout.py` · `eval_scorer_symmetry.py` | **127/127** · holdout OK · scorer 5/6 vs 6/6 · offline compound A=2→B=1 |
 | 2026-09-02 | Partner verify re-run | `verify_partners_hosted.sh` · `full_gate.sh` | **4/4 partners** · compound warm-shelf PASS · 72/72 auto-seed |

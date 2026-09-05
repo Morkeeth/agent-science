@@ -20,7 +20,21 @@ echo "subject: $SUBJECT"
 echo "url:     $BASE/clear"
 echo
 
+# Hosted may be private-workspaces (login required). Probe before burning a long POST.
+HEALTH="$(curl -sS --max-time 20 "$BASE/health" || true)"
+MODE="$(python3 -c "import json,sys; d=json.loads(sys.argv[1] or '{}'); print(d.get('mode') or '')" "$HEALTH" 2>/dev/null || true)"
+if [ "$MODE" = "private-workspaces" ]; then
+  echo "BLOCKED: hosted revision is mode=private-workspaces — unauthenticated /clear is not a stranger path."
+  echo "health: $HEALTH"
+  echo "Oscar door: restore a public judge surface, OR film from local:"
+  echo "  python3 scripts/compound_exhibit_receipt.py"
+  echo "  bash scripts/demo_truth_layer.sh"
+  echo "  open docs/film/  # screenshots from last public desk"
+  exit 2
+fi
+
 START=$(date +%s)
+set +e
 RESP="$(python3 - "$SCRIPT_FILE" "$SUBJECT" "$BASE" <<'PY'
 import json
 import sys
@@ -37,15 +51,37 @@ req = urllib.request.Request(
     headers={"Content-Type": "application/json"},
     method="POST",
 )
-with urllib.request.urlopen(req, timeout=300) as resp:
-    print(resp.read().decode())
+try:
+    with urllib.request.urlopen(req, timeout=300) as resp:
+        print(resp.read().decode())
+except urllib.error.HTTPError as e:
+    body = e.read().decode("utf-8", "replace")
+    print(json.dumps({
+        "error": f"HTTP {e.code}",
+        "body": body[:500],
+        "location": e.headers.get("Location"),
+    }))
+    sys.exit(1)
 PY
 )"
+EC=$?
+set -e
 END=$(date +%s)
+
+if [ "$EC" -ne 0 ]; then
+  echo "BLOCKED: hosted POST /clear failed (exit $EC)."
+  printf '%s\n' "$RESP"
+  echo "Local stranger path still works: bash scripts/verify_cold_clone.sh"
+  exit 2
+fi
 
 printf '%s\n' "$RESP" | python3 -c "
 import json, sys
 d = json.load(sys.stdin)
+if d.get('error'):
+    print('BLOCKED:', d.get('error'), d.get('location') or '')
+    print(d.get('body') or '')
+    raise SystemExit(2)
 print(f\"claims: {d.get('claims_extracted')} | sourced: {d.get('sourced')} | unsourced: {d.get('unsourced')}\")
 print(f\"parallel_api_calls: {d.get('parallel_api_calls')} | engine: {d.get('engine')}\")
 print()
