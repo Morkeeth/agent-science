@@ -53,11 +53,16 @@ class HostedFlow(unittest.TestCase):
     def create(self,rid='create-request-0001'):
         return self.request('POST','/api/cases',{'request_id':rid,'question':'What evidence supports typed tool inputs?','live':False})
 
-    def test_anonymous_cannot_read_or_run_legacy_or_new(self):
-        for method,path in [('GET','/api/cases'),('POST','/api/cases'),('POST','/search'),('POST','/clear')]:
-            self.assertEqual(self.request(method,path,{},token=None)[0],401)
-        self.assertEqual(self.request('GET','/stats',token=None)[0],303)
-        self.assertEqual(self.request('POST','/search',{},token=TOKEN_A)[0],404)
+    def test_anonymous_cannot_read_private_workspace_api(self):
+        for method, path in [('GET', '/api/cases'), ('POST', '/api/cases')]:
+            self.assertEqual(self.request(method, path, {}, token=None)[0], 401)
+        # Public desk is restored beside private workspaces (partner track).
+        code, _, health = self.request('GET', '/health', token=None)
+        self.assertEqual(code, 200)
+        self.assertIn('engine_default', health)
+        code, _, partners = self.request('GET', '/partners', token=None)
+        self.assertEqual(code, 200)
+        self.assertIn('partners', partners)
 
     def test_real_worker_create_idempotency_and_restart(self):
         code,_,result=self.create(); self.assertEqual(code,201,result)

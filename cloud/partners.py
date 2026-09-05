@@ -29,11 +29,12 @@ def manifest(*, gemini_path: str, adk_default: bool) -> dict:
                 "called_from": "clearance/facts.py → judge_claim",
             },
             "google_cloud": {
-                "role": "Cloud Run desk + GCS corpus shelf",
+                "role": "Cloud Run dual surface — public desk + private /cases",
                 "module": "cloud/service.py",
                 "deploy": "deploy.sh",
                 "corpus_gcs": os.environ.get("CORPUS_GCS_URI"),
                 "refusal_log_gcs": os.environ.get("REFUSAL_LOG_GCS_URI"),
+                "workspace_bucket": os.environ.get("AGENT_SCIENCE_WORKSPACE_BUCKET"),
             },
             "agent_builder_adk": {
                 "role": "default /clear engine",

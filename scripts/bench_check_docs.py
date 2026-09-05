@@ -24,8 +24,9 @@ SUITES = [
     ("test_search_path.py", "search_path", 5),
     ("test_source_map.py", "source_map", 3),
     ("test_refusal_correctness.py", "refusal_correctness", 6),
-    ("test_partner_runtime.py", "partner_runtime", 6),
+    ("test_partner_runtime.py", "partner_runtime", 7),
     ("test_parallel_integration.py", "parallel_integration", 6),
+    ("test_hosted_partner_surfaces.py", "hosted_partner_surfaces", 5),
 ]
 
 
@@ -36,6 +37,7 @@ def _run_suite(filename: str) -> tuple[int, int]:
         capture_output=True,
         text=True,
         cwd=str(ROOT),
+        env={**dict(__import__("os").environ), "PYTHONPATH": str(ROOT)},
     )
     out = (proc.stdout or "") + (proc.stderr or "")
     # Patterns: "72 passed, 0 failed" | "5/5 passed" | "all passed" | "2/2 passed"
@@ -45,6 +47,11 @@ def _run_suite(filename: str) -> tuple[int, int]:
     m = re.search(r"(\d+)/(\d+)\s+passed", out)
     if m:
         return int(m.group(1)), int(m.group(2))
+    # unittest: "Ran 5 tests in …\n\nOK"
+    m = re.search(r"Ran\s+(\d+)\s+tests?\b", out)
+    if m and re.search(r"^OK\s*$", out, re.M) and proc.returncode == 0:
+        n = int(m.group(1))
+        return n, n
     if "all passed" in out.lower():
         # refusal_correctness — count PASS lines
         passes = len(re.findall(r"^\s*PASS", out, re.M))

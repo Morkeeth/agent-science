@@ -36,10 +36,15 @@ def t_parallel_entrypoint_wired_in_facts():
 
 def t_gcp_service_health_shape():
     svc = importlib.import_module("cloud.service")
+    status = importlib.import_module("cloud.partner_status")
     src = inspect.getsource(svc)
-    assert "engine_default" in src
-    assert "gemini_path" in src or "parallel" in src
+    status_src = inspect.getsource(status)
+    assert "partner_status.health_payload" in src or "health_payload" in src
+    assert "engine_default" in status_src
+    assert "gemini_path" in status_src
+    assert "parallel" in status_src
     assert "_run_clearance" in src
+    assert 'path == "/partners"' in src or 'path == "/partners"' in status_src
 
 
 def t_adk_default_engine_wired():

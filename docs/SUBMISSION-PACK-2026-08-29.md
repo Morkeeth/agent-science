@@ -1,8 +1,9 @@
 # SUBMISSION PACK — Agentic Cinema · slice 7
 
-**Date:** 2026-09-03 · **Repo:** https://github.com/Morkeeth/agent-science @ `main`  
+**Date:** 2026-09-05 · **Repo:** https://github.com/Morkeeth/agent-science @ `main`  
 **Hosted:** https://agent-science-568004190078.us-central1.run.app · **Deadline:** 2026-09-09 14:00 PT  
-**Scope:** docs + offline controls — no public repo flip, no video upload, no Devpost submit, no `deploy.sh`
+**Scope:** docs + offline controls — no public repo flip, no video upload, no Devpost submit, no `deploy.sh`  
+**Hosted note (2026-09-05):** revision `00026-zel` partner-dark — see `docs/FINDING-hosted-partner-strip-2026-09-05.md`. Dual-surface fix is code-complete; Oscar deploy required.
 
 ---
 
@@ -30,10 +31,10 @@ Offline compound receipt writes `docs/COMPOUND-EXHIBIT-2026-08-29.md` with A=2�
 | Public repo | Stranger can clone | [ ] | Private until submit — flip visibility on GitHub |
 | OSI licence | Open-source approved | [x] | `LICENSE` (MIT) |
 | Sealed prediction | Pre-registered, falsifiable | [x] | `docs/SEALED-PREDICTION-2026-08-31.md` — hosted A=1→B=0, corpus_hits=1 |
-| Partner integrations | All four called at runtime | [x] docs | `docs/PARTNER-INTEGRATIONS-2026-08-30.md` |
-| ADK default path | `engine_default: adk` | [x] local / [x] hosted | `docs/RECEIPT-adk-default-path-2026-08-30.md` |
+| Partner integrations | All four called at runtime | [x] code · [ ] live hosted | `docs/PARTNER-INTEGRATIONS-2026-08-30.md` · finding 2026-09-05 |
+| ADK default path | `engine_default: adk` | [x] local / [ ] live hosted | `docs/RECEIPT-adk-default-path-2026-08-30.md` · dual-surface pending deploy |
 
-**Controls re-measured 2026-09-03** (run each at object):
+**Controls re-measured 2026-09-05** (run each at object):
 
 | Suite | Command | Result |
 |-------|---------|--------|
@@ -48,12 +49,13 @@ Offline compound receipt writes `docs/COMPOUND-EXHIBIT-2026-08-29.md` with A=2�
 | refusal_correctness | `python3 tests/test_refusal_correctness.py` | **6/6** |
 | partner_runtime | `python3 tests/test_partner_runtime.py` | **7/7** |
 | parallel_integration | `python3 tests/test_parallel_integration.py` | **6/6** |
-| **Total** | 11 suites | **128/128** |
-| docs gate | `python3 scripts/bench_check_docs.py` | **128/128 match** |
+| hosted_partner_surfaces | `python3 tests/test_hosted_partner_surfaces.py` | **5/5** |
+| **Total** | 12 suites | **133/133** |
+| docs gate | `python3 scripts/bench_check_docs.py` | **133/133 match** |
 | holdout freeze | `python3 scripts/eval_verify_holdout.py` | **4 files pinned** |
 | scorer symmetry | `python3 scripts/eval_scorer_symmetry.py` | baseline **5/6** vs shipping **6/6** on delivered labels |
 
-**Compound exhibit (offline, 2026-09-03):** `python3 scripts/compound_exhibit_receipt.py` · A=**2**→B=**1** Parallel · B corpus hits=**2** — `docs/COMPOUND-EXHIBIT-2026-08-29.md`. Live hosted (2026-08-31): `long_run_goal.sh` · A=**1**→B=**0** · sealed `docs/SEALED-PREDICTION-2026-08-31.md`. Orphan-works full script: run B **504** — do not claim on video.
+**Compound exhibit (offline, 2026-09-05):** `python3 scripts/compound_exhibit_receipt.py` · A=**2**→B=**1** Parallel · B corpus hits=**2** — `docs/COMPOUND-EXHIBIT-2026-08-29.md` (fixtures share identical overlapping assertions; rephrasing correctly spends Parallel under 2026-09-04 integrity). Live hosted compound: **BLOCKED** until Oscar dual-surface deploy — `docs/BLOCKED-live-compound-2026-09-05.md`. Orphan-works full script: run A/B **504** historically — do not claim on video.
 
 **Eval gate:** `docs/QWEN-EVAL-GATE-2026-08-30.md` — baseline **5/6 = 0.833** vs shipping **6/6 = 1.000**, delta +1 (RC5); McNemar p=1.0000 at n=6. Holdout + symmetrical scorer re-run 2026-09-03: `docs/RECEIPT-night-wave-2026-09-03.md`.
 

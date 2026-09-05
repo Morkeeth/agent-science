@@ -41,7 +41,7 @@ from clearance import ingest as stack_ingest, query_analytics, stack_search  # n
 from clearance import corpus  # noqa: E402
 from clearance import refusal_log  # noqa: E402
 from cloud import agent as adk_agent  # noqa: E402
-from cloud import partners as partner_manifest  # noqa: E402
+from cloud import partner_status  # noqa: E402
 
 # ADK is the default path. Setting this to "0" serves the direct pipeline instead and
 # is for controls only — a run with the agent switched off is a different product and
@@ -530,7 +530,11 @@ class Handler(BaseHTTPRequestHandler):
             return None
 
     def do_GET(self):
-        if os.getenv('AGENT_SCIENCE_HOSTED') == '1' or os.getenv('K_SERVICE'):
+        # Dual surface: private /cases|/api|/login stay on WorkspaceHTTP.
+        # Public desk + partner proof (/health, /partners, /clear, …) stay here.
+        # Hosted-only routing that swallowed every path made partner admissibility
+        # go dark (revision agent-science-00026-zel: /health without gemini/parallel/adk).
+        if partner_status.is_hosted() and partner_status.is_workspace_path(self.path):
             from cloud.case_http import WorkspaceHTTP
             return WorkspaceHTTP(self).handle()
         parsed = urlparse(self.path)
@@ -598,56 +602,10 @@ class Handler(BaseHTTPRequestHandler):
                               "text/html; charset=utf-8")
 
         if path == "/health":
-            gemini_path = "none"
-            if os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY"):
-                gemini_path = "api-key"
-            else:
-                proj = (
-                    os.environ.get("GCP_PROJECT")
-                    or os.environ.get("GOOGLE_CLOUD_PROJECT")
-                    or (os.environ.get("K_SERVICE") and "adc")
-                )
-                if proj:
-                    gemini_path = f"vertex:{proj}"
-                else:
-                    try:
-                        from clearance import gemini as _g
-                        p = _g.vertex_project()
-                        if p and _g.vertex_token():
-                            gemini_path = f"vertex:{p}"
-                    except Exception:
-                        pass
-            adk_ok = adk_agent.adk_available()
-            adk_default = ADK_DEFAULT and adk_ok
-            from clearance import search as _parallel
-            return self._json(200, {
-                "ok": True,
-                "service": "agent-science",
-                "gemini": gemini_path != "none",
-                "gemini_path": gemini_path,
-                "parallel": bool(os.environ.get("PARALLEL_API_KEY")),
-                "parallel_sdk": _parallel.sdk_available(),
-                "parallel_sdk_version": _parallel.sdk_version(),
-                "parallel_transport": _parallel.integration_info()["transport"],
-                "last_parallel_search_id": _parallel.last_search_id(),
-                "agent_builder": adk_ok,
-                "adk_version": adk_agent.adk_version(),
-                "engine_default": "adk" if adk_default else "direct",
-            })
+            return self._json(200, partner_status.health_payload(adk_default=ADK_DEFAULT))
 
         if path == "/partners":
-            gemini_path = "none"
-            if os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY"):
-                gemini_path = "api-key"
-            else:
-                proj = os.environ.get("GCP_PROJECT") or os.environ.get("GOOGLE_CLOUD_PROJECT")
-                if proj:
-                    gemini_path = f"vertex:{proj}"
-            adk_ok = adk_agent.adk_available()
-            return self._json(200, partner_manifest.manifest(
-                gemini_path=gemini_path,
-                adk_default=ADK_DEFAULT and adk_ok,
-            ))
+            return self._json(200, partner_status.partners_payload(adk_default=ADK_DEFAULT))
 
         if path == "/corpus":
             subject = (qs.get("subject") or ["default"])[0].strip() or "default"
@@ -663,7 +621,7 @@ class Handler(BaseHTTPRequestHandler):
         self._json(404, {"error": f"no route {path}"})
 
     def do_POST(self):
-        if os.getenv('AGENT_SCIENCE_HOSTED') == '1' or os.getenv('K_SERVICE'):
+        if partner_status.is_hosted() and partner_status.is_workspace_path(self.path):
             from cloud.case_http import WorkspaceHTTP
             return WorkspaceHTTP(self).handle()
         if self.path == "/search":
@@ -726,21 +684,24 @@ class Handler(BaseHTTPRequestHandler):
         self._json(404, {"error": f"no route {self.path}"})
 
     def log_message(self, fmt, *a):
-        if os.getenv('AGENT_SCIENCE_HOSTED') == '1' or os.getenv('K_SERVICE'):
-            # Request lines may contain private questions or signed source URLs.
+        if partner_status.is_hosted() and partner_status.is_workspace_path(self.path):
+            # Workspace request lines may contain private questions or signed URLs.
             sys.stderr.write("workspace HTTP response\n")
         else:
             sys.stderr.write("%s %s\n" % (self.address_string(), fmt % a))
 
 
 def main():
-    if os.getenv('AGENT_SCIENCE_HOSTED') == '1' or os.getenv('K_SERVICE'):
+    if partner_status.is_hosted():
         from cloud.case_auth import Auth
         from cloud.case_storage import WorkspaceStore
         Auth()
         WorkspaceStore.from_env()
         if not os.getenv('AGENT_SCIENCE_PUBLIC_ORIGIN'):
             raise RuntimeError('Hosted service requires its public origin')
+        sys.stderr.write(
+            "agent-science dual surface: public desk + private /cases\n"
+        )
     port = int(os.environ.get("PORT", 8080))
     sys.stderr.write(f"agent-science compounding desk on :{port}\n")
     HTTPServer(("0.0.0.0", port), Handler).serve_forever()
