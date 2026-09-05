@@ -47,3 +47,15 @@ def test_cli_and_mcp_review_preserve_notice_and_flag_decision(tmp_path):
     assert not result['isError'] and len(reopened['pending'])==1
     p=subprocess.run([sys.executable,'-m','clearance','research','source-reviews',data['id'],'--db',db],capture_output=True,text=True,timeout=30)
     assert p.returncode==0 and '1 pending' in p.stdout and 'unresolved' in p.stdout
+
+
+def test_identical_review_does_not_change_decision_or_synthesis(tmp_path):
+    from clearance import source_reviews
+    db=str(tmp_path/'cases.db');data=fixtures.fixture(db);proposal=fixtures.proposal(data,db)
+    source_reviews.review(data['id'],data['version'],proposal,db=db)
+    reviewed=cases.get(data['id'],db=db)
+    cases.decide(data['id'],'Retain the inspected comparator.','The scoped notice leaves the comparator unchanged.', ['paper'],expected_version=reviewed['version'],db=db)
+    source_reviews.review(data['id'],reviewed['version'],proposal,db=db)
+    current=cases.get(data['id'],db=db)
+    assert current['decisions'][0]['review']['state']=='UNCHANGED_IN_SNAPSHOT'
+    assert not synthesis.compare(data['id'],reviewed['version'],db=db)['material_change']

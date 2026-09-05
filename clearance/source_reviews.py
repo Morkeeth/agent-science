@@ -71,7 +71,7 @@ def assessment_status(data, assessment):
             'source_snapshot_hash':source.get('snapshot_hash'), 'warning_fingerprint':fingerprint,
             'warnings':warnings, 'notice_identities':sorted({w.get('notice') for w in warnings if isinstance(w, dict) and w.get('notice')}),
             'state':'RESOLVED_AS_AUTHORED' if resolved else 'REVIEW_REQUIRED',
-            'review':latest, 'meaning':MEANING})
+            'review':({k:v for k,v in latest.items() if k not in ('id','case_version','recorded_version','at')} if latest else None), 'meaning':MEANING})
     return rows
 
 
