@@ -1,6 +1,7 @@
 # RECEIPT — partner dual surface · 2026-09-05
 
 **Branch:** `cursor/partner-hosted-dual-surface-fe44`  
+**Head:** `c46a569`  
 **Scope:** restore partner admissibility beside private workspaces; do not run `deploy.sh`.
 
 ## Finding at the hosted object (before fix)
@@ -38,8 +39,9 @@ python3 tests/test_watch_it_go_red.py
 
 python3 tests/test_hosted_partner_surfaces.py
 → Ran 5 tests · OK
-  (anonymous /health has engine_default=adk · /partners 200 · /clear not 401 ·
-   /api/cases still 401 · 00026 stripped shape fails contract)
+
+bash scripts/demo_partner_dual_surface.sh
+→ health mode=private-workspaces+public-desk · partners OK · /clear≠401 · /api/cases=401
 
 python3 -m unittest tests.test_hosted_flow -q
 → Ran 13 tests · OK
