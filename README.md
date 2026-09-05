@@ -2,6 +2,8 @@
 
 Research a builder question, inspect the source evidence, and record a decision that can change when its evidence changes.
 
+**Clearance desk (hackathon track):** paste a documentary script → every checkable claim back as a **verbatim quote + URL**, or **UNSOURCED** with a named reason. Constraint: if the document does not contain the exact passage, refuse — never paraphrase. Partners at runtime: Vertex · Parallel · Cloud Run · ADK (`docs/PARTNER-INTEGRATIONS-2026-08-30.md`).
+
 Agent Science is a CLI/MCP research companion for coding work. Public-source discovery, versioned evidence, decisions and repo experiments work locally without a hosted account. The CLI and MCP interface keep the question, exact source quotations, source snapshots, actual search attempts, repo context and decision history together.
 
 ## Use it from your terminal

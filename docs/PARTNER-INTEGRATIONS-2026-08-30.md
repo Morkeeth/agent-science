@@ -1,37 +1,52 @@
 # PARTNER INTEGRATIONS — Agent Science · Sep 9 path
 
-**Date:** 2026-08-30 · **Last verified:** 2026-09-03 · **Repo:** Morkeeth/agent-science · **Scope:** all four partners wired in code; deploy is Oscar's click.
+**Date:** 2026-08-30 · **Last verified:** 2026-09-05 · **Repo:** Morkeeth/agent-science · **Scope:** all four partners wired in code; deploy is Oscar's click.
 
 Each partner must be **called at runtime** on the default path — not documented only.
+
+> **2026-09-05 finding:** live revision `agent-science-00026-zel` stripped partner fields from
+> `/health` and gated `/partners` + `/clear` behind workspace login.
+> `bash scripts/verify_partners_hosted.sh` → **RED** (`gemini: expected True, got None`).
+> Fix on this branch: dual surface (`cloud/partner_status.py` + `cloud/service.py`).
+> Full write-up: `docs/FINDING-hosted-partner-strip-2026-09-05.md`.
+> **Live hosted stays RED until Oscar runs `deploy.sh` and promotes the candidate.**
 
 ---
 
 ## Oscar deploy checklist (one pass)
 
 1. **Rotate keys** if any revision ever had plaintext env vars (`deploy.sh` note).
-2. **`bash deploy.sh`** — Oscar only; writes Secret Manager, IAM, Cloud Run revision.
-3. **Verify all four partners at runtime (one command):**
+2. **`bash deploy.sh`** — Oscar only; writes Secret Manager, IAM, Cloud Run **candidate** revision (no traffic).
+3. **Verify candidate** (tag URL printed by deploy.sh):
    ```bash
-   bash scripts/verify_partners_hosted.sh
+   bash scripts/verify_partners_hosted.sh https://workspace-candidate---agent-science-….run.app
    ```
-   Expect: health OK · `engine_default: adk` · `/clear` stamps `engine: adk` with `parallel_calls ≥ 1` on fresh claim · compound-mini PASS · compound-fresh PASS (A_parallel≥1, B_hits≥1).
-4. **Compound with Parallel drop (video beat):**
+   Expect: health OK · `mode=private-workspaces+public-desk` · `engine_default: adk` · `/clear` stamps `engine: adk` with `parallel_calls ≥ 1` on fresh claim · compound-mini PASS · compound-fresh PASS.
+4. **Promote** the exact candidate revision (Oscar) only after step 3 is green.
+5. **Compound with Parallel drop (video beat):**
    ```bash
    python3 scripts/compound_fresh_hosted_probe.py
    ```
-   Expect: Run A `parallel_calls ≥ 1` → Run B `parallel_calls ≤ A` with `corpus_hits ≥ 1`.
-5. **Or verify /health alone:**
+6. **Or verify /health alone on the public URL:**
    ```bash
    curl -s https://agent-science-568004190078.us-central1.run.app/health | python3 -m json.tool
    ```
-   Expect: `"gemini_path": "vertex:hack-fleet"`, `"parallel": true`, `"engine_default": "adk"`.
-6. **Verify /clear** (JSON):
+   Expect after promote: `"gemini_path": "vertex:hack-fleet"`, `"parallel": true`, `"engine_default": "adk"`, `"mode": "private-workspaces+public-desk"`.
+7. **Verify /clear** (JSON):
    ```bash
    curl -s -X POST https://agent-science-568004190078.us-central1.run.app/clear \
      -H 'Content-Type: application/json' \
      -d '{"script":"The Dust Bowl displaced 2.5 million people.","subject":"dust-bowl"}' \
      | python3 -c "import sys,json; d=json.load(sys.stdin); print('engine',d.get('engine')); print('parallel_calls',d.get('parallel_calls'))"
    ```
+
+**Surfaces on one revision**
+
+| Path | Auth | Purpose |
+|------|------|---------|
+| `/health`, `/partners` | public | Partner admissibility |
+| `/`, `/clear`, registry/visibility UIs | public | Clearance desk + film |
+| `/cases`, `/api/cases`, `/login` | workspace token | Private research |
 
 ---
 
@@ -73,7 +88,7 @@ env -u GEMINI_API_KEY -u GOOGLE_API_KEY python3 agent_science.py fixtures/script
 
 **Deploy wiring (`deploy.sh`):**
 ```bash
---set-secrets="PARALLEL_API_KEY=${SECRET}:latest"
+--set-secrets="PARALLEL_API_KEY=${PARALLEL_SECRET}:${PARALLEL_VERSION}"
 ```
 
 **curl (live API — requires key):**
@@ -100,12 +115,13 @@ curl -s -X POST https://api.parallel.ai/v1/search \
 
 | Field | Value |
 |-------|-------|
-| **Role** | Hosted clearance desk — paste script, get gap report |
-| **Entrypoint** | `cloud/service.py` (Dockerfile `CMD`) |
+| **Role** | Hosted dual surface — public clearance desk + private `/cases` workspaces |
+| **Entrypoint** | `cloud/service.py` (Dockerfile `CMD`) · routing helper `cloud/partner_status.py` |
 | **Deploy script** | `deploy.sh` (Oscar only — never run from agent) |
 | **Project / region** | `hack-fleet` / `us-central1` (env: `GCP_PROJECT`, `GCP_REGION`) |
 | **Service name** | `agent-science` (`GCP_SERVICE`) |
 | **Corpus shelf** | GCS `gs://hack-fleet-agent-science-corpus/corpus.db` via `CORPUS_GCS_URI` |
+| **Workspace store** | GCS bucket `AGENT_SCIENCE_WORKSPACE_BUCKET` (tenant cases) |
 
 ### `/health` spec
 
@@ -113,6 +129,8 @@ curl -s -X POST https://api.parallel.ai/v1/search \
 {
   "ok": true,
   "service": "agent-science",
+  "mode": "private-workspaces+public-desk",
+  "revision": "agent-science-…",
   "gemini": true,
   "gemini_path": "vertex:hack-fleet",
   "parallel": true,
@@ -122,7 +140,9 @@ curl -s -X POST https://api.parallel.ai/v1/search \
   "last_parallel_search_id": "srch_…",
   "agent_builder": true,
   "adk_version": "2.7.1",
-  "engine_default": "adk"
+  "engine_default": "adk",
+  "workspace": true,
+  "public_desk": true
 }
 ```
 
@@ -132,6 +152,7 @@ curl -s -X POST https://api.parallel.ai/v1/search \
 | `parallel` | `PARALLEL_API_KEY` present in env |
 | `agent_builder` | `google-adk` importable |
 | `engine_default` | What `POST /clear` will use: `adk` or `direct` |
+| `mode` | `private-workspaces+public-desk` on hosted dual surface |
 
 ### Routes
 
@@ -142,12 +163,18 @@ curl -s -X POST https://api.parallel.ai/v1/search \
 | GET | `/` | — | Desk UI (HTML form → POST /clear) |
 | GET | `/corpus?subject=` | — | `{subject, remembered, total}` |
 | POST | `/clear` | `{"script","subject"}` | Gap report JSON; `engine` field stamped |
+| GET/POST | `/cases`, `/api/cases` | workspace auth | Private research (unchanged) |
 
 **Local desk:**
 ```bash
 export PORT=8099 AGENT_BUILDER=1 GCP_PROJECT=hack-fleet
 python3 cloud/service.py
 curl -s localhost:8099/health
+```
+
+**Hosted dual-surface control (no deploy):**
+```bash
+python3 tests/test_hosted_partner_surfaces.py
 ```
 
 ---
@@ -180,6 +207,7 @@ git clone https://github.com/Morkeeth/agent-science.git && cd agent-science
 bash scripts/verify_cold_clone.sh
 ```
 
-Receipts: `docs/RECEIPT-hosted-partner-runtime-2026-08-30.md`, `docs/RECEIPT-live-compound-exhibit-2026-08-30.md`.
+Receipts: `docs/RECEIPT-hosted-partner-runtime-2026-08-30.md`, `docs/RECEIPT-live-compound-exhibit-2026-08-30.md`,
+`docs/RECEIPT-partner-dual-surface-2026-09-05.md`.
 
 Live `/clear` requires Oscar deploy + keys. Offline controls prove partner **code paths** exist and are tested.

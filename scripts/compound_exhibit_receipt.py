@@ -75,9 +75,11 @@ _OFFLINE_CLAIMS = {
              None, "29 October 2014"),
     ],
     "B": [
-        _Raw("Europe's answer was Directive 2012/28/EU — known as the Orphan Works Directive —",
+        # Identical assertions for the overlapping facts — same-subject reuse keys on
+        # full assertion text (f61635e). Rephrasing is a different claim and must search.
+        _Raw("In 2012 the European Union passed Directive 2012/28/EU, the Orphan Works Directive.",
              None, "Directive 2012/28/EU"),
-        _Raw("and the deadline for national transposition was 29 October 2014.",
+        _Raw("Member states had until 29 October 2014 to bring it into national law.",
              None, "29 October 2014"),
         _Raw("The British Library has estimated that forty percent of its copyrighted collection is orphaned.",
              None, "forty percent"),
@@ -228,6 +230,10 @@ def _write_receipt(run: dict, *, backfill_rows: int) -> None:
         "",
         f"- Run B parallel < Run A: **{'yes' if pb < pa else 'NO — exhibit failed'}**",
         f"- corpus_hits B ≥ 1: **{'yes' if b['corpus_hits'] >= 1 else 'NO'}**",
+        "",
+        "Note: same-subject corpus reuse requires **identical assertion text** "
+        "(integrity change 2026-09-04). Overlapping fixtures share exact lines; "
+        "rephrased claims correctly spend Parallel again.",
         "",
     ]
 

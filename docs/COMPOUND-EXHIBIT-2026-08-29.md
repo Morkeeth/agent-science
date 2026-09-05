@@ -1,6 +1,6 @@
 # COMPOUND EXHIBIT — orphan-works A/B
 
-**Date:** 2026-09-03 00:07 UTC · **Subject:** `orphan-works` · **Mode:** offline
+**Date:** 2026-09-05 00:14 UTC · **Subject:** `orphan-works` · **Mode:** offline
 **Fixtures:** `compound-mini-A.txt` → `compound-mini-B.txt`
 
 ## Quantified compounding
@@ -52,7 +52,7 @@ PASS  test_visibility_ui_renders_transparency
 
 ```
 PASS  test_not_gameable_reuse_carries_the_original_verdict_both_poles
-PASS  test_second_subject_reuses_the_log_and_spends_no_parallel_call
+PASS  test_second_subject_reuses_support_and_retries_unsettled_claim
 
 2/2 passed
 ```

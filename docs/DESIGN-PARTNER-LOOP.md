@@ -3,11 +3,16 @@
 **Audience:** Oscar sends to one real clearance lead before Sep 9.  
 **Goal:** one production runs their script through the desk; friction list lands in `CURSOR-LOG.md`.
 
+> **Gate before sending:** live `/health` must show `engine_default: adk` and
+> `mode: private-workspaces+public-desk`. As of 2026-09-05, revision `00026-zel` is
+> partner-dark — Oscar must redeploy dual surface first
+> (`docs/FINDING-hosted-partner-strip-2026-09-05.md`).
+
 ---
 
 ## Script upload flow (what the partner does)
 
-1. Open hosted desk: `https://agent-science-568004190078.us-central1.run.app/` (after Oscar deploy).
+1. Open hosted desk: `https://agent-science-568004190078.us-central1.run.app/` (after Oscar deploy of dual surface).
 2. Set **subject shelf** — a tag their team reuses across episodes (e.g. `season-2-ep3`).
 3. Paste **documentary narration** (plain text, not PDF).
 4. Click **Clear script** → gap report HTML or JSON via API:
@@ -17,6 +22,8 @@
      -d '{"script":"<paste>","subject":"<their-tag>"}'
    ```
 5. **Second script** on same subject — partner should see `corpus_hits ≥ 1` and fewer Parallel calls (compounding).
+
+Optional: partner with a workspace token can also use `/cases` for research decisions — separate from the clearance desk paste flow.
 
 ---
 
@@ -32,6 +39,7 @@
 | 6 | Subject tag — intuitive or confusing? | | |
 | 7 | Output format — HTML memo vs JSON for their pipeline? | | |
 | 8 | Blocker that would stop them paying? | | |
+| 9 | Did `/health` and `/partners` make the four partners obvious? | | |
 
 ---
 
@@ -39,26 +47,22 @@
 
 - `parallel_calls` run 1 vs run 2 (from JSON report)
 - `corpus_hits` on run 2
-- Count of UNSOURCED by `cause` (especially `no_independent_source`, `search_found_no_admissible_source`)
-- Time-to-report (wall clock)
+- Wall time paste → report
+- Count of SOURCED / UNSOURCED rows the partner disputes
 
 ---
 
 ## Oscar → partner email (draft)
 
-> Subject: 15-minute clearance desk trial  
->  
-> We built a desk that returns every checkable claim as SOURCED (verbatim quote + URL) or UNSOURCED (named reason).  
->  
-> **Try it:** [hosted URL] — paste one page of narration, pick a subject tag, clear. Paste a second page with the **same tag** and tell us if the Parallel call count drops.  
->  
-> **Reply with:** anything wrongly sourced/unsourced, and whether the refusal reasons are usable in your workflow.  
->  
-> Constraint we won't break: if the document doesn't contain the exact passage, we refuse — no paraphrase.
+Subject: 30-minute clearance pass on your narration?
+
+Hi — we built a desk that returns every checkable claim as a verbatim quote + URL, or UNSOURCED with a named reason (never a paraphrase). Could you paste one short documentary script and tell us where it frictioned? Link: https://agent-science-568004190078.us-central1.run.app/ — reply with the checklist above.
 
 ---
 
-## Log destination
+## After the session
 
 Partner friction → append to `CURSOR-LOG.md` under `## Design partner · <date>`.  
-Slice 6 done-when: one real lead + friction list (Oscar owns outreach).
+Do not change product rules from one session; batch themes.
+
+**Owner:** Oscar outreach. Build lane only prepares this template.
