@@ -67,13 +67,15 @@ def for_case(case_id, *, case_version=None, db=None):
 
 
 def _update(trial_id, expected_version, change, db):
+    # Public operations require a version. Internal phase transitions use None
+    # only with a state guard inside this same BEGIN IMMEDIATE transaction.
     with closing(_connect(db)) as con, con:
         con.execute('BEGIN IMMEDIATE')
         row = con.execute('SELECT body FROM context_trials WHERE id=?', (trial_id,)).fetchone()
         if not row:
             raise ValueError('context trial not found')
         body = json.loads(row['body'])
-        if type(expected_version) is not int or body['version'] != expected_version:
+        if expected_version is not None and (type(expected_version) is not int or body['version'] != expected_version):
             raise ValueError('stale trial version')
         change(body)
         body['version'] += 1
@@ -107,13 +109,18 @@ def _read(path, digest):
 
 
 def _git(repo, *args):
-    return subprocess.check_output(['git', '-c', 'core.hooksPath=/dev/null', '-C', str(repo), *args], stderr=subprocess.PIPE, timeout=30)
+    try:
+        return subprocess.check_output(['git', '-c', 'core.hooksPath=/dev/null', '-C', str(repo), *args], stderr=subprocess.PIPE, timeout=30)
+    except (OSError, subprocess.SubprocessError) as exc:
+        raise ValueError('Git operation failed: ' + ' '.join(args[:2])) from exc
 
 
 def create(spec, *, db=None):
     required = {'protocol_id', 'protocol_version', 'repo', 'base_commit', 'tasks', 'arms', 'acceptance_path', 'acceptance_sha256', 'host', 'policy', 'repetitions', 'artifact_root'}
     if not isinstance(spec, dict) or set(spec) != required:
         raise ValueError('context trial requires exactly: ' + ', '.join(sorted(required)))
+    if type(spec['protocol_version']) is not int or spec['protocol_version'] < 1:
+        raise ValueError('protocol_version must be a positive exact version')
     protocol = research_protocols.get(spec['protocol_id'], version=spec['protocol_version'], db=db)
     if protocol['kind'] != 'agent_context_trial' or protocol['status'] != 'READY':
         raise ValueError('a READY agent_context_trial protocol is required')
@@ -148,9 +155,13 @@ def create(spec, *, db=None):
         raise ValueError('invalid execution policy fields')
     if any(type(v) is not int or v < 1 or v > 86400 for v in policy.values()):
         raise ValueError('policy ceilings must be positive bounded integers')
+    if policy['total_seconds'] < policy['attempt_seconds'] + policy['check_seconds']:
+        raise ValueError('execution policy cannot admit even one attempt')
     denominator = len(tasks) * len(arms) * spec['repetitions']
-    if policy['max_attempts'] > denominator or policy['attempt_seconds'] > protocol['budget']['timeout']:
+    if policy['max_attempts'] > denominator or max(policy['attempt_seconds'], policy['check_seconds']) > protocol['budget']['timeout']:
         raise ValueError('execution policy exceeds frozen denominator or attempt timeout')
+    if not protocol.get('check_sha256'):
+        raise ValueError('protocol requires a frozen acceptance check SHA256')
     if spec['acceptance_sha256'] != protocol['check_sha256']:
         raise ValueError('acceptance hash differs from protocol')
     acceptance_source = Path(spec['acceptance_path']).resolve()
@@ -193,6 +204,8 @@ def _trusted(trusted):
 
 def prepare(trial_id, *, task_id, arm_id, repetition, expected_version, trusted=False, db=None):
     _trusted(trusted)
+    if type(expected_version) is not int:
+        raise ValueError('expected_version must be an integer')
     attempt_id = uuid.uuid4().hex[:16]
     def reserve(body):
         m = body['manifest']; policy = m['policy']
@@ -214,9 +227,9 @@ def prepare(trial_id, *, task_id, arm_id, repetition, expected_version, trusted=
             'worktree': str(Path(m['artifact_root']) / attempt_id / 'worktree'), 'started_epoch': None,
             'tokens': None, 'billing': None, 'host_calls': None})
     saved = _update(trial_id, expected_version, reserve, db)
-    attempt = saved['attempts'][-1]; m = saved['manifest']; tree = Path(attempt['worktree'])
-    tree.parent.mkdir(mode=0o700)
+    attempt = next(a for a in saved['attempts'] if a['id'] == attempt_id); m = saved['manifest']; tree = Path(attempt['worktree'])
     try:
+        tree.parent.mkdir(mode=0o700)
         _git(m['repo'], 'worktree', 'add', '--detach', str(tree), m['base_commit'])
         arm = next(a for a in m['arms'] if a['id'] == arm_id)
         target = tree / 'AGENTS.md'
@@ -224,21 +237,30 @@ def prepare(trial_id, *, task_id, arm_id, repetition, expected_version, trusted=
             target.unlink()
         target.write_bytes(_read(arm['instructions_path'], arm['sha256']))
         def ready(body):
-            a = next(a for a in body['attempts'] if a['id'] == attempt_id); a.update(state='AWAITING_HOST', started_at=cases.now(), started_epoch=time.time())
-        return _update(trial_id, saved['version'], ready, db)
+            a = next(a for a in body['attempts'] if a['id'] == attempt_id)
+            if a['state'] != 'PREPARING':
+                raise ValueError('attempt preparation was cancelled or state changed')
+            a.update(state='AWAITING_HOST', started_at=cases.now(), started_epoch=time.time())
+        return _update(trial_id, None, ready, db)
     except BaseException:
         def unknown(body):
-            a = next(a for a in body['attempts'] if a['id'] == attempt_id); a['state'] = 'UNKNOWN'; a['error'] = 'Preparation interrupted or failed; inspect preserved worktree.'
-        _update(trial_id, get(trial_id, db=db)['version'], unknown, db)
+            a = next(a for a in body['attempts'] if a['id'] == attempt_id)
+            if a['state'] == 'PREPARING':
+                a['state'] = 'UNKNOWN'; a['error'] = 'Preparation interrupted or failed; inspect preserved worktree.'
+        _update(trial_id, None, unknown, db)
         raise
 
 
 def _run_check(script, task, tree, timeout, output_path):
     """Bound output on disk while draining pipes; kill the whole child session."""
     import selectors
-    env = {'PATH': os.environ.get('PATH', '/usr/bin:/bin'), 'PYTHONPATH': str(tree), 'PYTHONNOUSERSITE': '1',
+    env = {'PATH': os.environ.get('PATH', '/usr/bin:/bin'), 'PYTHONNOUSERSITE': '1', 'PYTHONDONTWRITEBYTECODE': '1',
            'CONTEXT_TRIAL_TASK': task, 'HOME': str(tree.parent)}
-    process = subprocess.Popen([sys.executable, str(script), task], cwd=tree, env=env, stdout=subprocess.PIPE,
+    # Start isolated; preload acceptance infrastructure before adding tested code.
+    launcher = ('import sys,runpy,pathlib,json,os,hashlib,tempfile,subprocess,time,unittest,importlib,uuid; '
+                'script,task,tree=sys.argv[1:]; sys.pycache_prefix=str(pathlib.Path(script).parent / ("check-pycache-"+uuid.uuid4().hex)); sys.path.insert(0,tree); '
+                'sys.argv=[script,task]; runpy.run_path(script,run_name="__main__")')
+    process = subprocess.Popen([sys.executable, '-I', '-B', '-c', launcher, str(script), task, str(tree)], cwd=tree, env=env, stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT, start_new_session=True)
     start = time.monotonic(); written = 0; timed_out = False
     try:
@@ -270,8 +292,20 @@ def _run_check(script, task, tree, timeout, output_path):
             'output_path': str(output_path), 'output_sha256': _hash(output_path.read_bytes()), 'output_limit_bytes': 65536}
 
 
+
+def _untracked(tree):
+    # Include ignored sources: .gitignore is an agent-controlled input. Normal
+    # __pycache__ cannot influence the isolated check's fresh pycache_prefix.
+    names = set()
+    for flags in (('--others', '--exclude-standard'), ('--others', '--ignored', '--exclude-standard')):
+        names.update(_git(tree, 'ls-files', *flags, '-z').decode().split('\0'))
+    return sorted(name for name in names if name and name != 'AGENTS.md' and not ('__pycache__' in Path(name).parts and Path(name).suffix == '.pyc'))
+
+
 def complete(trial_id, attempt_id, *, expected_version, trusted=False, db=None):
     _trusted(trusted)
+    if type(expected_version) is not int:
+        raise ValueError('expected_version must be an integer')
     def claim(body):
         a = next((a for a in body['attempts'] if a['id'] == attempt_id), None)
         if not a or a['state'] != 'AWAITING_HOST':
@@ -299,13 +333,14 @@ def complete(trial_id, attempt_id, *, expected_version, trusted=False, db=None):
         if common.resolve() != original_common.resolve():
             raise ValueError('attempt Git ownership changed')
         head = _git(tree, 'rev-parse', 'HEAD').decode().strip()
-        _git(tree, 'merge-base', '--is-ancestor', m['base_commit'], head)
-        # Capture committed and uncommitted tracked changes; untracked files are
+        if head != m['base_commit']:
+            raise ValueError('attempt HEAD differs from frozen base; leave fixes uncommitted')
+        # Capture staged and unstaged tracked changes; untracked files are
         # separately frozen below. AGENTS is the assigned intervention, not a fix.
         patch = _git(tree, 'diff', '--binary', m['base_commit'], '--', '.', ':(exclude)AGENTS.md')
-        untracked = _git(tree, 'ls-files', '--others', '--exclude-standard', '-z').decode().split('\0')
+        untracked = _untracked(tree)
         files = {}
-        for name in filter(None, untracked):
+        for name in untracked:
             path = tree / name
             if path.is_symlink() or not path.is_file() or path.stat().st_size > 200000:
                 raise ValueError('untracked attempt file is unsafe or too large')
@@ -326,13 +361,19 @@ def complete(trial_id, attempt_id, *, expected_version, trusted=False, db=None):
         result['acceptance'] = check
         after = _git(tree, 'diff', '--binary', m['base_commit'], '--', '.', ':(exclude)AGENTS.md')
         after_files = {}
-        for name in filter(None, _git(tree, 'ls-files', '--others', '--exclude-standard', '-z').decode().split('\0')):
+        for name in _untracked(tree):
             path = tree / name
             if path.is_symlink() or not path.is_file() or path.stat().st_size > 200000:
                 raise ValueError('attempt file changed during acceptance')
             after_files[name] = _hash(path.read_bytes())
         _read(tree / 'AGENTS.md', arm['sha256'])
         _read(captured, m['acceptance_sha256'])
+        if patch_path.is_symlink() or patch_path.read_bytes() != patch:
+            raise ValueError('captured patch artifact changed during acceptance')
+        for name, digest in files.items():
+            artifact = tree.parent / 'untracked' / name
+            if artifact.is_symlink() or _hash(artifact.read_bytes()) != digest:
+                raise ValueError('captured untracked artifact changed during acceptance')
         if after != patch or after_files != files or _git(tree, 'rev-parse', 'HEAD').decode().strip() != head:
             raise ValueError('attempt changed during acceptance; result invalid')
         result['acceptance_passed'] = check['exit_code'] == 0 and not check['timed_out']
@@ -345,16 +386,26 @@ def complete(trial_id, attempt_id, *, expected_version, trusted=False, db=None):
         attempt = next(attempt for attempt in body['attempts'] if attempt['id'] == attempt_id)
         if attempt['state'] != 'CHECKING':
             raise ValueError('attempt state changed during acceptance')
+        if result.get('patch_sha256'):
+            for other in body['attempts']:
+                if other['id'] != attempt_id and other['task_id'] == a['task_id'] and other['arm_id'] == a['arm_id'] and other.get('result', {}).get('patch_sha256') == result['patch_sha256']:
+                    result['duplicate_patch_hash'] = True
+                    other['result']['duplicate_patch_hash'] = True
         attempt.update(state=state, finished_at=cases.now(), result=result)
-    return _update(trial_id, get(trial_id, db=db)['version'], finish, db)
+    return _update(trial_id, None, finish, db)
 
 
 def abort(trial_id, attempt_id, *, expected_version, reason, trusted=False, db=None):
     """Close a host lease without deleting work or refunding reserved capacity."""
     _trusted(trusted); _text(reason, 'cancellation reason')
+    if type(expected_version) is not int:
+        raise ValueError('expected_version must be an integer')
     def change(body):
         a = next((a for a in body['attempts'] if a['id'] == attempt_id), None)
-        if not a or a['state'] not in ('AWAITING_HOST', 'PREPARING', 'UNKNOWN'):
+        if not a or a['state'] not in ('AWAITING_HOST', 'PREPARING', 'UNKNOWN', 'CHECKING'):
             raise ValueError('attempt cannot be cancelled in this state')
-        a.update(state='CANCELLED', finished_at=cases.now(), cancellation_reason=reason)
+        if a['state'] == 'CHECKING':
+            a.update(state='REVIEW_REQUIRED', finished_at=cases.now(), recovery_reason=reason, external_outcome='unknown', recovery_note='Operator closed abandoned check; no retry or success inference. Verify no old process remains before using artifacts.')
+        else:
+            a.update(state='CANCELLED', finished_at=cases.now(), cancellation_reason=reason)
     return _update(trial_id, expected_version, change, db)
