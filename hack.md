@@ -320,6 +320,7 @@ Full record: `fleet-ops (internal)/retros/QWEN-LOSS-RETRO-2026-08-30.md` (correc
 - [x] Design partner gate — `docs/DESIGN-PARTNER-LOOP.md`
 - [x] SUBMISSION-PACK re-measure — **133/133** (`bench_check_docs.py`)
 - [x] Qwen eval re-run — baseline/ablation **5/6 vs 6/6**, delta +1
+- [x] Local dual-surface demo — `bash scripts/demo_partner_dual_surface.sh` (no deploy)
 - [x] Offline compound re-measure — A=2→B=1 after fixture integrity align (`compound_exhibit_receipt.py` exit 0)
 - [x] Live compound — **BLOCKED** no Parallel/Gemini keys (`docs/BLOCKED-live-compound-2026-09-05.md`)
 
@@ -328,6 +329,7 @@ Full record: `fleet-ops (internal)/retros/QWEN-LOSS-RETRO-2026-08-30.md` (correc
 ```bash
 git pull && python3 tests/test_watch_it_go_red.py                    # 72/72
 python3 tests/test_hosted_partner_surfaces.py                        # 5/5
+bash scripts/demo_partner_dual_surface.sh                            # local hosted dual surface OK
 python3 scripts/bench_check_docs.py                                  # 133/133
 python3 scripts/eval_refusal_baseline.py && python3 scripts/eval_refusal_ablation.py
 bash scripts/verify_partners_hosted.sh                               # RED until Oscar deploy
