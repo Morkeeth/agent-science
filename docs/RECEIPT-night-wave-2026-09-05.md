@@ -47,8 +47,9 @@
 3. **"Cost from billing" remains open** — price-card gate is falsifiable list-price math only. Parallel/GCP **billing console not read** (no access). Checklist row stays unchecked for true billing.
 4. **Live orphan-works / hosted compound** — **BLOCKED**: missing API keys locally; hosted clear **401**. Cannot refresh sealed hosted A/B tonight.
 5. **ADK `engine_default` on hosted /health** — gone from health JSON under private-workspaces; pack now marks hosted ADK row unchecked. Local ADK tests still 5/5.
-6. **`deploy_prep.sh` still prints old routes** (`/search` open, corpus GCS seed story) and claims `partner_runtime 5/5` while suite is **7/7** — not rewritten beyond the new DEPLOY-PREP doc; Oscar should prefer `docs/DEPLOY-PREP-2026-09-05.md`.
-7. **Video + Devpost** — still Oscar outward acts; not touched.
+6. **`deploy_prep.sh`** — partner_runtime count corrected to 7/7; routes text now points at private-workspaces + `DEPLOY-PREP-2026-09-05.md`.
+7. **`new_user_trial.sh` / `long_run_goal.sh`** — fail fast with exit **78 BLOCKED** when hosted mode is `private-workspaces` without `AGENT_SCIENCE_WORKSPACE_TOKEN` (no more false assert on missing `engine_default`).
+8. **Video + Devpost submit** — still Oscar outward acts; paste file scrubbed for open-UI lies.
 
 ---
 
