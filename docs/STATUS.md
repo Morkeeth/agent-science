@@ -2,7 +2,7 @@
 doc: status
 project: Agent Science
 canonical: true
-last-updated: 2026-09-01T05:45:00Z
+last-updated: 2026-09-05T08:35:00Z
 deadline: 2026-09-09T14:00:00-07:00
 ---
 
