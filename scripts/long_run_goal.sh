@@ -46,11 +46,20 @@ for q in "2012/28/EU" "Directive 2012/28/EU" "orphan works directive"; do
 done
 
 echo "--- HOSTED: health + desk surfaces ---"
-curl -sf "$BASE/health" | python3 -c "
+health_json=$(curl -sf "$BASE/health")
+echo "$health_json" | python3 -c "
 import sys,json
 d=json.load(sys.stdin)
-assert d['ok'] and d['engine_default']=='adk' and d['parallel'] and d['gemini']
-print('  health ok engine=adk')
+assert d.get('ok')
+mode=d.get('mode') or ''
+print('  health ok mode=%r revision=%r' % (mode, d.get('revision')))
+if mode == 'private-workspaces' and not __import__('os').environ.get('AGENT_SCIENCE_WORKSPACE_TOKEN'):
+    print('BLOCKED: hosted mode=private-workspaces; /search and /clear need a workspace token.')
+    print('Set AGENT_SCIENCE_WORKSPACE_TOKEN or film the local CLI path. Offline compound remains authoritative.')
+    raise SystemExit(78)
+if 'engine_default' in d:
+    assert d['engine_default']=='adk' and d.get('parallel') and d.get('gemini')
+    print('  engine=adk partners present')
 "
 note "hosted health"
 

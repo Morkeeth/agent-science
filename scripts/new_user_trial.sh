@@ -13,7 +13,18 @@ echo
 py() { python3 -c "$1"; }
 
 echo "1. Health (partners wired)"
-curl -sf "$BASE/health" | py "import sys,json; d=json.load(sys.stdin); assert d['ok']; print('  engine', d['engine_default'], 'parallel', d['parallel'], 'gemini', d['gemini'])"
+health_json=$(curl -sf "$BASE/health")
+echo "$health_json" | py "
+import sys,json,os
+d=json.load(sys.stdin)
+assert d['ok']
+print('  mode', d.get('mode'), 'revision', d.get('revision'))
+if d.get('mode')=='private-workspaces' and not os.environ.get('AGENT_SCIENCE_WORKSPACE_TOKEN'):
+    print('BLOCKED: private-workspaces login wall — stranger /search and /clear need a workspace token.')
+    print('Offline: python3 scripts/compound_exhibit_receipt.py')
+    raise SystemExit(78)
+print('  engine', d.get('engine_default'), 'parallel', d.get('parallel'), 'gemini', d.get('gemini'))
+"
 
 echo "2. Free lookup (dictionary — 0 Parallel)"
 curl -sf "$BASE/search?q=2012/28/EU&live=false" | py "

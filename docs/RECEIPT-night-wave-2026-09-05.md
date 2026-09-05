@@ -35,7 +35,8 @@
 | Hosted /search | `curl -D- …/search?q=…&live=false` | **303** → login |
 | Hosted /clear | `curl -X POST …/clear` | **401** |
 | GitHub visibility | `curl …/repos/Morkeeth/agent-science` | `private=false`, `visibility=public` |
-| Keys on VM | env + `~/.config/keys/` | **PARALLEL + GEMINI MISSING** |
+| Hosted stranger trial | `bash scripts/new_user_trial.sh; echo $?` | exit **78 BLOCKED** (private-workspaces, no token) |
+| Artifact claims offline | `python3 scripts/eval_artifact_claims.py --offline` | **12/12 OK** |
 
 ---
 

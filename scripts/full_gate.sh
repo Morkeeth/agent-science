@@ -36,9 +36,11 @@ python3 -m pytest -q tests/test_terminal_case_workflow.py tests/test_evidence_ca
 echo "--- 5. Docs gate ---"
 python3 scripts/bench_check_docs.py
 
-echo "--- 5a. Qwen eval gates (holdout + scorer symmetry) ---"
+echo "--- 5a. Qwen eval gates (holdout + scorer + artifact + cost card) ---"
 python3 scripts/eval_verify_holdout.py
 python3 scripts/eval_scorer_symmetry.py
+python3 scripts/eval_artifact_claims.py
+python3 scripts/eval_cost_price_card.py
 
 echo "--- 5b. Privacy (no home/~/CODE paths in tracked files) ---"
 bash scripts/privacy_grep.sh

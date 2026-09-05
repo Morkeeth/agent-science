@@ -38,13 +38,17 @@ python3 tests/test_registry_surface.py -q 2>&1 | tail -1
 
 echo
 echo "8. Offline compound receipt..."
-python3 scripts/compound_exhibit_receipt.py 2>&1 | grep -E 'parallel_calls|corpus_hits|Mode:' | head -4
+python3 scripts/compound_exhibit_receipt.py 2>&1 | grep -E 'parallel_calls|corpus_hits|Mode:|Overlap' | head -5
 
 echo
 echo "9. Eval gate (baseline + ablation + scorer symmetry)..."
 python3 scripts/eval_refusal_baseline.py 2>&1 | tail -3
 python3 scripts/eval_refusal_ablation.py 2>&1 | tail -2
 python3 scripts/eval_scorer_symmetry.py 2>&1 | tail -3
+
+echo
+echo "10. Artifact claims (offline — no hosted/GitHub)..."
+python3 scripts/eval_artifact_claims.py --offline 2>&1 | tail -6
 
 echo
 echo "=== cold-clone verify OK ==="

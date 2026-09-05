@@ -26,7 +26,7 @@ done
 echo
 echo "2. Control tests"
 python3 tests/test_watch_it_go_red.py >/dev/null 2>&1 && ok "watch_it_go_red 72/72" || bad "watch_it_go_red"
-python3 tests/test_partner_runtime.py >/dev/null 2>&1 && ok "partner_runtime 5/5" || bad "partner_runtime"
+python3 tests/test_partner_runtime.py >/dev/null 2>&1 && ok "partner_runtime 7/7" || bad "partner_runtime"
 python3 tests/test_popular.py >/dev/null 2>&1 && ok "popular endpoint" || bad "popular"
 python3 tests/test_stack_product.py >/dev/null 2>&1 && ok "stack product" || bad "stack"
 python3 tests/test_dictionary.py >/dev/null 2>&1 && ok "dictionary" || bad "dictionary"
@@ -54,14 +54,20 @@ if "$GCLOUD" secrets describe parallel-api-key --project="$PROJECT" >/dev/null 2
 else
   warn "parallel-api-key secret will be created on deploy"
 fi
+if "$GCLOUD" secrets describe agent-science-workspace-access --project="$PROJECT" >/dev/null 2>&1; then
+  ok "Secret Manager agent-science-workspace-access exists"
+else
+  warn "workspace-access secret missing — deploy.sh will fail closed"
+fi
 
 echo
-echo "6. Deploy will set"
+echo "6. Deploy will set (see deploy.sh + docs/DEPLOY-PREP-2026-09-05.md)"
 cat <<EOF
-  CORPUS_GCS_URI=gs://\${CORPUS_BUCKET}/corpus.db
-  REFUSAL_LOG_GCS_URI=gs://\${CORPUS_BUCKET}/refusal_log.db
-  PARALLEL_API_KEY via Secret Manager
-  Routes: / /search /registry /popular /popular/ui /stats /health /clear
+  Candidate revision with --no-traffic --tag=workspace-candidate
+  PARALLEL_API_KEY + AGENT_SCIENCE_ACCESS_CONFIG via Secret Manager only
+  Workspace bucket gs://\${PROJECT}-agent-science-workspaces (no local seed)
+  Hosted mode private-workspaces: /health public; /search /clear require login
+  Prefer checklist: docs/DEPLOY-PREP-2026-09-05.md
 EOF
 
 echo

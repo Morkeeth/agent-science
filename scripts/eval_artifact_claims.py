@@ -34,6 +34,7 @@ HOST = os.environ.get(
     "AGENT_SCIENCE_HOST",
     "https://agent-science-568004190078.us-central1.run.app",
 )
+OFFLINE = "--offline" in sys.argv
 
 SUITES = [
     ("test_watch_it_go_red.py", "watch_it_go_red"),
@@ -268,14 +269,15 @@ def _measure_public_repo() -> dict:
 
 
 def _claims() -> list[tuple[str, str, Callable[[], dict]]]:
-    out: list[tuple[str, str, callable]] = []
+    out: list[tuple[str, str, Callable[[], dict]]] = []
     for filename, key in SUITES:
         out.append((f"suite:{key}", f"SUBMISSION-PACK {key} count", lambda f=filename, k=key: _measure_suite(f, k)))
     out.append(("compound:offline", "offline compound A→B + corpus_hits", _measure_compound))
-    out.append(("hosted:health", "hosted /health ok", _measure_hosted_health))
-    out.append(("hosted:search", "stranger free /search JSON", _measure_hosted_stranger_search))
-    out.append(("hosted:visibility", "stranger /visibility/ui without login", _measure_hosted_visibility_ui))
-    out.append(("github:public", "public-repo claim matches GitHub object", _measure_public_repo))
+    if not OFFLINE:
+        out.append(("hosted:health", "hosted /health ok", _measure_hosted_health))
+        out.append(("hosted:search", "pack honesty about hosted /search login", _measure_hosted_stranger_search))
+        out.append(("hosted:visibility", "pack honesty about /visibility/ui login", _measure_hosted_visibility_ui))
+        out.append(("github:public", "public-repo claim matches GitHub object", _measure_public_repo))
     return out
 
 
@@ -285,7 +287,9 @@ def main() -> int:
     b_win = c = 0
     print("Artifact claims @", ROOT)
     print("Commit:", subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT).decode().strip())
-    print("Host:", HOST)
+    print("Mode:", "offline (suites+compound only)" if OFFLINE else "full (includes hosted+GitHub)")
+    if not OFFLINE:
+        print("Host:", HOST)
     print()
     print("Baseline arm: trust SUBMISSION-PACK / paste numbers (no object re-run)")
     print("Shipping arm: re-measure each claim at its object")
