@@ -352,3 +352,69 @@ def test_review_expected_version_requires_exact_integer(saved, value):
     request = review_input(obs); request['expected_review_version'] = value
     with pytest.raises(ValueError, match='nonnegative integer'):
         evaluation.review(campaign['id'], request, db=db)
+
+
+@pytest.mark.parametrize('events,counter', [
+    ([], 1),
+    ([{'route': 'source_metadata', 'outcome': 'failed', 'url': 'https://api.crossref.org/works/10.1234/test'}], 0),
+    ([{'route': 'source_metadata', 'outcome': 'checked', 'response_hash': 'd'*64}], 0),
+])
+def test_replay_rejects_registry_activity_including_failed_requests(saved, events, counter):
+    db, campaign, obs = saved
+    run = night_runs.get(obs['run_id'], db=db)
+    run['observed_usage']['metadata_responses'] = counter
+    run['steps'][0]['observed_events'] = events
+    night_runs._save(run, db)
+    with pytest.raises(ValueError, match='registry requests'):
+        evaluation.record(campaign['id'], obs, db=db)
+
+
+def test_bare_imported_claim_does_not_count_as_synthesis(saved):
+    db, campaign, obs = saved
+    case = cases.get(obs['case_id'], db=db)
+    for claim in case['claims']:
+        claim['assessments'] = []
+    with cases.connect(db) as con:
+        con.execute('UPDATE revisions SET body=? WHERE case_id=? AND version=?', (json.dumps(case), case['id'], case['version']))
+    with pytest.raises(ValueError, match='active assessment'):
+        evaluation.record(campaign['id'], obs, db=db)
+
+
+def test_baseline_noop_version_bump_does_not_fill_repetition(saved):
+    db, campaign, obs = saved
+    obs.pop('run_id'); obs['arm_id'] = 'baseline'
+    evaluation.record(campaign['id'], obs, db=db)
+    case = cases.get(obs['case_id'], db=db)
+    case['version'] += 1
+    cases._save(case, db=db)
+    obs.update(case_version=case['version'], repetition=2)
+    with pytest.raises(ValueError, match='already recorded'):
+        evaluation.record(campaign['id'], obs, db=db)
+
+
+def test_unknown_run_limit_key_rejected_before_freeze(tmp_path):
+    value = spec(); value['arms'][0]['resource_limits'] = dict(LIMITS, metadata_checks=2)
+    with pytest.raises(ValueError, match='supported run limit keys'):
+        evaluation.create(value, db=tmp_path / 'new.db')
+
+
+def test_same_sources_for_distinct_questions_are_not_duplicate_baselines(saved):
+    db, _, obs = saved
+    value = spec()
+    value['questions'].append(dict(value['questions'][0], id='q2', question='A distinct artificial question?'))
+    campaign = evaluation.create(value, db=db)
+    obs.pop('run_id'); obs['arm_id'] = 'baseline'
+    evaluation.record(campaign['id'], obs, db=db)
+    case = cases.get(obs['case_id'], db=db)
+    case.update(id='distinct-question-case', version=1, question=value['questions'][1]['question'])
+    cases._save(case, db=db)
+    obs.update(case_id=case['id'], case_version=1, question_id='q2', question_hash=cases.digest(case['question']))
+    assert evaluation.record(campaign['id'], obs, db=db)['coverage']['recorded'] == 2
+
+
+def test_offline_registry_noop_remains_snapshot_replay(saved):
+    db, campaign, obs = saved
+    run = night_runs.get(obs['run_id'], db=db)
+    run['steps'][0]['observed_events'] = [{'route': 'source_metadata', 'outcome': 'not_checked'}]
+    night_runs._save(run, db)
+    assert evaluation.record(campaign['id'], obs, db=db)['coverage']['recorded'] == 1

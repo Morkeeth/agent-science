@@ -90,6 +90,8 @@ def create(spec, *, db=None):
         limits = arm.get('resource_limits')
         if not isinstance(limits, dict) or not limits:
             raise ValueError('resource_limits must be explicit')
+        if 'code_ref' in arm and set(limits) != set(night_runs.DEFAULTS):
+            raise ValueError('code-pinned resource limits must match the supported run limit keys')
         if any(type(v) is not int or v < 0 for v in limits.values()):
             raise ValueError('resource limits must be nonnegative integers')
     manifest['denominator'] = len(manifest['questions']) * len(manifest['arms']) * repetitions
@@ -224,14 +226,20 @@ def record(campaign_id, observation, *, db=None):
         online = run.get('observed_usage', {}).get('online_fetches', 0)
         if obs['mode'] == 'fresh_web' and not online:
             raise ValueError('fresh_web requires an observed online fetch in this run')
-        if obs['mode'] == 'snapshot_replay' and online:
-            raise ValueError('snapshot_replay cannot contain online fetches')
+        metadata_activity = run.get('observed_usage', {}).get('metadata_responses', 0) or any(
+            event.get('route') == 'source_metadata' and event.get('outcome') not in ('not_checked', 'unsupported', 'skipped')
+            and (event.get('url') or event.get('checked_at') or event.get('response_hash'))
+            for step in run.get('steps', []) for event in step.get('observed_events', []))
+        if obs['mode'] == 'snapshot_replay' and (online or metadata_activity):
+            raise ValueError('snapshot_replay cannot contain online fetches or registry requests')
     elif 'baseline_policy' not in arm:
         raise ValueError('candidate requires a completed persisted run')
     elif arm['mode'] == 'fresh_web':
         raise ValueError('fresh_web baseline requires a persisted run with observed fetches')
-    if arm['kind'] == 'synthesis' and not case.get('claims'):
-        raise ValueError('synthesis arm requires a saved interpreted answer, not retrieval')
+    if arm['kind'] == 'synthesis':
+        from clearance import synthesis
+        if not synthesis.build(case)['conclusions']:
+            raise ValueError('synthesis arm requires a saved active assessment, not bare imported claims')
     snapshots = {}
     for evidence in case['evidence']:
         text = evidence.get('snapshot_text')
@@ -243,7 +251,10 @@ def record(campaign_id, observation, *, db=None):
         raise ValueError('retrieval outcome requires saved source snapshots; an empty plan is not a completed baseline')
     _validate_review_content(obs, snapshots)
     runtime_observation = _runtime_observation(run, arm)
-    obs.update(recorded_at=cases.now(), manifest_hash=campaign['manifest_hash'],
+    baseline_content_hash = _hash({'question_hash': question['question_hash'],
+        'sources': sorted((e['url'], e['snapshot_hash']) for e in snapshots.values()),
+        'interpretations': [{'statement': c.get('statement'), 'assessments': c.get('assessments', [])} for c in case.get('claims', [])]})
+    obs.update(baseline_content_hash=baseline_content_hash, recorded_at=cases.now(), manifest_hash=campaign['manifest_hash'],
                case_content_hash=_hash({k: case.get(k) for k in ('id', 'version', 'question', 'claims', 'evidence')}),
                source_snapshots=[{'evidence_id': e['id'], 'url': e['url'], 'snapshot_hash': e['snapshot_hash']} for e in snapshots.values()],
                operational={'observed_usage': run.get('observed_usage') if run else None,
@@ -259,7 +270,8 @@ def record(campaign_id, observation, *, db=None):
                 raise ValueError('duplicate frozen evaluation slot')
             if obs.get('run_id') and old.get('run_id') == obs['run_id']:
                 raise ValueError('completed run already recorded; repetitions require distinct executions')
-            if not obs.get('run_id') and (old['case_id'], old['case_version']) == (obs['case_id'], obs['case_version']):
+            same_baseline = old.get('baseline_content_hash') == obs['baseline_content_hash'] and old['question_id'] == obs['question_id']
+            if not obs.get('run_id') and ((old['case_id'], old['case_version']) == (obs['case_id'], obs['case_version']) or same_baseline):
                 raise ValueError('baseline case outcome already recorded; repetitions require distinct outcomes')
         try:
             con.execute('INSERT INTO research_observations VALUES(?,?,?,?,?)',
