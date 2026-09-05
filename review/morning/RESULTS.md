@@ -49,3 +49,7 @@ The proposed one-question paid discovery policy remains unapproved: at most eigh
 5. Publication candidate: review the final source diff and exclude older film commits and unrelated working-tree changes before any approved publication.
 
 Next prompt: Continue the full research engine plan from this receipt. Read the actual policy approval and latest case versions first. Prioritize an investigation that can change a material answer and an experiment that tests the resulting repository decision; do not turn workflow counts into scientific scores.
+
+## Later live follow-up
+
+The one-question policy was subsequently approved and exercised. See [the live investigation receipt](LIVE-QUESTION.md): the challenge changed a saved interpretation and decision, independent source review added caveats, and the shared round allowance stopped further discovery. Five additional topics and the actual context trial remain outstanding.

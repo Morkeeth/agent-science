@@ -1,6 +1,6 @@
 {
   "baseline": "ea05a1009778f754608da3825e36c85fc702f591",
-  "status": "local candidate verified; scientific field work outstanding",
+  "status": "local candidate verified; first live investigation and challenge completed",
   "lanes": [
     {
       "owner": "source metadata",
@@ -23,8 +23,9 @@
       "commit": "70eafcc2db66da499b6c29c6df7ed46e7ee4df2a"
     }
   ],
-  "live_policy": "prepared; awaiting explicit approval",
+  "live_policy": "one-question policy approved and shared round allowance exhausted; proposed five-topic policy awaits approval",
   "publication": "not authorized",
   "candidate": "70eafcc2db66da499b6c29c6df7ed46e7ee4df2a",
-  "acceptance_receipt": "review/morning/RESULTS.md"
+  "acceptance_receipt": "review/morning/RESULTS.md",
+  "live_receipt": "review/morning/LIVE-QUESTION.md"
 }
