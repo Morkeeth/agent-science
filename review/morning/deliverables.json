@@ -1,27 +1,30 @@
 {
   "baseline": "ea05a1009778f754608da3825e36c85fc702f591",
-  "status": "building",
+  "status": "local candidate verified; scientific field work outstanding",
   "lanes": [
     {
       "owner": "source metadata",
       "branch": "build/science-metadata-20260905",
-      "commit": null,
-      "status": "implementing",
+      "commit": "6c94b2d",
+      "status": "integrated and tested",
       "receipt": "review/morning/METADATA.md"
     },
     {
       "owner": "frozen evaluation",
       "branch": "build/science-evaluation-20260905",
-      "commit": null,
-      "status": "implementing",
+      "commit": "9167a2d",
+      "status": "integrated and tested",
       "receipt": "review/morning/EVALUATION.md"
     },
     {
       "owner": "coordinator",
       "branch": "build/adaptive-research-night-20260905",
-      "status": "integrating and validating"
+      "status": "integrated and tested",
+      "commit": "70eafcc2db66da499b6c29c6df7ed46e7ee4df2a"
     }
   ],
   "live_policy": "prepared; awaiting explicit approval",
-  "publication": "not authorized"
+  "publication": "not authorized",
+  "candidate": "70eafcc2db66da499b6c29c6df7ed46e7ee4df2a",
+  "acceptance_receipt": "review/morning/RESULTS.md"
 }
