@@ -26,23 +26,24 @@ python, parallel-web (Parallel Search SDK 1.3.2), gemini (Vertex AI), google-clo
 
 ## Try it in 60 seconds (judges)
 
-Browser, no clone:
+**Measured 2026-09-05:** hosted revision `agent-science-00026-zel` is `mode: private-workspaces`. Logged-out `/`, `/visibility/ui`, `/truths/ui`, `/registry`, and `/clear` redirect to **Sign in**. Public JSON health remains:
 
-- Websearch companion with the full search shown: https://agent-science-568004190078.us-central1.run.app/visibility/ui?q=ralph+loop+agentic
-- Clearance desk (paste a script): https://agent-science-568004190078.us-central1.run.app/
-- Truths dashboard: https://agent-science-568004190078.us-central1.run.app/truths/ui
-- Partner manifest: https://agent-science-568004190078.us-central1.run.app/health
+- https://agent-science-568004190078.us-central1.run.app/health → `ok: true`, `mode: private-workspaces`
 
-Terminal, no keys:
+Oscar may restore a public judge surface or demo from a workspace; until then the stranger proof is the cold clone:
 
 ```
 git clone https://github.com/Morkeeth/agent-science.git && cd agent-science
+bash scripts/cinema_pack_gate.sh
+# or:
 bash scripts/verify_cold_clone.sh
 bash scripts/demo_truth_layer.sh
-bash scripts/demo_clearance_desk.sh
+python3 scripts/compound_exhibit_receipt.py   # offline A=2→B=1 Parallel, corpus_hits≥1
 ```
 
-A fresh clone of that repository ran those three commands on 2026-09-03 with exit code 0, 0, 0 (72/72 mutation-watched controls, 127/127 doc-checked controls, holdout OK, registry 16/16, eval delta +1).
+`bash scripts/demo_clearance_desk.sh` exits 2 with BLOCKED while the hosted desk requires sign-in.
+
+Film/screenshots from the last public desk: `docs/film/` · pack: `docs/CINEMA-PACK-2026-09-05.md`.
 
 ## About the project
 

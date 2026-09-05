@@ -20,10 +20,10 @@ deadline: 2026-09-09T14:00:00-07:00
 | State | Detail |
 |-------|--------|
 | **Product noun** | **Agent Science** — truth layer for what people believe and use · B lead · A on the same layer |
-| **Product** | LIVE on Cloud Run · public repo · sealed prediction |
-| **Build lane** | WOW websearch transparency · CONTRARY stamp · stack-fit · community notes · `/truths/ui` |
-| **Oscar** | **Film 30 min** — `docs/PITCH-TOMORROW.md` · transparency WOW first · Devpost paste ready |
-| **Film lead** | Ask → sourced/refuse → free on re-ask · ≥2 domains · E&O as *a* truth not the only story |
+| **Product** | Hosted alive · **private-workspaces** login wall (2026-09-05) · public repo · sealed prediction |
+| **Cinema pack** | `docs/CINEMA-PACK-2026-09-05.md` · `bash scripts/cinema_pack_gate.sh` → OK · use-bar template blank |
+| **Oscar** | Film/upload · Devpost · key rotate · decide public judge surface · optional live research policy |
+| **Film lead** | Prefer `docs/film/` + cold clone until hosted desk is public again |
 
 ---
 
@@ -64,22 +64,25 @@ deadline: 2026-09-09T14:00:00-07:00
 | | |
 |---|---|
 | **URL** | https://agent-science-568004190078.us-central1.run.app |
-| **Revision** | `agent-science-00018-n4s` · `parallel_sdk: true` · **`/truths/ui` live** |
-| **Health** | `engine_default: adk` · 265 claims · hit rate ~0.80 |
-| **New** | `GET /visibility/ui` — full websearch panel for judges (film this) |
-| **New** | `GET /truths/ui` — truths dashboard |
-| **Stats** | 265 claims · hit rate ~0.80 · queries logged growing |
+| **Revision** | `agent-science-00026-zel` · **`mode: private-workspaces`** (measured 2026-09-05) |
+| **Health** | `{"ok": true, "service": "agent-science", "mode": "private-workspaces", "revision": "agent-science-00026-zel"}` |
+| **Logged-out UI** | `/`, `/visibility/ui`, `/truths/ui`, `/registry`, `/search`, `/clear` → **303 Sign in** |
+| **API** | `/api/cases` → **401** workspace key required |
+| **Cinema pack** | `docs/CINEMA-PACK-2026-09-05.md` · `bash scripts/cinema_pack_gate.sh` |
 
-**Compound (sealed):** `longrun-0831-1320` A=**1** → B=**0** Parallel · B `corpus_hits=1`
+**Compound (sealed 2026-08-31):** `longrun-0831-1320` A=**1** → B=**0** Parallel · B `corpus_hits=1`  
+**Compound (offline re-measure 2026-09-05):** A=**2** → B=**1** · corpus_hits B=**2** — `python3 scripts/compound_exhibit_receipt.py`
 
 ---
 
 ## Oscar checklist (only human work left)
 
-1. **Read** `docs/PITCH-TOMORROW.md` — 30s pitch + morning plan
-2. **Record** ≤180s — transparency WOW first · `docs/FILM-SCOUT-COMMANDS.md`
-3. **Devpost** — `docs/DEVPOST-READY.md` (elevator pitch updated)
-4. **Verify** logged-out: video on live entry page
+1. **Read** `docs/CINEMA-PACK-2026-09-05.md` — paste fields + Oscar doors
+2. **Decide** hosted public judge surface vs film from `docs/film/` + cold clone
+3. **Record/upload** ≤180s — `docs/FILM-PACK-2026-09-03.md` · `demo/demo-final.mp4` (179.675s)
+4. **Devpost** — `submission/DEVPOST-PASTE.md` (judge path updated 2026-09-05)
+5. **Rotate keys** (console) · **logged-out** verify Devpost video
+6. Optional: approve live research policy for NIGHTRUN six-topic field pass
 
 ---
 
