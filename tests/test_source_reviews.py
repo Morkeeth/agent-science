@@ -70,7 +70,7 @@ class SourceReviewTests(unittest.TestCase):
 
     def test_unavailable_notice_stays_unresolved(self):
         self.write(lambda d:d['evidence'][1].update(status='UNAVAILABLE'))
-        with self.assertRaisesRegex(ValueError,'available exact'):self.submit()
+        with self.assertRaisesRegex(ValueError,'notice_unavailable'):self.submit()
         p=copy.deepcopy(self.proposal);p.update(disposition='unresolved',notices=[],rationale='The registry notice cannot be inspected, so its effect remains unresolved.')
         result=self.submit(p)
         self.assertEqual(1,len(result['pending']));self.assertEqual('unresolved',result['pending'][0]['review']['disposition'])
@@ -132,3 +132,67 @@ class SourceReviewTests(unittest.TestCase):
         self.assertEqual('CURRENT',conclusion['conditions'][0]['state'])
         self.write(lambda d:d['claims'][0]['assessments'][0]['conditions'][0].update(value='different interpretation'))
         self.assertEqual('REVIEW_REQUIRED',synthesis.build(cases.get(self.data['id'],db=self.db))['conclusions'][0]['state'])
+
+    def test_latest_unresolved_survives_source_body_reversion(self):
+        self.submit()
+        changed=BODY+' A later source revision.'
+        self.write(lambda d:d['evidence'][0].update(snapshot_text=changed,snapshot_hash=cases.digest(changed)))
+        pending=source_reviews.list_pending(self.data['id'],db=self.db)['pending'][0]
+        p=copy.deepcopy(self.proposal);p.update(source_snapshot_hash=pending['source_snapshot_hash'],disposition='unresolved',notices=[],rationale='The later source revision makes the correction effect unresolved.')
+        self.submit(p)
+        self.write(lambda d:d['evidence'][0].update(snapshot_text=BODY,snapshot_hash=cases.digest(BODY)))
+        result=source_reviews.list_pending(self.data['id'],db=self.db)
+        self.assertEqual([],result['resolved'])
+        self.assertEqual('unresolved',result['pending'][0]['review']['disposition'])
+        self.assertEqual('REVIEW_REQUIRED',synthesis.build(cases.get(self.data['id'],db=self.db))['conclusions'][0]['state'])
+
+    def test_conflicting_notice_redirect_identity_cannot_cover_two_notices(self):
+        current=cases.get(self.data['id'],db=self.db)
+        payload=json.dumps({'message':{'DOI':'10.1234/paper','updated-by':[dict(DOI=doi,type='correction') for doi in ('10.1234/notice','10.1234/another')]}}).encode()
+        with patch.object(source_metadata,'_fetch',return_value=(payload,200)):
+            metadata=source_metadata.inspect(current['evidence'][0],live=True)
+        source_metadata.apply(current['id'],current['version'],'paper',metadata,db=self.db)
+        self.write(lambda d:d['evidence'][1].update(final_url='https://doi.org/10.1234/another'))
+        p=proposal(cases.get(self.data['id'],db=self.db),self.db)
+        p['notices'].append(dict(notice_identity='doi:10.1234/another',evidence_id='notice',quote=NOTICE,snapshot_hash=cases.digest(NOTICE)))
+        with self.assertRaisesRegex(ValueError,'ambiguous'):self.submit(p)
+
+    def test_review_response_is_pinned_despite_concurrent_later_revision(self):
+        real=source_reviews.list_pending
+        def racing(case_id,*,db=None,version=None):
+            data=cases.get(case_id,db=db);data['version']+=1
+            data['evidence'][0].update(snapshot_text=BODY+' Concurrent change.',snapshot_hash=cases.digest(BODY+' Concurrent change.'))
+            cases._save(data,db=db)
+            return real(case_id,db=db,**({'version':version} if version is not None else {}))
+        with patch.object(source_reviews,'list_pending',racing):result=self.submit()
+        self.assertEqual(result['reviews'][-1]['recorded_version'],result['version'])
+        self.assertEqual(1,len(result['resolved']))
+        self.assertGreater(cases.get(self.data['id'],db=self.db)['version'],result['version'])
+
+    def test_notice_errors_name_fixable_cause(self):
+        failures=[('notice_quote_absent',{},dict(quote='This passage never appeared inside the actual correction notice.')),
+                  ('notice_snapshot_stale',{},dict(snapshot_hash='0'*64)),
+                  ('notice_unavailable',dict(status='UNAVAILABLE'),{}),
+                  ('notice_needs_review',dict(metadata_review_required=[dict(type='correction',notice='doi:10.1234/third')]),{}),
+                  ('notice_retracted',dict(retracted=True),{}),
+                  ('notice_body_hash_mismatch',dict(snapshot_hash='0'*64),dict(snapshot_hash='0'*64))]
+        original=copy.deepcopy(self.data['evidence'][1])
+        for reason,changes,anchor_changes in failures:
+            with self.subTest(reason=reason):
+                self.write(lambda d:d['evidence'].__setitem__(1,{**original,**changes}))
+                p=copy.deepcopy(self.proposal);p['notices'][0].update(anchor_changes)
+                with self.assertRaisesRegex(ValueError,reason):self.submit(p)
+
+
+    def test_malformed_warning_remains_pending(self):
+        self.write(lambda d:d['evidence'][0].update(metadata_review_required=True))
+        result=source_reviews.list_pending(self.data['id'],db=self.db)
+        self.assertEqual(1,len(result['pending']))
+        self.assertEqual('REVIEW_REQUIRED',synthesis.build(cases.get(self.data['id'],db=self.db))['conclusions'][0]['state'])
+
+    def test_notice_error_rows_show_why_prior_resolution_reopened(self):
+        self.submit()
+        self.write(lambda d:d['evidence'][1].update(retracted=True))
+        pending=source_reviews.list_pending(self.data['id'],db=self.db)['pending'][0]
+        self.assertEqual('notice_retracted',pending['notice_failures'][0]['reason'])
+        self.assertTrue(pending['review_binding_current'])
