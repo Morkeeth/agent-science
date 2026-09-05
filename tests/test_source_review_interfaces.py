@@ -73,3 +73,42 @@ def test_new_registry_notice_does_not_erase_an_earlier_warning(tmp_path):
     assert all(w in warnings for w in prior)
     assert {w['notice'] for w in warnings}=={'doi:10.1234/notice','doi:10.1234/new-notice'}
     assert len(source_reviews.list_pending(data['id'],db=db)['pending'][0]['notice_identities'])==2
+
+
+def test_unavailable_source_can_record_unresolved_through_mcp(tmp_path):
+    from clearance import source_reviews
+    from clearance.mcp_server import TOOLS
+    db=str(tmp_path/'cases.db');data=fixtures.fixture(db)
+    data['evidence'][0].update(snapshot_text='',snapshot_hash=None,status='UNAVAILABLE')
+    data['version']+=1;cases._save(data,db=db)
+    row=source_reviews.list_pending(data['id'],db=db)['pending'][0]
+    proposal={key:row[key] for key in ('assessment_id','evidence_id','source_snapshot_hash','warning_fingerprint')}
+    proposal.update(disposition='unresolved',notices=[],rationale='The original source is unavailable, so the correction effect remains unresolved.')
+    tool=next(t for t in TOOLS if t['name']=='science_research')
+    assert 'source-review' in tool['description']
+    assert 'null' in tool['inputSchema']['properties']['source_review']['properties']['source_snapshot_hash']['type']
+    result,saved=mcp({'action':'source-review','case_id':data['id'],'version':data['version'],'source_review':proposal,'db':db})
+    assert not result['isError'],saved
+    assert saved['pending'][0]['source_snapshot_hash'] is None
+    assert saved['pending'][0]['review']['disposition']=='unresolved'
+    assert synthesis.build(cases.get(data['id'],db=db))['conclusions'][0]['state']=='REVIEW_REQUIRED'
+    proposal['disposition']='unaffected'
+    result,error=mcp({'action':'source-review','case_id':data['id'],'version':saved['version'],'source_review':proposal,'db':db})
+    assert result['isError']
+    assert cases.get(data['id'],db=db)['version']==saved['version']
+
+
+def test_mirror_warning_flags_evidence_only_decision(tmp_path):
+    db=str(tmp_path/'cases.db');data=fixtures.fixture(db)
+    paper=data['evidence'][0]
+    mirror={k:v for k,v in paper.items() if k not in ('source_metadata','metadata_review_required')}
+    mirror.update(id='mirror',url='https://dx.doi.org/10.1234/paper?download=pdf')
+    data['evidence'].append(mirror);data['claims']=[]
+    before=copy.deepcopy(data)
+    before['evidence'][0].pop('metadata_review_required',None)
+    before['evidence'][0].pop('source_metadata',None)
+    decision={'evidence_ids':['mirror']}
+    review=cases.decision_review(decision,before,data)
+    assert review['state']=='REVIEW_REQUIRED'
+    assert any(c['kind']=='source_metadata_changed' and c['evidence_id']=='mirror' for c in review['changes'])
+    assert cases.decision_review(decision,data,data)['state']=='UNCHANGED_IN_SNAPSHOT'

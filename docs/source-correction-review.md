@@ -31,7 +31,13 @@ from the inspected row into the review object. Add:
 only the exact assessment and source snapshot. `revise` records that reassessment is
 needed; submit a superseding finding through the existing research flow. It does not
 rewrite the claim automatically. `unresolved` keeps the review requirement and can
-use an empty notice list when access is missing.
+use an empty notice list when access is missing. If the source itself has no saved
+snapshot, copy its `null` snapshot hash exactly and use `unresolved`; do not invent
+a hash. A missing source body cannot be cleared.
+
+After a `revise` review, submit the superseding assessment, inspect its pending
+review and explain how the correction is accounted for. `unaffected` on that new
+assessment means the inspected notice requires no further change to its stated scope.
 
 The full typed object is also exposed in MCP `science_research` tools/list. Actions
 are `source-reviews` with `case_id`, and `source-review` with `case_id`, `version`

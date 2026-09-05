@@ -192,7 +192,7 @@ TOOLS.append({
 
 TOOLS.append({
     "name": "science_research",
-    "description": "Conduct a persisted investigation: start locally, inspect context, submit a case-version-pinned reasoning proposal with resume, challenge a conclusion, compare versions, follow questions and define experiments. Start makes no external calls. A waiting run is not complete. Only explicit live execution under a configured aggregate policy can fetch/search. Findings are authored interpretations with checked quotations. This tool cannot execute experiments or shell commands.",
+    "description": "Conduct a persisted investigation: start locally, inspect context, submit a case-version-pinned reasoning proposal with resume, challenge a conclusion, compare versions, follow questions, inspect source-reviews, submit a source-review and define experiments. Start makes no external calls. A waiting run is not complete. Only explicit live execution under a configured aggregate policy can fetch/search. Findings are authored interpretations with checked quotations. This tool cannot execute experiments or shell commands.",
     "inputSchema": {"type":"object", "additionalProperties":False, "required":["action"], "properties": {
         "action":{"type":"string","enum":["start","show","context","resume","cancel","reconcile","challenge","update","compare","follow","updates","experiment-plan","protocol","evaluation-create","evaluation-show","evaluation-record","evaluation-review","source-reviews","source-review","context-trials","context-trial-create","context-trial-show"]},
         "question":{"type":"string","maxLength":1500},
@@ -211,7 +211,7 @@ TOOLS.append({
             "description":"Copy the assessment/source IDs and hashes from source-reviews. Inspect every registry notice with science_case source before submitting unaffected. Registry facts remain; a retraction or supersession cannot be cleared.",
             "properties":{
                 "assessment_id":{"type":"string"},"evidence_id":{"type":"string"},
-                "source_snapshot_hash":{"type":"string","pattern":"^[0-9a-f]{64}$"},
+                "source_snapshot_hash":{"type":["string","null"],"pattern":"^[0-9a-f]{64}$","description":"Exact value from source-reviews. Null is permitted only for unresolved when the source has no saved snapshot."},
                 "warning_fingerprint":{"type":"string","pattern":"^[0-9a-f]{64}$"},
                 "rationale":{"type":"string","minLength":20,"maxLength":5000},
                 "disposition":{"type":"string","enum":["unaffected","revise","unresolved"],"description":"unaffected resolves only the exact inspected scope; revise records needed reassessment without rewriting the claim; unresolved retains the warning and permits missing notices."},

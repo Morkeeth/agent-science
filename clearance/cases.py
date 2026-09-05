@@ -258,13 +258,14 @@ def refresh(case_id, *, live=False, db=None, max_documents=None):
 
 def decision_review(decision, original, current):
     """Compare saved source and active interpretation state without loading cases."""
+    from clearance import source_reviews
     delta=changes(original,current) if original else []
     cited=set(decision['evidence_ids'])
     relevant=[c for c in delta if c.get('evidence_id') in cited or c['kind']=='repo_changed']
 
     def interpretations(data):
         from clearance import source_reviews
-        evidence={e['id']:e for e in data.get('evidence',[])}
+        evidence={e['id']:source_reviews.effective_source(data,e) for e in data.get('evidence',[])}
         result={}
         for claim in data.get('claims',[]):
             superseded={a.get('supersedes') for a in claim.get('assessments',[])}
@@ -293,9 +294,10 @@ def decision_review(decision, original, current):
         if before.get(claim_id)!=after.get(claim_id):
             relevant.append({'kind':'interpretation_changed','claim_id':claim_id,
                 'reason':'Active authored reasoning, conditions or anchored source state changed.'})
-    old_sources={e['id']:e for e in (original or {}).get('evidence',[])}
+    old_sources={e['id']:source_reviews.effective_source(original or {},e) for e in (original or {}).get('evidence',[])}
     for source in current.get('evidence',[]):
         if source['id'] not in cited: continue
+        source=source_reviews.effective_source(current,source)
         for field in ('retracted','superseded_by','metadata_review_required'):
             if old_sources.get(source['id'],{}).get(field)!=source.get(field):
                 relevant.append({'kind':'source_metadata_changed','evidence_id':source['id'],'field':field})
