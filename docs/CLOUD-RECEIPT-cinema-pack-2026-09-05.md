@@ -125,4 +125,6 @@ Still needs Oscar: approve bounded aggregate policy; exercise Parallel (optional
 - Did **not** approve or spend live research policy.  
 - Public `main` remains compound-red until this branch merges.  
 - Devpost long paste (`submission/DEVPOST-PASTE.md`) still contains older hosted-UI claims; pack §1 tells Oscar to edit before submit — full paste rewrite deferred to avoid silent number/URL drift without a second object pass.  
-- `demo_clearance_desk.sh` exit 2 is success-as-honesty for today’s hosted mode, not a clearance demo.
+- `demo_clearance_desk.sh` exit 2 is success-as-honesty for today’s hosted mode, not a clearance demo.  
+- First draft of `cinema_pack_gate.sh` treated the `# Example: https://youtu.be/…` comment as a real video URL (false FAIL). Fixed by ignoring `#` lines; re-run → **CINEMA PACK GATE OK**.  
+- One-command gate: `bash scripts/cinema_pack_gate.sh` → exit **0** (2026-09-05).
