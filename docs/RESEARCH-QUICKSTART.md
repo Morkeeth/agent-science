@@ -145,3 +145,13 @@ Practical consequences are explicitly authored inferences. Answers group empiric
 An independent review appends a version to the original observation; it does not replace the run or the original judgments. Supply `arm_id`, `question_id`, `repetition`, `expected_review_version` (zero for the first review), `reviewer`, all six `judgments` and optional `errors`. Concurrent or stale writers are rejected. Historical case and source hashes bind every review to the evidence actually observed.
 
 Metadata requests use public registry GETs without a paid search provider. The CLI still requires an approved aggregate capacity policy for live requests; a free-only policy can set discovery and reasoning limits to zero. An offline check can be followed by a live check. Failed registry checks retain their receipts on the run without creating an evidence revision. Correction flags make conclusions and decisions require review; they do not assert that every passage in a corrected paper is false. New interpretations of those passages remain explicitly flagged. Retractions and superseded sources cannot supply new synthesis anchors.
+
+## Inspect local experiments and corrected sources
+
+Retrieve a host context trial through its case with `research context-trials CASE_ID`.
+See [context trial setup](context-trial-runner.md) for frozen tasks, instruction arms
+and trusted CLI execution. A prepared attempt is not an executed result.
+
+Use `research source-reviews CASE_ID` when registry notices affect conclusions.
+[Correction review](source-correction-review.md) explains how to inspect the notice,
+record a scoped disposition and preserve the source history.

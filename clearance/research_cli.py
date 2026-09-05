@@ -72,7 +72,7 @@ def add_parser(sub):
             item.add_argument('case_id')
             if name=='source-review':
                 item.add_argument('--version',type=int,required=True)
-                item.add_argument('--review-file',type=Path,required=True)
+                item.add_argument('--review-file',type=Path,required=True,help='JSON: assessment_id, evidence_id, source_snapshot_hash, warning_fingerprint (from source-reviews), disposition (unaffected/revise/unresolved), rationale, notices [{notice_identity,evidence_id,quote,snapshot_hash}]. Inspect notice sources first.')
         elif name == 'context-trials':
             item.add_argument('case_id')
             item.add_argument('--case-version',type=int)

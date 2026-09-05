@@ -21,6 +21,10 @@ def test_cli_and_mcp_review_preserve_notice_and_flag_decision(tmp_path):
     cases.decide(data['id'],'Retain the scoped comparator assumption.','A correction must be assessed before accepting this decision.', ['paper'],expected_version=data['version'],db=db)
     result,pending=mcp({'action':'source-reviews','case_id':data['id'],'db':db})
     assert not result['isError'] and len(pending['pending'])==1
+    from clearance.mcp_server import TOOLS
+    schema=next(t for t in TOOLS if t['name']=='science_research')['inputSchema']['properties']['source_review']
+    assert 'notice_identity' in schema['properties']['notices']['items']['required']
+    assert set(schema['properties']['disposition']['enum'])=={'unaffected','revise','unresolved'}
     good=fixtures.proposal(data,db);bad=copy.deepcopy(good)
     bad['notices'][0]['quote']='This quote does not occur in the frozen correction notice.'
     result,error=mcp({'action':'source-review','case_id':data['id'],'version':data['version'],'source_review':bad,'db':db})

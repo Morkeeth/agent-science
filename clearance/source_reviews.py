@@ -130,7 +130,7 @@ def review(case_id, version, proposal, *, db=None):
         seen = set()
         for notice in proposal['notices']:
             if not isinstance(notice, dict) or set(notice) != {'notice_identity', 'evidence_id', 'quote', 'snapshot_hash'}:
-                raise ValueError('notice requires identity, evidence_id, quote and snapshot_hash')
+                raise ValueError('notice requires notice_identity, evidence_id, quote and snapshot_hash')
             if any(not isinstance(notice[key], str) or not notice[key] for key in ('notice_identity', 'evidence_id', 'snapshot_hash')):
                 raise ValueError('notice identity, evidence_id and snapshot_hash must be nonempty text')
             if notice['notice_identity'] not in identities or notice['notice_identity'] in seen:
