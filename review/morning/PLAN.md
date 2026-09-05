@@ -19,6 +19,10 @@ Each lane has its own worktree. Source metadata owns source_metadata.py and its 
 5. Follow changed sources to changed interpretations and affected decisions. Test source failures, misleading sources and unknown external outcomes.
 6. Review the full source diff for publication after the local candidate and live evidence have been exercised.
 
-## Operating boundary
+## Original operating boundary (superseded by approved live receipts)
 
 The first live policy is prepared outside Git: at most eight discovery calls, twenty document reads and three rounds; reasoning supplied by the MCP host, no separate model API calls. It is not approved merely by preparing it. Billing remains unknown. Build and free primary-metadata inspection can continue independently while explicit paid-call approval is pending.
+
+The one-question and five-topic policies were later approved and exercised. See
+[FIELD-PASS.md](FIELD-PASS.md) for observed usage and remaining limits. The full
+scientific comparison and fresh-web repetition plan remain outstanding.

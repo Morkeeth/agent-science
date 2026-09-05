@@ -1,5 +1,9 @@
 # Morning continuation — 2026-09-05
 
+Historical morning checkpoint. The later [live field pass](FIELD-PASS.md) and
+[context trial](CONTEXT-TRIAL.md) supersede its pending execution status; original
+measurements below retain their own pins and limits.
+
 ## What this is
 
 Continuation of the complete NIGHTPLAN-2026-09-05.md. Product baseline e12ca6f7c4ad489b8e20bb16c307470635b0883d stays frozen. Morning baseline ea05a1009778f754608da3825e36c85fc702f591. Tested code candidate 70eafcc2db66da499b6c29c6df7ed46e7ee4df2a. CLI/MCP remain primary; the visual design was not changed. No public push or deployment.
@@ -53,3 +57,5 @@ Next prompt: Continue the full research engine plan from this receipt. Read the 
 ## Later live follow-up
 
 The one-question policy was subsequently approved and exercised. See [the live investigation receipt](LIVE-QUESTION.md): the challenge changed a saved interpretation and decision, independent source review added caveats, and the shared round allowance stopped further discovery. Five additional topics and the actual context trial remain outstanding.
+
+Later source-grounded reviews now cover all 18 preserved answers: see [SCIENTIFIC-REVIEW](SCIENTIFIC-REVIEW.md). The historical 108-unknown checkpoint above remains a dated record; current dispositions are 52 scoped passes, two failed criteria from one defect, and 54 unknown. No scientific-quality lift is established.
