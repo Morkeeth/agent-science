@@ -59,3 +59,17 @@ def test_identical_review_does_not_change_decision_or_synthesis(tmp_path):
     current=cases.get(data['id'],db=db)
     assert current['decisions'][0]['review']['state']=='UNCHANGED_IN_SNAPSHOT'
     assert not synthesis.compare(data['id'],reviewed['version'],db=db)['material_change']
+
+
+def test_new_registry_notice_does_not_erase_an_earlier_warning(tmp_path):
+    from clearance import source_metadata, source_reviews
+    db=str(tmp_path/'cases.db');data=fixtures.fixture(db)
+    source=data['evidence'][0];prior=copy.deepcopy(source['metadata_review_required'])
+    metadata=copy.deepcopy(source['source_metadata'])
+    for record in metadata['records']:
+        for relation in record['relations']: relation['notice']='doi:10.1234/new-notice'
+    updated=source_metadata.apply(data['id'],data['version'],source['id'],metadata,db=db)
+    warnings=updated['evidence'][0]['metadata_review_required']
+    assert all(w in warnings for w in prior)
+    assert {w['notice'] for w in warnings}=={'doi:10.1234/notice','doi:10.1234/new-notice'}
+    assert len(source_reviews.list_pending(data['id'],db=db)['pending'][0]['notice_identities'])==2

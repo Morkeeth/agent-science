@@ -120,7 +120,7 @@ class SourceMetadataTests(unittest.TestCase):
                 metadata = self.checked(**{'updated-by':[{'DOI':'10.1234/notice', 'type':raw}]})
                 evidence = sm.apply('c', version, 'e', metadata, db=self.db)['evidence'][0]
                 version += 1
-                relation = evidence['metadata_review_required'][0]
+                relation = next(r for r in evidence['metadata_review_required'] if r['raw_type'] == raw)
                 self.assertEqual(relation['raw_type'], raw)
                 self.assertEqual(relation['type'], raw.lower().replace('_','-'))
                 self.assertEqual(bool(evidence.get('retracted')), raw == 'Retraction')

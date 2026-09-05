@@ -207,7 +207,12 @@ def apply(case_id, version, evidence_id, metadata, *, db=None):
                 if record['provider'] == 'arxiv' and kind == 'new-version' and relation.get('target_version') in pinned:
                     evidence['superseded_by'] = relation['notice']; effects.append(relation)
         # Missing records never clear earlier explicit flags.
-        if effects: evidence['metadata_review_required'] = effects
+        if effects:
+            # A partial registry response cannot silently retire an earlier notice.
+            retained = list(evidence.get('metadata_review_required') or [])
+            for effect in effects:
+                if effect not in retained: retained.append(effect)
+            evidence['metadata_review_required'] = retained
         data['version'] += 1
         data.setdefault('trace', []).append({'route':'source_metadata', 'outcome':metadata.get('status'),
                                            'evidence_id':evidence_id, 'at':cases.now(), 'source_body_checked':False})
