@@ -1,3 +1,32 @@
+<!-- STATE:start -->
+## SHARED WORK STATE · revision ae237d991de6 · rendered 2026-09-05 23:48
+One state for Cursor, Codex, Claude and Oscar. Sources, all outside this repo: `~/.local/state/fleet/rulings.jsonl` (Oscar's rulings, local only, supersede rows), `~/CODE/cursor-slask/tasks/TASKS.yaml` (task IDs, Cursor's), `~/.claude/board/config.json` (clocks). Views such as GLANCE, SLASK and ZUP are adapters over the same revision.
+**A CLOSED task stays closed. Do not requeue, re-verify or re-poll it.**
+Before acting, record that you read this revision: `python3 ~/CODE/fleet-ops/state/state.py ack --session <name> --consumer <claude|codex|cursor> --rev ae237d991de6`. In a cloud sandbox instead append `{"session":"<name>","consumer":"cursor","rev":"ae237d991de6","ts":"<iso>"}` to `.fleet/ACK.jsonl` in this repo and commit it.
+
+### OPEN
+- **AS-CINEMA-2026-09-09** · Agent Science, Agentic Cinema submit pack · owner shared · `agent-science` · due 2026-09-09T14:00
+  - next: Oscar: C1 rotate Gemini+Parallel keys. Agent: continue research-engine nightplan + use-bar path; stop at film/Devpost.
+- **AS-KEYS-ROTATE** · Rotate Gemini + Parallel keys (plaintext Cloud Run revision) · owner oscar · `cleared` · due 2026-09-09T14:00
+  - next: Rotate both keys at aistudio.google.com + parallel.ai; then agent redeploys without --set-env-vars secrets
+- **AS-NIGHTPLAN-2026-09-05** · Overnight research engine build (nightplan) · owner agent · `cleared`
+  - next: Execute cleared/NIGHTPLAN-2026-09-05.md, research/challenge/resume CLI+MCP; no public push, no overnight spend without policy
+
+### RULINGS AND FACTS, each with the object it was read from
+- ETHOnline clocks: organiser close Sunday 13 September 12:00 EDT; Oscar's own hard stop Wednesday 10 September 23:59 Stockholm because 11 to 13 September is a wedding; 6 September was a go/no-go gate, never the deadline. · "quoted words held local-only" · ethglobal.com/events/ethonline2026/info/details fetched 2026-09-05; board/config.json; SLASK line 221 · 2026-09-05
+- Agent browser work leaves Brave untouched. Use a separate Chrome profile or background fetch. No force quit, no profile changes. · "quoted words held local-only" · RUN.md night run 2026-09-05, Settled; relayed by Oscar 2026-09-06 00:3x · 2026-09-05
+
+### CLOCKS (board/config.json)
+- 2026-09-04T10:00 · ReadyCounter · WebMCP Challenge (Devpost) · DONE · SUBMITTED 4 Sep (Oscar). Retro + launch post open.
+- 2026-09-06T13:59 · Paper 1 · Agents in the Wild @ NeurIPS (OpenReview) · open · 5 Sep AoE = 6 Sep 13:59 Paris; one upload, who-verifies-anon.pdf
+- 2026-09-09T01:59 · Kaggle Working Note · DONE · 8 Sep 23:59 UTC; Oscar: completed. Also lifts the embargo on article series 10
+- 2026-09-09T23:00 · Agent Science · Agentic Cinema (Devpost) · open · 14:00 PDT; video upload + paste left
+- 2026-09-10T23:59 · ETHOnline hard stop (Stockholm) · open · ARC MAP full product; personal hard stop; build days 4, 5, 7, 10 Sep. Registration/stake previously reported by board, not reverified. Current build: ~/CODE/arc-map/.internal/HANDOFF-2026-09-05.md; Unclaimed blockers are historical, not current registration evidence.
+- 2026-09-15T02:00 · Agent Grinder + MAGNET · AWS Professional Agents · open · 14 Sep 17:00 PDT; 4 rulings blocked on Oscar
+
+### ACKNOWLEDGED THIS REVISION: claude (morkeeth-10 d0bca7 fable)
+<!-- STATE:end -->
+
 # Product direction — operator ruling, 2026-09-04
 
 CLI/MCP is the primary Agent Science workflow. Research, evidence inspection, decisions, repo experiments and review belong in the terminal or coding agent. The dashboard is an optional evidence inspector; it must not become a required workflow or require a hosted account for local work. Preserve the design developed with Claude. Extending capabilities does not authorize a new visual design or replacing the product front door.
