@@ -1,0 +1,156 @@
+"""Assessment-scoped authored review of inspected correction notices.
+
+Registry facts remain untouched. An acknowledgment is not semantic proof and
+cannot rehabilitate retracted or superseded source material.
+"""
+from contextlib import closing
+import hashlib
+import json
+import uuid
+
+from clearance import cases, studies
+
+MEANING = 'Authored correction interpretation; exact quote and identity are checked, not semantic entailment.'
+
+
+def _hash(value):
+    return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(',', ':')).encode()).hexdigest()
+
+
+def _warnings(source):
+    return sorted(source.get('metadata_review_required') or [], key=lambda value: json.dumps(value, sort_keys=True))
+
+
+def _assessment_hash(data, assessment):
+    claim = next((c for c in data.get('claims', []) if any(a['id'] == assessment['id'] for a in c['assessments'])), {})
+    # Derived presentation fields must not alter the committed assessment binding.
+    raw = next((a for a in claim.get('assessments', []) if a['id'] == assessment['id']), assessment)
+    raw = {k:v for k,v in raw.items() if k not in ('state', 'source_reviews')}
+    return _hash({'statement':claim.get('statement'), 'assessment':raw})
+
+
+def _available(source):
+    text = source.get('snapshot_text')
+    return (source.get('status') != 'UNAVAILABLE' and isinstance(text, str) and bool(text)
+            and source.get('snapshot_hash') == cases.digest(text)
+            and not source.get('retracted') and not source.get('superseded_by'))
+
+
+def _notice_current(data, notice):
+    source = next((e for e in data.get('evidence', []) if e['id'] == notice['evidence_id']), {})
+    identities, versions, _ = studies._identities(source)
+    return (_available(source) and not source.get('metadata_review_required')
+            and source['snapshot_hash'] == notice['snapshot_hash']
+            and notice['notice_identity'] in identities | versions
+            and notice['quote'] in source['snapshot_text'])
+
+
+def assessment_status(data, assessment):
+    """Stable semantic rows used by brief, synthesis and decision review."""
+    sources = {e['id']:e for e in data.get('evidence', [])}
+    anchors = [assessment.get('anchor', {})] + [c.get('anchor', {}) for c in assessment.get('conditions', [])]
+    rows = []
+    for evidence_id in sorted({a['evidence_id'] for a in anchors if a.get('evidence_id')}):
+        source = sources.get(evidence_id, {})
+        warnings = _warnings(source)
+        if not warnings:
+            continue
+        fingerprint = _hash(warnings)
+        reviews = [r for r in data.get('source_reviews', []) if r['assessment_id'] == assessment['id'] and r['evidence_id'] == evidence_id]
+        current = [r for r in reviews if r['warning_fingerprint'] == fingerprint
+                   and r['source_snapshot_hash'] == source.get('snapshot_hash')
+                   and r['assessment_fingerprint'] == _assessment_hash(data, assessment)]
+        latest = current[-1] if current else None
+        expected_notices = {w.get('notice') for w in warnings if isinstance(w, dict) and isinstance(w.get('notice'), str)}
+        resolved = (latest is not None and latest['disposition'] == 'unaffected' and _available(source)
+                    and bool(expected_notices) and {n['notice_identity'] for n in latest['notices']} == expected_notices
+                    and all(isinstance(w, dict) and w.get('notice') in expected_notices for w in warnings)
+                    and all(a.get('snapshot_hash') == source.get('snapshot_hash') for a in anchors if a.get('evidence_id') == evidence_id)
+                    and all(_notice_current(data, n) for n in latest['notices']))
+        rows.append({'assessment_id':assessment['id'], 'evidence_id':evidence_id,
+            'source_snapshot_hash':source.get('snapshot_hash'), 'warning_fingerprint':fingerprint,
+            'warnings':warnings, 'notice_identities':sorted({w.get('notice') for w in warnings if isinstance(w, dict) and w.get('notice')}),
+            'state':'RESOLVED_AS_AUTHORED' if resolved else 'REVIEW_REQUIRED',
+            'review':latest, 'meaning':MEANING})
+    return rows
+
+
+def list_pending(case_id, *, db=None):
+    data = cases.get(case_id, db=db)
+    rows = []
+    for claim in data.get('claims', []):
+        superseded = {a.get('supersedes') for a in claim['assessments']}
+        for assessment in claim['assessments']:
+            if assessment['id'] in superseded:
+                continue
+            rows += [dict(row, claim_id=claim['id'], statement=claim['statement']) for row in assessment_status(data, assessment)]
+    return {'object_type':'source_reviews', 'case_id':case_id, 'version':data['version'],
+            'pending':[row for row in rows if row['state'] == 'REVIEW_REQUIRED'],
+            'resolved':[row for row in rows if row['state'] == 'RESOLVED_AS_AUTHORED'],
+            'reviews':data.get('source_reviews', []), 'meaning':MEANING}
+
+
+def review(case_id, version, proposal, *, db=None):
+    required = {'assessment_id', 'evidence_id', 'source_snapshot_hash', 'warning_fingerprint', 'notices', 'rationale', 'disposition'}
+    if not isinstance(proposal, dict) or set(proposal) != required:
+        raise ValueError('source review requires exact fields: ' + ', '.join(sorted(required)))
+    if not isinstance(proposal['disposition'], str) or proposal['disposition'] not in ('unaffected', 'revise', 'unresolved'):
+        raise ValueError('disposition must be unaffected, revise or unresolved')
+    for field in ('assessment_id', 'evidence_id', 'source_snapshot_hash', 'warning_fingerprint'):
+        if not isinstance(proposal[field], str) or not proposal[field]:
+            raise ValueError(field + ' must be nonempty text')
+    if not isinstance(proposal['rationale'], str) or not 20 <= len(proposal['rationale'].strip()) <= 5000:
+        raise ValueError('source review needs a substantive 20–5000 character rationale')
+    if not isinstance(proposal['notices'], list) or len(proposal['notices']) > 30:
+        raise ValueError('notices must be a list of at most 30 inspected anchors')
+    with closing(cases.connect(db)) as con, con:
+        con.execute('BEGIN IMMEDIATE')
+        row = con.execute('SELECT body FROM revisions WHERE case_id=? ORDER BY version DESC LIMIT 1', (case_id,)).fetchone()
+        if not row:
+            raise ValueError('case not found')
+        data = json.loads(row['body'])
+        if type(version) is not int or data['version'] != version:
+            raise ValueError('case version changed; inspect the current notices')
+        assessments = []
+        for claim in data.get('claims', []):
+            superseded = {a.get('supersedes') for a in claim['assessments']}
+            assessments += [a for a in claim['assessments'] if a['id'] not in superseded]
+        assessment = next((a for a in assessments if a['id'] == proposal['assessment_id']), None)
+        if not assessment:
+            raise ValueError('review must name an active assessment')
+        target = next((r for r in assessment_status(data, assessment) if r['evidence_id'] == proposal['evidence_id']), None)
+        if not target:
+            raise ValueError('assessment does not use this warning source')
+        if any(proposal[key] != target[key] for key in ('source_snapshot_hash', 'warning_fingerprint')):
+            raise ValueError('source body or warning fingerprint changed')
+        source = next(e for e in data['evidence'] if e['id'] == proposal['evidence_id'])
+        if proposal['disposition'] == 'unaffected' and not _available(source):
+            raise ValueError('unavailable, retracted or superseded source cannot be rehabilitated')
+        identities = set(target['notice_identities'])
+        seen = set()
+        for notice in proposal['notices']:
+            if not isinstance(notice, dict) or set(notice) != {'notice_identity', 'evidence_id', 'quote', 'snapshot_hash'}:
+                raise ValueError('notice requires identity, evidence_id, quote and snapshot_hash')
+            if any(not isinstance(notice[key], str) or not notice[key] for key in ('notice_identity', 'evidence_id', 'snapshot_hash')):
+                raise ValueError('notice identity, evidence_id and snapshot_hash must be nonempty text')
+            if notice['notice_identity'] not in identities or notice['notice_identity'] in seen:
+                raise ValueError('notice identity is unrelated or duplicated')
+            quote = notice['quote']
+            if not isinstance(quote, str) or not 20 <= len(quote) <= 4000 or not _notice_current(data, notice):
+                raise ValueError('notice requires an available exact 20–4000 character quote and matching registry identity')
+            seen.add(notice['notice_identity'])
+        if proposal['disposition'] == 'unaffected':
+            if not identities or seen != identities or any(not isinstance(w, dict) or not w.get('notice') for w in target['warnings']):
+                raise ValueError('all registry notices must be inspected before an unaffected disposition')
+            anchors = [assessment.get('anchor', {})] + [c.get('anchor', {}) for c in assessment.get('conditions', [])]
+            if any(a.get('snapshot_hash') != source['snapshot_hash'] for a in anchors if a.get('evidence_id') == source['id']):
+                raise ValueError('assessment source body is stale; review cannot repair its anchor')
+        elif proposal['disposition'] == 'revise' and not seen:
+            raise ValueError('revise requires an inspected notice; use unresolved when unavailable')
+        record = {**proposal, 'id':uuid.uuid4().hex[:12], 'assessment_fingerprint':_assessment_hash(data, assessment),
+                  'case_version':version, 'recorded_version':version + 1, 'at':cases.now(),
+                  'authorship':'user_or_agent', 'meaning':MEANING}
+        data.setdefault('source_reviews', []).append(record)
+        data.update(version=version + 1, changes=[{'kind':'source_review_added', 'assessment_id':assessment['id'], 'evidence_id':source['id']}])
+        con.execute('INSERT INTO revisions VALUES(?,?,?)', (case_id, version + 1, json.dumps(data)))
+    return list_pending(case_id, db=db)

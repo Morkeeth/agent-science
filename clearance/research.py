@@ -175,6 +175,7 @@ def assess(case_id,version,*,statement,relation,rationale,evidence_id=None,quote
 
 
 def brief(data):
+    from clearance import source_reviews
     evidence={e['id']:e for e in data['evidence']};rows=[]
     for claim in data.get('claims',[]):
         assessments=[]
@@ -182,7 +183,14 @@ def brief(data):
         for a in claim['assessments']:
             anchor=a['anchor'];source=evidence.get(anchor.get('evidence_id'),{})
             current=not anchor or (source.get('snapshot_hash')==anchor['snapshot_hash'] and source.get('status')!='UNAVAILABLE')
-            assessments.append({**a,'state':'SUPERSEDED' if a['id'] in superseded else 'CURRENT' if current else 'REVIEW_REQUIRED'})
+            reviews=source_reviews.assessment_status(data,a)
+            anchors=[anchor]+[c.get('anchor',{}) for c in a.get('conditions',[])]
+            for item in anchors:
+                if not item: continue
+                used=evidence.get(item.get('evidence_id'),{})
+                current &= (used.get('snapshot_hash')==item.get('snapshot_hash') and used.get('status')!='UNAVAILABLE' and not used.get('retracted') and not used.get('superseded_by'))
+            current &= not any(r['state']=='REVIEW_REQUIRED' for r in reviews)
+            assessments.append({**a,'source_reviews':reviews,'state':'SUPERSEDED' if a['id'] in superseded else 'CURRENT' if current else 'REVIEW_REQUIRED'})
         relations={a['relation'] for a in assessments if a['state']=='CURRENT'}
         state=('CONTESTED' if {'supports','contradicts'}<=relations else
                'REVIEW_REQUIRED' if any(a['state']=='REVIEW_REQUIRED' for a in assessments) else
@@ -206,6 +214,10 @@ def render_brief(result):
         for a in c['assessments']:
             lines.append(f"  {a['relation']} · {a['state']}: {a['rationale']}")
             if a['anchor']:lines.extend(['  '+a['anchor']['url'],'  '+a['anchor']['quote']])
+            for review in a.get('source_reviews',[]):
+                disposition=review.get('review') or {}
+                lines.append('  Correction review: '+review['state']+' · '+disposition.get('disposition','pending'))
+                if disposition: lines.append('  Authored rationale: '+disposition['rationale'])
         lines.append('')
     if not result['claims']:lines.append('No claims assessed yet. Read a source and add an assessment.')
     if result['unread_report_citations']:lines.append(f"Unread report citations: {len(result['unread_report_citations'])}")

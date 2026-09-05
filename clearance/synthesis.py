@@ -155,14 +155,14 @@ def build(case_data):
             stale_condition = False
             for condition in conditions:
                 anchor = condition['anchor']; source = evidence.get(anchor['evidence_id'], {})
-                current = source.get('snapshot_hash') == anchor['snapshot_hash'] and source.get('status') != 'UNAVAILABLE' and not source.get('retracted') and not source.get('superseded_by') and not source.get('metadata_review_required')
+                current = source.get('snapshot_hash') == anchor['snapshot_hash'] and source.get('status') != 'UNAVAILABLE' and not source.get('retracted') and not source.get('superseded_by') and not any(r['evidence_id'] == source.get('id') and r['state'] == 'REVIEW_REQUIRED' for r in assessment.get('source_reviews', []))
                 condition['state'] = 'CURRENT' if current else 'REVIEW_REQUIRED'
                 stale_condition |= not current
                 if current and anchor['evidence_id'] in by_evidence:
                     by_evidence[anchor['evidence_id']]['conditions'][condition['field']].append(condition)
             state = 'REVIEW_REQUIRED' if stale_condition else assessment['state']
             anchor = assessment['anchor']; source = evidence.get(anchor.get('evidence_id'), {})
-            if source.get('retracted') or source.get('superseded_by') or source.get('metadata_review_required'):
+            if source.get('retracted') or source.get('superseded_by') or any(r['state'] == 'REVIEW_REQUIRED' for r in assessment.get('source_reviews', [])):
                 state = 'REVIEW_REQUIRED'
             category = assessment.get('category', 'unclassified')
             conclusion = {'claim_id':claim['id'], 'assessment_id':assessment['id'], 'statement':claim['statement'],
@@ -173,7 +173,7 @@ def build(case_data):
                     if other['id'] != assessment['id'] and other['state'] != 'SUPERSEDED'],
                 'category':category, 'practical_consequence':assessment.get('practical_consequence'),
                 'consequence_basis':'Authored inference from this interpretation; not an independently measured result.',
-                'rationale':assessment['rationale'], 'anchor':anchor, 'conditions':conditions,
+                'rationale':assessment['rationale'], 'anchor':anchor, 'conditions':conditions, 'source_reviews':assessment.get('source_reviews', []),
                 'strongest_challenge':assessment.get('strongest_challenge'), 'what_would_change':assessment.get('what_would_change'),
                 'authorship':assessment['authorship'], 'meaning':MEANING, 'evidence_version':assessment['evidence_version']}
             conclusions.append(conclusion)
