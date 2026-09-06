@@ -7,7 +7,7 @@ import re
 import sqlite3
 import uuid
 from contextlib import closing
-from clearance import cases, night_runs
+from clearance import cases, night_runs, research_protocols
 
 CRITERIA = ('original_sources', 'citation_correctness', 'scope_errors', 'contrary_evidence',
             'unresolved_gaps', 'experiment_specificity')
@@ -134,12 +134,30 @@ def prepare(spec, *, db=None):
     arm_ids = {arm.get('id') for arm in arms if isinstance(arm, dict)}
     if arm_ids != {'baseline', 'candidate'}:
         raise ValueError('prepared campaign arms must be named baseline and candidate')
-    if prepared.get('protocol') is not None and not isinstance(prepared['protocol'], dict):
+    supplied_protocol = prepared.get('protocol')
+    if supplied_protocol is not None and not isinstance(supplied_protocol, dict):
         raise ValueError('protocol must be an object when provided')
-    protocol = prepared.get('protocol', {})
-    if protocol:
-        for key in ('baseline', 'candidate'):
-            _text(protocol.get(key), 'protocol ' + key)
+    protocol = {'state': 'UNRESOLVED', 'reason': 'No immutable protocol ID and version were supplied.'}
+    if supplied_protocol:
+        if set(supplied_protocol) != {'id', 'version'}:
+            raise ValueError('protocol reference requires exactly id and version')
+        protocol_id = _text(supplied_protocol.get('id'), 'protocol id')
+        protocol_version = supplied_protocol.get('version')
+        if type(protocol_version) is not int or protocol_version < 1:
+            raise ValueError('protocol version must be a positive integer')
+        saved = research_protocols.get(protocol_id, version=protocol_version, db=db)
+        if saved.get('status') != 'READY':
+            raise ValueError('prepared campaign requires a READY immutable protocol')
+        if saved.get('kind') != 'code_change':
+            raise ValueError('prepared evaluation requires a code_change protocol')
+        pins = {arm['id']: arm.get('code_ref') for arm in arms}
+        if pins != {'baseline': saved.get('baseline'), 'candidate': saved.get('intervention')}:
+            raise ValueError('campaign arm pins must equal the frozen protocol baseline and intervention')
+        protocol_snapshot = {key: saved.get(key) for key in (
+            'id', 'version', 'case_id', 'case_version', 'kind', 'status', 'repo',
+            'baseline', 'intervention', 'check_sha256', 'budget', 'stopping_rule')}
+        protocol = {'state': 'READY_UNRUN', 'id': protocol_id, 'version': protocol_version,
+                    'snapshot': protocol_snapshot, 'snapshot_hash': _hash(protocol_snapshot)}
     prepared['preparation'] = {
         'status': 'FROZEN_UNRUN',
         'operational_rubric': rubric,
@@ -149,8 +167,37 @@ def prepare(spec, *, db=None):
     }
     result = create(prepared, db=db)
     result['preparation'] = copy.deepcopy(result['manifest']['preparation'])
-    result['next_action'] = 'Run the pinned baseline/candidate protocol, then import each completed result with exact case and source provenance.'
+    result['next_action'] = ('Run protocol ' + protocol['id'] + ' v' + str(protocol['version']) +
+        ' with the trusted CLI acceptance script, then record results with exact provenance.'
+        if protocol['state'] == 'READY_UNRUN' else
+        'Create a READY immutable experiment protocol, then prepare a new campaign version before recording results.')
     return result
+
+
+def _protocol_evidence(manifest, *, db=None):
+    """Resolve a prepared campaign's frozen protocol without rewriting its manifest."""
+    preparation = manifest.get('preparation')
+    if not isinstance(preparation, dict):
+        return None
+    reference = preparation.get('protocol')
+    if not isinstance(reference, dict) or reference.get('state') != 'READY_UNRUN':
+        return None
+    saved = research_protocols.get(reference.get('id'), version=reference.get('version'), db=db)
+    snapshot = reference.get('snapshot')
+    if not isinstance(snapshot, dict) or reference.get('snapshot_hash') != _hash(snapshot):
+        raise ValueError('frozen protocol reference integrity check failed')
+    current_snapshot = {key: saved.get(key) for key in snapshot}
+    if current_snapshot != snapshot:
+        raise ValueError('stored protocol no longer matches the frozen campaign reference')
+    completed = [execution for execution in saved.get('executions', [])
+                 if execution.get('state') == 'COMPLETED' and execution.get('experiment_id')]
+    if not completed:
+        return None
+    execution = completed[0]
+    return {'protocol_id': saved['id'], 'protocol_version': saved['version'],
+            'protocol_snapshot_hash': reference['snapshot_hash'],
+            'acceptance_sha256': saved['check_sha256'], 'experiment_id': execution['experiment_id'],
+            'execution_id': execution['id'], 'execution_state': execution['state']}
 
 
 def _load(con, campaign_id):
@@ -202,7 +249,7 @@ def _runtime_observation(run, arm):
             'duration_limitations': [] if duration_known else ['One or more operation durations are unobserved.']}
 
 
-def _validate_review_content(obs, snapshots):
+def _validate_review_content(obs, snapshots, *, experiment_evidence=None, require_experiment_evidence=False):
     judgments = obs.get('judgments')
     if not isinstance(judgments, dict) or set(judgments) != set(CRITERIA):
         raise ValueError('all six manual judgments are required; use unknown when unmeasured')
@@ -216,6 +263,9 @@ def _validate_review_content(obs, snapshots):
             raise ValueError('judgment anchors must be a list')
         if judgment['status'] == 'pass' and name in ('original_sources', 'citation_correctness', 'contrary_evidence') and not anchors:
             raise ValueError(name + ' pass requires inspected source anchors')
+        if (judgment['status'] == 'pass' and name == 'experiment_specificity'
+                and require_experiment_evidence and not experiment_evidence):
+            raise ValueError('experiment_specificity pass requires a completed frozen protocol execution')
         for anchor in anchors:
             if not isinstance(anchor, dict):
                 raise ValueError('anchor must be an object')
@@ -300,7 +350,9 @@ def record(campaign_id, observation, *, db=None):
             snapshots[evidence['id']] = evidence
     if arm['kind'] == 'retrieval' and not snapshots:
         raise ValueError('retrieval outcome requires saved source snapshots; an empty plan is not a completed baseline')
-    _validate_review_content(obs, snapshots)
+    experiment_evidence = _protocol_evidence(manifest, db=db)
+    _validate_review_content(obs, snapshots, experiment_evidence=experiment_evidence,
+                             require_experiment_evidence='preparation' in manifest)
     runtime_observation = _runtime_observation(run, arm)
     baseline_content_hash = _hash({'question_hash': question['question_hash'],
         'sources': sorted((e['url'], e['snapshot_hash']) for e in snapshots.values()),
@@ -312,7 +364,7 @@ def record(campaign_id, observation, *, db=None):
                             'usage_basis': run.get('usage_basis') if run else 'baseline case; no instrumented run',
                             'engine_elapsed_seconds': runtime_observation['engine_elapsed_seconds'],
                             'latency_seconds': None, 'tokens': None, 'billing': run.get('billing') if run else None},
-               execution_provenance=runtime_observation)
+               execution_provenance=runtime_observation, experiment_evidence=experiment_evidence)
     with closing(_connect(db)) as con, con:
         con.execute('BEGIN IMMEDIATE')
         previous = [json.loads(row[0]) for row in con.execute('SELECT body FROM research_observations WHERE campaign_id=?', (campaign_id,))]
@@ -365,10 +417,12 @@ def review(campaign_id, review_object, *, db=None):
             if not isinstance(text, str) or cases.digest(text) != evidence.get('snapshot_hash'):
                 raise ValueError('source snapshot integrity check failed')
             snapshots[evidence['id']] = evidence
-    _validate_review_content(item, snapshots)
+    _validate_review_content(item, snapshots, experiment_evidence=original.get('experiment_evidence'),
+                             require_experiment_evidence='preparation' in campaign['manifest'])
     item.update(version=expected + 1, recorded_at=cases.now(), case_id=original['case_id'],
                 case_version=original['case_version'], case_content_hash=original['case_content_hash'],
                 manifest_hash=original['manifest_hash'], observation_hash=_hash(original),
+                experiment_evidence=copy.deepcopy(original.get('experiment_evidence')),
                 basis='Independent authored review; source occurrence is not semantic proof.')
     with closing(_connect(db)) as con, con:
         con.execute('BEGIN IMMEDIATE')

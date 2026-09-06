@@ -141,12 +141,22 @@ agent-science research evaluation-show CAMPAIGN_ID --json
 The preparation spec must include `operational_rubric` with
 `source_recovery`, `counterevidence` and `experiment_executability`, a
 non-empty `unknown_resources` list, and exactly two arms named `baseline` and
-`candidate`. A prepared campaign is `FROZEN_UNRUN`; its manifest hash is the
-provenance anchor. Import later results with `evaluation-record` only after an
-exact case version and, for executable work, a completed persisted run have
-been checked. A saved plan is never an observation. Use `pass`, `fail` or
-`unknown` for each criterion, then append an independent review with
-`evaluation-review`; unknown evidence remains unknown.
+`candidate`. Bind executable work with `"protocol": {"id": "...", "version":
+1}`. That exact existing protocol must be `READY`, and its baseline and
+intervention commits must equal the two campaign arm pins. The manifest freezes
+the protocol version, case version, commits, acceptance digest, budget and
+stopping rule. Free-form protocol descriptions are rejected. If `protocol` is
+absent, preparation succeeds only as explicitly `UNRESOLVED`; create a protocol
+and prepare a new campaign before claiming experiment adequacy.
+
+A prepared campaign is `FROZEN_UNRUN`; its manifest hash is the provenance
+anchor. Import later results with `evaluation-record` only after an exact case
+version and, for executable work, a completed persisted run have been checked.
+`experiment_specificity: pass` also requires a completed execution of the exact
+frozen protocol version. The saved observation and each review expose its
+protocol ID/version, acceptance digest, execution ID and experiment ID. A saved
+plan is never an observation. Use `pass`, `fail` or `unknown` for each criterion;
+missing protocol, source or rubric evidence stays unknown.
 
 ```text
 agent-science research evaluation-create --spec-file evaluation.json
