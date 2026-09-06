@@ -11,7 +11,7 @@ deadline: 2026-09-09T14:00:00-07:00
 > **For Claude / fleet:** this file is the single “where we are” surface.  
 > `hack.md` = process · `CLAUDE.md` = entry · this file = gates + evidence.
 
-**Last gate run:** 2026-08-31T21:46:02Z — `bash scripts/full_gate.sh` → **FULL GATE OK** (127/127 · visibility hosted · 19/19 long run)
+**Last gate run:** 2026-09-06 — `test_watch_it_go_red` 72/72 · hosted stranger path **RED** (`private-workspaces`) · cost-from-billing gate REFUSE without export · see `docs/RECEIPT-night-wave-2026-09-06.md`
 
 ---
 
@@ -20,10 +20,10 @@ deadline: 2026-09-09T14:00:00-07:00
 | State | Detail |
 |-------|--------|
 | **Product noun** | **Agent Science** — truth layer for what people believe and use · B lead · A on the same layer |
-| **Product** | LIVE on Cloud Run · public repo · sealed prediction |
-| **Build lane** | WOW websearch transparency · CONTRARY stamp · stack-fit · community notes · `/truths/ui` |
-| **Oscar** | **Film 30 min** — `docs/PITCH-TOMORROW.md` · transparency WOW first · Devpost paste ready |
-| **Film lead** | Ask → sourced/refuse → free on re-ask · ≥2 domains · E&O as *a* truth not the only story |
+| **Product** | LIVE on Cloud Run · **private workspaces** (rev `00026-zel`) · public repo · sealed prediction |
+| **Build lane** | Night wave 2026-09-06 — cost billing gate + hosted stranger RED finding + pack truth |
+| **Oscar** | **Film** CLI/cold-clone or workspace login — hosted try-it URLs are RED for logged-out judges |
+| **Film lead** | Do not claim `/visibility/ui` without login until `probe_hosted_stranger_path.py` is GREEN |
 
 ---
 
@@ -64,11 +64,10 @@ deadline: 2026-09-09T14:00:00-07:00
 | | |
 |---|---|
 | **URL** | https://agent-science-568004190078.us-central1.run.app |
-| **Revision** | `agent-science-00018-n4s` · `parallel_sdk: true` · **`/truths/ui` live** |
-| **Health** | `engine_default: adk` · 265 claims · hit rate ~0.80 |
-| **New** | `GET /visibility/ui` — full websearch panel for judges (film this) |
-| **New** | `GET /truths/ui` — truths dashboard |
-| **Stats** | 265 claims · hit rate ~0.80 · queries logged growing |
+| **Revision** | `agent-science-00026-zel` · **`mode=private-workspaces`** |
+| **Health** | `ok: true` · no public `engine_default` field on this revision |
+| **Stranger path** | **RED** — `/search` `/truths/ui` `/visibility/ui` → 303 → login (`docs/FINDING-hosted-stranger-path-2026-09-06.md`) |
+| **Workspace** | `/login` · `/cases` — token required; never in URL |
 
 **Compound (sealed):** `longrun-0831-1320` A=**1** → B=**0** Parallel · B `corpus_hits=1`
 

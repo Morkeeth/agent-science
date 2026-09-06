@@ -1,0 +1,11 @@
+{
+  "source_url": "https://parallel.ai/pricing",
+  "fetched_at": "2026-09-06T00:10:00Z",
+  "product": "Search API",
+  "processor": "Advanced",
+  "verbatim_span": "Advanced | $5 | $1 | Multi-hop background research agents | ~3s",
+  "unit": "per_1k_requests_with_10_results",
+  "usd_per_1k_requests": 5.0,
+  "usd_per_request": 0.005,
+  "note": "Card for baseline estimates only. Not a billing statement. Shipping arm requires an export under fixtures/billing/export.json or BILLING_EXPORT_PATH."
+}

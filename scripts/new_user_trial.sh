@@ -13,7 +13,20 @@ echo
 py() { python3 -c "$1"; }
 
 echo "1. Health (partners wired)"
-curl -sf "$BASE/health" | py "import sys,json; d=json.load(sys.stdin); assert d['ok']; print('  engine', d['engine_default'], 'parallel', d['parallel'], 'gemini', d['gemini'])"
+HEALTH_JSON=$(curl -sf "$BASE/health") || { echo "  FAIL: /health unreachable"; exit 1; }
+echo "$HEALTH_JSON" | py "
+import sys, json
+d = json.load(sys.stdin)
+assert d.get('ok'), d
+mode = d.get('mode')
+if mode == 'private-workspaces' or 'engine_default' not in d:
+    print('  BLOCKED: hosted mode=%r revision=%r' % (mode, d.get('revision')))
+    print('  Legacy stranger path (/search, /clear, /registry) is not public on this revision.')
+    print('  Use: bash scripts/verify_cold_clone.sh · python3 scripts/probe_hosted_stranger_path.py')
+    print('  Oscar: workspace login, or restore a public exhibit surface before filming try-it URLs.')
+    raise SystemExit(2)
+print('  engine', d['engine_default'], 'parallel', d.get('parallel'), 'gemini', d.get('gemini'))
+"
 
 echo "2. Free lookup (dictionary — 0 Parallel)"
 curl -sf "$BASE/search?q=2012/28/EU&live=false" | py "

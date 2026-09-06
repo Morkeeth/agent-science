@@ -2,7 +2,7 @@
 doc: hack
 project: Agent Science
 phase: SHIP
-last-touched: 2026-09-03 12:10 UTC
+last-touched: 2026-09-06 00:10 UTC
 canonical: true
 event: Agentic Cinema · Parallel track · deadline 2026-09-09 14:00 PDT
 supersedes: docs/PHASE0-LADDER.md ClickHouse-track note (runtime track is Parallel)
@@ -295,50 +295,58 @@ submission craft, supported by a real tendency, **not** as the explanation of th
 - [x] **Baseline steelmanned** — raw rows printed by eval scripts; RC5 is now the single discordant item (baseline GREEN, shipping UNKNOWN)
 - [x] **Statistic matched to n** — Wilson 95% CI + McNemar in baseline/ablation scripts
 - [x] **Scorer symmetrical** — `python3 scripts/eval_scorer_symmetry.py` · delivered SOURCED/UNSOURCED labels only; baseline **5/6** vs shipping **6/6** (RC5 discordant)
-- [ ] **Cost from billing**, with the price card's date stated.
+- [x] **Cost from billing**, with the price card's date stated. — `python3 scripts/eval_cost_from_billing.py` (2026-09-06): price card from parallel.ai/pricing; baseline invents USD from receipt×card; shipping **REFUSES** without billing export (no export on disk).
 - [x] **Offline path with no API key.**
 - [x] **Honesty & limitations** section carrying our worst number — README §Honesty & limitations; PITCH first screen
 - [ ] **Answer the track brief in the track's own words on the first screen** — judge pack § above; must land on Devpost ¶1 + video 0:00
 - [ ] **Video verified attached and public on the live entry page, from a logged-out browser** — not in a checklist file, on the page.
-- [ ] **Every artifact claim measured at the submitted commit.** Four retros of that loss failed this row.
+- [ ] **Every artifact claim measured at the submitted commit.** Four retros of that loss failed this row. Hosted stranger-path claims re-measured 2026-09-06 → RED (private-workspaces).
 
 Full record: `fleet-ops (internal)/retros/QWEN-LOSS-RETRO-2026-08-30.md` (corrected) ·
 `QWEN-FIELD-TEST-2026-08-30.md` (the n=40 falsification) · playbook lesson 97.
 
 ---
 
-## 🎯 NOW — Partner night wave (fresh compound + timeout finding)
+## 🎯 NOW — Night wave 2026-09-06 · Sep 9 submit-path truth (embarrass us)
 
-**Slice:** Harden partner verify to prove Parallel at runtime; ship fresh compound probe; document orphan-works 504 regression at object.
+**Slice:** Close open Qwen **cost-from-billing** gate with a naive baseline arm; re-measure hosted stranger path **at the live URL**; refresh SUBMISSION-PACK + Oscar deploy prep (no deploy).
 
-### Build (shipped 2026-09-03)
+### Build
 
-- [x] Fresh compound probe — `python3 scripts/compound_fresh_hosted_probe.py` (A_parallel≥1 → B drop + corpus_hits)
-- [x] Partner verify hardened — `bash scripts/verify_partners_hosted.sh` (Parallel ≥1 on fresh claim + compound-fresh)
-- [x] Orphan-works timeout finding — `docs/FINDING-orphan-works-timeout-2026-09-03.md` (Run A now 504 @ 300s)
-- [x] Receipt — `docs/RECEIPT-partner-night-2026-09-03.md`
+- [x] Cost-from-billing gate — `scripts/eval_cost_from_billing.py` + `fixtures/billing/PRICE-CARD.json` (baseline invents; shipping refuses without export)
+- [x] Hosted stranger-path probe — `scripts/probe_hosted_stranger_path.py` (RED on login-wall; self-test watches RED first)
+- [x] SUBMISSION-PACK truth — public-repo / try-it / hosted claims re-derived; stranger one-command stays offline
+- [x] Offline compound exact-assertion fix — paraphrased mini-B failed A=2→B=3; identical overlap restores A=2→B=1 (`FINDING-offline-compound-exact-assertion-2026-09-06.md`)
+- [x] Live compound — keys missing → honest BLOCKED receipt
+- [x] Deploy prep — `docs/DEPLOY-PREP-2026-09-06.md` matching current `deploy.sh` (private workspace; Oscar only)
 
 ### Verify (one command each)
 
 ```bash
 git pull && python3 tests/test_watch_it_go_red.py                    # 72/72
-bash scripts/verify_partners_hosted.sh                               # 4/4 partners + Parallel + compound-fresh
-python3 scripts/compound_fresh_hosted_probe.py                       # A≥1 Parallel → B corpus_hits≥1
-bash scripts/full_gate.sh                                            # FULL GATE OK
-python3 scripts/bench_check_docs.py                                  # 127/127
+python3 scripts/eval_cost_from_billing.py                           # shipping REFUSE without billing export
+python3 scripts/probe_hosted_stranger_path.py --self-test           # RED then GREEN control
+python3 scripts/probe_hosted_stranger_path.py                       # live URL — RED / private-workspaces
+python3 scripts/bench_check_docs.py                                 # 128/128
 python3 scripts/eval_refusal_baseline.py && python3 scripts/eval_refusal_ablation.py
+python3 tests/test_registry_surface.py -q                           # 16/16
+python3 scripts/compound_exhibit_receipt.py                         # offline A=2→B=1
+bash scripts/new_user_trial.sh                                      # exit 2 BLOCKED
 ```
 
 ### Receipt
 
-- `docs/RECEIPT-partner-night-2026-09-03.md`
-- `docs/FINDING-orphan-works-timeout-2026-09-03.md`
+- `docs/RECEIPT-night-wave-2026-09-06.md`
+- `docs/FINDING-hosted-stranger-path-2026-09-06.md`
+- `docs/FINDING-offline-compound-exact-assertion-2026-09-06.md`
 
 ### BLOCKED
 
-- Orphan-works full script — **504 @ 300s on Run A** (was Run B only). Oscar: raise `deploy.sh --timeout` or film compound-fresh.
+- Live compound exhibit — needs PARALLEL/GEMINI keys **and** workspace auth on current hosted revision
+- Outward acts (video, Devpost, deploy promote) — Oscar only
 
 ---
+
 
 ## 🎯 NOW (merged 2026-09-03, Cursor lane) — Night wave: SUBMISSION-PACK + Qwen eval gates (build lane)
 
@@ -528,6 +536,7 @@ bash scripts/verify_cold_clone.sh                                               
 
 | When | What | Command | Outcome |
 |------|------|---------|---------|
+| 2026-09-06 night | Cost billing + hosted stranger + compound exact-assertion | `eval_cost_from_billing.py` · `probe_hosted_stranger_path.py` · `compound_exhibit_receipt.py` | shipping **REFUSE** (no export) · hosted stranger **RED** · paraphrased mini-B **failed** then fixed to A=2→B=1 |
 | 2026-09-03 night | Fresh compound + timeout finding | `compound_fresh_hosted_probe.py` · `verify_partners_hosted.sh` | **A≥1 Parallel → B drop** · orphan-works Run A **504** @ 300s |
 | 2026-09-03 night | SUBMISSION-PACK + Qwen gates | `bench_check_docs.py` · `eval_verify_holdout.py` · `eval_scorer_symmetry.py` | **127/127** · holdout OK · scorer 5/6 vs 6/6 · offline compound A=2→B=1 |
 | 2026-09-02 | Partner verify re-run | `verify_partners_hosted.sh` · `full_gate.sh` | **4/4 partners** · compound warm-shelf PASS · 72/72 auto-seed |
@@ -554,4 +563,4 @@ bash scripts/verify_cold_clone.sh                                               
 
 ---
 
-*Update NOW after every slice. Oscar owns phase 6–7. Next: EYES on §WINNER ANGLES.*
+*Update NOW after every slice. Oscar owns phase 6–7. Next: film CLI/cold-clone or restore public exhibit — stranger probe is RED.*

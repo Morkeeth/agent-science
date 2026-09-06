@@ -1,6 +1,6 @@
 # COMPOUND EXHIBIT — orphan-works A/B
 
-**Date:** 2026-09-03 00:07 UTC · **Subject:** `orphan-works` · **Mode:** offline
+**Date:** 2026-09-06 00:13 UTC · **Subject:** `orphan-works` · **Mode:** offline
 **Fixtures:** `compound-mini-A.txt` → `compound-mini-B.txt`
 
 ## Quantified compounding
@@ -20,6 +20,7 @@ Network boundaries faked; verdict rules run for real:
 - search.find_sources → scripted primary URLs + honest call counter
 - instruments.document → fixture bodies (no HTTP)
 - StringLocator (DEFAULT) + verify + independence — real shipping rules
+- Overlapping A/B claims are identical assertions (exact-reuse rule); see docs/FINDING-offline-compound-exact-assertion-2026-09-06.md
 
 Ground-truth Parallel calls at fake boundary (Run A only): `3`
 
@@ -52,7 +53,7 @@ PASS  test_visibility_ui_renders_transparency
 
 ```
 PASS  test_not_gameable_reuse_carries_the_original_verdict_both_poles
-PASS  test_second_subject_reuses_the_log_and_spends_no_parallel_call
+PASS  test_second_subject_reuses_support_and_retries_unsettled_claim
 
 2/2 passed
 ```

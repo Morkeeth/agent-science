@@ -67,6 +67,9 @@ class _Raw:
 
 
 # Fixed claim lists mirroring compound-mini scripts — extraction is NOT simulated live.
+# Overlapping A/B claims must be IDENTICAL assertions: refusal_log reuses only exact
+# settled wording (see claim_key). Paraphrases are related candidates, not free hits —
+# that is why the old paraphrased B script stopped compounding after exact-assertion reuse.
 _OFFLINE_CLAIMS = {
     "A": [
         _Raw("In 2012 the European Union passed Directive 2012/28/EU, the Orphan Works Directive.",
@@ -75,9 +78,9 @@ _OFFLINE_CLAIMS = {
              None, "29 October 2014"),
     ],
     "B": [
-        _Raw("Europe's answer was Directive 2012/28/EU — known as the Orphan Works Directive —",
+        _Raw("In 2012 the European Union passed Directive 2012/28/EU, the Orphan Works Directive.",
              None, "Directive 2012/28/EU"),
-        _Raw("and the deadline for national transposition was 29 October 2014.",
+        _Raw("Member states had until 29 October 2014 to bring it into national law.",
              None, "29 October 2014"),
         _Raw("The British Library has estimated that forty percent of its copyrighted collection is orphaned.",
              None, "forty percent"),
@@ -176,6 +179,7 @@ def _run_offline() -> dict:
             "search.find_sources → scripted primary URLs + honest call counter",
             "instruments.document → fixture bodies (no HTTP)",
             "StringLocator (DEFAULT) + verify + independence — real shipping rules",
+            "Overlapping A/B claims are identical assertions (exact-reuse rule); see docs/FINDING-offline-compound-exact-assertion-2026-09-06.md",
         ],
         "net_find_calls": net.find_calls,
     }
