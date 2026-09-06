@@ -1,8 +1,8 @@
 <!-- STATE:start -->
-## SHARED WORK STATE · revision b6f1e17d6917 · rendered 2026-09-06 · scope repo cleared
+## SHARED WORK STATE · revision bc9cb3da482c · rendered 2026-09-06 · scope repo cleared
 This repo's rows of the one shared work state. Authorities: todo.md (human), TASKS.yaml (ids), board clocks, Oscar's rulings (local only). Views such as GLANCE, SLASK and ZUP are adapters over the same revision.
 **A CLOSED task stays closed. Do not requeue, re-verify or re-poll it.**
-Before acting, record that you read this revision, exact session and exact rev: `python3 ~/CODE/fleet-ops/state/state.py ack --session <your session id> --consumer <claude|codex|cursor> --rev b6f1e17d6917`. In a cloud sandbox instead append `{"session":"<your session id>","consumer":"<claude|codex|cursor>","rev":"b6f1e17d6917","ts":"<iso>","stage":"acknowledged"}` to `.fleet/ACK.jsonl` in this repo and commit it.
+Before acting, record that you read this revision, exact session and exact rev: `python3 ~/CODE/fleet-ops/state/state.py ack --session <your session id> --consumer <claude|codex|cursor> --rev bc9cb3da482c`. In a cloud sandbox instead append `{"session":"<your session id>","consumer":"<claude|codex|cursor>","rev":"bc9cb3da482c","ts":"<iso>","stage":"acknowledged"}` to `.fleet/ACK.jsonl` in this repo and commit it.
 
 ### CLOSED. Not open work.
 - **AS-NIGHTPLAN-2026-09-05** · Overnight research engine build (nightplan) · **DONE**. status `done` in TASKS.yaml
@@ -13,7 +13,7 @@ Before acting, record that you read this revision, exact session and exact rev: 
 - **AS-KEYS-ROTATE** · Rotate Gemini + Parallel keys (plaintext Cloud Run revision) · owner oscar · `cleared` · due 2026-09-09T14:00
   - next: Rotate both keys at aistudio.google.com + parallel.ai; then agent redeploys without --set-env-vars secrets
 
-### ACKNOWLEDGED THIS REVISION: claude/morkeeth-10, claude/dc8db26e-0366-4b4c-8309-460715de7fcb
+### ACKNOWLEDGED THIS REVISION: nobody yet
 <!-- STATE:end -->
 
 # Product direction — operator ruling, 2026-09-04
