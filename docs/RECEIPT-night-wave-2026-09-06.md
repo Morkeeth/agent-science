@@ -98,6 +98,7 @@ Offline `compound_exhibit_receipt.py` is authoritative for stranger/no-key path.
 - **Carried A=2→B=1 from the markdown receipt** until re-running `compound_exhibit_receipt.py` went RED (A=2→B=3). Exact-assertion reuse made paraphrased mini-B a false compounding story.
 - **Cost gate shipping arm cannot SOURCED tonight** — no billing export on disk; baseline dollars are invented and labeled as such. Unticked “cost from billing” is now a runnable gate that refuses, not a silent blank.
 - **Did not restore a public exhibit surface** — product direction is private workspaces; restoring public `/search` is Oscar’s deploy decision (`DEPLOY-PREP-2026-09-06.md`).
-- **Did not run `full_gate.sh` / `long_run_goal.sh` end-to-end** — hosted long-run cannot pass while stranger path is RED.
+- **Did not claim `FULL GATE OK`** — `bash scripts/full_gate.sh` exited **2** with `OFFLINE OK · HOSTED BLOCKED` after stranger probe RED (correct; long_run skipped).
 - **McNemar p=1.0000 at n=6 still not significant** — delta +1 on refusal set unchanged.
 - **Video / Devpost / deploy promote** — outward acts; not done.
+- **PeriodCheck LOC tonight (2576) is not the old “11–14k” figure** — re-derived at their HEAD clone; do not carry the prior counter without reconciling what it included.
