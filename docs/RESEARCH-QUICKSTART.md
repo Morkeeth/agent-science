@@ -155,7 +155,18 @@ version and, for executable work, a completed persisted run have been checked.
 `experiment_specificity: pass` also requires a completed execution of the exact
 frozen protocol version. The saved observation and each review expose its
 protocol ID/version, acceptance digest, execution ID and experiment ID. A saved
-plan is never an observation. Use `pass`, `fail` or `unknown` for each criterion;
+plan is never an observation. Preparation rejects a protocol with any execution
+history: create a fresh protocol version before freezing a held-out campaign.
+Execution must start after the campaign freeze. The saved experiment must exist,
+be valid, and match the protocol and observation's exact case/version, repository,
+commit pins and acceptance-script digest. Record and review reject dangling or
+mismatched result references. Observations freeze hashes of the actual result and
+execution; later reviews re-resolve those exact bytes. Older observations without
+this result binding remain readable but cannot authorize a new experiment pass.
+These are local integrity checks, not tamper-proof storage or proof that the
+acceptance criterion measures scientific benefit.
+
+Use `pass`, `fail` or `unknown` for each criterion;
 missing protocol, source or rubric evidence stays unknown.
 
 ```text

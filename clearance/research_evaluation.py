@@ -7,6 +7,7 @@ import re
 import sqlite3
 import uuid
 from contextlib import closing
+from datetime import datetime
 from clearance import cases, night_runs, research_protocols
 
 CRITERIA = ('original_sources', 'citation_correctness', 'scope_errors', 'contrary_evidence',
@@ -148,6 +149,8 @@ def prepare(spec, *, db=None):
         saved = research_protocols.get(protocol_id, version=protocol_version, db=db)
         if saved.get('status') != 'READY':
             raise ValueError('prepared campaign requires a READY immutable protocol')
+        if saved.get('executions'):
+            raise ValueError('protocol already has execution history; create a fresh protocol version before preparing a held-out campaign')
         if saved.get('kind') != 'code_change':
             raise ValueError('prepared evaluation requires a code_change protocol')
         pins = {arm['id']: arm.get('code_ref') for arm in arms}
@@ -174,9 +177,9 @@ def prepare(spec, *, db=None):
     return result
 
 
-def _protocol_evidence(manifest, *, db=None):
+def _protocol_evidence(campaign, observation, *, db=None):
     """Resolve a prepared campaign's frozen protocol without rewriting its manifest."""
-    preparation = manifest.get('preparation')
+    preparation = campaign['manifest'].get('preparation')
     if not isinstance(preparation, dict):
         return None
     reference = preparation.get('protocol')
@@ -193,10 +196,54 @@ def _protocol_evidence(manifest, *, db=None):
                  if execution.get('state') == 'COMPLETED' and execution.get('experiment_id')]
     if not completed:
         return None
+    if len(completed) != 1:
+        raise ValueError('frozen protocol has ambiguous completed executions')
     execution = completed[0]
+    if (execution.get('protocol_id') != saved['id']
+            or execution.get('protocol_version') != saved['version']):
+        raise ValueError('execution identity differs from frozen protocol')
+    with closing(cases.connect(db)) as con:
+        row = con.execute('SELECT case_id,body FROM experiments WHERE id=?',
+                          (execution['experiment_id'],)).fetchone()
+    if row is None:
+        raise ValueError('completed protocol execution refers to a missing experiment')
+    result = json.loads(row['body'])
+    if not isinstance(result, dict):
+        raise ValueError('persisted experiment result must be an object')
+    if (result.get('id') != execution['experiment_id'] or row['case_id'] != saved['case_id']
+            or result.get('case_id') != saved['case_id']
+            or result.get('case_version') != saved['case_version']
+            or observation.get('case_id') != saved['case_id']
+            or observation.get('case_version') != saved['case_version']
+            or result.get('repo') != saved['repo']):
+        raise ValueError('experiment identity differs from frozen protocol or observed case')
+    if (result.get('valid') is not True
+            or result.get('pins') != {'baseline': saved['baseline'], 'candidate': saved['intervention']}
+            or result.get('acceptance_sha256') != saved['check_sha256']
+            or not isinstance(result.get('acceptance_source'), str)
+            or cases.digest(result['acceptance_source']) != result['acceptance_sha256']):
+        raise ValueError('experiment validity, pins or acceptance digest differ from frozen protocol')
+    if (not isinstance(result.get('runs'), list) or not result['runs']
+            or not all(isinstance(run, dict) for run in result['runs'])
+            or execution.get('result') != cases.experiment_summary(result)):
+        raise ValueError('persisted experiment differs from the completed execution result')
+    try:
+        frozen, started, recorded, finished = [datetime.fromisoformat(value) for value in (
+            campaign['created_at'], execution.get('started_at'), result.get('recorded_at'),
+            execution.get('finished_at'))]
+        if any(value.tzinfo is None for value in (frozen, started, recorded, finished)):
+            raise ValueError('timezone missing')
+        ordered = frozen < started <= recorded <= finished
+    except (TypeError, ValueError):
+        raise ValueError('experiment execution requires valid timezone-aware timestamps') from None
+    if not ordered:
+        raise ValueError('experiment execution must start after campaign freeze and finish after its result')
     return {'protocol_id': saved['id'], 'protocol_version': saved['version'],
             'protocol_snapshot_hash': reference['snapshot_hash'],
-            'acceptance_sha256': saved['check_sha256'], 'experiment_id': execution['experiment_id'],
+            'acceptance_sha256': result['acceptance_sha256'], 'experiment_id': result['id'],
+            'experiment_sha256': _hash(result), 'execution_sha256': _hash(execution),
+            'case_id': result['case_id'], 'case_version': result['case_version'],
+            'pins': copy.deepcopy(result['pins']), 'recorded_at': result['recorded_at'],
             'execution_id': execution['id'], 'execution_state': execution['state']}
 
 
@@ -350,7 +397,7 @@ def record(campaign_id, observation, *, db=None):
             snapshots[evidence['id']] = evidence
     if arm['kind'] == 'retrieval' and not snapshots:
         raise ValueError('retrieval outcome requires saved source snapshots; an empty plan is not a completed baseline')
-    experiment_evidence = _protocol_evidence(manifest, db=db)
+    experiment_evidence = _protocol_evidence(campaign, obs, db=db)
     _validate_review_content(obs, snapshots, experiment_evidence=experiment_evidence,
                              require_experiment_evidence='preparation' in manifest)
     runtime_observation = _runtime_observation(run, arm)
@@ -417,7 +464,12 @@ def review(campaign_id, review_object, *, db=None):
             if not isinstance(text, str) or cases.digest(text) != evidence.get('snapshot_hash'):
                 raise ValueError('source snapshot integrity check failed')
             snapshots[evidence['id']] = evidence
-    _validate_review_content(item, snapshots, experiment_evidence=original.get('experiment_evidence'),
+    experiment_evidence = original.get('experiment_evidence')
+    if experiment_evidence is not None:
+        resolved = _protocol_evidence(campaign, original, db=db)
+        if resolved != experiment_evidence:
+            raise ValueError('original experiment evidence no longer matches the persisted result')
+    _validate_review_content(item, snapshots, experiment_evidence=experiment_evidence,
                              require_experiment_evidence='preparation' in campaign['manifest'])
     item.update(version=expected + 1, recorded_at=cases.now(), case_id=original['case_id'],
                 case_version=original['case_version'], case_content_hash=original['case_content_hash'],
