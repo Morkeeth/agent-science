@@ -21,6 +21,7 @@ from cloud.case_auth import Auth
 from cloud.case_budget import Budget, Rejected
 from cloud.case_storage import WorkspaceStore, Conflict, StorageLimit
 from cloud import case_pages
+from cloud import partners as partner_manifest
 
 MAX_BODY = 32768
 CASE_ID = r'[a-f0-9]{12}'
@@ -189,8 +190,10 @@ class WorkspaceHTTP:
         parsed = urlsplit(h.path)
         path = parsed.path.rstrip('/') or '/'
         if h.command == 'GET' and path == '/health':
-            return self.send(200, {'ok': True, 'service': 'agent-science', 'mode': 'private-workspaces',
-                                   'revision': os.getenv('K_REVISION', 'local')})
+            return self.send(200, partner_manifest.health_payload(mode='private-workspaces'))
+        if h.command == 'GET' and path == '/partners':
+            # Public judge manifest — wiring only, no tenant data.
+            return self.send(200, partner_manifest.manifest())
         expected_origin = os.getenv('AGENT_SCIENCE_PUBLIC_ORIGIN', '').rstrip('/')
         if self.secure and h.command == 'GET' and not self.api and expected_origin:
             # Cloud Run has multiple aliases. Forms and session cookies must use

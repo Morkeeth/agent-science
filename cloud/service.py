@@ -598,56 +598,10 @@ class Handler(BaseHTTPRequestHandler):
                               "text/html; charset=utf-8")
 
         if path == "/health":
-            gemini_path = "none"
-            if os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY"):
-                gemini_path = "api-key"
-            else:
-                proj = (
-                    os.environ.get("GCP_PROJECT")
-                    or os.environ.get("GOOGLE_CLOUD_PROJECT")
-                    or (os.environ.get("K_SERVICE") and "adc")
-                )
-                if proj:
-                    gemini_path = f"vertex:{proj}"
-                else:
-                    try:
-                        from clearance import gemini as _g
-                        p = _g.vertex_project()
-                        if p and _g.vertex_token():
-                            gemini_path = f"vertex:{p}"
-                    except Exception:
-                        pass
-            adk_ok = adk_agent.adk_available()
-            adk_default = ADK_DEFAULT and adk_ok
-            from clearance import search as _parallel
-            return self._json(200, {
-                "ok": True,
-                "service": "agent-science",
-                "gemini": gemini_path != "none",
-                "gemini_path": gemini_path,
-                "parallel": bool(os.environ.get("PARALLEL_API_KEY")),
-                "parallel_sdk": _parallel.sdk_available(),
-                "parallel_sdk_version": _parallel.sdk_version(),
-                "parallel_transport": _parallel.integration_info()["transport"],
-                "last_parallel_search_id": _parallel.last_search_id(),
-                "agent_builder": adk_ok,
-                "adk_version": adk_agent.adk_version(),
-                "engine_default": "adk" if adk_default else "direct",
-            })
+            return self._json(200, partner_manifest.health_payload(mode="local-desk"))
 
         if path == "/partners":
-            gemini_path = "none"
-            if os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY"):
-                gemini_path = "api-key"
-            else:
-                proj = os.environ.get("GCP_PROJECT") or os.environ.get("GOOGLE_CLOUD_PROJECT")
-                if proj:
-                    gemini_path = f"vertex:{proj}"
-            adk_ok = adk_agent.adk_available()
-            return self._json(200, partner_manifest.manifest(
-                gemini_path=gemini_path,
-                adk_default=ADK_DEFAULT and adk_ok,
-            ))
+            return self._json(200, partner_manifest.manifest())
 
         if path == "/corpus":
             subject = (qs.get("subject") or ["default"])[0].strip() or "default"

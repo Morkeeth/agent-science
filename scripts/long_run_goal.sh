@@ -49,8 +49,11 @@ echo "--- HOSTED: health + desk surfaces ---"
 curl -sf "$BASE/health" | python3 -c "
 import sys,json
 d=json.load(sys.stdin)
-assert d['ok'] and d['engine_default']=='adk' and d['parallel'] and d['gemini']
-print('  health ok engine=adk')
+assert d['ok'], d
+missing=[k for k in ('engine_default','parallel','gemini') if k not in d]
+assert not missing, 'liveness-only /health — partner fields absent: %s (deploy partner-surface)' % missing
+assert d['engine_default']=='adk' and d['parallel'] and d['gemini'], d
+print('  health ok engine=adk parallel=%s gemini=%s' % (d['parallel'], d['gemini']))
 "
 note "hosted health"
 

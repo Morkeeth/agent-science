@@ -47,24 +47,17 @@ Output on this run:
 }
 ```
 
-## Hosted /health (measured 2026-08-30)
+## Hosted /health (measured 2026-08-30; **regressed 2026-09-06**)
 
 ```bash
 curl -s https://agent-science-568004190078.us-central1.run.app/health | python3 -m json.tool
 ```
 
-```json
-{
-  "ok": true,
-  "service": "agent-science",
-  "gemini": true,
-  "gemini_path": "vertex:hack-fleet",
-  "parallel": true,
-  "agent_builder": true,
-  "adk_version": "2.7.1",
-  "engine_default": "adk"
-}
-```
+**2026-08-30** returned `engine_default: adk` with partner fields.  
+**2026-09-06** live revision `agent-science-00026-zel` returns liveness-only
+`{ok, service, mode, revision}` — partner fields absent until Oscar deploys the
+partner-surface restore (`docs/FINDING-hosted-partner-surface-2026-09-06.md`).
+ADK remains the default **local desk** `/clear` engine (`AGENT_SCIENCE_HOSTED` unset).
 
 ## What is NOT proved here
 

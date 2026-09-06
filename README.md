@@ -1,5 +1,9 @@
 # Agent Science
 
+**You get:** every checkable claim back as a verbatim quote with its source URL, or UNSOURCED with a named reason — plus a research case shelf that lets a decision change when its evidence changes.  
+**Proof:** offline compound exhibit and held-out refusal eval (`python3 scripts/compound_exhibit_receipt.py`; `python3 scripts/eval_refusal_baseline.py`).  
+**Constraint:** if the document does not contain the exact passage, refuse — never paraphrase, never infer.
+
 Research a builder question, inspect the source evidence, and record a decision that can change when its evidence changes.
 
 Agent Science is a CLI/MCP research companion for coding work. Public-source discovery, versioned evidence, decisions and repo experiments work locally without a hosted account. The CLI and MCP interface keep the question, exact source quotations, source snapshots, actual search attempts, repo context and decision history together.

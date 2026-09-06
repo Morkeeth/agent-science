@@ -11,8 +11,10 @@
 > **You get:** every checkable claim back as a verbatim quote with its source URL, or
 > UNSOURCED with a named reason — plus a truth shelf that compounds so the second ask is free.
 >
-> **Proof:** hosted compound exhibit — Run A **1** Parallel call, Run B **0** with
-> `corpus_hits=1` on repeat. Four partners wired at runtime: Vertex, Parallel, Cloud Run, ADK.
+> **Proof:** offline compound + held-out refusal eval (baseline 5/6 vs shipping 6/6). Hosted
+> private workspaces expose partner wiring on `/health` + `/partners` after the 2026-09-06
+> deploy; unauthenticated `/clear` is local-desk only — do not demo a public paste URL until
+> Oscar confirms the revision.
 >
 > **Constraint:** if the document does not contain the exact passage, refuse — never paraphrase,
 > never infer. We refused our own pitch headline in the product because of this rule
