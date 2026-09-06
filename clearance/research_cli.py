@@ -24,12 +24,22 @@ def add_parser(sub):
     parser.add_argument('--db', default=argparse.SUPPRESS)
     parser.add_argument('--json', action='store_true', default=argparse.SUPPRESS)
     actions = parser.add_subparsers(dest='action', required=True)
-    for name in ('start', 'show', 'context', 'resume', 'cancel', 'reconcile', 'challenge', 'compare', 'follow', 'update', 'updates', 'experiment-plan', 'protocol', 'policy', 'execute-protocol', 'evaluation-prepare', 'evaluation-create', 'evaluation-show', 'evaluation-record','evaluation-review','source-reviews','source-review','context-trials','context-trial-create','context-trial-show','context-trial-prepare','context-trial-complete','context-trial-abort'):
+    for name in ('desk', 'open', 'save', 'seen', 'start', 'show', 'context', 'resume', 'cancel', 'reconcile', 'challenge', 'compare', 'follow', 'update', 'updates', 'experiment-plan', 'protocol', 'policy', 'execute-protocol', 'evaluation-prepare', 'evaluation-create', 'evaluation-show', 'evaluation-record','evaluation-review','source-reviews','source-review','context-trials','context-trial-create','context-trial-show','context-trial-prepare','context-trial-complete','context-trial-abort'):
         item = actions.add_parser(name)
         item.set_defaults(func=run)
         item.add_argument('--db', default=argparse.SUPPRESS)
         item.add_argument('--json', action='store_true', default=argparse.SUPPRESS)
-        if name == 'start':
+        if name == 'desk':
+            item.add_argument('--query', default='')
+            item.add_argument('--offset', type=int, default=0)
+        elif name in ('open', 'save', 'seen'):
+            item.add_argument('case_id')
+            if name == 'open':
+                item.add_argument('--claim', dest='claim_id')
+                item.add_argument('--version', type=int)
+            if name == 'seen':
+                item.add_argument('--version', type=int, required=True)
+        elif name == 'start':
             item.add_argument('question')
             item.add_argument('--case-id',help='continue research from this saved case without copying its evidence')
             item.add_argument('--root')
@@ -153,6 +163,9 @@ def _run(args):
 
 
 def render(result, *, db=None):
+    if result.get('object_type', '').startswith('investigation_'):
+        from clearance import investigation_desk
+        return investigation_desk.render(result, db=db)
     """Compact terminal view; --json retains the full inspectable object."""
     suffix = ' --db ' + shlex.quote(str(db)) if db else ''
     if result.get('object_type')=='source_reviews':

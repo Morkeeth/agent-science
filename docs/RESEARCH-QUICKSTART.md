@@ -195,3 +195,38 @@ and trusted CLI execution. A prepared attempt is not an executed result.
 Use `research source-reviews CASE_ID` when registry notices affect conclusions.
 [Correction review](source-correction-review.md) explains how to inspect the notice,
 record a scoped disposition and preserve the source history.
+
+
+## Return to an investigation and open the claim
+
+```bash
+agent-science research desk --query "retrieval"
+agent-science research open CASE_ID
+agent-science research open CASE_ID --claim CLAIM_ID
+agent-science research save CASE_ID
+# On the return visit, after another investigation or refresh has saved a revision:
+agent-science research desk
+agent-science research open CASE_ID --claim CLAIM_ID
+agent-science research seen CASE_ID --version INSPECTED_VERSION
+```
+
+The desk searches existing case questions and shows unseen versions and claims
+that require review. It is paginated, newest saved cases first; `--query` narrows
+the shelf. `open` groups the saved claims, including conflicting and unresolved
+readings. Open one claim to see its exact quoted support, surrounding passage at
+the original evidence version, current source binding, and correction or withdrawal
+notice. Both original and current sources have executable inspection commands.
+These passages are saved snapshots; opening them does not check the web.
+
+`save` follows an investigation without clearing changes on repeated saves.
+`seen --version` records only the version you inspected. Opening a page does not
+mark it seen, and marking it seen does not clear a scientific correction or make
+an authored claim true. A newer concurrent revision remains unseen. The older
+`follow` action still resets its comparison baseline; use `save` for the return
+journey. For fresh research, use the existing `update` and inspect/resume flow;
+provider calls still require the existing explicit policy approval.
+
+The same actions are available through `science_research`: `desk` (`query`,
+`offset`), `open` (`case_id`, optional `claim_id` and `version`), `save` (`case_id`),
+and `seen` (`case_id`, exact `version`). There is no hosted account requirement,
+new model, automatic background refresh, or new evidence store.

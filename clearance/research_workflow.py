@@ -45,7 +45,7 @@ def handle(arguments):
         raise ValueError('arguments must be an object')
     action = arguments.get('action', 'start')
     db = arguments.get('db')
-    allowed = {'start', 'show', 'context', 'resume', 'cancel', 'reconcile', 'challenge', 'compare', 'follow', 'updates', 'update', 'experiment-plan', 'protocol', 'execute-protocol', 'evaluation-prepare', 'evaluation-create', 'evaluation-show', 'evaluation-record','evaluation-review','source-reviews','source-review','context-trials','context-trial-create','context-trial-show'}
+    allowed = {'desk', 'open', 'save', 'seen', 'start', 'show', 'context', 'resume', 'cancel', 'reconcile', 'challenge', 'compare', 'follow', 'updates', 'update', 'experiment-plan', 'protocol', 'execute-protocol', 'evaluation-prepare', 'evaluation-create', 'evaluation-show', 'evaluation-record','evaluation-review','source-reviews','source-review','context-trials','context-trial-create','context-trial-show'}
     if not isinstance(action, str) or action not in allowed:
         raise ValueError('Unknown research action')
     for key in ('live',):
@@ -57,6 +57,17 @@ def handle(arguments):
     for key in ('version', 'from_version', 'case_version'):
         if key in arguments and (type(arguments[key]) is not int or arguments[key] < 1):
             raise ValueError(key + ' must be a positive integer')
+    if action in ('desk', 'open', 'save', 'seen'):
+        from clearance import investigation_desk
+        if action == 'desk':
+            return investigation_desk.desk(query=arguments.get('query', ''), offset=arguments.get('offset', 0), db=db)
+        if not isinstance(arguments.get('case_id'), str) or not arguments['case_id'].strip():
+            raise ValueError('case_id is required')
+        if action == 'seen' and 'version' not in arguments:
+            raise ValueError('seen requires the exact inspected version')
+        if action == 'open':
+            return investigation_desk.open_case(arguments['case_id'], claim_id=arguments.get('claim_id'), version=arguments.get('version'), db=db)
+        return investigation_desk.save(arguments['case_id'], version=arguments.get('version') if action == 'seen' else None, db=db)
     required = []
     if action in ('source-review','source-reviews'):
         required=['case_id']

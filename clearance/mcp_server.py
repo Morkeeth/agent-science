@@ -192,11 +192,13 @@ TOOLS.append({
 
 TOOLS.append({
     "name": "science_research",
-    "description": "Conduct a persisted investigation: start locally, inspect context, submit a case-version-pinned reasoning proposal with resume, challenge a conclusion, compare versions, follow questions, inspect source-reviews, submit a source-review and define experiments. Start makes no external calls. A waiting run is not complete. Only explicit live execution under a configured aggregate policy can fetch/search. Findings are authored interpretations with checked quotations. This tool cannot execute experiments or shell commands.",
+    "description": "Use desk to find saved questions, open to inspect claims and exact original/current source passages, save to follow without clearing changes, and seen with an inspected version to acknowledge the return visit. Conduct a persisted investigation: start locally, inspect context, submit a case-version-pinned reasoning proposal with resume, challenge a conclusion, compare versions, follow questions, inspect source-reviews, submit a source-review and define experiments. Start makes no external calls. A waiting run is not complete. Only explicit live execution under a configured aggregate policy can fetch/search. Findings are authored interpretations with checked quotations. This tool cannot execute experiments or shell commands.",
     "inputSchema": {"type":"object", "additionalProperties":False, "required":["action"], "properties": {
-        "action":{"type":"string","enum":["start","show","context","resume","cancel","reconcile","challenge","update","compare","follow","updates","experiment-plan","protocol","evaluation-prepare","evaluation-create","evaluation-show","evaluation-record","evaluation-review","source-reviews","source-review","context-trials","context-trial-create","context-trial-show"]},
+        "action":{"type":"string","enum":["desk","open","save","seen","start","show","context","resume","cancel","reconcile","challenge","update","compare","follow","updates","experiment-plan","protocol","evaluation-prepare","evaluation-create","evaluation-show","evaluation-record","evaluation-review","source-reviews","source-review","context-trials","context-trial-create","context-trial-show"]},
         "question":{"type":"string","maxLength":1500},
         "case_id":{"type":"string"}, "run_id":{"type":"string"},
+        "claim_id":{"type":"string","description":"Open one claim and its original/current source binding."},
+        "query":{"type":"string","maxLength":1500}, "offset":{"type":"integer","minimum":0},
         "root":{"type":"string","description":"Local repository path; contents are not web queries."},
         "db":{"type":"string","description":"Private local case store override."},
         "version":{"type":"integer","minimum":1}, "from_version":{"type":"integer","minimum":1},

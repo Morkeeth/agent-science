@@ -35,6 +35,20 @@ The first command saves a local plan and retrieves related prior research. An MC
 
 Answers retain source anchors, study conditions, competing interpretations, the strongest challenge and what would change the conclusion. Challenges pin the previous answer; comparisons show changes and affected decisions. Followed updates compare saved versions. Explicit update runs check for new evidence only when resumed under a configured policy.
 
+Return to the saved question and open the claim itself:
+
+```bash
+agent-science research desk --query "memory"
+agent-science research open CASE_ID --claim CLAIM_ID
+agent-science research save CASE_ID
+agent-science research seen CASE_ID --version INSPECTED_VERSION
+```
+
+The claim view opens the original quoted passage beside its current source binding,
+including missing passages and correction notices. `save` preserves unseen changes;
+`seen` acknowledges only the inspected version and never clears a scientific warning.
+The desk and claim view use saved evidence, with no background web calls.
+
 Live calls require an aggregate resource policy approved through the explicit local CLI; MCP cannot approve its own capacity. Usage reservations are not billing, and engine counters exclude reasoning and source reads performed separately by the MCP host. Repository experiments use immutable protocols and an explicitly selected trusted acceptance script.
 
 Research can also check primary registry corrections and pinned source versions, and freeze repeated evaluation campaigns with exact source/run references. Prepared executable campaigns bind an existing immutable protocol version and admit an experiment pass only after its completed execution is present. Practical consequences remain labelled inferences; unmatched baselines and unknown measurements stay visible.
