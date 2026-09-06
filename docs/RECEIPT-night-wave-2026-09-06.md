@@ -18,6 +18,8 @@
 5. **SUBMISSION-PACK truth refresh** — public-repo checkbox corrected (public since 2026-08-22); hosted try-it marked RED; controls **128/128**; stranger block stays offline
 6. **`new_user_trial.sh`** — honest exit 2 BLOCKED on private-workspaces (no KeyError false crash)
 7. **Deploy prep** — `docs/DEPLOY-PREP-2026-09-06.md` matching current private-workspace `deploy.sh` (Oscar only; no deploy run)
+8. **`full_gate.sh`** — cost billing + stranger probe; exit **2** `OFFLINE OK · HOSTED BLOCKED` instead of false FULL GATE OK
+9. **PeriodCheck field at objects** — `docs/FINDING-periodcheck-object-2026-09-06.md` (2576 LOC · 13/13 live-eval · hosted UI 200)
 
 ---
 
