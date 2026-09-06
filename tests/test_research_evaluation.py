@@ -112,6 +112,25 @@ def test_anchor_and_snapshot_failure_controls(saved):
         evaluation.record(campaign['id'], obs, db=db)
 
 
+def test_prepared_campaign_rejects_unsupported_experiment_pass(saved):
+    db, _, obs = saved
+    value = spec()
+    value.update(operational_rubric={
+        'source_recovery': 'Missing original source stays unknown.',
+        'counterevidence': 'Missing contrary evidence stays unknown.',
+        'experiment_executability': 'A pass requires completed frozen protocol evidence.'},
+        unknown_resources=['protocol execution'], protocol=None)
+    campaign = evaluation.prepare(value, db=db)
+    run = night_runs.get(obs['run_id'], db=db)
+    run['created_at'] = cases.now()
+    night_runs._save(run, db)
+    obs['judgments']['experiment_specificity'].update(
+        status='pass', rationale='No protocol or experiment exists for this negative control.')
+    with pytest.raises(ValueError, match='completed frozen protocol execution'):
+        evaluation.record(campaign['id'], obs, db=db)
+    assert evaluation.get(campaign['id'], db=db)['coverage']['recorded'] == 0
+
+
 @pytest.mark.parametrize('alias', ['HEAD', 'main', 'a12345', 'evaluated-head', 'a'*39])
 def test_mutable_baseline_rejected(tmp_path, alias):
     value = spec(); value['arms'][0]['code_ref'] = alias

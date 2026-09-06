@@ -129,6 +129,46 @@ An incoming retraction, correction or explicitly newer pinned version can flag t
 
 ## Freeze and review a repeated evaluation
 
+Prepare a new matched held-out campaign before any result exists. This freezes
+the questions, baseline/candidate arms, rubric and explicit unknown resources in
+the existing campaign store. It makes no web, model or experiment call:
+
+```text
+agent-science research evaluation-prepare --spec-file heldout.json --json
+agent-science research evaluation-show CAMPAIGN_ID --json
+```
+
+The preparation spec must include `operational_rubric` with
+`source_recovery`, `counterevidence` and `experiment_executability`, a
+non-empty `unknown_resources` list, and exactly two arms named `baseline` and
+`candidate`. Bind executable work with `"protocol": {"id": "...", "version":
+1}`. That exact existing protocol must be `READY`, and its baseline and
+intervention commits must equal the two campaign arm pins. The manifest freezes
+the protocol version, case version, commits, acceptance digest, budget and
+stopping rule. Free-form protocol descriptions are rejected. If `protocol` is
+absent, preparation succeeds only as explicitly `UNRESOLVED`; create a protocol
+and prepare a new campaign before claiming experiment adequacy.
+
+A prepared campaign is `FROZEN_UNRUN`; its manifest hash is the provenance
+anchor. Import later results with `evaluation-record` only after an exact case
+version and, for executable work, a completed persisted run have been checked.
+`experiment_specificity: pass` also requires a completed execution of the exact
+frozen protocol version. The saved observation and each review expose its
+protocol ID/version, acceptance digest, execution ID and experiment ID. A saved
+plan is never an observation. Preparation rejects a protocol with any execution
+history: create a fresh protocol version before freezing a held-out campaign.
+Execution must start after the campaign freeze. The saved experiment must exist,
+be valid, and match the protocol and observation's exact case/version, repository,
+commit pins and acceptance-script digest. Record and review reject dangling or
+mismatched result references. Observations freeze hashes of the actual result and
+execution; later reviews re-resolve those exact bytes. Older observations without
+this result binding remain readable but cannot authorize a new experiment pass.
+These are local integrity checks, not tamper-proof storage or proof that the
+acceptance criterion measures scientific benefit.
+
+Use `pass`, `fail` or `unknown` for each criterion;
+missing protocol, source or rubric evidence stays unknown.
+
 ```text
 agent-science research evaluation-create --spec-file evaluation.json
 agent-science research evaluation-show EVALUATION_ID
@@ -155,3 +195,38 @@ and trusted CLI execution. A prepared attempt is not an executed result.
 Use `research source-reviews CASE_ID` when registry notices affect conclusions.
 [Correction review](source-correction-review.md) explains how to inspect the notice,
 record a scoped disposition and preserve the source history.
+
+
+## Return to an investigation and open the claim
+
+```bash
+agent-science research desk --query "retrieval"
+agent-science research open CASE_ID
+agent-science research open CASE_ID --claim CLAIM_ID
+agent-science research save CASE_ID
+# On the return visit, after another investigation or refresh has saved a revision:
+agent-science research desk
+agent-science research open CASE_ID --claim CLAIM_ID
+agent-science research seen CASE_ID --version INSPECTED_VERSION
+```
+
+The desk searches existing case questions and shows unseen versions and claims
+that require review. It is paginated, newest saved cases first; `--query` narrows
+the shelf. `open` groups the saved claims, including conflicting and unresolved
+readings. Open one claim to see its exact quoted support, surrounding passage at
+the original evidence version, current source binding, and correction or withdrawal
+notice. Both original and current sources have executable inspection commands.
+These passages are saved snapshots; opening them does not check the web.
+
+`save` follows an investigation without clearing changes on repeated saves.
+`seen --version` records only the version you inspected. Opening a page does not
+mark it seen, and marking it seen does not clear a scientific correction or make
+an authored claim true. A newer concurrent revision remains unseen. The older
+`follow` action still resets its comparison baseline; use `save` for the return
+journey. For fresh research, use the existing `update` and inspect/resume flow;
+provider calls still require the existing explicit policy approval.
+
+The same actions are available through `science_research`: `desk` (`query`,
+`offset`), `open` (`case_id`, optional `claim_id` and `version`), `save` (`case_id`),
+and `seen` (`case_id`, exact `version`). There is no hosted account requirement,
+new model, automatic background refresh, or new evidence store.
