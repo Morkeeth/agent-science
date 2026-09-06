@@ -13,7 +13,7 @@ Before acting, record that you read this revision, exact session and exact rev: 
 - **AS-KEYS-ROTATE** · Rotate Gemini + Parallel keys (plaintext Cloud Run revision) · owner oscar · `cleared` · due 2026-09-09T14:00
   - next: Rotate both keys at aistudio.google.com + parallel.ai; then agent redeploys without --set-env-vars secrets
 
-### ACKNOWLEDGED THIS REVISION: nobody yet
+### ACKNOWLEDGED THIS REVISION: claude/morkeeth-10, claude/dc8db26e-0366-4b4c-8309-460715de7fcb
 <!-- STATE:end -->
 
 # Product direction — operator ruling, 2026-09-04
