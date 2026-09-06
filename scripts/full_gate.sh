@@ -36,9 +36,10 @@ python3 -m pytest -q tests/test_terminal_case_workflow.py tests/test_evidence_ca
 echo "--- 5. Docs gate ---"
 python3 scripts/bench_check_docs.py
 
-echo "--- 5a. Qwen eval gates (holdout + scorer symmetry) ---"
+echo "--- 5a. Qwen eval gates (holdout + scorer + cost billing) ---"
 python3 scripts/eval_verify_holdout.py
 python3 scripts/eval_scorer_symmetry.py
+python3 scripts/eval_cost_from_billing.py
 
 echo "--- 5b. Privacy (no home/~/CODE paths in tracked files) ---"
 bash scripts/privacy_grep.sh
@@ -46,11 +47,20 @@ bash scripts/privacy_grep.sh
 echo "--- 6. Cold clone ---"
 bash scripts/verify_cold_clone.sh
 
-echo "--- 7. Hosted long run ---"
-bash scripts/long_run_goal.sh "$BASE"
-
-echo "--- 8. Stranger trial ---"
-bash scripts/new_user_trial.sh "$BASE"
+echo "--- 7. Hosted stranger path (at the live URL) ---"
+if python3 scripts/probe_hosted_stranger_path.py --url "$BASE"; then
+  echo "--- 7b. Hosted long run ---"
+  bash scripts/long_run_goal.sh "$BASE"
+  echo "--- 8. Stranger trial ---"
+  bash scripts/new_user_trial.sh "$BASE"
+else
+  echo "HOSTED STRANGER PATH RED — skipping long_run/new_user_trial (would false-fail or KeyError)."
+  echo "Offline stranger path remains: verify_cold_clone.sh · compound_exhibit_receipt.py"
+  echo "Oscar: restore public exhibit or film CLI — docs/FINDING-hosted-stranger-path-2026-09-06.md"
+  echo
+  echo "=== FULL GATE OFFLINE OK · HOSTED BLOCKED === $STAMP"
+  exit 2
+fi
 
 echo
 echo "=== FULL GATE OK === $STAMP"

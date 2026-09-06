@@ -61,6 +61,14 @@ python3 scripts/compound_exhibit_receipt.py
 # exit 0 · A=2 → B=1 Parallel · corpus_hits B=2
 # (pre-fix re-run exited 3 with A=2→B=3 — see FINDING)
 
+bash scripts/full_gate.sh
+# === FULL GATE OFFLINE OK · HOSTED BLOCKED === (exit 2)
+# cost gate + stranger probe wired; long_run skipped on RED
+
+# PeriodCheck at objects (clone + live-evaluation.json + hosted curl):
+# Python LOC 2576 · live-eval 13/13 · hosted UI HTTP 200
+# docs/FINDING-periodcheck-object-2026-09-06.md
+
 test -n "$PARALLEL_API_KEY" || test -f ~/.config/keys/parallel.key; echo $?
 # 1 — missing
 ```
