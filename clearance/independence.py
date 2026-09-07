@@ -95,7 +95,7 @@ def classify(url: str) -> tuple[str, str]:
             return "derived", why
     for frag, why in _PRIMARY:
         domain = frag.lstrip(".")
-        if host == domain or host.endswith("." + domain):
+        if (host == domain and "." in domain) or host.endswith("." + domain):
             return "primary", why
     return "unclassified", "not on either list — a human should look"
 

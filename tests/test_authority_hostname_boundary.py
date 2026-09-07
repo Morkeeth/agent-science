@@ -33,3 +33,7 @@ def test_derived_hints_match_hosts_not_unrelated_paths():
 def test_spoofed_primary_cannot_satisfy_independence_alone():
  from clearance.independence import assess
  assert assess(['https://example.gov.attacker.invalid/report'])['has_independent_support'] is False
+
+
+def test_bare_registry_is_not_a_publisher():
+    assert classify("https://gov/x")[0] == "unclassified"

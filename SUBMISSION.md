@@ -12,7 +12,7 @@ Agent Science is the websearch truth companion. It exposes sources, retains inte
 - Local legacy routes: /clear, /front, /visibility/ui, /truths/ui, /registry and /partners are not the hosted judge workflow. Do not revive their old public promises.
 
 ## Evidence still required
-Cold accepted hosted journey, actual Google AI/Agent Builder and Parallel integration in that journey, reviewed source on remote default branch, public YouTube/Vimeo video URL, track selection and submitted form. The local submission video is179.675seconds; VIDEO-URL.txt remains a placeholder. Recording timing belongs to Oscar.
+Cold accepted hosted journey, actual Google AI/Agent Builder and Parallel integration in that journey, reviewed source on remote default branch, public YouTube/Vimeo video URL, track selection and submitted form. The local submission video is 179.675 seconds; VIDEO-URL.txt remains a placeholder. Recording timing belongs to Oscar.
 
 The `/judge/demo` candidate provides public evidence inspection without private data or metered calls. It cannot prove that Gemini or Parallel ran. Partner SDK imports or old health-field names cannot be substituted for a runtime receipt.
 
