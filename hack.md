@@ -2,7 +2,7 @@
 doc: hack
 project: Agent Science
 phase: SHIP
-last-touched: 2026-09-03 12:10 UTC
+last-touched: 2026-09-07 00:30 UTC
 canonical: true
 event: Agentic Cinema · Parallel track · deadline 2026-09-09 14:00 PDT
 supersedes: docs/PHASE0-LADDER.md ClickHouse-track note (runtime track is Parallel)
@@ -300,7 +300,7 @@ submission craft, supported by a real tendency, **not** as the explanation of th
 - [x] **Honesty & limitations** section carrying our worst number — README §Honesty & limitations; PITCH first screen
 - [ ] **Answer the track brief in the track's own words on the first screen** — judge pack § above; must land on Devpost ¶1 + video 0:00
 - [ ] **Video verified attached and public on the live entry page, from a logged-out browser** — not in a checklist file, on the page.
-- [x] **Every artifact claim measured at the submitted commit.** — `python3 scripts/eval_artifact_claims.py` (2026-09-07): baseline false-GREEN **5/10** on hosted stranger claims; pack public-repo row corrected; see `docs/ARTIFACT-CLAIM-EVAL-2026-09-07.json`
+- [x] **Every artifact claim measured at the submitted commit.** — `python3 scripts/eval_artifact_claims.py` (2026-09-07): baseline false-GREEN **6/10** (HS1–HS5 hosted login wall + D1 stale Private row removed); see `docs/ARTIFACT-CLAIM-EVAL-2026-09-07.json`
 
 Full record: `fleet-ops (internal)/retros/QWEN-LOSS-RETRO-2026-08-30.md` (corrected) ·
 `QWEN-FIELD-TEST-2026-08-30.md` (the n=40 falsification) · playbook lesson 97.
