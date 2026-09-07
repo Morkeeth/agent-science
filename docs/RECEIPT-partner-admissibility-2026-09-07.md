@@ -13,6 +13,7 @@
 | `deploy.sh` Vertex/ADK non-secret env | `t_deploy_sh_secret_manager_not_plaintext_env` |
 | Compound probes use `/api/clear` + token when set | `scripts/compound_*_hosted_probe.py` |
 | Partner verify script fails on stripped health | measured against live URL (RED) + finding doc |
+| Offline compound fixture aligned to exact-assertion integrity | `compound_exhibit_receipt.py` → A=2→B=1, hits=2, exit 0 |
 | SUBMISSION-PACK counts | **131/131** after partner suite grew 7→10 |
 | Design partner loop updated for login + token clear | `docs/DESIGN-PARTNER-LOOP.md` |
 | Partner integrations doc rewritten for dual-mode | `docs/PARTNER-INTEGRATIONS-2026-08-30.md` |
