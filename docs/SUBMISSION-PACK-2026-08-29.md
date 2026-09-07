@@ -54,7 +54,7 @@ Offline compound receipt writes `docs/COMPOUND-EXHIBIT-2026-08-29.md` with A=2�
 | scorer symmetry | `python3 scripts/eval_scorer_symmetry.py` | baseline **5/6** vs shipping **6/6** on delivered labels |
 | hosted partner verify | `bash scripts/verify_partners_hosted.sh` | **RED on live rev 00026** until Oscar redeploys this branch — local HTTP suite green |
 
-**Compound exhibit (offline, 2026-09-03):** `python3 scripts/compound_exhibit_receipt.py` · A=**2**→B=**1** Parallel · B corpus hits=**2** — `docs/COMPOUND-EXHIBIT-2026-08-29.md`. Live hosted (2026-08-31): `long_run_goal.sh` · A=**1**→B=**0** · sealed `docs/SEALED-PREDICTION-2026-08-31.md`. Orphan-works full script: run B **504** — do not claim on video.
+**Compound exhibit (offline, 2026-09-07):** `python3 scripts/compound_exhibit_receipt.py` · A=**2**→B=**1** Parallel · B corpus hits=**2** — `docs/COMPOUND-EXHIBIT-2026-08-29.md` (fixture aligned to exact-assertion integrity; see `docs/FINDING-compound-exhibit-integrity-2026-09-07.md`). Live hosted (2026-08-31): `long_run_goal.sh` · A=**1**→B=**0** · sealed `docs/SEALED-PREDICTION-2026-08-31.md`. Orphan-works full script: run B **504** — do not claim on video. Hosted partner `/health` stripped on rev `00026` until Oscar redeploys this branch.
 
 **Eval gate:** `docs/QWEN-EVAL-GATE-2026-08-30.md` — baseline **5/6 = 0.833** vs shipping **6/6 = 1.000**, delta +1 (RC5); McNemar p=1.0000 at n=6. Holdout + symmetrical scorer re-run 2026-09-03: `docs/RECEIPT-night-wave-2026-09-03.md`.
 
