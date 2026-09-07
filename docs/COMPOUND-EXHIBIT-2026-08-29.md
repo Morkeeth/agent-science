@@ -1,6 +1,6 @@
 # COMPOUND EXHIBIT — orphan-works A/B
 
-**Date:** 2026-09-05 00:14 UTC · **Subject:** `orphan-works` · **Mode:** offline
+**Date:** 2026-09-07 08:24 UTC · **Subject:** `orphan-works` · **Mode:** offline
 **Fixtures:** `compound-mini-A.txt` → `compound-mini-B.txt`
 
 ## Quantified compounding
@@ -11,6 +11,8 @@
 
 - Run B parallel < Run A: **yes**
 - corpus_hits B ≥ 1: **yes**
+
+Note: same-subject corpus reuse requires **identical assertion text** (integrity change 2026-09-04). Overlapping fixtures share exact lines; rephrased claims correctly spend Parallel again.
 
 ## Offline simulation (no Gemini/Parallel keys on this VM)
 

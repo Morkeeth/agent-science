@@ -23,7 +23,8 @@ PY
 )"
 export AGENT_BUILDER=1
 export GCP_PROJECT=hack-fleet
-export PARALLEL_API_KEY=pk-demo-not-live
+# Do not export PARALLEL_API_KEY here — secret_surfaces scans scripts for
+# plaintext key assignment. Health must still expose the parallel *field*.
 export PORT
 export PYTHONPATH="$ROOT"
 mkdir -p "$AGENT_SCIENCE_WORKSPACE_DIR"

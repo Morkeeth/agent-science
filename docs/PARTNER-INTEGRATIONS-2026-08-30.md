@@ -1,14 +1,15 @@
 # PARTNER INTEGRATIONS — Agent Science · Sep 9 path
 
-**Date:** 2026-08-30 · **Last verified:** 2026-09-05 · **Repo:** Morkeeth/agent-science · **Scope:** all four partners wired in code; deploy is Oscar's click.
+**Date:** 2026-08-30 · **Last verified:** 2026-09-07 · **Repo:** Morkeeth/agent-science · **Scope:** all four partners wired in code; deploy is Oscar's click.
 
 Each partner must be **called at runtime** on the default path — not documented only.
 
-> **2026-09-05 finding:** live revision `agent-science-00026-zel` stripped partner fields from
+> **2026-09-05 / re-measured 2026-09-07:** live revision `agent-science-00026-zel` stripped partner fields from
 > `/health` and gated `/partners` + `/clear` behind workspace login.
 > `bash scripts/verify_partners_hosted.sh` → **RED** (`gemini: expected True, got None`).
+> `python3 scripts/eval_hosted_partner_surface.py` → live naive **PASS** / shipping **FAIL**; local dual-surface shipping **PASS**.
 > Fix on this branch: dual surface (`cloud/partner_status.py` + `cloud/service.py`).
-> Full write-up: `docs/FINDING-hosted-partner-strip-2026-09-05.md`.
+> Full write-up: `docs/FINDING-hosted-partner-strip-2026-09-05.md` · receipt `docs/RECEIPT-partner-dual-surface-2026-09-07.md`.
 > **Live hosted stays RED until Oscar runs `deploy.sh` and promotes the candidate.**
 
 ---
