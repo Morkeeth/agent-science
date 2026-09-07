@@ -7,7 +7,7 @@ import json
 import re
 import uuid
 from contextlib import closing
-from clearance import cases, research, studies
+from clearance import cases, research, studies, source_reviews
 
 RELATIONS = {'supports', 'contradicts', 'context', 'unresolved', 'different_scope'}
 MEANING = 'Authored interpretation. Exact quote occurrence is checked; entailment is not mechanically established.'
@@ -90,10 +90,13 @@ def _finding(data, finding, version):
         causal = re.search(r'\b(causes?|caused|causal|increases?|improves?|reduces?)\b', statement, re.I)
         if relation == 'supports' and qualitative and causal:
             raise ValueError('qualitative study cannot establish causal effectiveness; leave unresolved or assess the claim as context/contradicted')
+    consequence = finding.get('practical_consequence')
+    if consequence is not None:
+        consequence = _text(consequence, 'practical_consequence', 20)
     category = finding.get('category', 'unclassified')
     if category not in ('empirical_findings', 'official_constraints', 'field_adoption', 'unclassified'):
         raise ValueError('invalid finding category; local measurements must come from actual experiments')
-    assessment = {'category':category, 'id':uuid.uuid4().hex[:12], 'relation':'context' if relation == 'different_scope' else relation,
+    assessment = {'practical_consequence':consequence, 'category':category, 'id':uuid.uuid4().hex[:12], 'relation':'context' if relation == 'different_scope' else relation,
         'scope_relationship':relation, 'rationale':rationale, 'anchor':anchor,
         'conditions':checked, 'strongest_challenge':challenge, 'what_would_change':reversal,
         'evidence_version':version, 'supersedes':None, 'at':cases.now(), 'authorship':'user_or_agent', 'meaning':MEANING}
@@ -143,7 +146,7 @@ def build(case_data):
     brief = research.brief(case_data)
     grouped = studies.group(case_data['evidence'])
     by_evidence = {eid:s for s in grouped for eid in s['evidence_ids']}
-    evidence = {e['id']:e for e in case_data['evidence']}
+    evidence = {e['id']:source_reviews.effective_source(case_data,e) for e in case_data['evidence']}
     conclusions = []; gaps = []
     for claim in brief['claims']:
         for assessment in claim['assessments']:
@@ -152,14 +155,14 @@ def build(case_data):
             stale_condition = False
             for condition in conditions:
                 anchor = condition['anchor']; source = evidence.get(anchor['evidence_id'], {})
-                current = source.get('snapshot_hash') == anchor['snapshot_hash'] and source.get('status') != 'UNAVAILABLE' and not source.get('retracted') and not source.get('superseded_by')
+                current = source.get('snapshot_hash') == anchor['snapshot_hash'] and source.get('status') != 'UNAVAILABLE' and not source.get('retracted') and not source.get('superseded_by') and not any(r['evidence_id'] == source.get('id') and r['state'] == 'REVIEW_REQUIRED' for r in assessment.get('source_reviews', []))
                 condition['state'] = 'CURRENT' if current else 'REVIEW_REQUIRED'
                 stale_condition |= not current
                 if current and anchor['evidence_id'] in by_evidence:
                     by_evidence[anchor['evidence_id']]['conditions'][condition['field']].append(condition)
             state = 'REVIEW_REQUIRED' if stale_condition else assessment['state']
             anchor = assessment['anchor']; source = evidence.get(anchor.get('evidence_id'), {})
-            if source.get('retracted') or source.get('superseded_by'):
+            if source.get('retracted') or source.get('superseded_by') or any(r['state'] == 'REVIEW_REQUIRED' for r in assessment.get('source_reviews', [])):
                 state = 'REVIEW_REQUIRED'
             category = assessment.get('category', 'unclassified')
             conclusion = {'claim_id':claim['id'], 'assessment_id':assessment['id'], 'statement':claim['statement'],
@@ -168,7 +171,9 @@ def build(case_data):
                 'competing_interpretations':[{'assessment_id':other['id'], 'relation':other.get('scope_relationship', other['relation']),
                     'rationale':other['rationale'], 'anchor':other['anchor']} for other in claim['assessments']
                     if other['id'] != assessment['id'] and other['state'] != 'SUPERSEDED'],
-                'category':category, 'rationale':assessment['rationale'], 'anchor':anchor, 'conditions':conditions,
+                'category':category, 'practical_consequence':assessment.get('practical_consequence'),
+                'consequence_basis':'Authored inference from this interpretation; not an independently measured result.',
+                'rationale':assessment['rationale'], 'anchor':anchor, 'conditions':conditions, 'source_reviews':assessment.get('source_reviews', []),
                 'strongest_challenge':assessment.get('strongest_challenge'), 'what_would_change':assessment.get('what_would_change'),
                 'authorship':assessment['authorship'], 'meaning':MEANING, 'evidence_version':assessment['evidence_version']}
             conclusions.append(conclusion)
@@ -190,7 +195,9 @@ def build(case_data):
     gaps += [{'url':u, 'reason':'unread citation'} for u in brief['unread_report_citations']]
     gaps += [{'evidence_id':e['id'], 'reason':'source unavailable'} for e in evidence.values() if e.get('status') == 'UNAVAILABLE']
     return {'case_id':case_data['id'], 'version':case_data['version'], 'question':case_data['question'],
-        'conclusions':conclusions, 'studies':grouped, 'gaps':gaps,
+        'conclusions':conclusions, 'evidence_groups':{category:[c['assessment_id'] for c in conclusions if c['category']==category]
+            for category in ('empirical_findings','official_constraints','field_adoption','unclassified')},
+        'studies':grouped, 'gaps':gaps,
         'local_measurements':[cases.experiment_summary(e) for e in case_data.get('experiments', [])],
         'limits':brief['limits'] + ['Conditions absent from source anchors remain unknown.',
             'Source classification and interpretations are authored; numeric occurrence is not numerical validity.']}
@@ -204,7 +211,7 @@ def compare(case_id, from_version, *, db=None):
         if before[eid].get('status') == 'UNAVAILABLE' and after[eid].get('status') != 'UNAVAILABLE':
             changes = [event for event in changes if event.get('evidence_id') != eid]
             changes.append({'kind':'source_newly_available', 'evidence_id':eid, 'url':after[eid]['url']})
-        for field in ('retracted', 'superseded_by'):
+        for field in ('retracted', 'superseded_by', 'metadata_review_required'):
             if before[eid].get(field) != after[eid].get(field):
                 changes.append({'kind':'source_metadata_changed', 'field':field, 'evidence_id':eid,
                     'before':before[eid].get(field), 'after':after[eid].get(field)})

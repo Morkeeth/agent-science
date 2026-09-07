@@ -120,3 +120,113 @@ The CLI captures the trusted script once, checks its digest, and gives the runne
 Each protocol version has one execution attempt. Repeating a completed execution retrieves its stored result. An interrupted or failed attempt is visible and cannot silently rerun; inspect the case's experiments, then create a new protocol version with `experiment-plan ... --protocol-id PROTOCOL_ID` and a complete replacement protocol file if another attempt is needed. A changed case requires a new protocol version too.
 
 The execution result includes its actual experiment ID and links back to the protocol version. `research protocol` retains those links, and `case show CASE_ID` retrieves the experiment through its case. Raw script source and process output are omitted from protocol responses. A passing check establishes only its named acceptance criteria. It does not establish a general research finding.
+
+## Check corrections and source versions
+
+After inspecting the source ID, a host can submit `next_action: {"kind":"metadata","evidence_id":"SOURCE_ID","reason":"Check for registry corrections or newer versions"}` with the current `case_version`. Explicit live execution under the approved policy checks at most two fixed primary-registry endpoints (Crossref and arXiv), reserving one document read per planned endpoint and one round. Offline execution does not query a registry. Registry response hashes and check times remain separate from source-body freshness.
+
+An incoming retraction, correction or explicitly newer pinned version can flag the conclusion and its decisions for review. A retraction notice is not automatically retracted itself. Missing metadata does not clear earlier flags or prove that no correction exists. Source-body refresh preserves known registry status.
+
+## Freeze and review a repeated evaluation
+
+Prepare a new matched held-out campaign before any result exists. This freezes
+the questions, baseline/candidate arms, rubric and explicit unknown resources in
+the existing campaign store. It makes no web, model or experiment call:
+
+```text
+agent-science research evaluation-prepare --spec-file heldout.json --json
+agent-science research evaluation-show CAMPAIGN_ID --json
+```
+
+The preparation spec must include `operational_rubric` with
+`source_recovery`, `counterevidence` and `experiment_executability`, a
+non-empty `unknown_resources` list, and exactly two arms named `baseline` and
+`candidate`. Bind executable work with `"protocol": {"id": "...", "version":
+1}`. That exact existing protocol must be `READY`, and its baseline and
+intervention commits must equal the two campaign arm pins. The manifest freezes
+the protocol version, case version, commits, acceptance digest, budget and
+stopping rule. Free-form protocol descriptions are rejected. If `protocol` is
+absent, preparation succeeds only as explicitly `UNRESOLVED`; create a protocol
+and prepare a new campaign before claiming experiment adequacy.
+
+A prepared campaign is `FROZEN_UNRUN`; its manifest hash is the provenance
+anchor. Import later results with `evaluation-record` only after an exact case
+version and, for executable work, a completed persisted run have been checked.
+`experiment_specificity: pass` also requires a completed execution of the exact
+frozen protocol version. The saved observation and each review expose its
+protocol ID/version, acceptance digest, execution ID and experiment ID. A saved
+plan is never an observation. Preparation rejects a protocol with any execution
+history: create a fresh protocol version before freezing a held-out campaign.
+Execution must start after the campaign freeze. The saved experiment must exist,
+be valid, and match the protocol and observation's exact case/version, repository,
+commit pins and acceptance-script digest. Record and review reject dangling or
+mismatched result references. Observations freeze hashes of the actual result and
+execution; later reviews re-resolve those exact bytes. Older observations without
+this result binding remain readable but cannot authorize a new experiment pass.
+These are local integrity checks, not tamper-proof storage or proof that the
+acceptance criterion measures scientific benefit.
+
+Use `pass`, `fail` or `unknown` for each criterion;
+missing protocol, source or rubric evidence stays unknown.
+
+```text
+agent-science research evaluation-create --spec-file evaluation.json
+agent-science research evaluation-show EVALUATION_ID
+agent-science research evaluation-record EVALUATION_ID --observation-file observation.json
+agent-science research evaluation-review EVALUATION_ID --review-file review.json
+```
+
+MCP exposes these four actions with `evaluation_spec`, `evaluation_id`, `observation` and `evaluation_review`. The specification fixes question IDs and expected distinctions, independently authored rubric, arms, resource limits, evidence modes and repetitions before runs begin. See `review/morning/EVALUATION.md` for the complete schema. This operation makes no provider call.
+
+Each observation binds manual judgments and source anchors to an actual case version and completed run. Duplicate runs cannot fill additional repetitions. Saved-source replay cannot be marked fresh web. The report lists missing slots, errors and paired comparability; retrieval and synthesis are different tasks. Runtime source hashes and clean local Git pins provide bounded provenance; they do not attest dependencies, hardware, loaded-module state or models. Engine-operation duration excludes host waiting and separately issued tools. Unknown latency, tokens and billing stay unknown.
+
+Practical consequences are explicitly authored inferences. Answers group empirical findings, official constraints and field adoption; reports of use never become measured effectiveness merely through grouping.
+
+An independent review appends a version to the original observation; it does not replace the run or the original judgments. Supply `arm_id`, `question_id`, `repetition`, `expected_review_version` (zero for the first review), `reviewer`, all six `judgments` and optional `errors`. Concurrent or stale writers are rejected. Historical case and source hashes bind every review to the evidence actually observed.
+
+Metadata requests use public registry GETs without a paid search provider. The CLI still requires an approved aggregate capacity policy for live requests; a free-only policy can set discovery and reasoning limits to zero. An offline check can be followed by a live check. Failed registry checks retain their receipts on the run without creating an evidence revision. Correction flags make conclusions and decisions require review; they do not assert that every passage in a corrected paper is false. New interpretations of those passages remain explicitly flagged. Retractions and superseded sources cannot supply new synthesis anchors.
+
+## Inspect local experiments and corrected sources
+
+Retrieve a host context trial through its case with `research context-trials CASE_ID`.
+See [context trial setup](context-trial-runner.md) for frozen tasks, instruction arms
+and trusted CLI execution. A prepared attempt is not an executed result.
+
+Use `research source-reviews CASE_ID` when registry notices affect conclusions.
+[Correction review](source-correction-review.md) explains how to inspect the notice,
+record a scoped disposition and preserve the source history.
+
+
+## Return to an investigation and open the claim
+
+```bash
+agent-science research desk --query "retrieval"
+agent-science research open CASE_ID
+agent-science research open CASE_ID --claim CLAIM_ID
+agent-science research save CASE_ID
+# On the return visit, after another investigation or refresh has saved a revision:
+agent-science research desk
+agent-science research open CASE_ID --claim CLAIM_ID
+agent-science research seen CASE_ID --version INSPECTED_VERSION
+```
+
+The desk searches existing case questions and shows unseen versions and claims
+that require review. It is paginated, newest saved cases first; `--query` narrows
+the shelf. `open` groups the saved claims, including conflicting and unresolved
+readings. Open one claim to see its exact quoted support, surrounding passage at
+the original evidence version, current source binding, and correction or withdrawal
+notice. Both original and current sources have executable inspection commands.
+These passages are saved snapshots; opening them does not check the web.
+
+`save` follows an investigation without clearing changes on repeated saves.
+`seen --version` records only the version you inspected. Opening a page does not
+mark it seen, and marking it seen does not clear a scientific correction or make
+an authored claim true. A newer concurrent revision remains unseen. The older
+`follow` action still resets its comparison baseline; use `save` for the return
+journey. For fresh research, use the existing `update` and inspect/resume flow;
+provider calls still require the existing explicit policy approval.
+
+The same actions are available through `science_research`: `desk` (`query`,
+`offset`), `open` (`case_id`, optional `claim_id` and `version`), `save` (`case_id`),
+and `seen` (`case_id`, exact `version`). There is no hosted account requirement,
+new model, automatic background refresh, or new evidence store.

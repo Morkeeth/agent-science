@@ -1,0 +1,124 @@
+{
+  "code_commit": "06a2beec614ad5eb1646e7bca2952cae61b9cac0",
+  "policy_id": "five-topic-field-pass-20260905",
+  "topics": [
+    {
+      "topic": "retrieval",
+      "case_id": "5b54d783ec1f",
+      "reserved": {
+        "discovery_calls": 3,
+        "document_reads": 6,
+        "reasoning_calls": 0,
+        "rounds": 3
+      },
+      "observed": {
+        "reasoning_responses": 0,
+        "provider_completed": 3,
+        "document_reads": 5,
+        "online_fetches": 5,
+        "cached_reads": 0
+      },
+      "mcp_calls": 45,
+      "source_pages": 25,
+      "receipt_sha256": "20ab0974c284824caf0bfc77d0503c3983397887119de6431e2fcad0f2c36e9b"
+    },
+    {
+      "topic": "coding",
+      "case_id": "988cbb2094ed",
+      "reserved": {
+        "discovery_calls": 3,
+        "document_reads": 6,
+        "reasoning_calls": 0,
+        "rounds": 3
+      },
+      "observed": {
+        "reasoning_responses": 0,
+        "provider_completed": 3,
+        "document_reads": 6,
+        "online_fetches": 6,
+        "cached_reads": 0
+      },
+      "mcp_calls": 52,
+      "source_pages": 31,
+      "receipt_sha256": "4a804a9a864dcdf19e26483739c2545a435132407efb99ef13f1996462100a37"
+    },
+    {
+      "topic": "ux",
+      "case_id": "7be7dab537cd",
+      "reserved": {
+        "discovery_calls": 3,
+        "document_reads": 6,
+        "reasoning_calls": 0,
+        "rounds": 3
+      },
+      "observed": {
+        "online_fetches": 5,
+        "cached_reads": 0,
+        "reasoning_responses": 0,
+        "document_reads": 5,
+        "provider_completed": 3
+      },
+      "mcp_calls": 48,
+      "source_pages": 28,
+      "receipt_sha256": "c2eb64340e3a10146f60f41187e66bb129970c13496b81f66919ba67f51277a7"
+    },
+    {
+      "topic": "coordination",
+      "case_id": "6f9c8e80b194",
+      "reserved": {
+        "discovery_calls": 3,
+        "document_reads": 6,
+        "reasoning_calls": 0,
+        "rounds": 3
+      },
+      "observed": {
+        "online_fetches": 4,
+        "cached_reads": 0,
+        "reasoning_responses": 0,
+        "document_reads": 4,
+        "provider_completed": 3
+      },
+      "mcp_calls": 43,
+      "source_pages": 23,
+      "receipt_sha256": "a708b8aa548c99d8f20a2f93d8a21e704784cd454018d3f27a4cb5625ab19136"
+    },
+    {
+      "topic": "evaluation",
+      "case_id": "d6ec0a732fd4",
+      "reserved": {
+        "discovery_calls": 3,
+        "document_reads": 6,
+        "reasoning_calls": 0,
+        "rounds": 3
+      },
+      "observed": {
+        "reasoning_responses": 0,
+        "provider_completed": 3,
+        "document_reads": 6,
+        "online_fetches": 6,
+        "cached_reads": 0
+      },
+      "mcp_calls": 21,
+      "source_pages": 3,
+      "receipt_sha256": "387c9a9e0375d4c489f17ceacc2d4479b05528181fd131ae294cc217c62f8b13"
+    }
+  ],
+  "reserved": {
+    "discovery_calls": 15,
+    "document_reads": 30,
+    "reasoning_calls": 0,
+    "rounds": 15
+  },
+  "observed": {
+    "reasoning_responses": 0,
+    "provider_completed": 15,
+    "document_reads": 26,
+    "online_fetches": 26,
+    "cached_reads": 0
+  },
+  "mcp_calls": 209,
+  "source_pages": 110,
+  "billing": null,
+  "host_tokens": null,
+  "caveat": "Counts exclude subsequent zero-call independent source corrections; memory investigation uses a separate earlier policy. These are workflow counts, not scientific quality metrics."
+}

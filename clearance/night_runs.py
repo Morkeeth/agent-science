@@ -3,10 +3,11 @@ import copy
 import fcntl
 import json
 import uuid
+import time
 from contextlib import closing, contextmanager
 from pathlib import Path
 from urllib.parse import urlparse
-from clearance import cases, research, research_search
+from clearance import cases, research, research_search, execution_provenance
 from clearance.research_contract import validate_proposal
 from clearance.safe_fetch import validate_url
 
@@ -134,7 +135,7 @@ def start(question, *, root=None, case_id=None, challenge=False, policy=None, db
         if not challenges:
             challenges = ['Identify evidence that would overturn the saved answer; no strongest challenge was recorded.']
     run = dict(id=uuid.uuid4().hex[:16], case_id=data['id'], case_version=data['version'],
-               base_case_version=data['version'], revision=0, status='awaiting_reasoning',
+               base_case_version=data['version'], runtime=execution_provenance.capture(), revision=0, status='awaiting_reasoning',
                question=question, challenge=challenge, challenges=challenges, prior_research=prior,
                question_map=[dict(id='q1', question=question, gap='; '.join(challenges) if challenge else 'Inspect original evidence and identify unresolved scope.',
                                   competing_explanation='', importance='material')], steps=[], cursor=0,
@@ -153,7 +154,7 @@ def context(run_id, *, db=None):
     windows=run.get('source_windows',{})
     ordered=sorted(data['evidence'],key=lambda e: 0 if e['id'] in windows else 1)
     for e in ordered[:40]:
-        row={k:e[k] for k in ('id','url','status','reason','quote','snapshot_hash') if k in e}
+        row={k:e[k] for k in ('id','url','status','reason','quote','snapshot_hash','source_metadata','metadata_checked_at','metadata_review_required','retracted','superseded_by') if k in e}
         snapshot=e.get('snapshot_text','')
         window=windows.get(e['id'],{})
         stale=bool(window and window['snapshot_hash']!=e.get('snapshot_hash'))
@@ -209,7 +210,7 @@ def _validate(proposal, version):
     if not isinstance(proposal, dict) or type(proposal.get('case_version')) is not int or proposal['case_version'] != version:
         raise ValueError('proposal requires the inspected current case_version')
     action = proposal.get('next_action')
-    if not isinstance(action, dict) or action.get('kind') not in ('search','read','finish') or not isinstance(action.get('reason'), str) or not action['reason'].strip():
+    if not isinstance(action, dict) or action.get('kind') not in ('search','read','metadata','finish') or not isinstance(action.get('reason'), str) or not action['reason'].strip():
         raise ValueError('next_action requires a supported kind and reason')
     if 'question_map' in proposal:
         nodes = proposal['question_map']
@@ -224,6 +225,9 @@ def _validate(proposal, version):
         providers=action.get('providers',['parallel'])
         if not isinstance(providers,list) or not providers or any(not isinstance(p,str) or p not in ('parallel','perplexity') for p in providers) or len(providers)!=len(set(providers)):
             raise ValueError('invalid providers')
+    if action['kind']=='metadata':
+        if not isinstance(action.get('evidence_id'),str) or not action['evidence_id'].strip():
+            raise ValueError('metadata requires one existing evidence_id')
     if action['kind']=='read':
         urls=action.get('urls')
         if not isinstance(urls,list) or not 1<=len(urls)<=10:
@@ -268,7 +272,7 @@ def _reserve(run, counts, kind, payload, db, live):
         if shared is not None:
             con.execute('UPDATE night_policy SET usage=? WHERE id=?',(json.dumps(shared),run['aggregate']['id']))
         step=dict(id=uuid.uuid4().hex, kind=kind, state='started', payload=payload,
-                  reserved=counts, started_at=cases.now(), base_case_version=run['case_version'], billing=None)
+                  reserved=counts, started_at=cases.now(), runtime=execution_provenance.capture(), base_case_version=run['case_version'], billing=None)
         run['steps'].append(step)
         run.update(status='running', stop_reason=None)
         _write(con,run)
@@ -304,7 +308,8 @@ def _signature(action):
             tuple(sorted(action['urls'])) if kind=='read' else (),
             tuple(sorted(action.get('providers',['parallel']))) if kind=='search' else (),
             action.get('offset') if kind=='read' else None,
-            action.get('limit',12000) if kind=='read' and 'offset' in action else None)
+            action.get('limit',12000) if kind=='read' and 'offset' in action else None,
+            action.get('evidence_id') if kind=='metadata' else None)
 
 
 def reconcile(run_id, *, operation_id, case_version, acknowledgement, db=None):
@@ -368,9 +373,11 @@ def resume(run_id, *, proposal=None, reasoner=None, live=False, db=None):
                     return _save(run,db)
                 step=_reserve(run,{'reasoning_calls':1},'reasoning',{'model':getattr(reasoner,'model','host_callable')},db,live or getattr(reasoner,'external',False))
                 if step is None: return run
+                started=time.monotonic()
                 try:
                     proposal=reasoner(context(run_id,db=db))
                 except BaseException as exc:
+                    step['elapsed_seconds']=time.monotonic()-started
                     from clearance.reasoning import ReasoningResponseError
                     if isinstance(exc,ReasoningResponseError):
                         step.update(state='completed',proposal_rejected=True,response_invalid=True,
@@ -380,7 +387,7 @@ def resume(run_id, *, proposal=None, reasoner=None, live=False, db=None):
                         _save(run,db)
                     else:_unknown(run,step,db)
                     raise
-                step.update(state='completed',response=copy.deepcopy(proposal))
+                step.update(state='completed',response=copy.deepcopy(proposal),elapsed_seconds=time.monotonic()-started)
                 run['observed_usage']['reasoning_responses']+=1
                 _save(run,db)
             try:
@@ -392,7 +399,7 @@ def resume(run_id, *, proposal=None, reasoner=None, live=False, db=None):
                 run.update(status='awaiting_reasoning',stop_reason='proposal validation failed; correct the proposal against the current case version')
                 _save(run,db)
                 raise
-            if any(s['state']=='unknown' and s.get('reconciliation') and s['kind'] in ('search','read')
+            if any(s['state']=='unknown' and s.get('reconciliation') and s['kind'] in ('search','read','metadata')
                    and _signature(s['payload']['next_action'])==_signature(action) for s in run['steps']):
                 raise ValueError('this operation has an unknown outcome; replay is prohibited in this run')
             run['host_proposal_required']=False
@@ -405,16 +412,26 @@ def resume(run_id, *, proposal=None, reasoner=None, live=False, db=None):
                     raise ValueError('local paging requires an existing readable source snapshot')
                 if action['offset']>len(selected['snapshot_text']):
                     raise ValueError('source page offset exceeds the stored snapshot length')
-            previous=next((s for s in reversed(run['steps']) if s['kind'] in ('search','read') and s['state']=='completed'),None)
-            if previous and kind in ('search','read') and _signature(previous['payload']['next_action'])==_signature(action):
+            previous=next((s for s in reversed(run['steps']) if s['kind'] in ('search','read','metadata') and s['state']=='completed'),None)
+            if previous and not (kind=='metadata' and any(e.get('outcome')=='not_checked' for e in previous.get('observed_events',[]))) and kind in ('search','read','metadata') and _signature(previous['payload']['next_action'])==_signature(action):
                 run.setdefault('stops',[]).append({'reason':'diminishing new evidence','at':cases.now(),'case_version':run['case_version']})
                 run.update(status='stopped',stop_reason='diminishing new evidence: repeated identical action; inspect the saved gap or supply a bounded host finish')
                 return _save(run,db)
+            metadata_target=None
+            if kind=='metadata':
+                metadata_target=next((e for e in current['evidence'] if e['id']==action['evidence_id']),None)
+                if metadata_target is None:raise ValueError('metadata evidence not found in inspected case')
             counts={}
+            if kind=='metadata' and live:
+                from clearance import source_metadata
+                planned=source_metadata.planned_request_count(metadata_target)
+                if not planned:raise ValueError('metadata requires an unambiguous supported DOI or arXiv identifier; no capacity reserved')
+                counts={'document_reads':planned,'rounds':1}
             if kind=='search': counts={'discovery_calls':len(action.get('providers',['parallel'])),'document_reads':len(action.get('providers',['parallel']))*2,'rounds':1}
             if kind=='read': counts={'document_reads':len(action['urls']),**({} if paging else {'rounds':1})}
             step=_reserve(run,counts,kind,copy.deepcopy(proposal),db,live and kind!='finish' and not paging)
             if step is None: return run
+            started=time.monotonic()
             try:
                 if proposal.get('findings'):
                     from clearance import synthesis
@@ -431,6 +448,16 @@ def resume(run_id, *, proposal=None, reasoner=None, live=False, db=None):
                     current=research.investigate(run['case_id'],current['version'],query=action.get('query','') if kind=='search' else '',
                                                 sources=action.get('urls',[]) if kind=='read' else [], providers=action.get('providers',['parallel']) if kind=='search' else ['parallel'],
                                                 live=live,limit=2,db=db)
+                if kind=='metadata':
+                    from clearance import source_metadata
+                    metadata=source_metadata.inspect(metadata_target,live=live)
+                    if live and metadata['status'] in ('checked','partial') and any(r.get('status')=='checked' for r in metadata['records']):
+                        current=source_metadata.apply(run['case_id'],current['version'],metadata_target['id'],metadata,db=db)
+                    step['observed_events']=[{'route':'source_metadata','outcome':r['status'],
+                        'provider':r['provider'],'url':r.get('requested_url'),'response_hash':r.get('response_hash'),
+                        'checked_at':r.get('checked_at'),'reason':'; '.join(r.get('errors',[]))}
+                        for r in metadata['records']] or [{'route':'source_metadata','outcome':metadata['status'],'reason':'; '.join(metadata.get('errors',[]))}]
+                    run['observed_usage']['metadata_responses']=run['observed_usage'].get('metadata_responses',0)+sum(bool(r.get('checked_at')) for r in metadata['records'])
                 run['case_version']=current['version']
                 if paging:
                     windows=run.setdefault('source_windows',{})
@@ -453,7 +480,7 @@ def resume(run_id, *, proposal=None, reasoner=None, live=False, db=None):
                             elif live and event.get('cache_hit') is False:run['observed_usage']['online_fetches']+=1
                         elif event.get('outcome')=='completed':run['observed_usage']['provider_completed']+=1
                 if 'question_map' in proposal: run['question_map']=copy.deepcopy(proposal['question_map'])
-                step.update(state='completed',resulting_case_version=current['version'],response_reference=dict(case_id=current['id'],version=current['version']))
+                step.update(state='completed',elapsed_seconds=time.monotonic()-started,resulting_case_version=current['version'],response_reference=dict(case_id=current['id'],version=current['version']))
                 run['cursor']+=1
                 if kind=='finish':
                     run.update(status='completed',stop_reason=proposal.get('stop_reason') or action['reason'])
@@ -469,6 +496,7 @@ def resume(run_id, *, proposal=None, reasoner=None, live=False, db=None):
                     _release_reservation(run,step,db)
                 else:_save(run,db)
             except BaseException:
+                step['elapsed_seconds']=time.monotonic()-started
                 if step['state']!='rejected':_unknown(run,step,db)
                 raise
             if kind=='finish' or reasoner is None or run['status']=='cancelled': return run

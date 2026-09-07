@@ -197,6 +197,22 @@ class WorkspaceHTTP:
             # the configured canonical origin, not whichever alias was bookmarked.
             if h.headers.get('Host', '').lower() not in {urlsplit(origin).netloc.lower() for origin in self.allowed_origins()}:
                 return self.send(303, location=expected_origin + parsed.path + ('?'+parsed.query if parsed.query else ''))
+        # Only a pure hostname inspection is anonymous. Do not route legacy
+        # research handlers around tenant authentication or read private stores.
+        if h.command == 'GET' and path == '/judge/demo':
+            from cloud.public_demo import render
+            source = (parse_qs(parsed.query, max_num_fields=4).get('source') or [''])[0]
+            return self.send(200, render(source))
+        legacy_public_paths = {'/clear', '/front', '/visibility/ui', '/truths/ui'}
+        if h.command == 'GET' and path in {'/', '/judge', *legacy_public_paths}:
+            from clearance.independence import classify
+            query = parse_qs(parsed.query, keep_blank_values=True, max_num_fields=4)
+            url = (query.get('url') or [''])[0]
+            if len(url) > 2048:
+                raise HTTPError(400, 'Source URL is too long.')
+            return self.send(200, case_pages.public_release(
+                url, classify(url) if url else None,
+                legacy_path=path if path in legacy_public_paths else ''))
         self.auth = self.auth or Auth()
         tenant, session = self.auth.identify(h.headers)
         if path == '/login':

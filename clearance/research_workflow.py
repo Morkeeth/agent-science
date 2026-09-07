@@ -45,20 +45,41 @@ def handle(arguments):
         raise ValueError('arguments must be an object')
     action = arguments.get('action', 'start')
     db = arguments.get('db')
-    allowed = {'start', 'show', 'context', 'resume', 'cancel', 'reconcile', 'challenge', 'compare', 'follow', 'updates', 'update', 'experiment-plan', 'protocol', 'execute-protocol'}
+    allowed = {'desk', 'open', 'save', 'seen', 'start', 'show', 'context', 'resume', 'cancel', 'reconcile', 'challenge', 'compare', 'follow', 'updates', 'update', 'experiment-plan', 'protocol', 'execute-protocol', 'evaluation-prepare', 'evaluation-create', 'evaluation-show', 'evaluation-record','evaluation-review','source-reviews','source-review','context-trials','context-trial-create','context-trial-show'}
     if not isinstance(action, str) or action not in allowed:
         raise ValueError('Unknown research action')
     for key in ('live',):
         if key in arguments and type(arguments[key]) is not bool:
             raise ValueError(key + ' must be a boolean')
-    for key in ('proposal', 'policy', 'protocol'):
+    for key in ('proposal', 'policy', 'protocol', 'evaluation_spec', 'observation', 'evaluation_review', 'trial_spec', 'source_review'):
         if key in arguments and arguments[key] is not None and not isinstance(arguments[key], dict):
             raise ValueError(key + ' must be an object')
     for key in ('version', 'from_version', 'case_version'):
         if key in arguments and (type(arguments[key]) is not int or arguments[key] < 1):
             raise ValueError(key + ' must be a positive integer')
+    if action in ('desk', 'open', 'save', 'seen'):
+        from clearance import investigation_desk
+        if action == 'desk':
+            return investigation_desk.desk(query=arguments.get('query', ''), offset=arguments.get('offset', 0), db=db)
+        if not isinstance(arguments.get('case_id'), str) or not arguments['case_id'].strip():
+            raise ValueError('case_id is required')
+        if action == 'seen' and 'version' not in arguments:
+            raise ValueError('seen requires the exact inspected version')
+        if action == 'open':
+            return investigation_desk.open_case(arguments['case_id'], claim_id=arguments.get('claim_id'), version=arguments.get('version'), db=db)
+        return investigation_desk.save(arguments['case_id'], version=arguments.get('version') if action == 'seen' else None, db=db)
     required = []
-    if action == 'reconcile':
+    if action in ('source-review','source-reviews'):
+        required=['case_id']
+        if action=='source-review' and 'version' not in arguments:
+            raise ValueError('version is required')
+    elif action=='context-trials':
+        required=['case_id']
+    elif action=='context-trial-show':
+        required=['trial_id']
+    elif action in ('evaluation-show','evaluation-record','evaluation-review'):
+        required=['evaluation_id']
+    elif action == 'reconcile':
         required = ['run_id', 'operation_id', 'acknowledgement']
         if 'case_version' not in arguments:
             raise ValueError('case_version is required')
@@ -77,6 +98,28 @@ def handle(arguments):
             raise ValueError(key + ' is required')
     if action == 'compare' and 'from_version' not in arguments:
         raise ValueError('from_version is required')
+    if action in ('source-review','source-reviews'):
+        from clearance import source_reviews
+        if action=='source-review':
+            return source_reviews.review(arguments['case_id'],arguments['version'],arguments.get('source_review',{}),db=db)
+        return source_reviews.list_pending(arguments['case_id'],db=db)
+    if action == 'context-trials':
+        from clearance import context_trials
+        return context_trials.for_case(arguments['case_id'],case_version=arguments.get('case_version'),db=db)
+    if action in ('context-trial-create','context-trial-show'):
+        from clearance import context_trials
+        return context_trials.create(arguments.get('trial_spec',{}),db=db) if action=='context-trial-create' else context_trials.get(arguments['trial_id'],db=db)
+    if action.startswith('evaluation-'):
+        from clearance import research_evaluation
+        if action=='evaluation-prepare':
+            return research_evaluation.prepare(arguments.get('evaluation_spec',{}),db=db)
+        if action=='evaluation-create':
+            return research_evaluation.create(arguments.get('evaluation_spec',{}),db=db)
+        if action=='evaluation-record':
+            return research_evaluation.record(arguments['evaluation_id'],arguments.get('observation',{}),db=db)
+        if action=='evaluation-review':
+            return research_evaluation.review(arguments['evaluation_id'],arguments.get('evaluation_review',{}),db=db)
+        return research_evaluation.get(arguments['evaluation_id'],db=db)
     if action == 'execute-protocol':
         raise ValueError('Protocol execution is CLI-only; select a trusted script in the terminal.')
     if action == 'follow':

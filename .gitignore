@@ -12,3 +12,6 @@ cache/gemini.json
 .venv-adk/
 cache/run_history.json
 out/
+
+# Runtime research telemetry is private state, never release source.
+cache/search_receipts.jsonl

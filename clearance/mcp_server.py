@@ -75,6 +75,24 @@ TOOLS = [
         "inputSchema": {"type": "object", "properties": {}},
     },
     {
+        "name": "science_recheck",
+        "description": (
+            "Re-read the sources behind saved answers and report what changed. A claim "
+            "whose cited span has disappeared from its source is moved back to UNKNOWN "
+            "and every answer resting on that URL is listed. Use before trusting a "
+            "reused answer, or after a source is known to have moved. live=false "
+            "compares cached snapshots and makes no network call."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "url": {"type": "string", "description": "re-read only claims citing this URL"},
+                "live": {"type": "boolean", "description": "re-fetch the sources", "default": False},
+                "limit": {"type": "integer", "default": 200},
+            },
+        },
+    },
+    {
         "name": "science_ingest",
         "description": (
             "Ingest a researched claim+URL into the registry (verify against source, "
@@ -192,11 +210,13 @@ TOOLS.append({
 
 TOOLS.append({
     "name": "science_research",
-    "description": "Conduct a persisted investigation: start locally, inspect context, submit a case-version-pinned reasoning proposal with resume, challenge a conclusion, compare versions, follow questions and define experiments. Start makes no external calls. A waiting run is not complete. Only explicit live execution under a configured aggregate policy can fetch/search. Findings are authored interpretations with checked quotations. This tool cannot execute experiments or shell commands.",
+    "description": "Use desk to find saved questions, open to inspect claims and exact original/current source passages, save to follow without clearing changes, and seen with an inspected version to acknowledge the return visit. Conduct a persisted investigation: start locally, inspect context, submit a case-version-pinned reasoning proposal with resume, challenge a conclusion, compare versions, follow questions, inspect source-reviews, submit a source-review and define experiments. Start makes no external calls. A waiting run is not complete. Only explicit live execution under a configured aggregate policy can fetch/search. Findings are authored interpretations with checked quotations. This tool cannot execute experiments or shell commands.",
     "inputSchema": {"type":"object", "additionalProperties":False, "required":["action"], "properties": {
-        "action":{"type":"string","enum":["start","show","context","resume","cancel","reconcile","challenge","update","compare","follow","updates","experiment-plan","protocol"]},
+        "action":{"type":"string","enum":["desk","open","save","seen","start","show","context","resume","cancel","reconcile","challenge","update","compare","follow","updates","experiment-plan","protocol","evaluation-prepare","evaluation-create","evaluation-show","evaluation-record","evaluation-review","source-reviews","source-review","context-trials","context-trial-create","context-trial-show"]},
         "question":{"type":"string","maxLength":1500},
         "case_id":{"type":"string"}, "run_id":{"type":"string"},
+        "claim_id":{"type":"string","description":"Open one claim and its original/current source binding."},
+        "query":{"type":"string","maxLength":1500}, "offset":{"type":"integer","minimum":0},
         "root":{"type":"string","description":"Local repository path; contents are not web queries."},
         "db":{"type":"string","description":"Private local case store override."},
         "version":{"type":"integer","minimum":1}, "from_version":{"type":"integer","minimum":1},
@@ -205,6 +225,27 @@ TOOLS.append({
         "policy":{"type":"object","description":"Explicit bounded run policy; shared aggregate authorization is required before live calls."},
         "protocol":{"type":"object","description":"Experiment definition: hypothesis, claim_refs, repo, tasks, baseline, intervention, outcomes, budget and stopping_rule. Incomplete definitions remain DRAFT."},
         "protocol_id":{"type":"string"},
+        "evaluation_id":{"type":"string"},
+        "source_review":{"type":"object","additionalProperties":False,
+            "required":["assessment_id","evidence_id","source_snapshot_hash","warning_fingerprint","notices","rationale","disposition"],
+            "description":"Copy the assessment/source IDs and hashes from source-reviews. Inspect every registry notice with science_case source before submitting unaffected. Registry facts remain; a retraction or supersession cannot be cleared.",
+            "properties":{
+                "assessment_id":{"type":"string"},"evidence_id":{"type":"string"},
+                "source_snapshot_hash":{"type":["string","null"],"pattern":"^[0-9a-f]{64}$","description":"Exact value from source-reviews. Null is permitted only for unresolved when the source has no saved snapshot."},
+                "warning_fingerprint":{"type":"string","pattern":"^[0-9a-f]{64}$"},
+                "rationale":{"type":"string","minLength":20,"maxLength":5000},
+                "disposition":{"type":"string","enum":["unaffected","revise","unresolved"],"description":"unaffected resolves only the exact inspected scope; revise records needed reassessment without rewriting the claim; unresolved retains the warning and permits missing notices."},
+                "notices":{"type":"array","maxItems":30,"items":{"type":"object","additionalProperties":False,
+                    "required":["notice_identity","evidence_id","quote","snapshot_hash"],"properties":{
+                        "notice_identity":{"type":"string","description":"Exact registry notice identity from source-reviews."},
+                        "evidence_id":{"type":"string","description":"Saved notice document, not the original paper."},
+                        "quote":{"type":"string","minLength":20,"maxLength":4000},
+                        "snapshot_hash":{"type":"string","pattern":"^[0-9a-f]{64}$"}}}}}},
+        "trial_id":{"type":"string"},
+        "trial_spec":{"type":"object","description":"Freeze a local context trial definition with pinned protocol, tasks, instructions, host identity, trusted acceptance hash and limits. Does not run an agent or acceptance script. Prepare/complete/abort are CLI-only."},
+        "evaluation_spec":{"type":"object","description":"For evaluation-prepare: held-out questions, baseline/candidate arms, operational_rubric (source_recovery, counterevidence, experiment_executability), explicit unknown_resources and optional protocol. For evaluation-create: legacy immutable campaign spec. Neither starts research."},
+        "evaluation_review":{"type":"object","description":"Append an independent review to a frozen observation; requires expected_review_version and exact historical source anchors."},
+        "observation":{"type":"object","description":"Reviewer-authored judgments tied to actual completed work, exact case version and source anchors; unknown metrics remain unknown."},
         "operation_id":{"type":"string"},
         "case_version":{"type":"integer","minimum":1},
         "acknowledgement":{"type":"string","description":"For reconcile: retain-reservation-and-do-not-retry. Inspect unknown step and current case first; this cannot establish the external outcome or refund capacity."}
@@ -331,6 +372,17 @@ def handle_tool(name: str, arguments: dict) -> str:
 
     if name == "science_stats":
         return json.dumps(stack_search.stats(), indent=2)
+
+    if name == "science_recheck":
+        from clearance import recheck as R
+        try:
+            return R.format_report(R.recheck(
+                url=arguments.get("url"),
+                live=bool(arguments.get("live", False)),
+                limit=int(arguments.get("limit", 200)),
+            ))
+        except (ValueError, OSError, sqlite3.Error) as exc:
+            return json.dumps({"error": str(exc)})
 
     if name == "science_visibility":
         from clearance import visibility

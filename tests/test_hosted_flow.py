@@ -59,6 +59,25 @@ class HostedFlow(unittest.TestCase):
         self.assertEqual(self.request('GET','/stats',token=None)[0],303)
         self.assertEqual(self.request('POST','/search',{},token=TOKEN_A)[0],404)
 
+    def test_public_judge_entry_never_opens_private_store_or_calls_research(self):
+        with patch('cloud.case_http.WorkspaceStore.from_env', side_effect=AssertionError('private store touched')), patch('cloud.case_http.research', side_effect=AssertionError('research called')):
+            for path in ('/', '/judge', '/front', '/clear', '/visibility/ui', '/truths/ui'):
+                code, headers, page = self.request('GET', path, token=None)
+                self.assertEqual(code, 200)
+                self.assertIn('requires an access key', page)
+                self.assertEqual(headers['Cache-Control'], 'no-store')
+            code, _, page = self.request('GET', '/judge?url=https%3A%2F%2Fexample.gov.attacker.invalid%2Freport', token=None)
+            self.assertEqual(code, 200)
+            self.assertIn('UNCLASSIFIED', page)
+            self.assertNotIn('Publisher hint: PRIMARY', page)
+            for path in ('/judge/demo', '/judge/demo?source=pep8', '/judge/demo?source=black'):
+                code, _, page = self.request('GET', path, token=None)
+                self.assertEqual(code, 200)
+                self.assertIn('Public read-only research example', page)
+                self.assertIn('No private workspace', page)
+            self.assertEqual(self.request('GET', '/api/cases', token=None)[0], 401)
+            self.assertEqual(self.request('POST', '/clear', {}, token=None)[0], 401)
+
     def test_real_worker_create_idempotency_and_restart(self):
         code,_,result=self.create(); self.assertEqual(code,201,result)
         self.assertEqual(self.create()[0],200)

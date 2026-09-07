@@ -172,12 +172,39 @@ def lookup(query: str, *, subject: str = "stack", live: bool = False,
     con = refusal_log.connect(Path(db) if db else _db())
     trace: list[dict] = []
     candidates: list[dict] = []
+    prior: dict | None = None
 
     def finish(result, tier=COST_FREE, calls=0):
         result = _enrich(result, cost_tier=tier, subject=subject, parallel_api_calls=calls)
         result["query"] = raw
         result["trace"] = trace
         result.setdefault("candidates", candidates)
+        # A claim that WAS sourced and is now uncertain is not "nothing is known". The
+        # miss path used to report `not_in_registry` for it, which threw away the one
+        # thing the user most needs after a source changes: that this had an answer,
+        # what broke it, and what would settle it.
+        if prior is not None and result.get("label") == "NOT_CLEARED":
+            result["prior"] = prior
+            result["why"] = prior["why"]
+            result["cause"] = "prior_claim_unsettled"
+            result["resolves_with"] = prior.get("resolves_with")
+        # EVERY answer that cites a source says how old that evidence is, whichever
+        # route produced it. A free replay that looks identical to a fresh verification
+        # is the defect: the user cannot tell a span read minutes ago from one read
+        # months ago, and reuse is only honest while the reader can see its age.
+        if result.get("citation_url") and "freshness" not in result:
+            established = result.get("established") or raw
+            row = con.execute(
+                "SELECT * FROM claims WHERE slot=? ORDER BY first_seen_at DESC LIMIT 1",
+                (refusal_log.claim_key(established),)).fetchone()
+            fresh = (refusal_log.freshness_of(row) if row else
+                     {**refusal_log.snapshot_facts(result["citation_url"]),
+                      "basis": "document cache; this answer has no registry row"})
+            result["freshness"] = fresh
+        f = result.get("freshness") or {}
+        for key in ("evidence_age_days", "source_fetched_at", "source_sha256"):
+            if f.get(key) is not None:
+                result[key] = f[key]
         refusal_log.log_query(con, query=raw, result=result)
         return result
 
@@ -200,6 +227,17 @@ def lookup(query: str, *, subject: str = "stack", live: bool = False,
                            and not reg.get("unsettled"))
                 trace.append({"route": "registry", "query": q,
                               "outcome": "hit" if settled else "unsettled" if reg.get("unsettled") else "miss"})
+                if q == raw and reg.get("unsettled") and reg.get("verdict"):
+                    prior = {
+                        "label": reg.get("label"),
+                        "verdict": reg.get("verdict"),
+                        "cause": reg.get("cause"),
+                        "citation_url": reg.get("citation_url"),
+                        "resolves_with": reg.get("resolves_with"),
+                        "freshness": reg.get("freshness"),
+                        "why": ("This assertion has a saved registry row that is no "
+                                "longer settled: " + str(reg.get("why") or reg.get("cause"))),
+                    }
                 if settled:
                     refusal_log.lookup(con, term=reg["term"], assertion=reg["established"])
                     reg["source"] = "registry"

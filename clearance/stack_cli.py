@@ -39,6 +39,19 @@ def _print_result(res: dict) -> None:
         else:
             bits.append("0 Parallel API")
         print(f"  {' · '.join(bits)}")
+    fresh = res.get("freshness") or {}
+    if res.get("citation_url"):
+        age = fresh.get("evidence_age_days")
+        age_txt = f"{age}d old" if age is not None else "age unknown"
+        print(f"  evidence: {age_txt} · fetched={fresh.get('source_fetched_at') or '—'} "
+              f"· sha256={(fresh.get('source_sha256') or '—')[:12]}")
+        checked = fresh.get("evidence_checked_at")
+        print(f"  last re-read: {checked or 'never — run `recheck` to re-open the source'}")
+    if res.get("candidates") and res.get("label") == "NOT_CLEARED":
+        print(f"  related claims (candidates, not an answer to this question): "
+              f"{len(res['candidates'])}")
+        for c in res["candidates"][:3]:
+            print(f"    · [{c.get('verdict')}] {str(c.get('established'))[:64]}")
     if res.get("next_step"):
         print(f"  → {res['next_step']}")
 
@@ -95,6 +108,16 @@ def cmd_popular(args: argparse.Namespace) -> int:
         print("\n=== Parallel probes (from receipts) ===")
         for r in data["parallel_probes"][:8]:
             print(f"  {r['asks']:3d}x  {r['probe'][:70]}")
+    return 0
+
+
+def cmd_recheck(args: argparse.Namespace) -> int:
+    from clearance import recheck as R
+    report = R.recheck(url=args.url, live=args.live, limit=args.limit)
+    if args.json:
+        print(json.dumps(report, indent=2, default=str))
+    else:
+        print(R.format_report(report), end="")
     return 0
 
 
@@ -220,7 +243,7 @@ def cmd_mcp(_args: argparse.Namespace) -> int:
 
 def main(argv=None) -> int:
     argv = list(sys.argv[1:] if argv is None else argv)
-    research_actions = {'start','show','context','resume','cancel','reconcile','challenge','update','compare','follow','updates','experiment-plan','protocol','policy','execute-protocol'}
+    research_actions = {'desk','open','save','seen','start','show','context','resume','cancel','reconcile','challenge','update','compare','follow','updates','experiment-plan','protocol','policy','execute-protocol','evaluation-prepare','evaluation-create','evaluation-show','evaluation-record','evaluation-review','source-reviews','source-review','context-trials','context-trial-create','context-trial-show','context-trial-prepare','context-trial-complete','context-trial-abort'}
     if argv and argv[0] == 'research':
         index=1
         while index < len(argv):
@@ -258,6 +281,16 @@ def main(argv=None) -> int:
     b.set_defaults(func=cmd_browse)
 
     sub.add_parser("stats", help="registry stats").set_defaults(func=cmd_stats)
+
+    rc = sub.add_parser(
+        "recheck",
+        help="re-read the sources behind saved answers; flag every dependent answer")
+    rc.add_argument("--url", help="re-read only claims citing this URL")
+    rc.add_argument("--live", action="store_true",
+                    help="re-fetch the sources (default: cached snapshots, no network)")
+    rc.add_argument("--limit", type=int, default=200)
+    rc.add_argument("--json", action="store_true")
+    rc.set_defaults(func=cmd_recheck)
 
     pop = sub.add_parser("popular", help="top queries + optimization targets for devs")
     pop.add_argument("--limit", type=int, default=15)

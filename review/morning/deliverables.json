@@ -1,0 +1,129 @@
+{
+  "baseline": "ea05a1009778f754608da3825e36c85fc702f591",
+  "status": "Integrated locally; six initial live investigations and 18-attempt context pilot complete; correction review built and exercised",
+  "lanes": [
+    {
+      "owner": "source metadata",
+      "branch": "build/science-metadata-20260905",
+      "commit": "6c94b2d",
+      "status": "integrated and tested",
+      "receipt": "review/morning/METADATA.md"
+    },
+    {
+      "owner": "frozen evaluation",
+      "branch": "build/science-evaluation-20260905",
+      "commit": "9167a2d",
+      "status": "integrated and tested",
+      "receipt": "review/morning/EVALUATION.md"
+    },
+    {
+      "owner": "coordinator",
+      "branch": "build/adaptive-research-night-20260905",
+      "status": "integrated and tested",
+      "commit": "70eafcc2db66da499b6c29c6df7ed46e7ee4df2a"
+    },
+    {
+      "owner": "context runner",
+      "branch": "build/context-trial-runner-20260905",
+      "commit": "6b9cd98",
+      "integrated_commit": "fa2f607",
+      "status": "integrated, reviewed and exercised",
+      "receipt": "review/morning/CONTEXT-TRIAL.md"
+    },
+    {
+      "owner": "runner review fixes",
+      "branch": "build/context-trial-review-fixes-20260905",
+      "commit": "eb6d68fb231f68b9c452de21ade1b2d5722721d2",
+      "integrated_commit": "1dc7c3ca9fca1ca88b41c0d6037a48a0d5e31c57",
+      "status": "integrated and exercised",
+      "receipt": "review/morning/CONTEXT-RUNNER-REVIEW.md"
+    },
+    {
+      "owner": "correction review",
+      "branch": "build/source-correction-review-20260905",
+      "commit": "a266fd7",
+      "integrated_commit": "a647374",
+      "status": "integrated, real MCP fixture flow exercised",
+      "receipt": "review/morning/CORRECTION-REVIEW.md"
+    },
+    {
+      "owner": "correction review fixes",
+      "branch": "build/correction-review-fixes-20260905",
+      "commit": "39b3a9edf9ee9f78171208f0358a5c9c8ba445a6",
+      "integrated_commit": "597cd69",
+      "status": "integrated; failure controls exercised",
+      "receipt": "review/morning/CORRECTION-REVIEW.md"
+    },
+    {
+      "owner": "final correction review fixes",
+      "branch": "build/correction-final-fixes-20260905",
+      "commit": "99d3e77",
+      "integrated_commit": "ff7d6c9",
+      "status": "integrated; exact-identity, withdrawal and null-source failures exercised",
+      "receipt": "review/morning/CORRECTION-REVIEW.md"
+    },
+    {
+      "owner": "five-topic field team",
+      "branch": "read-only detached research lanes",
+      "commit": "06a2beec614ad5eb1646e7bca2952cae61b9cac0",
+      "status": "completed; exact anchors reviewed; caveats saved",
+      "receipt": "review/morning/FIELD-PASS.md"
+    },
+    {
+      "owner": "coordinator",
+      "branch": "build/context-trial-integration-20260905",
+      "commit": "d971d78689e98aa8756d899428fcd6bc1a5cafe0",
+      "status": "local main; no public push",
+      "receipt": "NIGHTRUN-2026-09-05.md"
+    }
+  ],
+  "live_policy": "One-question and five-topic policies approved and consumed; no new allowance inferred",
+  "publication": "not authorized",
+  "candidate": "d971d78689e98aa8756d899428fcd6bc1a5cafe0",
+  "acceptance_receipt": "NIGHTRUN-2026-09-05.md",
+  "live_receipt": "review/morning/FIELD-PASS.md",
+  "reviews": {
+    "context_runner": {
+      "cursor": {
+        "status": "completed",
+        "sha256": "665fba5a477032be3bcabf50b1980c46bd4c7b98fd050c8ecd8a4b7602a7ed22"
+      },
+      "fable": {
+        "status": "completed",
+        "sha256": "89cc9d980be5c028892b53898106422e0626ae4748dc3614f109a9e628b27f90"
+      }
+    },
+    "correction": {
+      "cursor": {
+        "status": "completed",
+        "sha256": "d0ac2fb01dc1a44a0bfd961f65007f48f38dca6b6250554e70822522b1d831c0"
+      },
+      "fable": {
+        "status": "completed",
+        "sha256": "4e672ca8cd282fd144e98ebe7141c2da58e67771c4849673c8673737d272bb83"
+      }
+    }
+  },
+  "trial": {
+    "id": "2fda7ea51a36443c",
+    "protocol": "6bcf588dafaa",
+    "protocol_version": 3,
+    "finished": 18,
+    "denominator": 18,
+    "baseline_accepted": 9,
+    "candidate_accepted": 8,
+    "receipt": "review/morning/CONTEXT-TRIAL.md",
+    "independent_audit_sha256": "afa6c7656de51a7f1878370e5a71382876fb7a89db9fd26f1457b4ab4b63f45c"
+  },
+  "scientific_quality": "All 18 saved answers reviewed: 52 scoped pass, 2 failed criteria for one confirmed overstatement, 54 unknown. No measured quality lift; fresh-web repetitions and matched-baseline comparison outstanding.",
+  "scientific_review": {
+    "receipt": "review/morning/SCIENTIFIC-REVIEW.md",
+    "campaign_id": "0c3c278d3e704325",
+    "observations": 18,
+    "pass": 52,
+    "fail": 2,
+    "unknown": 54,
+    "confirmed_unique_errors": 1,
+    "original_observations_unchanged": true
+  }
+}
