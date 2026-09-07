@@ -15,7 +15,10 @@ def _identities(item):
         parsed = urlsplit(value)
         host = (parsed.hostname or '').lower()
         if field == 'doi' or host in ('doi.org', 'dx.doi.org'):
-            match = DOI.search(value)
+            # Resolver URL query and fragment are transport metadata, not DOI suffixes.
+            raw = str(item.get(field) or '').strip()
+            doi_value = unquote(urlsplit(raw).path) if host in ('doi.org', 'dx.doi.org') else value
+            match = DOI.search(doi_value)
             if match:
                 doi = match[0].rstrip('.,;')
                 # DOI suffixes can contain balanced parentheses. Trim only a

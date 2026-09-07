@@ -31,7 +31,7 @@ for f in tests/test_dictionary.py tests/test_registry_surface.py tests/test_rout
 done
 
 echo "--- 4a. Terminal research and decision workflow ---"
-python3 -m pytest -q tests/test_terminal_case_workflow.py tests/test_evidence_cases.py tests/test_research_expansion.py tests/test_research_search.py tests/test_research_contract.py tests/test_studies_synthesis.py tests/test_night_runs.py tests/test_research_workflow.py tests/test_overnight_integration.py
+python3 -m pytest -q tests/test_terminal_case_workflow.py tests/test_evidence_cases.py tests/test_research_expansion.py tests/test_research_search.py tests/test_research_contract.py tests/test_studies_synthesis.py tests/test_night_runs.py tests/test_research_workflow.py tests/test_overnight_integration.py tests/test_source_metadata.py tests/test_research_evaluation.py tests/test_morning_integration.py tests/test_context_trials.py tests/test_context_trial_interfaces.py tests/test_context_trial_review_controls.py tests/test_source_reviews.py tests/test_source_review_interfaces.py
 
 echo "--- 5. Docs gate ---"
 python3 scripts/bench_check_docs.py

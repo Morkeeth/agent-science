@@ -1,0 +1,467 @@
+{
+  "campaign_id": "0c3c278d3e704325",
+  "manifest_hash": "eca84eae7581297bffbabecc2ab7988d23ce52dc3f377c4ddbf1f394bc7cf183",
+  "observations": 18,
+  "original_observations_unchanged": true,
+  "counts": {
+    "pass": 52,
+    "unknown": 54,
+    "fail": 2
+  },
+  "topics": {
+    "coding": [
+      {
+        "repetition": 1,
+        "case_id": "morning-r1-coding",
+        "case_version": 2,
+        "review_version": 2,
+        "judgments": {
+          "citation_correctness": "pass",
+          "contrary_evidence": "unknown",
+          "experiment_specificity": "unknown",
+          "original_sources": "unknown",
+          "scope_errors": "pass",
+          "unresolved_gaps": "pass"
+        }
+      },
+      {
+        "repetition": 2,
+        "case_id": "morning-r2-coding",
+        "case_version": 2,
+        "review_version": 1,
+        "judgments": {
+          "citation_correctness": "pass",
+          "contrary_evidence": "unknown",
+          "experiment_specificity": "unknown",
+          "original_sources": "unknown",
+          "scope_errors": "pass",
+          "unresolved_gaps": "pass"
+        }
+      },
+      {
+        "repetition": 3,
+        "case_id": "morning-r3-coding",
+        "case_version": 2,
+        "review_version": 1,
+        "judgments": {
+          "citation_correctness": "pass",
+          "contrary_evidence": "unknown",
+          "experiment_specificity": "unknown",
+          "original_sources": "unknown",
+          "scope_errors": "pass",
+          "unresolved_gaps": "pass"
+        }
+      }
+    ],
+    "coordination": [
+      {
+        "repetition": 1,
+        "case_id": "morning-r1-coordination",
+        "case_version": 2,
+        "review_version": 2,
+        "judgments": {
+          "citation_correctness": "pass",
+          "contrary_evidence": "unknown",
+          "experiment_specificity": "unknown",
+          "original_sources": "unknown",
+          "scope_errors": "pass",
+          "unresolved_gaps": "pass"
+        }
+      },
+      {
+        "repetition": 2,
+        "case_id": "morning-r2-coordination",
+        "case_version": 2,
+        "review_version": 1,
+        "judgments": {
+          "citation_correctness": "pass",
+          "contrary_evidence": "unknown",
+          "experiment_specificity": "unknown",
+          "original_sources": "unknown",
+          "scope_errors": "pass",
+          "unresolved_gaps": "pass"
+        }
+      },
+      {
+        "repetition": 3,
+        "case_id": "morning-r3-coordination",
+        "case_version": 2,
+        "review_version": 1,
+        "judgments": {
+          "citation_correctness": "pass",
+          "contrary_evidence": "unknown",
+          "experiment_specificity": "unknown",
+          "original_sources": "unknown",
+          "scope_errors": "pass",
+          "unresolved_gaps": "pass"
+        }
+      }
+    ],
+    "evaluation": [
+      {
+        "repetition": 1,
+        "case_id": "morning-r1-evaluation",
+        "case_version": 2,
+        "review_version": 2,
+        "judgments": {
+          "citation_correctness": "pass",
+          "contrary_evidence": "unknown",
+          "experiment_specificity": "unknown",
+          "original_sources": "unknown",
+          "scope_errors": "pass",
+          "unresolved_gaps": "pass"
+        }
+      },
+      {
+        "repetition": 2,
+        "case_id": "morning-r2-evaluation",
+        "case_version": 2,
+        "review_version": 1,
+        "judgments": {
+          "citation_correctness": "pass",
+          "contrary_evidence": "unknown",
+          "experiment_specificity": "unknown",
+          "original_sources": "unknown",
+          "scope_errors": "pass",
+          "unresolved_gaps": "pass"
+        }
+      },
+      {
+        "repetition": 3,
+        "case_id": "morning-r3-evaluation",
+        "case_version": 2,
+        "review_version": 1,
+        "judgments": {
+          "citation_correctness": "pass",
+          "contrary_evidence": "unknown",
+          "experiment_specificity": "unknown",
+          "original_sources": "unknown",
+          "scope_errors": "pass",
+          "unresolved_gaps": "pass"
+        }
+      }
+    ],
+    "memory": [
+      {
+        "repetition": 1,
+        "case_id": "morning-r1-memory",
+        "case_version": 2,
+        "review_version": 2,
+        "judgments": {
+          "citation_correctness": "pass",
+          "contrary_evidence": "unknown",
+          "experiment_specificity": "unknown",
+          "original_sources": "unknown",
+          "scope_errors": "pass",
+          "unresolved_gaps": "pass"
+        }
+      },
+      {
+        "repetition": 2,
+        "case_id": "morning-r2-memory",
+        "case_version": 2,
+        "review_version": 1,
+        "judgments": {
+          "citation_correctness": "fail",
+          "contrary_evidence": "unknown",
+          "experiment_specificity": "unknown",
+          "original_sources": "unknown",
+          "scope_errors": "fail",
+          "unresolved_gaps": "pass"
+        }
+      },
+      {
+        "repetition": 3,
+        "case_id": "morning-r3-memory",
+        "case_version": 2,
+        "review_version": 1,
+        "judgments": {
+          "citation_correctness": "pass",
+          "contrary_evidence": "unknown",
+          "experiment_specificity": "unknown",
+          "original_sources": "unknown",
+          "scope_errors": "pass",
+          "unresolved_gaps": "pass"
+        }
+      }
+    ],
+    "retrieval": [
+      {
+        "repetition": 1,
+        "case_id": "morning-r1-retrieval",
+        "case_version": 2,
+        "review_version": 2,
+        "judgments": {
+          "citation_correctness": "pass",
+          "contrary_evidence": "unknown",
+          "experiment_specificity": "unknown",
+          "original_sources": "unknown",
+          "scope_errors": "pass",
+          "unresolved_gaps": "pass"
+        }
+      },
+      {
+        "repetition": 2,
+        "case_id": "morning-r2-retrieval",
+        "case_version": 2,
+        "review_version": 1,
+        "judgments": {
+          "citation_correctness": "pass",
+          "contrary_evidence": "unknown",
+          "experiment_specificity": "unknown",
+          "original_sources": "unknown",
+          "scope_errors": "pass",
+          "unresolved_gaps": "pass"
+        }
+      },
+      {
+        "repetition": 3,
+        "case_id": "morning-r3-retrieval",
+        "case_version": 2,
+        "review_version": 2,
+        "judgments": {
+          "citation_correctness": "pass",
+          "contrary_evidence": "unknown",
+          "experiment_specificity": "unknown",
+          "original_sources": "unknown",
+          "scope_errors": "pass",
+          "unresolved_gaps": "pass"
+        }
+      }
+    ],
+    "ux": [
+      {
+        "repetition": 1,
+        "case_id": "morning-r1-ux",
+        "case_version": 2,
+        "review_version": 2,
+        "judgments": {
+          "citation_correctness": "pass",
+          "contrary_evidence": "unknown",
+          "experiment_specificity": "unknown",
+          "original_sources": "unknown",
+          "scope_errors": "pass",
+          "unresolved_gaps": "pass"
+        }
+      },
+      {
+        "repetition": 2,
+        "case_id": "morning-r2-ux",
+        "case_version": 2,
+        "review_version": 1,
+        "judgments": {
+          "citation_correctness": "pass",
+          "contrary_evidence": "unknown",
+          "experiment_specificity": "unknown",
+          "original_sources": "unknown",
+          "scope_errors": "pass",
+          "unresolved_gaps": "pass"
+        }
+      },
+      {
+        "repetition": 3,
+        "case_id": "morning-r3-ux",
+        "case_version": 2,
+        "review_version": 1,
+        "judgments": {
+          "citation_correctness": "pass",
+          "contrary_evidence": "unknown",
+          "experiment_specificity": "unknown",
+          "original_sources": "unknown",
+          "scope_errors": "pass",
+          "unresolved_gaps": "pass"
+        }
+      }
+    ]
+  },
+  "review_coverage": {
+    "observations_with_reviews": 18,
+    "recorded_observations": 18,
+    "unknown_remaining": [
+      {
+        "arm_id": "candidate",
+        "question_id": "coding",
+        "repetition": 1,
+        "criteria": [
+          "contrary_evidence",
+          "experiment_specificity",
+          "original_sources"
+        ]
+      },
+      {
+        "arm_id": "candidate",
+        "question_id": "coding",
+        "repetition": 2,
+        "criteria": [
+          "contrary_evidence",
+          "experiment_specificity",
+          "original_sources"
+        ]
+      },
+      {
+        "arm_id": "candidate",
+        "question_id": "coding",
+        "repetition": 3,
+        "criteria": [
+          "contrary_evidence",
+          "experiment_specificity",
+          "original_sources"
+        ]
+      },
+      {
+        "arm_id": "candidate",
+        "question_id": "coordination",
+        "repetition": 1,
+        "criteria": [
+          "contrary_evidence",
+          "experiment_specificity",
+          "original_sources"
+        ]
+      },
+      {
+        "arm_id": "candidate",
+        "question_id": "coordination",
+        "repetition": 2,
+        "criteria": [
+          "contrary_evidence",
+          "experiment_specificity",
+          "original_sources"
+        ]
+      },
+      {
+        "arm_id": "candidate",
+        "question_id": "coordination",
+        "repetition": 3,
+        "criteria": [
+          "contrary_evidence",
+          "experiment_specificity",
+          "original_sources"
+        ]
+      },
+      {
+        "arm_id": "candidate",
+        "question_id": "evaluation",
+        "repetition": 1,
+        "criteria": [
+          "contrary_evidence",
+          "experiment_specificity",
+          "original_sources"
+        ]
+      },
+      {
+        "arm_id": "candidate",
+        "question_id": "evaluation",
+        "repetition": 2,
+        "criteria": [
+          "contrary_evidence",
+          "experiment_specificity",
+          "original_sources"
+        ]
+      },
+      {
+        "arm_id": "candidate",
+        "question_id": "evaluation",
+        "repetition": 3,
+        "criteria": [
+          "contrary_evidence",
+          "experiment_specificity",
+          "original_sources"
+        ]
+      },
+      {
+        "arm_id": "candidate",
+        "question_id": "memory",
+        "repetition": 1,
+        "criteria": [
+          "contrary_evidence",
+          "experiment_specificity",
+          "original_sources"
+        ]
+      },
+      {
+        "arm_id": "candidate",
+        "question_id": "memory",
+        "repetition": 2,
+        "criteria": [
+          "contrary_evidence",
+          "experiment_specificity",
+          "original_sources"
+        ]
+      },
+      {
+        "arm_id": "candidate",
+        "question_id": "memory",
+        "repetition": 3,
+        "criteria": [
+          "contrary_evidence",
+          "experiment_specificity",
+          "original_sources"
+        ]
+      },
+      {
+        "arm_id": "candidate",
+        "question_id": "retrieval",
+        "repetition": 1,
+        "criteria": [
+          "contrary_evidence",
+          "experiment_specificity",
+          "original_sources"
+        ]
+      },
+      {
+        "arm_id": "candidate",
+        "question_id": "retrieval",
+        "repetition": 2,
+        "criteria": [
+          "contrary_evidence",
+          "experiment_specificity",
+          "original_sources"
+        ]
+      },
+      {
+        "arm_id": "candidate",
+        "question_id": "retrieval",
+        "repetition": 3,
+        "criteria": [
+          "contrary_evidence",
+          "experiment_specificity",
+          "original_sources"
+        ]
+      },
+      {
+        "arm_id": "candidate",
+        "question_id": "ux",
+        "repetition": 1,
+        "criteria": [
+          "contrary_evidence",
+          "experiment_specificity",
+          "original_sources"
+        ]
+      },
+      {
+        "arm_id": "candidate",
+        "question_id": "ux",
+        "repetition": 2,
+        "criteria": [
+          "contrary_evidence",
+          "experiment_specificity",
+          "original_sources"
+        ]
+      },
+      {
+        "arm_id": "candidate",
+        "question_id": "ux",
+        "repetition": 3,
+        "criteria": [
+          "contrary_evidence",
+          "experiment_specificity",
+          "original_sources"
+        ]
+      }
+    ]
+  },
+  "confirmed_unique_errors": 1,
+  "adjudicated_wording_disagreements": 1,
+  "meaning": "Scoped authored source reviews; not a quality-lift score, independent replication or fresh-web evaluation",
+  "live_calls": 0
+}

@@ -158,6 +158,15 @@ def claim_key(assertion: str) -> str:
 _ADDED_COLUMNS = (
     ("refusal_code", "TEXT"),   # the precise mechanism, beside the coarse cause
     ("trail", "TEXT"),          # json: every span considered, and why each was not evidence
+    # THE FRESHNESS OF THE EVIDENCE, not of the row. `first_seen_at` is overwritten by
+    # every UPDATE in record(), so it is the last write, and using it as an age would be
+    # a number correct about the wrong object. These three describe the DOCUMENT the
+    # span was read out of: when it was fetched, what it hashed to, and when we last
+    # went back and looked. All NULL on every row written before this column existed,
+    # and a NULL says "unknown", never "fresh".
+    ("source_fetched_at", "TEXT"),
+    ("source_sha256", "TEXT"),
+    ("evidence_checked_at", "TEXT"),
 )
 _QUERY_COLUMNS = (
     ("cost_tier", "TEXT"),      # free | cheap | live — for popular-query analytics
@@ -215,7 +224,10 @@ def record(con, *, term: str, assertion: str, verdict: str, production: str,
            citation_url: Optional[str] = None, quoted_terms: Optional[str] = None,
            origins: Optional[list] = None, resolves_with: Optional[str] = None,
            refusal_code: Optional[str] = None,
-           trail: Optional[list] = None) -> None:
+           trail: Optional[list] = None,
+           source_fetched_at: Optional[str] = None,
+           source_sha256: Optional[str] = None,
+           evidence_checked_at: Optional[str] = None) -> None:
     """Write a claim OR a refusal. Refusals are first-class here, not a side effect.
 
     `trail` is every span the locator offered for this claim and the reason each one was
@@ -227,13 +239,23 @@ def record(con, *, term: str, assertion: str, verdict: str, production: str,
     slot = claim_key(assertion)
     prior = con.execute("SELECT term FROM claims WHERE slot=? ORDER BY first_seen_at DESC LIMIT 1", (slot,)).fetchone()
     t = prior["term"] if prior else norm_term(term)
+    # When the caller does not know the snapshot, ASK THE CACHE rather than leaving the
+    # freshness of a live-verified span blank. fetch=False: reading a document we
+    # already hold is not a fetch, and this must never make a network call as a side
+    # effect of writing a row.
+    if citation_url and (source_sha256 is None or source_fetched_at is None):
+        known = snapshot_facts(citation_url)
+        source_sha256 = source_sha256 or known.get("sha256")
+        source_fetched_at = source_fetched_at or known.get("fetched_at")
     cols = ("term", "slot", "established", "verdict", "basis", "cause", "citation_url",
             "quoted_terms", "origins", "resolves_with", "first_seen_in", "first_seen_at",
-            "reused", "refusal_code", "trail")
+            "reused", "refusal_code", "trail",
+            "source_fetched_at", "source_sha256", "evidence_checked_at")
     vals = (t, slot, assertion, verdict, basis, cause,
             citation_url, quoted_terms, json.dumps(origins or []), resolves_with,
             production, datetime.now(timezone.utc).isoformat(), 0,
-            refusal_code, json.dumps(trail) if trail else None)
+            refusal_code, json.dumps(trail) if trail else None,
+            source_fetched_at, source_sha256, evidence_checked_at)
     existing = con.execute(
         "SELECT verdict, cause FROM claims WHERE term=? AND slot=?", (t, slot)
     ).fetchone()
@@ -246,12 +268,14 @@ def record(con, *, term: str, assertion: str, verdict: str, production: str,
         con.execute(
             "UPDATE claims SET established=?, verdict=?, basis=?, cause=?, "
             "citation_url=?, quoted_terms=?, origins=?, resolves_with=?, "
-            "first_seen_in=?, first_seen_at=?, refusal_code=?, trail=? "
+            "first_seen_in=?, first_seen_at=?, refusal_code=?, trail=?, "
+            "source_fetched_at=?, source_sha256=?, evidence_checked_at=? "
             "WHERE term=? AND slot=?",
             (assertion, verdict, basis, cause, citation_url, quoted_terms,
              json.dumps(origins or []), resolves_with, production,
              datetime.now(timezone.utc).isoformat(),
-             refusal_code, json.dumps(trail) if trail else None, t, slot),
+             refusal_code, json.dumps(trail) if trail else None,
+             source_fetched_at, source_sha256, evidence_checked_at, t, slot),
         )
     con.execute("INSERT INTO claim_observations (term, assertion, observed_at, payload) "
                 "VALUES (?, ?, ?, ?)",
@@ -277,6 +301,80 @@ def trail_of(row) -> list:
         return []
 
 
+def snapshot_facts(url: str | None) -> dict:
+    """What the local document cache already knows about a URL. Never fetches.
+
+    Returns {} when the URL was never opened on this machine. An empty dict and a
+    stale snapshot are different facts, and the surface must not merge them.
+    """
+    if not url:
+        return {}
+    from clearance import instruments
+    snap = instruments.document_snapshot(url, fetch=False)
+    if not snap:
+        return {}
+    return {"sha256": snap.get("sha256"), "fetched_at": snap.get("fetched_at")}
+
+
+def _age_days(stamp: str | None) -> Optional[float]:
+    if not stamp:
+        return None
+    try:
+        then = datetime.fromisoformat(stamp)
+    except ValueError:
+        return None
+    if then.tzinfo is None:
+        then = then.replace(tzinfo=timezone.utc)
+    return round((datetime.now(timezone.utc) - then).total_seconds() / 86400.0, 2)
+
+
+def freshness_of(row) -> dict:
+    """How old the EVIDENCE is, and when we last went back and looked.
+
+    Deliberately not derived from `first_seen_at`: record()'s UPDATE branch overwrites
+    that with the write time, so it dates the row, not the document. A row with no
+    snapshot recorded reports `unknown` — it does not report zero, and it does not
+    report fresh.
+    """
+    d = dict(row) if not isinstance(row, dict) else row
+    fetched = d.get("source_fetched_at")
+    checked = d.get("evidence_checked_at")
+    return {
+        "source_fetched_at": fetched,
+        "evidence_age_days": _age_days(fetched),
+        "source_sha256": d.get("source_sha256"),
+        "evidence_checked_at": checked,
+        "checked_age_days": _age_days(checked),
+        "basis": ("snapshot fetch time of the document the span was read from"
+                  if fetched else
+                  "unknown — no source snapshot is recorded for this claim"),
+        "note": ("Age of the saved evidence. It is not a statement that the source "
+                 "still says this; run `recheck` to re-read the document."),
+    }
+
+
+def dependents(con, url: str) -> dict:
+    """Everything on this registry that rests on one URL, with its denominators.
+
+    Both numerators are counted over the whole table, not over a page of it, so the
+    fraction printed beside them describes the set it came from.
+    """
+    claims = [dict(r) for r in con.execute(
+        "SELECT * FROM claims WHERE citation_url = ? ORDER BY first_seen_at DESC",
+        (url,))]
+    queries = [dict(r) for r in con.execute(
+        "SELECT * FROM queries WHERE citation_url = ? ORDER BY id DESC", (url,))]
+    return {
+        "url": url,
+        "claims": claims,
+        "answers": queries,
+        "claims_on_this_url": len(claims),
+        "claims_total": con.execute("SELECT COUNT(*) c FROM claims").fetchone()["c"],
+        "answers_on_this_url": len(queries),
+        "answers_total": con.execute("SELECT COUNT(*) c FROM queries").fetchone()["c"],
+    }
+
+
 def lookup(con, *, term: str, assertion: str) -> Optional[dict]:
     r = con.execute("SELECT * FROM claims WHERE slot=? ORDER BY first_seen_at DESC LIMIT 1",
                     (claim_key(assertion),)).fetchone()
@@ -284,6 +382,7 @@ def lookup(con, *, term: str, assertion: str) -> Optional[dict]:
         return None
     d = dict(r)
     d["origins"] = json.loads(d["origins"] or "[]")
+    d["freshness"] = freshness_of(d)
     # Keep the established wording visible, including harmless whitespace changes.
     d["reused_from_wording"] = (d["established"] if d["established"].strip().lower()
                                 != assertion.strip().lower() else None)
@@ -351,18 +450,61 @@ def browse_queries(con, *, limit: int = 50) -> list[dict]:
         "SELECT * FROM queries ORDER BY id DESC LIMIT ?", (limit,))]
 
 
+# Retrieval words that carry no subject. Kept small and explicit: an aggressive stop
+# list silently drops the distinctive half of a short question.
+_STOP = frozenset("""a an the and or of in on to for is are was were be been it its this
+that these those what which when where who how why does do did can could should would
+say says said state states stated make makes made use used using with from about into
+than then there their they you your our we i not no""".split())
+
+
+def _retrieval_tokens(query: str) -> list[str]:
+    raw = re.findall(r"[a-z0-9][a-z0-9._/-]{2,}", norm_term(query))
+    return [t for t in (w.strip("._-/") for w in raw) if len(t) >= 3 and t not in _STOP]
+
+
+def _candidate_rows(con, query: str, *, limit: int) -> list:
+    """Related claims, ranked by how many of the question's distinctive words they carry.
+
+    NAVIGATION ONLY. The whole-string LIKE this replaces could match nothing but the
+    identical sentence, so the second question in any real session came back with an
+    empty candidates pane while the registry held the very claim it was about. Ranking
+    by shared words fixes retrieval and changes NOTHING about reuse: `search_registry`
+    still reuses a verdict only for the identical assertion, and every row returned here
+    is labelled a candidate. A better search must not become a looser proof.
+    """
+    tokens = _retrieval_tokens(query)
+    if not tokens:
+        return []
+
+    def esc(v: str) -> str:
+        return v.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+
+    clauses, args = [], []
+    for tok in tokens[:12]:
+        pat = f"%{esc(tok)}%"
+        clauses.append("(lower(term) LIKE ? ESCAPE '\\' OR lower(established) LIKE ? ESCAPE '\\'"
+                       " OR lower(quoted_terms) LIKE ? ESCAPE '\\')")
+        args += [pat, pat, pat]
+    sql = ("SELECT * FROM claims WHERE " + " OR ".join(clauses)
+           + " ORDER BY first_seen_at DESC LIMIT ?")
+    found = con.execute(sql, args + [max(limit * 20, 100)]).fetchall()
+
+    def overlap(row) -> int:
+        blob = norm_term(" ".join(str(row[k] or "") for k in
+                                  ("term", "established", "quoted_terms")))
+        return sum(1 for t in tokens if t in blob)
+
+    ranked = sorted(found, key=lambda r: (-overlap(r), r["first_seen_at"]), reverse=False)
+    return [r for r in ranked if overlap(r) > 0][:limit]
+
+
 def search_registry(con, query: str, *, limit: int = 5, log: bool = True, reuse: bool = True) -> dict:
     """Browse related claims, but reuse a verdict only for the same assertion."""
     q = query.strip()
     exact = con.execute("SELECT * FROM claims WHERE slot=? ORDER BY first_seen_at DESC LIMIT 1",
                         (claim_key(q),)).fetchone() if q else None
-    # Escape LIKE wildcards: user input is a literal topic, not a SQL pattern.
-    needle = norm_term(q).replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
-    rows = con.execute(
-        "SELECT * FROM claims WHERE lower(term) LIKE ? ESCAPE '\\' "
-        "OR lower(established) LIKE ? ESCAPE '\\' "
-        "OR lower(quoted_terms) LIKE ? ESCAPE '\\' ORDER BY first_seen_at DESC LIMIT ?",
-        (f"%{needle}%", f"%{needle}%", f"%{needle}%", limit)).fetchall() if q else []
+    rows = _candidate_rows(con, q, limit=limit) if q else []
     result = {"query": q, "label": "NOT_CLEARED", "verdict": None,
               "cause": "related_claims_only" if rows else "not_in_registry",
               "why": "Related claims are candidates, not evidence that this assertion is supported."
@@ -376,6 +518,7 @@ def search_registry(con, query: str, *, limit: int = 5, log: bool = True, reuse:
         result["label"] = surface_label(verdict=best["verdict"], cause=best.get("cause"))
         result["why"] = best.get("resolves_with") or best.get("cause")
         result["unsettled"] = not is_settled_for_reuse(verdict=best["verdict"], cause=best.get("cause"))
+        result["freshness"] = freshness_of(best)
         latest = con.execute(
             "SELECT * FROM queries WHERE lower(trim(query_text)) = lower(trim(?)) ORDER BY id DESC LIMIT 1",
             (q,)).fetchone()

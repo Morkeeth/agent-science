@@ -325,3 +325,40 @@ def test_qualitative_context_does_not_assert_causal_effect(saved):
     result=synthesis.apply(data['id'],2,{'findings':[finding(statement='Memory improves coding effectiveness',
         relation='context',quote=quote,conditions=[])]},db=db)
     assert synthesis.build(result)['conclusions'][0]['claim_state']=='UNRESOLVED'
+
+
+def test_practical_consequence_is_versioned_inference_and_affects_review(saved):
+    from clearance import research_cli
+    db,data=saved
+    before=synthesis.apply(data['id'],1,{'findings':[finding(practical_consequence='Run a matched repository comparison before adopting memory.')]},db=db)
+    assessed=before['claims'][0]['assessments'][0]
+    after=synthesis.apply(data['id'],2,{'findings':[finding(claim_id=before['claims'][0]['id'],supersedes=assessed['id'],
+        practical_consequence='Hold adoption until a matched comparison measures accepted changes.')]},db=db)
+    answer=synthesis.build(after)
+    assert 'Authored inference' in answer['conclusions'][0]['consequence_basis']
+    assert answer['evidence_groups']['empirical_findings']==[answer['conclusions'][0]['assessment_id']]
+    assert 'Practical consequence (inference): Hold adoption' in research_cli.render(answer)
+    assert cases.decision_review({'evidence_ids':['e1']},before,after)['state']=='REVIEW_REQUIRED'
+    assert synthesis.build(cases.get(data['id'],version=2,db=db))['conclusions'][0]['practical_consequence'].startswith('Run a matched')
+    assert synthesis.compare(data['id'],2,db=db)['reasoning_changes']
+
+
+def test_adoption_keeps_its_own_answer_group(saved):
+    from clearance import research_cli
+    db,data=saved
+    result=synthesis.apply(data['id'],1,{'findings':[finding(category='field_adoption'),finding(statement='Separate empirical assertion',category='empirical_findings')]},db=db)
+    answer=synthesis.build(result)
+    assert len(answer['evidence_groups']['field_adoption'])==1
+    assert len(answer['evidence_groups']['empirical_findings'])==1
+    rendered=research_cli.render(answer)
+    assert rendered.index('Empirical findings')<rendered.index('Field adoption')
+    assert 'reported use, not measured effectiveness' in rendered
+
+
+def test_doi_resolver_query_and_fragment_do_not_create_another_study():
+    evidence=[{'id':'plain','url':'https://doi.org/10.1234/abc'},
+              {'id':'query','url':'https://doi.org/10.1234/abc?via=ihub#abstract'},
+              {'id':'encoded','url':'https://dx.doi.org/10.1234%2Fabc?download=1'}]
+    grouped=studies.group(evidence)
+    assert len(grouped)==1 and grouped[0]['id']=='doi:10.1234/abc'
+    assert set(grouped[0]['evidence_ids'])=={'plain','query','encoded'}

@@ -21,6 +21,39 @@ agent-science case list --query "fresh sessions" --root .
 
 The longer `python3 -m clearance` form below works from this checkout too.
 
+## Reuse an answer, and know how old its evidence is
+
+Every answer that cites a source now carries the age of that evidence: when the cited
+document was fetched, what it hashed to, and when the source was last re-opened.
+
+```
+$ agent-science lookup 'PEP 8 says to "Limit all lines to a maximum of 79 characters".'
+[SOURCED] PEP 8 says to "Limit all lines to a maximum of 79 characters".
+  source: https://peps.python.org/pep-0008/
+  span: "Maximum Line Length Limit all lines to a maximum of 79 characters."
+  tier=free · via registry · 0 Parallel API
+  evidence: 0.0d old · fetched=2026-09-07T07:02:07.182511+00:00 · sha256=ef6df9586ed3
+  last re-read: never — run `recheck` to re-open the source
+```
+
+An age is not a verification. To go back and read the sources again:
+
+```bash
+agent-science recheck            # compare cached snapshots, no network call
+agent-science recheck --live     # re-fetch the sources
+agent-science recheck --live --url https://peps.python.org/pep-0008/
+```
+
+A claim whose cited span has disappeared from its source is moved back to UNKNOWN with
+the cause `source_does_not_state_it`, and every saved answer resting on that URL is
+listed with its denominator. A document that merely changed around an intact span keeps
+its verdict and is re-bound to the new snapshot. A source that could not be read is
+reported `unchecked`; it is never reported unchanged. The same report is available to an
+agent through the `science_recheck` MCP tool.
+
+A related question retrieves related claims as **candidates**. Their verdicts are never
+reused as an answer: only the identical assertion can be replayed.
+
 ## Investigate a question over time
 
 ```bash
@@ -35,7 +68,23 @@ The first command saves a local plan and retrieves related prior research. An MC
 
 Answers retain source anchors, study conditions, competing interpretations, the strongest challenge and what would change the conclusion. Challenges pin the previous answer; comparisons show changes and affected decisions. Followed updates compare saved versions. Explicit update runs check for new evidence only when resumed under a configured policy.
 
+Return to the saved question and open the claim itself:
+
+```bash
+agent-science research desk --query "memory"
+agent-science research open CASE_ID --claim CLAIM_ID
+agent-science research save CASE_ID
+agent-science research seen CASE_ID --version INSPECTED_VERSION
+```
+
+The claim view opens the original quoted passage beside its current source binding,
+including missing passages and correction notices. `save` preserves unseen changes;
+`seen` acknowledges only the inspected version and never clears a scientific warning.
+The desk and claim view use saved evidence, with no background web calls.
+
 Live calls require an aggregate resource policy approved through the explicit local CLI; MCP cannot approve its own capacity. Usage reservations are not billing, and engine counters exclude reasoning and source reads performed separately by the MCP host. Repository experiments use immutable protocols and an explicitly selected trusted acceptance script.
+
+Research can also check primary registry corrections and pinned source versions, and freeze repeated evaluation campaigns with exact source/run references. Prepared executable campaigns bind an existing immutable protocol version and admit an experiment pass only after its completed execution is present. Practical consequences remain labelled inferences; unmatched baselines and unknown measurements stay visible.
 
 See [the terminal and MCP quickstart](docs/RESEARCH-QUICKSTART.md) for installation, live setup, resume, updates and experiments. The lower-level case commands below remain available.
 

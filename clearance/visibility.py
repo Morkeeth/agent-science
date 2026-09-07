@@ -308,6 +308,16 @@ def format_panel(data: dict) -> str:
     if p.get("quoted_terms"):
         qt = str(p["quoted_terms"]).replace("\n", " ")[:220]
         lines.append(f"  span={qt}")
+    fresh = p.get("freshness") or {}
+    if p.get("citation_url"):
+        age = fresh.get("evidence_age_days")
+        lines.append(
+            f"  evidence_age={'unknown' if age is None else str(age) + 'd'}  "
+            f"fetched={fresh.get('source_fetched_at') or '—'}  "
+            f"sha256={(fresh.get('source_sha256') or '—')[:12]}  "
+            f"last_re-read={fresh.get('evidence_checked_at') or 'never'}")
+    if p.get("prior"):
+        lines.append(f"  PRIOR CLAIM UNSETTLED: {p['prior'].get('why')}")
     if p.get("cause"):
         lines.append(f"  cause={p['cause']}")
     if p.get("resolves_with"):
@@ -566,6 +576,7 @@ th{{color:var(--muted);font-weight:500}}
   {f'<p class="meta"><a href="{_esc(p.get("citation_url"))}">{_esc(p.get("citation_url"))}</a></p>' if p.get('citation_url') else ''}
   {f'<div class="span">{_esc(span)}</div>' if span else ''}
   {f'<p class="meta">cause: {_esc(p.get("cause"))}</p>' if p.get('cause') else ''}
+  {f'<p class="meta">evidence age: {_esc((p.get("freshness") or {}).get("evidence_age_days", "unknown"))} days · fetched {_esc((p.get("freshness") or {}).get("source_fetched_at") or "unknown")} · last re-read {_esc((p.get("freshness") or {}).get("evidence_checked_at") or "never")}</p>' if p.get('citation_url') else ''}
 </div>
 
 <div class="panel">
