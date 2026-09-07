@@ -2,7 +2,7 @@
 doc: hack
 project: Agent Science
 phase: SHIP
-last-touched: 2026-09-03 12:10 UTC
+last-touched: 2026-09-07 00:20 UTC
 canonical: true
 event: Agentic Cinema · Parallel track · deadline 2026-09-09 14:00 PDT
 supersedes: docs/PHASE0-LADDER.md ClickHouse-track note (runtime track is Parallel)
@@ -307,7 +307,47 @@ Full record: `fleet-ops (internal)/retros/QWEN-LOSS-RETRO-2026-08-30.md` (correc
 
 ---
 
-## 🎯 NOW — Partner night wave (fresh compound + timeout finding)
+## 🎯 NOW — Partner admissibility on private workspaces (2026-09-07)
+
+**Slice:** Hosted private-workspaces stripped partner `/health` fields — restore public partner surfaces + auth-gated `/api/clear` without reopening unauthenticated clearance. Oscar redeploy required for live GREEN.
+
+### Build (this night)
+
+- [x] Finding at object — live `/health` missing partner fields · `docs/FINDING-hosted-partner-health-stripped-2026-09-07.md`
+- [x] Shared `partners.health()` + honest `track_checklist` (no hardcoded True)
+- [x] Public `/health` + `/partners` on `WorkspaceHTTP`
+- [x] Auth-gated `POST /api/clear` with `request_id` idempotency + budget
+- [x] `deploy.sh` non-secret `AGENT_BUILDER` / `GCP_PROJECT` / `GOOGLE_CLOUD_LOCATION`
+- [x] `verify_partners_hosted.sh` + compound probes token-aware
+- [x] Partner doc + design-partner loop + SUBMISSION-PACK **131/131**
+- [x] Qwen eval re-run at object (baseline/ablation/scorer/holdout)
+- [x] Live compound BLOCKED doc naming missing credentials
+
+### Verify (one command each)
+
+```bash
+python3 tests/test_watch_it_go_red.py                    # 72/72
+python3 tests/test_partner_runtime.py                    # 10/10
+python3 -m unittest tests.test_hosted_flow               # 15 OK
+python3 scripts/bench_check_docs.py                      # 131/131
+python3 scripts/eval_refusal_baseline.py && python3 scripts/eval_refusal_ablation.py
+bash scripts/verify_partners_hosted.sh                   # RED on live until Oscar deploy
+```
+
+### Receipt
+
+- `docs/RECEIPT-partner-admissibility-2026-09-07.md`
+- `docs/FINDING-hosted-partner-health-stripped-2026-09-07.md`
+- `docs/BLOCKED-live-compound-2026-09-07.md`
+
+### BLOCKED
+
+- Live hosted still `00026-zel` stripped health — Oscar `deploy.sh` + promote
+- This VM: no Parallel/Gemini/workspace token — live clear/compound not re-run here
+
+---
+
+## 🎯 NOW (prior) — Partner night wave (fresh compound + timeout finding)
 
 **Slice:** Harden partner verify to prove Parallel at runtime; ship fresh compound probe; document orphan-works 504 regression at object.
 
@@ -528,6 +568,9 @@ bash scripts/verify_cold_clone.sh                                               
 
 | When | What | Command | Outcome |
 |------|------|---------|---------|
+| 2026-09-07 night | Partner admissibility | `test_partner_runtime` · `test_hosted_flow` · live `curl /health` | **10/10** · **15 OK** · live `/health` **RED** (stripped) until Oscar deploy · finding + auth `/api/clear` shipped |
+| 2026-09-07 night | Compound exhibit integrity | `compound_exhibit_receipt.py` | **RED** under paraphrase fixtures post-`f61635e` → fixture exact-assertion fix → A=**2**→B=**1**, hits=**2**, exit 0 |
+| 2026-09-07 night | Qwen eval re-measure | `eval_refusal_baseline` · ablation · scorer · holdout | baseline **5/6** vs shipping **6/6** · holdout OK · bench **131/131** |
 | 2026-09-03 night | Fresh compound + timeout finding | `compound_fresh_hosted_probe.py` · `verify_partners_hosted.sh` | **A≥1 Parallel → B drop** · orphan-works Run A **504** @ 300s |
 | 2026-09-03 night | SUBMISSION-PACK + Qwen gates | `bench_check_docs.py` · `eval_verify_holdout.py` · `eval_scorer_symmetry.py` | **127/127** · holdout OK · scorer 5/6 vs 6/6 · offline compound A=2→B=1 |
 | 2026-09-02 | Partner verify re-run | `verify_partners_hosted.sh` · `full_gate.sh` | **4/4 partners** · compound warm-shelf PASS · 72/72 auto-seed |
@@ -554,4 +597,4 @@ bash scripts/verify_cold_clone.sh                                               
 
 ---
 
-*Update NOW after every slice. Oscar owns phase 6–7. Next: EYES on §WINNER ANGLES.*
+*Update NOW after every slice. Oscar owns phase 6–7. Next: Oscar deploy this branch → partner verify GREEN · EYES on §WINNER ANGLES.*

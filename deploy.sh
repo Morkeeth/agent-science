@@ -37,9 +37,11 @@ CANDIDATE_ORIGIN="https://workspace-candidate---${URL#https://}"
 "$GCLOUD" run deploy "$SERVICE" --source . --project="$PROJECT" --region="$REGION" \
   --platform=managed --allow-unauthenticated --memory=512Mi --timeout=240 --no-traffic --tag=workspace-candidate \
   --concurrency=1 --max-instances=3 --service-account="$RUNTIME_SA" \
-  --set-env-vars="AGENT_SCIENCE_HOSTED=1,AGENT_SCIENCE_PUBLIC_ORIGIN=${URL},AGENT_SCIENCE_ALLOWED_ORIGINS=${CANDIDATE_ORIGIN},AGENT_SCIENCE_WORKSPACE_BUCKET=${BUCKET},AGENT_SCIENCE_DAILY_RESEARCH_LIMIT=10,AGENT_SCIENCE_GLOBAL_RESEARCH_LIMIT=50,AGENT_SCIENCE_DAILY_MUTATION_LIMIT=100,AGENT_SCIENCE_RESEARCH_TIMEOUT=180" \
+  --set-env-vars="AGENT_SCIENCE_HOSTED=1,AGENT_SCIENCE_PUBLIC_ORIGIN=${URL},AGENT_SCIENCE_ALLOWED_ORIGINS=${CANDIDATE_ORIGIN},AGENT_SCIENCE_WORKSPACE_BUCKET=${BUCKET},AGENT_SCIENCE_DAILY_RESEARCH_LIMIT=10,AGENT_SCIENCE_GLOBAL_RESEARCH_LIMIT=50,AGENT_SCIENCE_DAILY_MUTATION_LIMIT=100,AGENT_SCIENCE_RESEARCH_TIMEOUT=180,AGENT_BUILDER=1,GCP_PROJECT=${PROJECT},GOOGLE_CLOUD_PROJECT=${PROJECT},GOOGLE_CLOUD_LOCATION=global" \
   --set-secrets="PARALLEL_API_KEY=${PARALLEL_SECRET}:${PARALLEL_VERSION},AGENT_SCIENCE_ACCESS_CONFIG=${ACCESS_SECRET}:${ACCESS_VERSION}"
 REVISION="$("$GCLOUD" run services describe "$SERVICE" --project="$PROJECT" --region="$REGION" --format='value(status.latestReadyRevisionName)')"
 printf 'CANDIDATE_REVISION=%s\n' "$REVISION"
 printf 'Candidate is deployed without traffic. Verify it before promoting this exact revision.\n'
+printf 'Partner verify (public surfaces):\n  bash scripts/verify_partners_hosted.sh %s\n' "$URL"
+printf 'Auth-gated clearance (set AGENT_SCIENCE_WORKSPACE_TOKEN from Secret Manager users):\n  bash scripts/verify_partners_hosted.sh %s\n' "$URL"
 "$GCLOUD" run services describe "$SERVICE" --project="$PROJECT" --region="$REGION" --format='json(status.traffic)' 

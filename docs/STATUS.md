@@ -11,7 +11,7 @@ deadline: 2026-09-09T14:00:00-07:00
 > **For Claude / fleet:** this file is the single “where we are” surface.  
 > `hack.md` = process · `CLAUDE.md` = entry · this file = gates + evidence.
 
-**Last gate run:** 2026-08-31T21:46:02Z — `bash scripts/full_gate.sh` → **FULL GATE OK** (127/127 · visibility hosted · 19/19 long run)
+**Last gate run:** 2026-09-07 — partner admissibility night · `bench_check_docs.py` **131/131** · live `/health` **RED** (stripped) until Oscar redeploys `cursor/partner-admissibility-hosted-68f4`
 
 ---
 
@@ -43,9 +43,9 @@ deadline: 2026-09-09T14:00:00-07:00
 | Gate | Result | Command / doc |
 |------|--------|----------------|
 | Mutation controls | **72/72** | `test_watch_it_go_red.py` |
-| All test suites | **127/127** + truth-layer suites | `bench_check_docs.py` + `full_gate.sh` |
+| All test suites | **131/131** + truth-layer suites | `bench_check_docs.py` + `full_gate.sh` |
 | Secret scan | **6/6** | `test_secret_surfaces.py` |
-| Partner runtime | **6/6** | `test_partner_runtime.py` + `test_parallel_integration.py` |
+| Partner runtime | **10/10** + **6/6** parallel | `test_partner_runtime.py` + `test_parallel_integration.py` |
 | ADK default | **5/5** | `test_adk_default_path.py` |
 | Registry surface | **16/16** | `test_registry_surface.py` |
 | Cold clone | ✅ | `verify_cold_clone.sh` |
@@ -65,7 +65,7 @@ deadline: 2026-09-09T14:00:00-07:00
 |---|---|
 | **URL** | https://agent-science-568004190078.us-central1.run.app |
 | **Revision** | `agent-science-00018-n4s` · `parallel_sdk: true` · **`/truths/ui` live** |
-| **Health** | `engine_default: adk` · 265 claims · hit rate ~0.80 |
+| **Health** | live `00026-zel` **stripped** (finding 2026-09-07) · code fix awaits Oscar deploy · expect `engine_default: adk` after promote |
 | **New** | `GET /visibility/ui` — full websearch panel for judges (film this) |
 | **New** | `GET /truths/ui` — truths dashboard |
 | **Stats** | 265 claims · hit rate ~0.80 · queries logged growing |

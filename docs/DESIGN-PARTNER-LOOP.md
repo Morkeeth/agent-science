@@ -3,20 +3,37 @@
 **Audience:** Oscar sends to one real clearance lead before Sep 9.  
 **Goal:** one production runs their script through the desk; friction list lands in `CURSOR-LOG.md`.
 
+**Hosted mode (2026-09-07):** Cloud Run is **private workspaces**. Unauthenticated `POST /clear` is gone. Partners use an invite key Oscar issues from Secret Manager (`agent-science-workspace-access`).
+
 ---
 
 ## Script upload flow (what the partner does)
 
-1. Open hosted desk: `https://agent-science-568004190078.us-central1.run.app/` (after Oscar deploy).
-2. Set **subject shelf** — a tag their team reuses across episodes (e.g. `season-2-ep3`).
-3. Paste **documentary narration** (plain text, not PDF).
-4. Click **Clear script** → gap report HTML or JSON via API:
+### Option A — Hosted (invite key)
+
+1. Open hosted desk: `https://agent-science-568004190078.us-central1.run.app/login`
+2. Paste the **access key** Oscar sent (never put it in a URL or shared doc).
+3. Confirm public partner wiring (optional): open `/health` — expect `engine_default: adk` and `parallel: true`.
+4. Clear via API (or Oscar-provided form once filmed):
    ```bash
-   curl -s -X POST https://agent-science-568004190078.us-central1.run.app/clear \
+   export AGENT_SCIENCE_WORKSPACE_TOKEN='<invite key>'
+   curl -s -X POST https://agent-science-568004190078.us-central1.run.app/api/clear \
+     -H "Authorization: Bearer $AGENT_SCIENCE_WORKSPACE_TOKEN" \
      -H 'Content-Type: application/json' \
-     -d '{"script":"<paste>","subject":"<their-tag>"}'
+     -d '{"request_id":"<16+ random chars>","script":"<paste>","subject":"<their-tag>"}'
    ```
-5. **Second script** on same subject — partner should see `corpus_hits ≥ 1` and fewer Parallel calls (compounding).
+5. **Second script** on the same `subject` — partner should see `corpus_hits ≥ 1` and fewer or equal Parallel calls.
+
+### Option B — Local desk (no account)
+
+```bash
+git clone https://github.com/Morkeeth/agent-science.git && cd agent-science
+pip install -r requirements.txt
+export PARALLEL_API_KEY=…   # or ~/.config/keys/parallel.key
+export PORT=8099 AGENT_BUILDER=1 GCP_PROJECT=hack-fleet
+python3 cloud/service.py
+# browser: http://127.0.0.1:8099/  → paste script → Clear
+```
 
 ---
 
@@ -30,8 +47,9 @@
 | 4 | Was the **reason** on UNSOURCED actionable? | | |
 | 5 | Did compounding work on script 2? (Parallel delta) | | |
 | 6 | Subject tag — intuitive or confusing? | | |
-| 7 | Output format — HTML memo vs JSON for their pipeline? | | |
-| 8 | Blocker that would stop them paying? | | |
+| 7 | Output format — JSON for their pipeline vs HTML memo? | | |
+| 8 | Invite-key login — friction vs open paste desk? | | |
+| 9 | Blocker that would stop them paying? | | |
 
 ---
 
@@ -39,8 +57,9 @@
 
 - `parallel_calls` run 1 vs run 2 (from JSON report)
 - `corpus_hits` on run 2
-- Count of UNSOURCED by `cause` (especially `no_independent_source`, `search_found_no_admissible_source`)
+- Count of UNSOURCED by `cause`
 - Time-to-report (wall clock)
+- Whether they needed Option B (local) because hosted auth blocked them
 
 ---
 
@@ -50,7 +69,7 @@
 >  
 > We built a desk that returns every checkable claim as SOURCED (verbatim quote + URL) or UNSOURCED (named reason).  
 >  
-> **Try it:** [hosted URL] — paste one page of narration, pick a subject tag, clear. Paste a second page with the **same tag** and tell us if the Parallel call count drops.  
+> **Try it:** I will send you a one-time access key for https://agent-science-568004190078.us-central1.run.app/login — paste one page of narration with a subject tag, then a second page with the **same tag**, and tell us if the Parallel call count drops.  
 >  
 > **Reply with:** anything wrongly sourced/unsourced, and whether the refusal reasons are usable in your workflow.  
 >  

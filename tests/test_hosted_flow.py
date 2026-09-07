@@ -54,10 +54,52 @@ class HostedFlow(unittest.TestCase):
         return self.request('POST','/api/cases',{'request_id':rid,'question':'What evidence supports typed tool inputs?','live':False})
 
     def test_anonymous_cannot_read_or_run_legacy_or_new(self):
-        for method,path in [('GET','/api/cases'),('POST','/api/cases'),('POST','/search'),('POST','/clear')]:
-            self.assertEqual(self.request(method,path,{},token=None)[0],401)
-        self.assertEqual(self.request('GET','/stats',token=None)[0],303)
-        self.assertEqual(self.request('POST','/search',{},token=TOKEN_A)[0],404)
+        for method, path in [('GET', '/api/cases'), ('POST', '/api/cases'), ('POST', '/search'), ('POST', '/clear'), ('POST', '/api/clear')]:
+            self.assertEqual(self.request(method, path, {}, token=None)[0], 401)
+        self.assertEqual(self.request('GET', '/stats', token=None)[0], 303)
+        self.assertEqual(self.request('POST', '/search', {}, token=TOKEN_A)[0], 404)
+
+    def test_public_partner_health_and_partners_without_token(self):
+        with patch.dict(os.environ, {
+            'AGENT_BUILDER': '1', 'GCP_PROJECT': 'hack-fleet', 'PARALLEL_API_KEY': 'pk-test',
+        }, clear=False), patch('cloud.agent.adk_available', return_value=True), \
+             patch('cloud.agent.adk_version', return_value='2.7.1'):
+            code, _, health = self.request('GET', '/health', token=None)
+            self.assertEqual(code, 200)
+            self.assertTrue(health['ok'])
+            self.assertEqual(health['mode'], 'private-workspaces')
+            self.assertEqual(health['engine_default'], 'adk')
+            self.assertTrue(health['gemini'])
+            self.assertTrue(health['parallel'])
+            self.assertTrue(str(health.get('gemini_path', '')).startswith('vertex:'))
+            code, _, partners = self.request('GET', '/partners', token=None)
+            self.assertEqual(code, 200)
+            self.assertTrue(partners['track_checklist']['hosted_url_required'])
+            self.assertTrue(partners['track_checklist']['clearance_requires_workspace_token'])
+            self.assertEqual(partners['partners']['agent_builder_adk']['engine_default'], 'adk')
+
+    def test_auth_clear_uses_adk_path_and_is_idempotent(self):
+        fake = {
+            'ok': True, 'engine': 'adk', 'claims_extracted': 1,
+            'parallel_calls': 1, 'corpus_hits': 0, 'sourced': 0, 'unsourced': 1,
+        }
+        with patch('cloud.service._run_clearance', return_value=fake) as clear:
+            code, _, out = self.request('POST', '/api/clear', {
+                'request_id': 'clear-request-00001',
+                'script': 'The Archive of Zephyr passed Regulation Z for orphan media.',
+                'subject': 'partner-clear-test',
+            })
+            self.assertEqual(code, 200, out)
+            self.assertEqual(out['engine'], 'adk')
+            self.assertEqual(clear.call_count, 1)
+            code2, _, out2 = self.request('POST', '/api/clear', {
+                'request_id': 'clear-request-00001',
+                'script': 'The Archive of Zephyr passed Regulation Z for orphan media.',
+                'subject': 'partner-clear-test',
+            })
+            self.assertEqual(code2, 200)
+            self.assertEqual(out2['engine'], 'adk')
+            self.assertEqual(clear.call_count, 1)
 
     def test_real_worker_create_idempotency_and_restart(self):
         code,_,result=self.create(); self.assertEqual(code,201,result)

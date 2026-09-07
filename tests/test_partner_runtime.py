@@ -15,6 +15,67 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 
+def adk_agent_mod():
+    from cloud import agent as adk_agent
+    return adk_agent
+
+
+def t_partner_health_exposes_engine_and_parallel_fields():
+    """Stripped private-workspace health is the defect this control catches."""
+    from cloud import partners
+
+    with patch.dict(
+        os.environ,
+        {"AGENT_BUILDER": "1", "GCP_PROJECT": "hack-fleet", "PARALLEL_API_KEY": "pk-test"},
+        clear=False,
+    ):
+        with patch.object(adk_agent_mod(), "adk_available", return_value=True):
+            with patch.object(adk_agent_mod(), "adk_version", return_value="2.7.1"):
+                h = partners.health(mode="private-workspaces", revision="local-test")
+    for field in (
+        "ok",
+        "gemini",
+        "gemini_path",
+        "parallel",
+        "parallel_sdk",
+        "agent_builder",
+        "engine_default",
+        "mode",
+        "revision",
+    ):
+        assert field in h, f"missing {field}"
+    assert h["mode"] == "private-workspaces"
+    assert h["engine_default"] == "adk"
+    assert h["gemini_path"].startswith("vertex:")
+    assert h["parallel"] is True
+
+
+def t_partner_manifest_checklist_not_hardcoded_true_without_wiring():
+    from cloud import partners
+
+    saved = os.environ.pop("PARALLEL_API_KEY", None)
+    try:
+        with patch.dict(os.environ, {"AGENT_BUILDER": "0"}, clear=False):
+            with patch(
+                "clearance.search.last_verified_receipt",
+                return_value={
+                    "verified_search_id": None,
+                    "verified_calls_logged": 0,
+                    "last_verified_utc": None,
+                },
+            ):
+                with patch.object(adk_agent_mod(), "adk_available", return_value=False):
+                    m = partners.manifest(gemini_path="none", adk_default=False)
+        tc = m["track_checklist"]
+        assert tc["parallel_search_at_runtime"] is False
+        assert tc["gemini_at_runtime"] is False
+        assert tc["adk_agent_builder"] is False
+        assert tc["clearance_requires_workspace_token"] is True
+    finally:
+        if saved is not None:
+            os.environ["PARALLEL_API_KEY"] = saved
+
+
 def t_gemini_entrypoint_exists():
     from clearance import gemini
     assert hasattr(gemini, "GeminiLocator")
@@ -37,9 +98,10 @@ def t_parallel_entrypoint_wired_in_facts():
 def t_gcp_service_health_shape():
     svc = importlib.import_module("cloud.service")
     src = inspect.getsource(svc)
-    assert "engine_default" in src
-    assert "gemini_path" in src or "parallel" in src
+    assert "partners" in src or "engine_default" in src
     assert "_run_clearance" in src
+    from cloud import partners
+    assert callable(partners.health)
 
 
 def t_adk_default_engine_wired():
@@ -67,8 +129,11 @@ def t_deploy_sh_secret_manager_not_plaintext_env():
     assert "--set-secrets" in deploy
     assert "PARALLEL_API_KEY" in deploy
     assert "parallel-api-key" in deploy or "PARALLEL_SECRET" in deploy
-    # Gemini via ADC — no plaintext key in deploy env vars
-    assert "GEMINI_API_KEY" not in deploy.split("--set-env-vars")[1].split("--set-secrets")[0]
+    env_block = deploy.split("--set-env-vars")[1].split("--set-secrets")[0]
+    assert "GEMINI_API_KEY" not in env_block
+    assert "AGENT_BUILDER=1" in env_block
+    assert "GCP_PROJECT=" in env_block
+    assert "GOOGLE_CLOUD_LOCATION=global" in env_block
 
 
 def t_partner_manifest_survives_cold_start():
@@ -90,13 +155,11 @@ def t_partner_manifest_survives_cold_start():
     try:
         d = Path(tempfile.mkdtemp())
 
-        # Red 1: no log at all.
         search.RECEIPTS = d / "absent.jsonl"
         out = search.last_verified_receipt()
         assert out["verified_search_id"] is None
         assert out["verified_calls_logged"] == 0
 
-        # Red 2: receipts exist but none carry a real search_id, plus a bad line.
         log = d / "no_ids.jsonl"
         log.write_text(
             json.dumps({"at": "2026-01-01T00:00:00+00:00", "source": "parallel", "search_id": None})
@@ -107,7 +170,6 @@ def t_partner_manifest_survives_cold_start():
         assert out["verified_search_id"] is None, "a cache-hit receipt is not proof of a live call"
         assert out["verified_calls_logged"] == 0
 
-        # Green: one real receipt, and the LAST one wins.
         log = d / "ids.jsonl"
         log.write_text(
             json.dumps({"at": "2026-01-01T00:00:00+00:00", "source": "parallel", "search_id": "search_old"})
@@ -128,6 +190,14 @@ def t_requirements_pins_parallel_web():
     req = (ROOT / "requirements.txt").read_text()
     assert "parallel-web==" in req
     assert "google-adk==" in req
+
+
+def t_case_http_exposes_public_partner_routes():
+    src = (ROOT / "cloud" / "case_http.py").read_text()
+    assert "partner_surface.health" in src
+    assert "partner_surface.manifest" in src
+    assert "def clear_script" in src
+    assert "/api/clear" in src or "base == '/clear'" in src
 
 
 if __name__ == "__main__":
