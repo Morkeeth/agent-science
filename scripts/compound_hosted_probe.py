@@ -1,10 +1,16 @@
 #!/usr/bin/env python3
-"""Hosted compound-mini A/B — proves Parallel drop + corpus_hits on repeat subject."""
+"""Hosted compound-mini A/B — proves Parallel drop + corpus_hits on repeat subject.
+
+Private-workspace hosted: set AGENT_SCIENCE_WORKSPACE_TOKEN and posts to /api/clear.
+Local desk (no AGENT_SCIENCE_HOSTED): posts to /clear without a token.
+"""
 from __future__ import annotations
 
 import json
+import os
 import sys
 import time
+import urllib.error
 import urllib.request
 import uuid
 from pathlib import Path
@@ -14,16 +20,39 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def run(base: str, script_path: Path, subject: str, label: str) -> dict:
     script = script_path.read_text()
-    body = json.dumps({"script": script, "subject": subject}).encode()
+    token = os.environ.get("AGENT_SCIENCE_WORKSPACE_TOKEN", "").strip()
+    if token:
+        path = "/api/clear"
+        payload = {
+            "request_id": f"compound-{uuid.uuid4().hex[:20]}",
+            "script": script,
+            "subject": subject,
+        }
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {token}",
+        }
+    else:
+        path = "/clear"
+        payload = {"script": script, "subject": subject}
+        headers = {"Content-Type": "application/json"}
+    body = json.dumps(payload).encode()
     req = urllib.request.Request(
-        base.rstrip("/") + "/clear",
+        base.rstrip("/") + path,
         data=body,
-        headers={"Content-Type": "application/json"},
+        headers=headers,
         method="POST",
     )
     t0 = time.time()
-    with urllib.request.urlopen(req, timeout=300) as resp:
-        data = json.loads(resp.read())
+    try:
+        with urllib.request.urlopen(req, timeout=300) as resp:
+            data = json.loads(resp.read())
+    except urllib.error.HTTPError as exc:
+        detail = exc.read().decode("utf-8", errors="replace")[:500]
+        raise SystemExit(
+            f"{label} HTTP {exc.code} on {path}: {detail}\n"
+            "Hosted private workspaces need AGENT_SCIENCE_WORKSPACE_TOKEN."
+        ) from exc
     keys = [
         "engine",
         "parallel_calls",

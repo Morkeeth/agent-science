@@ -12,11 +12,12 @@
 > UNSOURCED with a named reason — plus a truth shelf that compounds so the second ask is free.
 >
 > **Proof:** hosted compound exhibit — Run A **1** Parallel call, Run B **0** with
-> `corpus_hits=1` on repeat. Four partners wired at runtime: Vertex, Parallel, Cloud Run, ADK.
+> `corpus_hits=1` on repeat. Four partners wired at runtime: Vertex, Parallel, Cloud Run, ADK
+> (public `/health`+`/partners`; clearance via workspace token on `POST /api/clear` after private-workspace pivot — Oscar redeploy required if live `/health` lacks `engine_default`).
 >
 > **Constraint:** if the document does not contain the exact passage, refuse — never paraphrase,
 > never infer. We refused our own pitch headline in the product because of this rule
-> (hosted `POST /clear` on "94% of film archives…", 2026-09-02 → `UNSOURCED · search_found_no_admissible_source`);
+> (hosted clearance on "94% of film archives…", 2026-09-02 → `UNSOURCED · search_found_no_admissible_source`);
 > the film script places that beat at 1:00 — say "on camera" only after checking the cut.
 >
 > Clearance and EU regulation? One vertical on the same layer — not the whole product.

@@ -23,6 +23,7 @@ from cloud.case_storage import WorkspaceStore, Conflict, StorageLimit
 from cloud import case_pages
 
 MAX_BODY = 32768
+CLEAR_MAX_BODY = 120000
 CASE_ID = r'[a-f0-9]{12}'
 EVIDENCE_ID = r'[a-f0-9]{16}'
 
@@ -137,11 +138,11 @@ class WorkspaceHTTP:
         if self.h.headers.get('Origin') not in self.allowed_origins():
             raise HTTPError(403, 'This form must be submitted from the workspace address.')
 
-    def body(self):
+    def body(self, *, max_body=MAX_BODY):
         h = self.h
         if h.headers.get('Transfer-Encoding') or len(h.headers.get_all('Content-Length', [])) != 1:
             raise HTTPError(400, 'A single Content-Length header is required.')
-        length = integer(h.headers.get('Content-Length'), 'content length', 1, MAX_BODY)
+        length = integer(h.headers.get('Content-Length'), 'content length', 1, max_body)
         h.connection.settimeout(10)
         raw = h.rfile.read(length)
         if len(raw) != length:
@@ -188,9 +189,17 @@ class WorkspaceHTTP:
             raise HTTPError(414, 'Request URL is too long.')
         parsed = urlsplit(h.path)
         path = parsed.path.rstrip('/') or '/'
+        # Partner-admissible public surfaces — no token. Judges must see wiring
+        # without opening unauthenticated /search|/clear|/ingest.
         if h.command == 'GET' and path == '/health':
-            return self.send(200, {'ok': True, 'service': 'agent-science', 'mode': 'private-workspaces',
-                                   'revision': os.getenv('K_REVISION', 'local')})
+            from cloud import partners as partner_surface
+            return self.send(200, partner_surface.health(
+                mode='private-workspaces',
+                revision=os.getenv('K_REVISION', 'local'),
+            ))
+        if h.command == 'GET' and path in ('/partners', '/api/partners'):
+            from cloud import partners as partner_surface
+            return self.send(200, partner_surface.manifest())
         expected_origin = os.getenv('AGENT_SCIENCE_PUBLIC_ORIGIN', '').rstrip('/')
         if self.secure and h.command == 'GET' and not self.api and expected_origin:
             # Cloud Run has multiple aliases. Forms and session cookies must use
@@ -218,13 +227,17 @@ class WorkspaceHTTP:
         budget = Budget(self.store)
         csrf = self.auth.csrf(session) if session else ''
         if h.command == 'POST':
-            data = self.body()
+            base = path.removeprefix('/api') if self.api else path
+            clear_path = base == '/clear'
+            data = self.body(max_body=CLEAR_MAX_BODY if clear_path else MAX_BODY)
             if session:
                 self.origin()
                 if not self.auth.valid_csrf(session, data.get('csrf')):
                     raise HTTPError(403, 'Form session expired. Reload and submit again.')
             if path == '/logout':
                 return self.send(303, location='/login', cookie='')
+            if clear_path:
+                return self.clear_script(data, tenant, budget)
             return self.mutate(path, data, tenant, budget)
         if path in ('/', '/index.html'):
             return self.send(303, location='/cases')
@@ -251,6 +264,41 @@ class WorkspaceHTTP:
             case = cases.get(cid, db=ws.db, version=version)
             case['latest_version'] = cases.get(cid, db=ws.db)['version']
             return self.send(200, cases.public_view(case) if self.api else case_pages.detail(case, csrf))
+
+    def clear_script(self, data, tenant, budget):
+        """Auth-gated clearance — Parallel/Gemini/ADK at runtime without public /clear."""
+        rid = required_text(data, 'request_id', 64)
+        if not re.fullmatch(r'[a-zA-Z0-9_-]{16,64}', rid):
+            raise HTTPError(400, 'request_id must contain 16–64 letters, digits, underscores or hyphens.')
+        script = required_text(data, 'script', 100000)
+        subject = required_text(data, 'subject', 200, optional=True) or 'default'
+        allowed = {'csrf', 'request_id', 'script', 'subject'}
+        if set(data) - allowed:
+            raise HTTPError(400, 'Unsupported request fields.')
+        payload = {'action': 'clear', 'script': script, 'subject': subject}
+        fingerprint = hashlib.sha256(json.dumps(payload, sort_keys=True, separators=(',', ':')).encode()).hexdigest()
+        with self.store.workspace(tenant) as ws:
+            with receipts(ws.db) as con:
+                row = con.execute('SELECT fingerprint,result FROM hosted_requests WHERE id=?', (rid,)).fetchone()
+            if row:
+                if row[0] != fingerprint:
+                    raise HTTPError(409, 'Request ID was already used for different input.')
+                return self.send(200, json.loads(row[1]))
+            if ws.db.stat().st_size >= self.store.max_bytes:
+                raise StorageLimit('workspace is full')
+            # Clearance may call Parallel; counts as one admitted live research run.
+            budget.reserve(tenant, rid, fingerprint, True)
+            from cloud import service as svc
+            model = os.environ.get('GEMINI_MODEL', 'gemini-3.5-flash-lite')
+            try:
+                result = svc._run_clearance(script, subject, model)
+            except RuntimeError as exc:
+                raise HTTPError(503, str(exc)) from None
+            with receipts(ws.db) as con:
+                con.execute('INSERT INTO hosted_requests VALUES(?,?,?)', (rid, fingerprint, json.dumps(result)))
+            ws.commit()
+        code = 200 if result.get('ok') else 422
+        return self.send(code, result)
 
     def mutate(self, path, data, tenant, budget):
         base = path.removeprefix('/api') if self.api else path
