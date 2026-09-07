@@ -1,0 +1,9 @@
+{
+  "price_card_date": "2026-09-07",
+  "price_card_path": "fixtures/price-card/parallel-search-2026-09-07.json",
+  "price_card_rate_usd_per_search": 0.005,
+  "baseline_guess_usd_per_search": 0.005,
+  "billing_status": "UNKNOWN",
+  "observed_usd_total": null,
+  "source": "unavailable"
+}

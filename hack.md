@@ -295,48 +295,52 @@ submission craft, supported by a real tendency, **not** as the explanation of th
 - [x] **Baseline steelmanned** — raw rows printed by eval scripts; RC5 is now the single discordant item (baseline GREEN, shipping UNKNOWN)
 - [x] **Statistic matched to n** — Wilson 95% CI + McNemar in baseline/ablation scripts
 - [x] **Scorer symmetrical** — `python3 scripts/eval_scorer_symmetry.py` · delivered SOURCED/UNSOURCED labels only; baseline **5/6** vs shipping **6/6** (RC5 discordant)
-- [ ] **Cost from billing**, with the price card's date stated.
+- [x] **Cost from billing**, with the price card's date stated. — `python3 scripts/eval_cost_from_billing.py` · price card **2026-09-07** from parallel.ai/pricing · observed spend **UNKNOWN** (no invoice on VM); see `docs/COST-FROM-BILLING-2026-09-07.json`
 - [x] **Offline path with no API key.**
 - [x] **Honesty & limitations** section carrying our worst number — README §Honesty & limitations; PITCH first screen
 - [ ] **Answer the track brief in the track's own words on the first screen** — judge pack § above; must land on Devpost ¶1 + video 0:00
 - [ ] **Video verified attached and public on the live entry page, from a logged-out browser** — not in a checklist file, on the page.
-- [ ] **Every artifact claim measured at the submitted commit.** Four retros of that loss failed this row.
+- [x] **Every artifact claim measured at the submitted commit.** — `python3 scripts/eval_artifact_claims.py` (2026-09-07): baseline false-GREEN **5/10** on hosted stranger claims; pack public-repo row corrected; see `docs/ARTIFACT-CLAIM-EVAL-2026-09-07.json`
 
 Full record: `fleet-ops (internal)/retros/QWEN-LOSS-RETRO-2026-08-30.md` (corrected) ·
 `QWEN-FIELD-TEST-2026-08-30.md` (the n=40 falsification) · playbook lesson 97.
 
 ---
 
-## 🎯 NOW — Partner night wave (fresh compound + timeout finding)
+## 🎯 NOW — Night wave 2026-09-07 (submit-path truth · artifact claims)
 
-**Slice:** Harden partner verify to prove Parallel at runtime; ship fresh compound probe; document orphan-works 504 regression at object.
+**Slice:** One falsifiable Qwen-style gate that measures submission claims at their objects (baseline proxy vs open-the-object), with SUBMISSION-PACK + stranger trial honesty about private-workspaces hosted. No deploy · no Devpost · no video.
 
-### Build (shipped 2026-09-03)
+### Build (shipped 2026-09-07)
 
-- [x] Fresh compound probe — `python3 scripts/compound_fresh_hosted_probe.py` (A_parallel≥1 → B drop + corpus_hits)
-- [x] Partner verify hardened — `bash scripts/verify_partners_hosted.sh` (Parallel ≥1 on fresh claim + compound-fresh)
-- [x] Orphan-works timeout finding — `docs/FINDING-orphan-works-timeout-2026-09-03.md` (Run A now 504 @ 300s)
-- [x] Receipt — `docs/RECEIPT-partner-night-2026-09-03.md`
+- [x] Artifact-claim eval gate — `python3 scripts/eval_artifact_claims.py` (baseline false-GREEN **6/10** post pack fix; McNemar p=0.0312)
+- [x] Cost-from-billing gate — `python3 scripts/eval_cost_from_billing.py` (price card **2026-09-07**; billing UNKNOWN)
+- [x] Stranger trial watches RED — `bash scripts/new_user_trial.sh` exit **2** on `mode=private-workspaces`
+- [x] SUBMISSION-PACK truth refresh — public-repo corrected; hosted stranger marked login-walled; offline one-command authoritative
+- [x] Offline compound restored — identical-assertion overlap; A=2→B=1 · corpus_hits=2 (paraphrase path was RED)
+- [x] Live compound exhibit — BLOCKED receipt (no keys + hosted login wall)
+- [x] Deploy prep only — `docs/DEPLOY-PREP-2026-09-07.md` (candidate tag, no traffic flip)
 
-### Verify (one command each)
+### Verify (one command each — tick only after RUN)
 
 ```bash
 git pull && python3 tests/test_watch_it_go_red.py                    # 72/72
-bash scripts/verify_partners_hosted.sh                               # 4/4 partners + Parallel + compound-fresh
-python3 scripts/compound_fresh_hosted_probe.py                       # A≥1 Parallel → B corpus_hits≥1
-bash scripts/full_gate.sh                                            # FULL GATE OK
-python3 scripts/bench_check_docs.py                                  # 127/127
-python3 scripts/eval_refusal_baseline.py && python3 scripts/eval_refusal_ablation.py
+python3 scripts/eval_artifact_claims.py                              # baseline vs shipping at objects
+python3 scripts/eval_cost_from_billing.py                            # price card dated; billing UNKNOWN|measured
+python3 scripts/bench_check_docs.py                                  # 128/128
+python3 tests/test_registry_surface.py -q                            # 16/16
+python3 scripts/compound_exhibit_receipt.py                          # offline A=2→B=1
+bash scripts/new_user_trial.sh                                       # EXIT 2 RED on private-workspaces
 ```
 
 ### Receipt
 
-- `docs/RECEIPT-partner-night-2026-09-03.md`
-- `docs/FINDING-orphan-works-timeout-2026-09-03.md`
+- `docs/RECEIPT-night-wave-2026-09-07.md` — SHIPPED / VERIFIED / WRONG
 
 ### BLOCKED
 
-- Orphan-works full script — **504 @ 300s on Run A** (was Run B only). Oscar: raise `deploy.sh --timeout` or film compound-fresh.
+- Live Parallel/Gemini compound — no keys on this VM; hosted `/clear` and `/search` require workspace access key (`mode: private-workspaces`, rev `agent-science-00026-zel`).
+- Outward: video · Devpost · traffic promote — Oscar only.
 
 ---
 
@@ -528,6 +532,7 @@ bash scripts/verify_cold_clone.sh                                               
 
 | When | What | Command | Outcome |
 |------|------|---------|---------|
+| 2026-09-07 night | Artifact claims + hosted stranger RED | `eval_artifact_claims.py` · `new_user_trial.sh` · `compound_exhibit_receipt.py` | baseline false-GREEN **6/10** · trial EXIT **2** · offline compound A=2→B=1 restored · billing UNKNOWN · pack public-repo corrected |
 | 2026-09-03 night | Fresh compound + timeout finding | `compound_fresh_hosted_probe.py` · `verify_partners_hosted.sh` | **A≥1 Parallel → B drop** · orphan-works Run A **504** @ 300s |
 | 2026-09-03 night | SUBMISSION-PACK + Qwen gates | `bench_check_docs.py` · `eval_verify_holdout.py` · `eval_scorer_symmetry.py` | **127/127** · holdout OK · scorer 5/6 vs 6/6 · offline compound A=2→B=1 |
 | 2026-09-02 | Partner verify re-run | `verify_partners_hosted.sh` · `full_gate.sh` | **4/4 partners** · compound warm-shelf PASS · 72/72 auto-seed |

@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 # New-user trial — run against hosted Agent Science as a stranger would.
 # Usage: bash scripts/new_user_trial.sh [HOSTED_URL]
+#
+# Control contract: if hosted is private-workspaces (login wall), this script
+# must exit non-zero with a named RED. A KeyError on a missing health field is
+# not a control — that crash path was watched on 2026-09-07 and replaced.
 set -euo pipefail
 BASE="${1:-https://agent-science-568004190078.us-central1.run.app}"
 SUBJ="trial-$(date +%H%M)"
@@ -12,15 +16,41 @@ echo
 
 py() { python3 -c "$1"; }
 
-echo "1. Health (partners wired)"
-curl -sf "$BASE/health" | py "import sys,json; d=json.load(sys.stdin); assert d['ok']; print('  engine', d['engine_default'], 'parallel', d['parallel'], 'gemini', d['gemini'])"
+echo "1. Health"
+HEALTH_JSON="$(curl -sS -m 20 "$BASE/health" || true)"
+if [[ -z "$HEALTH_JSON" ]]; then
+  echo "  RED  /health empty or unreachable"
+  exit 1
+fi
+echo "$HEALTH_JSON" | py "
+import sys, json
+d = json.load(sys.stdin)
+assert d.get('ok'), d
+mode = d.get('mode') or 'public-desk'
+print('  ok', d.get('ok'), 'mode', mode, 'revision', d.get('revision'))
+# Old desk shape (pre private-workspaces) carried partner wiring here.
+if 'engine_default' in d:
+    print('  engine', d.get('engine_default'), 'parallel', d.get('parallel'), 'gemini', d.get('gemini'))
+if mode == 'private-workspaces':
+    print('  RED  hosted mode is private-workspaces — stranger /search /registry /clear require an access key')
+    print('  RED  public compound exhibit and free-lookup trial do not apply to this revision')
+    print('  use offline: python3 tests/test_registry_surface.py -q && python3 scripts/compound_exhibit_receipt.py')
+    sys.exit(2)
+"
 
 echo "2. Free lookup (dictionary — 0 Parallel)"
-curl -sf "$BASE/search?q=2012/28/EU&live=false" | py "
-import sys,json
-d=json.load(sys.stdin)
-print('  label', d['label'], 'tier', d.get('cost_tier'), 'parallel', d.get('parallel_api_calls',0))
-assert d['label']=='SOURCED', d
+SEARCH_BODY="$(curl -sS -m 30 -w '\n%{http_code}' "$BASE/search?q=2012/28/EU&live=false" || true)"
+echo "$SEARCH_BODY" | py "
+import sys, json
+raw = sys.stdin.read()
+body, _, code = raw.rpartition('\n')
+code = code.strip()
+if 'Sign in' in body or code in {'303', '401', '403'}:
+    print('  RED  /search login-walled or forbidden (http', code + ')')
+    sys.exit(2)
+d = json.loads(body)
+print('  label', d['label'], 'tier', d.get('cost_tier'), 'parallel', d.get('parallel_api_calls', 0))
+assert d['label'] == 'SOURCED', d
 "
 
 echo "3. Miss without live (honest NOT_CLEARED)"
@@ -49,7 +79,6 @@ a=json.load(open('/tmp/as_A.json'))
 ap, bp = a.get('parallel_api_calls',0), d.get('parallel_api_calls',0)
 bh = d.get('corpus_hits',0)
 print('  Run B: parallel', bp, 'corpus_hits', bh)
-# Seeded dictionary: A may already be 0 Parallel; B must hit corpus shelf.
 assert bh >= 1, ('expected corpus_hits>=1', ap, bp, bh)
 assert bp <= ap, ('expected B not more expensive than A', ap, bp)
 print('  COMPOUND OK (corpus hits on repeat)')

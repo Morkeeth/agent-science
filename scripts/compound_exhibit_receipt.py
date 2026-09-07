@@ -67,6 +67,9 @@ class _Raw:
 
 
 # Fixed claim lists mirroring compound-mini scripts — extraction is NOT simulated live.
+# Overlapping assertions must be byte-identical. same-subject integrity
+# (tests/test_same_subject_integrity.py) keys the corpus on the full assertion;
+# paraphrase reuse was a false compound and is not claimed here.
 _OFFLINE_CLAIMS = {
     "A": [
         _Raw("In 2012 the European Union passed Directive 2012/28/EU, the Orphan Works Directive.",
@@ -75,9 +78,9 @@ _OFFLINE_CLAIMS = {
              None, "29 October 2014"),
     ],
     "B": [
-        _Raw("Europe's answer was Directive 2012/28/EU — known as the Orphan Works Directive —",
+        _Raw("In 2012 the European Union passed Directive 2012/28/EU, the Orphan Works Directive.",
              None, "Directive 2012/28/EU"),
-        _Raw("and the deadline for national transposition was 29 October 2014.",
+        _Raw("Member states had until 29 October 2014 to bring it into national law.",
              None, "29 October 2014"),
         _Raw("The British Library has estimated that forty percent of its copyrighted collection is orphaned.",
              None, "forty percent"),
@@ -188,7 +191,7 @@ def _control_output(script: str) -> str:
     return r.stdout.strip() or r.stderr.strip()
 
 
-def _write_receipt(run: dict, *, backfill_rows: int) -> None:
+def _write_receipt(run: dict, *, backfill_rows: int, sourced_rows: int) -> None:
     if run.get("error"):
         body = f"""# COMPOUND EXHIBIT — orphan-works A/B
 
@@ -229,6 +232,9 @@ def _write_receipt(run: dict, *, backfill_rows: int) -> None:
         f"- Run B parallel < Run A: **{'yes' if pb < pa else 'NO — exhibit failed'}**",
         f"- corpus_hits B ≥ 1: **{'yes' if b['corpus_hits'] >= 1 else 'NO'}**",
         "",
+        "Overlap rule: identical assertions only (`test_same_subject_integrity`). "
+        "Paraphrase of the same fact does **not** count as a corpus hit.",
+        "",
     ]
 
     if mode == "offline":
@@ -242,7 +248,7 @@ def _write_receipt(run: dict, *, backfill_rows: int) -> None:
             lines.append(f"- {s}")
         lines += [
             "",
-            f"Ground-truth Parallel calls at fake boundary (Run A only): `{run.get('net_find_calls', '?')}`",
+            f"Ground-truth Parallel calls at fake boundary (total finds): `{run.get('net_find_calls', '?')}`",
             "",
         ]
     else:
@@ -257,7 +263,7 @@ def _write_receipt(run: dict, *, backfill_rows: int) -> None:
         "## Registry backfill",
         "",
         f"`python3 clear_corpus.py research-corpus --backfill` → **{backfill_rows} rows** "
-        f"(29 SOURCED + proven-unprovable refusals) in `cache/refusal_log.db`",
+        f"({sourced_rows} GREEN + proven-unprovable refusals) in `cache/refusal_log.db`",
         "",
         "## Controls",
         "",
@@ -282,10 +288,12 @@ def main() -> int:
     from clearance import refusal_log
 
     con = refusal_log.connect(refusal_log.DB)
-    backfill_rows = refusal_log.stats(con)["n"]
+    st = refusal_log.stats(con)
+    backfill_rows = st["n"]
+    sourced_rows = st.get("cleared") or 0
 
     run = _run_live() if _has_keys() else _run_offline()
-    _write_receipt(run, backfill_rows=backfill_rows)
+    _write_receipt(run, backfill_rows=backfill_rows, sourced_rows=sourced_rows)
     print(RECEIPT.read_text())
 
     if run.get("error"):

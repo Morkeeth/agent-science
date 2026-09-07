@@ -1,0 +1,19 @@
+{
+  "provider": "Parallel",
+  "product": "Search API",
+  "source_url": "https://www.parallel.ai/pricing",
+  "fetched_at": "2026-09-07T00:20:00Z",
+  "fetched_by": "night-wave artifact gate (WebFetch of public pricing page)",
+  "note": "Price card only. Not a billing statement. Do not treat as observed spend.",
+  "search_api": {
+    "unit": "per 1K requests with 10 results",
+    "processors": {
+      "Turbo": {"usd_per_1k": 1},
+      "Fast": {"usd_per_1k": 1},
+      "Basic": {"usd_per_1k": 5},
+      "Advanced": {"usd_per_1k": 5}
+    },
+    "implied_per_request_basic_or_advanced_usd": 0.005
+  },
+  "billing_access": "UNKNOWN — Parallel console / invoice not available on this VM"
+}

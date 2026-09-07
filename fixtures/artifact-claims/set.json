@@ -1,0 +1,119 @@
+{
+  "frozen_at": "2026-09-07T00:00:00Z",
+  "purpose": "Qwen-style gate: every submission claim measured at its object. Baseline uses a near proxy; shipping opens the object.",
+  "items": [
+    {
+      "id": "HS1",
+      "claim": "Hosted GET /search returns JSON to a stranger without login",
+      "asserted_by": ["docs/SUBMISSION-PACK-2026-08-29.md stranger path", "scripts/new_user_trial.sh"],
+      "category": "hosted_stranger",
+      "path": "/search?q=2012/28/EU&live=false",
+      "shipping_pass": {
+        "status": 200,
+        "body_must_not_contain": ["Sign in", "Workspace access key required"],
+        "json_key": "label"
+      },
+      "baseline": "health_ok_implies_pass"
+    },
+    {
+      "id": "HS2",
+      "claim": "Hosted GET /registry is browsable without login",
+      "asserted_by": ["docs/SUBMISSION-PACK-2026-08-29.md", "hack.md stranger path"],
+      "category": "hosted_stranger",
+      "path": "/registry",
+      "shipping_pass": {
+        "status": 200,
+        "body_must_contain": ["registry"],
+        "body_must_not_contain": ["Sign in"]
+      },
+      "baseline": "health_ok_implies_pass"
+    },
+    {
+      "id": "HS3",
+      "claim": "Hosted GET /health reports engine_default for partner wiring",
+      "asserted_by": ["scripts/new_user_trial.sh", "docs/STATUS.md", "film/preflight.sh"],
+      "category": "hosted_stranger",
+      "path": "/health",
+      "shipping_pass": {
+        "status": 200,
+        "json_key": "engine_default"
+      },
+      "baseline": "health_ok_implies_pass"
+    },
+    {
+      "id": "HS4",
+      "claim": "Hosted POST /clear accepts an unauthenticated compound script",
+      "asserted_by": ["docs/SEALED-PREDICTION-2026-08-31.md", "scripts/new_user_trial.sh"],
+      "category": "hosted_stranger",
+      "method": "POST",
+      "path": "/clear",
+      "body": "{\"script\":\"Directive 2012/28/EU orphan works.\\n\",\"subject\":\"artifact-claim-probe\"}",
+      "shipping_pass": {
+        "status": 200,
+        "json_key": "parallel_api_calls",
+        "body_must_not_contain": ["Sign in", "Workspace access key", "Request could not be completed"]
+      },
+      "baseline": "health_ok_implies_pass"
+    },
+    {
+      "id": "HS5",
+      "claim": "Hosted GET /visibility/ui is reachable without login for judges",
+      "asserted_by": ["docs/SUBMISSION-PACK-2026-08-29.md Devpost paste", "docs/STATUS.md"],
+      "category": "hosted_stranger",
+      "path": "/visibility/ui?q=ralph+loop",
+      "shipping_pass": {
+        "status": 200,
+        "body_must_not_contain": ["Sign in"]
+      },
+      "baseline": "health_ok_implies_pass"
+    },
+    {
+      "id": "D1",
+      "claim": "Public repo checkbox still reads Private until submit",
+      "asserted_by": ["docs/SUBMISSION-PACK-2026-08-29.md Quantified done-when"],
+      "category": "doc_truth",
+      "shipping": "pack_public_repo_row",
+      "baseline": "trust_pack_checkbox"
+    },
+    {
+      "id": "D2",
+      "claim": "Gap report still states 561 of 600 (94%) at the fixture object",
+      "asserted_by": ["docs/SUBMISSION-PACK-2026-08-29.md", "PITCH.md"],
+      "category": "doc_truth",
+      "shipping": "fixture_contains",
+      "fixture": "fixtures/gap-report-600.md",
+      "must_contain": "561 of 600 (94%)",
+      "baseline": "trust_pack_number"
+    },
+    {
+      "id": "D3",
+      "claim": "Second-question fixture still states 247 of 600 (41%) flip",
+      "asserted_by": ["docs/SUBMISSION-PACK-2026-08-29.md", "PITCH.md"],
+      "category": "doc_truth",
+      "shipping": "fixture_contains",
+      "fixture": "fixtures/shift-ai-training-vs-noncommercial.md",
+      "must_contain": "247 of 600 items (41%)",
+      "baseline": "trust_pack_number"
+    },
+    {
+      "id": "D4",
+      "claim": "registry_surface suite is 16/16 at object",
+      "asserted_by": ["docs/SUBMISSION-PACK-2026-08-29.md"],
+      "category": "doc_truth",
+      "shipping": "run_suite",
+      "suite": "tests/test_registry_surface.py",
+      "expect_pass_total": "16/16",
+      "baseline": "trust_pack_number"
+    },
+    {
+      "id": "D5",
+      "claim": "watch_it_go_red suite is 72/72 at object",
+      "asserted_by": ["docs/SUBMISSION-PACK-2026-08-29.md", "hack.md"],
+      "category": "doc_truth",
+      "shipping": "run_suite",
+      "suite": "tests/test_watch_it_go_red.py",
+      "expect_pass_total": "72/72",
+      "baseline": "trust_pack_number"
+    }
+  ]
+}

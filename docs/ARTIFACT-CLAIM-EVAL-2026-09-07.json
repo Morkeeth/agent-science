@@ -1,0 +1,122 @@
+{
+  "host": "https://agent-science-568004190078.us-central1.run.app",
+  "health_ok": true,
+  "n": 10,
+  "baseline_match": 4,
+  "shipping_is_object": 10,
+  "false_green": [
+    "HS1",
+    "HS2",
+    "HS3",
+    "HS4",
+    "HS5",
+    "D1"
+  ],
+  "holds": [
+    "D2",
+    "D3",
+    "D4",
+    "D5"
+  ],
+  "does_not_hold": [
+    "HS1",
+    "HS2",
+    "HS3",
+    "HS4",
+    "HS5",
+    "D1"
+  ],
+  "rows": [
+    {
+      "id": "HS1",
+      "claim": "Hosted GET /search returns JSON to a stranger without login",
+      "baseline_says_holds": true,
+      "shipping_says_holds": false,
+      "baseline_matches_object": false,
+      "detail": "HTTP 200; forbidden:'Sign in'; not_json [login wall]",
+      "baseline_detail": "health ok \u2192 assume claim holds"
+    },
+    {
+      "id": "HS2",
+      "claim": "Hosted GET /registry is browsable without login",
+      "baseline_says_holds": true,
+      "shipping_says_holds": false,
+      "baseline_matches_object": false,
+      "detail": "HTTP 200; missing:'registry'; forbidden:'Sign in' [login wall]",
+      "baseline_detail": "health ok \u2192 assume claim holds"
+    },
+    {
+      "id": "HS3",
+      "claim": "Hosted GET /health reports engine_default for partner wiring",
+      "baseline_says_holds": true,
+      "shipping_says_holds": false,
+      "baseline_matches_object": false,
+      "detail": "HTTP 200; json_missing:engine_default",
+      "baseline_detail": "health ok \u2192 assume claim holds"
+    },
+    {
+      "id": "HS4",
+      "claim": "Hosted POST /clear accepts an unauthenticated compound script",
+      "baseline_says_holds": true,
+      "shipping_says_holds": false,
+      "baseline_matches_object": false,
+      "detail": "HTTP 401; status=401 want=200; forbidden:'Workspace access key'; forbidden:'Request could not be completed'; not_json",
+      "baseline_detail": "health ok \u2192 assume claim holds"
+    },
+    {
+      "id": "HS5",
+      "claim": "Hosted GET /visibility/ui is reachable without login for judges",
+      "baseline_says_holds": true,
+      "shipping_says_holds": false,
+      "baseline_matches_object": false,
+      "detail": "HTTP 200; forbidden:'Sign in' [login wall]",
+      "baseline_detail": "health ok \u2192 assume claim holds"
+    },
+    {
+      "id": "D1",
+      "claim": "Public repo checkbox still reads Private until submit",
+      "baseline_says_holds": true,
+      "shipping_says_holds": false,
+      "baseline_matches_object": false,
+      "detail": "pack no longer claims Private until submit",
+      "baseline_detail": "trust pack checkbox as written"
+    },
+    {
+      "id": "D2",
+      "claim": "Gap report still states 561 of 600 (94%) at the fixture object",
+      "baseline_says_holds": true,
+      "shipping_says_holds": true,
+      "baseline_matches_object": true,
+      "detail": "fixture HAS '561 of 600 (94%)'",
+      "baseline_detail": "trust written number / suite count"
+    },
+    {
+      "id": "D3",
+      "claim": "Second-question fixture still states 247 of 600 (41%) flip",
+      "baseline_says_holds": true,
+      "shipping_says_holds": true,
+      "baseline_matches_object": true,
+      "detail": "fixture HAS '247 of 600 items (41%)'",
+      "baseline_detail": "trust written number / suite count"
+    },
+    {
+      "id": "D4",
+      "claim": "registry_surface suite is 16/16 at object",
+      "baseline_says_holds": true,
+      "shipping_says_holds": true,
+      "baseline_matches_object": true,
+      "detail": "16/16 passed",
+      "baseline_detail": "trust written number / suite count"
+    },
+    {
+      "id": "D5",
+      "claim": "watch_it_go_red suite is 72/72 at object",
+      "baseline_says_holds": true,
+      "shipping_says_holds": true,
+      "baseline_matches_object": true,
+      "detail": "72 passed, 0 failed",
+      "baseline_detail": "trust written number / suite count"
+    }
+  ],
+  "mcnemar_p": 0.03125
+}

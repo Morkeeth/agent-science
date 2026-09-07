@@ -119,3 +119,5 @@ Re-derives all 9 suite counts against `docs/SUBMISSION-PACK-2026-08-29.md` — e
 - [x] Offline path with no API key
 - [x] Wilson CI + McNemar (n=6)
 - [x] Honesty carries worst number (tie + RC5 false-GREEN both arms)
+- [x] Cost from billing with price card date — `scripts/eval_cost_from_billing.py` (2026-09-07 card; spend UNKNOWN without invoice)
+- [x] Every artifact claim at object — `scripts/eval_artifact_claims.py` (2026-09-07 hosted stranger false-GREEN)
