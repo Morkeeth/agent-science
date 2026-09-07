@@ -1,6 +1,7 @@
 # RECEIPT — partner dual surface re-land · 2026-09-07
 
 **Branch:** `cursor/partner-dual-surface-night-5b82`  
+**Head:** `9e4484d`  
 **Scope:** prior dual-surface fix never reached `main`; re-landed tonight; measured live RED vs local shipping; secret-scanner leak in demo fixed; baseline eval shipped.
 
 ## Finding at the hosted object (still true tonight)
@@ -72,12 +73,18 @@ python3 scripts/compound_exhibit_receipt.py → A=2→B=1 · corpus_hits B=2
 python3 scripts/eval_refusal_baseline.py → baseline 5/6 · shipping 6/6 · delta +1
 python3 scripts/eval_hosted_partner_surface.py
 → live naive PASS / shipping FAIL · local-fix shipping PASS
-bash scripts/verify_partners_hosted.sh → RED on live 00026 (expected until Oscar deploy)
+bash scripts/verify_partners_hosted.sh --local → OK (fields + desk≠401 + cases=401)
+bash scripts/verify_partners_hosted.sh         → RED on live 00026 (expected)
+python3 scripts/eval_hosted_partner_surface.py
+→ live naive PASS / shipping FAIL · local-fix shipping PASS
+python3 scripts/eval_refusal_baseline.py       → baseline 5/6 · shipping 6/6 · delta +1
+python3 scripts/eval_refusal_ablation.py       → ablation 5/6 · shipping 6/6 · delta +1
 ```
 
 ## Wrong / not verified
 
 - Did not run `deploy.sh` (Oscar only). Live URL remains partner-dark until candidate promote.
+- Did not `git push origin main` — constitution + cloud workflow: feature branch + PR; Oscar merges.
 - Local `/clear` returns 503 without Vertex/Gemini — proves desk routing, not a live ADK model call on this VM.
 - `parallel: false` on local demo (no key export by design); Parallel runtime proof still needs Oscar deploy with Secret Manager.
 - Prior branch `cursor/partner-hosted-dual-surface-fe44` shipped the same dual surface on 2026-09-05 and never merged — tonight re-landed onto current `main` plus the baseline eval and the secret-scanner fix the earlier demo lacked.
