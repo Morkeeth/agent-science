@@ -13,7 +13,18 @@ echo
 py() { python3 -c "$1"; }
 
 echo "1. Health (partners wired)"
-curl -sf "$BASE/health" | py "import sys,json; d=json.load(sys.stdin); assert d['ok']; print('  engine', d['engine_default'], 'parallel', d['parallel'], 'gemini', d['gemini'])"
+HEALTH_JSON=$(curl -sf "$BASE/health")
+echo "$HEALTH_JSON" | py "
+import sys,json
+d=json.load(sys.stdin)
+assert d['ok']
+mode=d.get('mode')
+if mode == 'private-workspaces':
+    print('  BLOCKED: hosted mode=private-workspaces — public /search and /clear are gone.')
+    print('  Use cold-clone stranger path: bash scripts/verify_cold_clone.sh')
+    raise SystemExit(2)
+print('  engine', d.get('engine_default'), 'parallel', d.get('parallel'), 'gemini', d.get('gemini'))
+"
 
 echo "2. Free lookup (dictionary — 0 Parallel)"
 curl -sf "$BASE/search?q=2012/28/EU&live=false" | py "

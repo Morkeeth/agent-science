@@ -57,14 +57,22 @@ def canonical(url: str) -> str:
     document is the unit of evidence. Two caches disagreeing about what one document is
     called is the wrong-object failure inside the store itself.
 
-    Deliberately conservative: scheme and one trailing slash only. Query strings and
-    fragments can change what a page IS (EUR-Lex serves different documents off `?uri=`),
-    so they are left alone.
+    Deliberately conservative on structure: scheme + trailing slash + percent-decoding
+    of path/query. Query *values* still select which EUR-Lex act is cited (`32012L0028`
+    ≠ `32019L0790`); only encoding variants of the same characters collapse
+    (`CELEX%3A…` vs `CELEX:…`). Fragments never identify the body we quote.
     """
+    from urllib.parse import unquote, urlsplit, urlunsplit
+
     u = (url or "").strip()
     if u.startswith("https://"):
         u = "http://" + u[len("https://"):]
-    return u[:-1] if u.endswith("/") and "?" not in u else u
+    if u.endswith("/") and "?" not in u:
+        u = u[:-1]
+    parts = urlsplit(u)
+    return urlunsplit(
+        (parts.scheme, parts.netloc, unquote(parts.path), unquote(parts.query), "")
+    )
 
 
 def _load() -> dict:
@@ -131,7 +139,31 @@ DOCS = Path(__file__).resolve().parent.parent / "cache" / "documents.json"
 
 
 def _load_docs() -> dict:
-    return json.loads(DOCS.read_text()) if DOCS.exists() else {}
+    """Load document cache, collapsing encoding-variant keys onto canonical().
+
+    Legacy rows may sit under CELEX%3A… while routing asks for CELEX:… — same document.
+    """
+    if not DOCS.exists():
+        return {}
+    raw = json.loads(DOCS.read_text())
+    out: dict = {}
+    for key, entry in raw.items():
+        want = canonical(key)
+        prior = out.get(want)
+        if prior is None:
+            out[want] = entry
+            continue
+        # Prefer the entry that still has text; keep richer fetched_at when tied.
+        if not prior.get("text") and entry.get("text"):
+            out[want] = entry
+        elif prior.get("text") and entry.get("text"):
+            if (entry.get("fetched_at") or "") > (prior.get("fetched_at") or ""):
+                out[want] = entry
+    return out
+
+
+def _doc_hit(docs: dict, url: str) -> Optional[dict]:
+    return docs.get(url) or docs.get(canonical(url))
 
 
 _DOC_LOCK = threading.RLock()
@@ -164,7 +196,7 @@ def document_snapshot(url: str, refresh: bool = False, *, timeout: int = 30,
         return None
     with _DOC_LOCK:
         docs = _load_docs()
-        hit = docs.get(url) or docs.get(canonical(url))
+        hit = _doc_hit(docs, url)
     # Legacy caches may contain PDF bytes decoded as UTF-8. They are not text evidence.
     if hit and hit.get("text", "").lstrip().startswith("%PDF-"):
         hit = None
@@ -194,7 +226,7 @@ def document_snapshot(url: str, refresh: bool = False, *, timeout: int = 30,
     with _DOC_LOCK:
         docs = _load_docs()
         # Keep versions addressable by content hash for later evidence comparisons.
-        previous = docs.get(url) or docs.get(canonical(url)) or {}
+        previous = _doc_hit(docs, url) or {}
         versions = dict(previous.get("versions", {}))
         if previous.get("text") is not None:
             old_hash = hashlib.sha256(previous["text"].encode("utf-8")).hexdigest()
@@ -203,6 +235,7 @@ def document_snapshot(url: str, refresh: bool = False, *, timeout: int = 30,
         versions[snapshot["sha256"]] = dict(entry)
         entry["versions"] = versions
         docs.pop(url, None)
+        docs.pop(canonical(url), None)
         docs[canonical(url)] = entry
         _write_docs(docs)
     return snapshot

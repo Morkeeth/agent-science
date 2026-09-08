@@ -49,7 +49,12 @@ echo "--- HOSTED: health + desk surfaces ---"
 curl -sf "$BASE/health" | python3 -c "
 import sys,json
 d=json.load(sys.stdin)
-assert d['ok'] and d['engine_default']=='adk' and d['parallel'] and d['gemini']
+assert d['ok']
+if d.get('mode') == 'private-workspaces':
+    print('  BLOCKED: hosted mode=private-workspaces — public desk withdrawn')
+    print('  Stranger path is cold clone + local lookup; see SUBMISSION-PACK')
+    raise SystemExit(2)
+assert d.get('engine_default')=='adk' and d.get('parallel') and d.get('gemini')
 print('  health ok engine=adk')
 "
 note "hosted health"

@@ -67,6 +67,9 @@ class _Raw:
 
 
 # Fixed claim lists mirroring compound-mini scripts — extraction is NOT simulated live.
+# B reuses A's exact assertion text for the overlapping claims (exact-claim integrity);
+# only the British Library sentence is new. Paraphrase reuse is a separate baseline arm
+# in scripts/eval_artifact_claims.py — it must not silently pass as corpus_hits here.
 _OFFLINE_CLAIMS = {
     "A": [
         _Raw("In 2012 the European Union passed Directive 2012/28/EU, the Orphan Works Directive.",
@@ -75,9 +78,9 @@ _OFFLINE_CLAIMS = {
              None, "29 October 2014"),
     ],
     "B": [
-        _Raw("Europe's answer was Directive 2012/28/EU — known as the Orphan Works Directive —",
+        _Raw("In 2012 the European Union passed Directive 2012/28/EU, the Orphan Works Directive.",
              None, "Directive 2012/28/EU"),
-        _Raw("and the deadline for national transposition was 29 October 2014.",
+        _Raw("Member states had until 29 October 2014 to bring it into national law.",
              None, "29 October 2014"),
         _Raw("The British Library has estimated that forty percent of its copyrighted collection is orphaned.",
              None, "forty percent"),

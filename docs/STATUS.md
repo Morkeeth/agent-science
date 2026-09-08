@@ -2,7 +2,7 @@
 doc: status
 project: Agent Science
 canonical: true
-last-updated: 2026-09-01T05:45:00Z
+last-updated: 2026-09-08T00:30:00Z
 deadline: 2026-09-09T14:00:00-07:00
 ---
 
@@ -11,7 +11,7 @@ deadline: 2026-09-09T14:00:00-07:00
 > **For Claude / fleet:** this file is the single “where we are” surface.  
 > `hack.md` = process · `CLAUDE.md` = entry · this file = gates + evidence.
 
-**Last gate run:** 2026-08-31T21:46:02Z — `bash scripts/full_gate.sh` → **FULL GATE OK** (127/127 · visibility hosted · 19/19 long run)
+**Last gate run:** 2026-09-08 — night wave at object · CELEX SOURCED · offline compound A=2→B=1 · hosted `mode=private-workspaces` (public desk withdrawn) · artifact-claim gate exit 0
 
 ---
 
@@ -20,10 +20,10 @@ deadline: 2026-09-09T14:00:00-07:00
 | State | Detail |
 |-------|--------|
 | **Product noun** | **Agent Science** — truth layer for what people believe and use · B lead · A on the same layer |
-| **Product** | LIVE on Cloud Run · public repo · sealed prediction |
-| **Build lane** | WOW websearch transparency · CONTRARY stamp · stack-fit · community notes · `/truths/ui` |
-| **Oscar** | **Film 30 min** — `docs/PITCH-TOMORROW.md` · transparency WOW first · Devpost paste ready |
-| **Film lead** | Ask → sourced/refuse → free on re-ask · ≥2 domains · E&O as *a* truth not the only story |
+| **Product** | Hosted = **private workspaces** (`00026-zel`) · public repo · sealed prediction (offline compound authoritative) |
+| **Build lane** | 2026-09-08: CELEX cache key · exact-claim compound · artifact-claim gate · pack truth |
+| **Oscar** | **Film cold-clone or signed-in `/cases`** — not withdrawn `/visibility/ui` · Devpost paste in SUBMISSION-PACK |
+| **Film lead** | Ask → sourced/refuse → free on re-ask · exact assertion reuse · E&O as *a* truth |
 
 ---
 
@@ -64,13 +64,12 @@ deadline: 2026-09-09T14:00:00-07:00
 | | |
 |---|---|
 | **URL** | https://agent-science-568004190078.us-central1.run.app |
-| **Revision** | `agent-science-00018-n4s` · `parallel_sdk: true` · **`/truths/ui` live** |
-| **Health** | `engine_default: adk` · 265 claims · hit rate ~0.80 |
-| **New** | `GET /visibility/ui` — full websearch panel for judges (film this) |
-| **New** | `GET /truths/ui` — truths dashboard |
-| **Stats** | 265 claims · hit rate ~0.80 · queries logged growing |
+| **Revision** | `agent-science-00026-zel` · **`mode=private-workspaces`** |
+| **Health** | public JSON only — no public `/search` / `/clear` / `/visibility/ui` (303 → sign-in) |
+| **Cases** | `/cases` + `/api/cases` with workspace access token |
+| **Stranger path** | cold clone · `verify_cold_clone.sh` · offline compound · local `clearance lookup` |
 
-**Compound (sealed):** `longrun-0831-1320` A=**1** → B=**0** Parallel · B `corpus_hits=1`
+**Compound (offline, 2026-09-08):** A=**2** → B=**1** Parallel · B `corpus_hits=2` (exact overlapping assertions)
 
 ---
 
@@ -104,6 +103,7 @@ bash scripts/full_gate.sh
 
 | When (UTC) | What |
 |------------|------|
+| 2026-09-08 00:30 | **Night wave** — CELEX canonical · exact-claim compound · artifact + paraphrase baseline gates · pack/hosted truth · deploy prep |
 | 2026-09-01 06:00 | **Hammer** — `/visibility/ui` hosted · demo_truth_layer.sh · README truth-layer lead · Devpost §0 |
 | 2026-08-31 21:23 | Truth layer night — transparency, CONTRARY, stack-fit, community notes, `/truths/ui` (branch) |
 | 2026-08-31 21:55 | Competitor research — websearch field map + steal angles → `RESEARCH-WEBSEARCH-COMPETITORS-2026-08-31.md` |
