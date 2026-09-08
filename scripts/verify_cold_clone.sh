@@ -47,4 +47,13 @@ python3 scripts/eval_refusal_ablation.py 2>&1 | tail -2
 python3 scripts/eval_scorer_symmetry.py 2>&1 | tail -3
 
 echo
+echo "10. Free CELEX lookup (seeded cache, no Parallel)..."
+python3 -m clearance lookup "2012/28/EU" 2>&1 | head -3
+
+echo
+echo "11. Artifact-claim gate + compound paraphrase baseline..."
+python3 scripts/eval_artifact_claims.py 2>&1 | tail -6
+python3 scripts/eval_compound_baseline.py 2>&1 | tail -6
+
+echo
 echo "=== cold-clone verify OK ==="

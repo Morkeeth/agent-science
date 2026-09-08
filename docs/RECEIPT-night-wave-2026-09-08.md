@@ -54,6 +54,9 @@ gh api repos/Morkeeth/agent-science --jq '{private,visibility}'
 
 test -n "$PARALLEL_API_KEY" || test -f ~/.config/keys/parallel.key; echo $?
 # 1 — MISSING
+
+bash scripts/verify_cold_clone.sh
+# === cold-clone verify OK === (steps 1–11, incl. artifact + compound baseline)
 ```
 
 ### Pre-fix findings (why this wave existed)
