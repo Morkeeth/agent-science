@@ -11,7 +11,7 @@ deadline: 2026-09-09T14:00:00-07:00
 > **For Claude / fleet:** this file is the single “where we are” surface.  
 > `hack.md` = process · `CLAUDE.md` = entry · this file = gates + evidence.
 
-**Last gate run:** 2026-08-31T21:46:02Z — `bash scripts/full_gate.sh` → **FULL GATE OK** (127/127 · visibility hosted · 19/19 long run)
+**Last gate run:** 2026-09-08 — dual-surface local green · hosted `/health` stripped on `00028-hed` · `bench_check_docs.py` **133/133** · watch_it_go_red **72/72**
 
 ---
 
@@ -20,9 +20,9 @@ deadline: 2026-09-09T14:00:00-07:00
 | State | Detail |
 |-------|--------|
 | **Product noun** | **Agent Science** — truth layer for what people believe and use · B lead · A on the same layer |
-| **Product** | LIVE on Cloud Run · public repo · sealed prediction |
-| **Build lane** | WOW websearch transparency · CONTRARY stamp · stack-fit · community notes · `/truths/ui` |
-| **Oscar** | **Film 30 min** — `docs/PITCH-TOMORROW.md` · transparency WOW first · Devpost paste ready |
+| **Product** | LIVE on Cloud Run · **partner desk STRIPPED** on rev 00028 — deploy dual-surface branch |
+| **Build lane** | Partner dual surface restored in code · local prove green · naive eval wins on live |
+| **Oscar** | **`bash deploy.sh`** then `verify_partners_hosted.sh` · then film · Devpost |
 | **Film lead** | Ask → sourced/refuse → free on re-ask · ≥2 domains · E&O as *a* truth not the only story |
 
 ---

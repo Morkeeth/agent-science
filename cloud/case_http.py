@@ -189,8 +189,19 @@ class WorkspaceHTTP:
         parsed = urlsplit(h.path)
         path = parsed.path.rstrip('/') or '/'
         if h.command == 'GET' and path == '/health':
-            return self.send(200, {'ok': True, 'service': 'agent-science', 'mode': 'private-workspaces',
-                                   'revision': os.getenv('K_REVISION', 'local')})
+            # Defense in depth: even if routing regresses to workspace-only,
+            # partner fields must still appear on /health.
+            from cloud import partner_status
+            return self.send(200, partner_status.health_payload(
+                adk_default=os.environ.get('AGENT_BUILDER', '1').strip().lower()
+                not in ('0', 'false', 'off', 'no'),
+            ))
+        if h.command == 'GET' and path in ('/partners', '/api/partners'):
+            from cloud import partner_status
+            return self.send(200, partner_status.partners_payload(
+                adk_default=os.environ.get('AGENT_BUILDER', '1').strip().lower()
+                not in ('0', 'false', 'off', 'no'),
+            ))
         expected_origin = os.getenv('AGENT_SCIENCE_PUBLIC_ORIGIN', '').rstrip('/')
         if self.secure and h.command == 'GET' and not self.api and expected_origin:
             # Cloud Run has multiple aliases. Forms and session cookies must use

@@ -12,7 +12,9 @@
 > UNSOURCED with a named reason — plus a truth shelf that compounds so the second ask is free.
 >
 > **Proof:** hosted compound exhibit — Run A **1** Parallel call, Run B **0** with
-> `corpus_hits=1` on repeat. Four partners wired at runtime: Vertex, Parallel, Cloud Run, ADK.
+> `corpus_hits=1` on repeat. Four partners wired in code; **live `/health` is stripped on
+> revision 00028 until Oscar redeploys dual-surface** (`docs/FINDING-hosted-partner-strip-2026-09-08.md`).
+> Local prove: `bash scripts/demo_partner_dual_surface.sh`.
 >
 > **Constraint:** if the document does not contain the exact passage, refuse — never paraphrase,
 > never infer. We refused our own pitch headline in the product because of this rule

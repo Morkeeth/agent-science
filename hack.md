@@ -246,9 +246,9 @@ bash scripts/new_user_trial.sh
 | 2 | Registry face | False SOURCED in UI | ✅ `/registry` hosted |
 | 3 | Compound exhibit | Compounding unproved | ✅ fresh subject hosted pass |
 | 4 | Second subject | Cross-subject collision | ✅ dust-bowl receipt |
-| 5 | ADK default path | Agent Builder not on path | ✅ `engine_default: adk` |
-| 6 | Design partner loop | Friction unknown | ⛔ Oscar |
-| 7 | Submission pack | Outward gates | ⚠️ repo public · sealed · **video + Devpost** |
+| 5 | ADK default path | Agent Builder not on path | ⚠️ code ✅ · hosted ⛔ until dual-surface deploy |
+| 6 | Design partner loop | Friction unknown | ⚠️ template ready · Oscar outreach |
+| 7 | Submission pack | Outward gates | ⚠️ repo public · sealed · **video + Devpost** · hosted partners RED |
 
 ---
 
@@ -307,7 +307,51 @@ Full record: `fleet-ops (internal)/retros/QWEN-LOSS-RETRO-2026-08-30.md` (correc
 
 ---
 
-## 🎯 NOW — Partner night wave (fresh compound + timeout finding)
+## 🎯 NOW — Partner dual surface (restore admissibility after hosted strip)
+
+**Slice:** Public desk + private `/cases` on one process; prove partners locally; leave hosted RED until Oscar deploy; ship baseline eval that beats us on live.
+
+### Build (shipping 2026-09-08)
+
+- [x] Dual-surface routing — `cloud/partner_status.py` · `cloud/service.py` (command: `bash scripts/demo_partner_dual_surface.sh`)
+- [x] Hosted strip finding at object — `docs/FINDING-hosted-partner-strip-2026-09-08.md` (`curl …/health` → no gemini/parallel/adk)
+- [x] Compound integrity fix — paraphrase B → exact A wording; `docs/FINDING-compound-exhibit-integrity-2026-09-08.md` (A=2→B=1, hits=2)
+- [x] Baseline eval — `python3 scripts/eval_hosted_partner_surface.py` (live: naive wins; local-fix: shipping wins)
+- [x] Partner doc + deploy checklist — `docs/PARTNER-INTEGRATIONS-2026-08-30.md` · `deploy.sh`
+- [x] Regression suite — `python3 tests/test_hosted_partner_surfaces.py` (5/5)
+- [x] SUBMISSION-PACK re-measure — `python3 scripts/bench_check_docs.py` → **133/133**
+- [x] Design partner loop honesty — `docs/DESIGN-PARTNER-LOOP.md` (login wall until deploy)
+
+### Verify (one command each)
+
+```bash
+git pull && python3 tests/test_watch_it_go_red.py                    # 72/72
+python3 tests/test_hosted_partner_surfaces.py                        # 5/5
+bash scripts/demo_partner_dual_surface.sh                            # dual-surface local OK
+bash scripts/verify_partners_hosted.sh --local                       # local fields OK
+python3 scripts/eval_hosted_partner_surface.py                       # live naive wins · local shipping wins
+bash scripts/verify_partners_hosted.sh                               # RED on 00028 until Oscar deploy
+python3 scripts/compound_exhibit_receipt.py                          # A=2→B=1 · hits=2
+bash scripts/verify_cold_clone.sh                                    # cold-clone verify OK
+python3 scripts/bench_check_docs.py                                  # 133/133
+python3 scripts/eval_refusal_baseline.py                             # 5/6 vs 6/6
+```
+
+### Receipt
+
+- `docs/RECEIPT-partner-dual-surface-2026-09-08.md`
+- `docs/FINDING-hosted-partner-strip-2026-09-08.md`
+- `docs/FINDING-compound-exhibit-integrity-2026-09-08.md`
+
+### BLOCKED
+
+- Live hosted partner surfaces — **Oscar `deploy.sh`** (revision 00028-hed still stripped)
+- Live ADK import in this agent image — `google-adk` not installed; unit tests cover selection
+- Live compound / orphan-works — no Parallel/Gemini keys on this VM
+
+---
+
+## 🎯 NOW (prior) — Partner night wave (fresh compound + timeout finding)
 
 **Slice:** Harden partner verify to prove Parallel at runtime; ship fresh compound probe; document orphan-works 504 regression at object.
 
@@ -528,6 +572,7 @@ bash scripts/verify_cold_clone.sh                                               
 
 | When | What | Command | Outcome |
 |------|------|---------|---------|
+| 2026-09-08 night | Partner dual surface restore | `demo_partner_dual_surface.sh` · `eval_hosted_partner_surface.py` · `verify_partners_hosted.sh` · `compound_exhibit_receipt.py` | **Local dual-surface OK** · live **00028-hed RED** · naive beats shipping on live · compound was **A=2→B=3** until exact-assertion fixture fix → **A=2→B=1 hits=2** · 133/133 docs |
 | 2026-09-03 night | Fresh compound + timeout finding | `compound_fresh_hosted_probe.py` · `verify_partners_hosted.sh` | **A≥1 Parallel → B drop** · orphan-works Run A **504** @ 300s |
 | 2026-09-03 night | SUBMISSION-PACK + Qwen gates | `bench_check_docs.py` · `eval_verify_holdout.py` · `eval_scorer_symmetry.py` | **127/127** · holdout OK · scorer 5/6 vs 6/6 · offline compound A=2→B=1 |
 | 2026-09-02 | Partner verify re-run | `verify_partners_hosted.sh` · `full_gate.sh` | **4/4 partners** · compound warm-shelf PASS · 72/72 auto-seed |

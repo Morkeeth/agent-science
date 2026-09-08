@@ -137,7 +137,7 @@ For a builder question that will drive a change, use `science_case` instead of t
 
 ## Hosted workspace boundary
 
-Cloud Run serves private `/cases` and `/api/cases` routes. Earlier unauthenticated `/search`, `/clear`, `/ingest` and shared history endpoints are local-only. Use a workspace bearer token; never put one in a URL. Each mutation requires a stable random `request_id` so a retry can recover the saved result. Decision writes require the current evidence version; use `supersedes` to replace an active decision while retaining its history. Do not send repo paths, scripts or local case files to hosted endpoints.
+Cloud Run serves a **dual surface** on one revision: public partner desk (`/`, `/clear`, `/health`, `/partners`, registry/visibility) beside private `/cases` and `/api/cases`. Partner track admissibility requires the public desk; research cases stay behind a workspace bearer token. Never put a token in a URL. Each mutation requires a stable random `request_id` so a retry can recover the saved result. Decision writes require the current evidence version; use `supersedes` to replace an active decision while retaining its history. Do not send repo paths, scripts or local case files to hosted endpoints. Local CLI/MCP remains the primary workflow — the hosted desk is the stranger/judge path, not a required account for builders.
 
 Cloud persistence uses tenant-scoped temporary SQLite copies and generation preconditions. Never remove the precondition to resolve a conflict, rerun a paid job automatically after a conflict, or seed a deployment from local user data. Budget metadata updates may retry only pure callbacks.
 

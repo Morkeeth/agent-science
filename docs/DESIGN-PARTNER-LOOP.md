@@ -7,7 +7,9 @@
 
 ## Script upload flow (what the partner does)
 
-1. Open hosted desk: `https://agent-science-568004190078.us-central1.run.app/` (after Oscar deploy).
+> **Hosted truth 2026-09-08:** live revision `00028-hed` is login-walled for `/clear` (partner strip). Oscar must deploy the dual-surface branch before sending this to a partner. Until then, run local: `bash scripts/demo_partner_dual_surface.sh`.
+
+1. Open hosted desk: `https://agent-science-568004190078.us-central1.run.app/` (after Oscar dual-surface deploy — expect desk, not login).
 2. Set **subject shelf** — a tag their team reuses across episodes (e.g. `season-2-ep3`).
 3. Paste **documentary narration** (plain text, not PDF).
 4. Click **Clear script** → gap report HTML or JSON via API:
@@ -17,6 +19,7 @@
      -d '{"script":"<paste>","subject":"<their-tag>"}'
    ```
 5. **Second script** on same subject — partner should see `corpus_hits ≥ 1` and fewer Parallel calls (compounding).
+6. Optional: open `/cases` with the workspace token Oscar issues — private research cases, separate from the public desk.
 
 ---
 
