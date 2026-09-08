@@ -1,6 +1,6 @@
 # RECEIPT — Partner dual surface · 2026-09-08
 
-**Branch:** `cursor/partner-dual-surface-night-6089`  
+**Branch:** `cursor/partner-dual-surface-night-6089` · **Commit:** `d3d35ae`  
 **Slice:** restore partner-admissible public desk beside private workspaces; prove at object; leave hosted RED until Oscar deploy.
 
 ## SHIPPED
