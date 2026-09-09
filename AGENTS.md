@@ -1,5 +1,5 @@
 <!-- STATE:start -->
-## SHARED WORK STATE · revision ffabe397994e · rendered 2026-09-08 · scope repo cleared
+## SHARED WORK STATE · revision ffabe397994e · rendered 2026-09-09 · scope repo cleared
 This repo's rows of the one shared work state. Authorities: todo.md (human), TASKS.yaml (ids), board clocks, Oscar's rulings (local only). Views such as GLANCE, SLASK and ZUP are adapters over the same revision.
 **A CLOSED task stays closed. Do not requeue, re-verify or re-poll it.**
 Before acting, record that you read this revision, exact session and exact rev: `python3 ~/CODE/fleet-ops/state/state.py ack --session <your session id> --consumer <claude|codex|cursor> --rev ffabe397994e`. In a cloud sandbox instead append `{"session":"<your session id>","consumer":"<claude|codex|cursor>","rev":"ffabe397994e","ts":"<iso>","stage":"acknowledged"}` to `.fleet/ACK.jsonl` in this repo and commit it.
@@ -11,7 +11,7 @@ Before acting, record that you read this revision, exact session and exact rev: 
 - **AS-KEYS-ROTATE** · Rotate Gemini + Parallel keys (plaintext Cloud Run revision) · owner oscar · `cleared` · due 2026-09-09T14:00
   - next: Rotate both keys at aistudio.google.com + parallel.ai; then agent redeploys without --set-env-vars secrets
 
-### ACKNOWLEDGED THIS REVISION: nobody yet
+### ACKNOWLEDGED THIS REVISION: claude/dc8db26e-0366-4b4c-8309-460715de7fcb
 <!-- STATE:end -->
 
 # Product direction — operator ruling, 2026-09-04
