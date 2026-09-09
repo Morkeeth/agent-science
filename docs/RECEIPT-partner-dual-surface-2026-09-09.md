@@ -43,7 +43,14 @@ python3 scripts/eval_hosted_partner_surface.py
 python3 scripts/eval_refusal_baseline.py              # baseline 5/6 shipping 6/6 delta +1
 python3 scripts/eval_refusal_ablation.py              # ablation 5/6 shipping 6/6 delta +1
 python3 scripts/bench_check_docs.py                   # 128/128 match
+python3 scripts/compound_exhibit_receipt.py           # A=2→B=1 Parallel · corpus_hits B=2
 ```
+
+## Also fixed tonight
+
+`fixtures/scripts/compound-mini-B.txt` had been paraphrased relative to A. Under exact
+assertion identity that made offline compound go **A=2→B=3, corpus_hits=0** when re-measured.
+Restored exact overlap + new BL claim; re-ran receipt → A=2→B=1, hits=2.
 
 ## BLOCKED
 
