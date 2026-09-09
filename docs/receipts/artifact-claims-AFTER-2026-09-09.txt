@@ -1,0 +1,23 @@
+ARTIFACT-CLAIM EVAL — every claim at its object
+Baseline arm: trust SUBMISSION-PACK wording (no object open)
+Shipping arm: re-derive at suite / curl / fixture / compound
+
+id    baseline shipping b_ok  s_ok  evidence
+AC1   True     True     True  True  measured=72/72 pack=72 expected=72
+AC2   True     True     True  True  measured=16/16 pack=16 expected=16
+AC3   True     True     True  True  measured=7/7 pack=7 expected=7
+AC4   True     True     True  True  A=2 B=1 corpus_hits=2 exit=0
+AC5   True     True     True  True  private=False pack_claims_private=False
+AC6   True     True     True  True  http=200 mode='private-workspaces' rev='agent-science-00028-hed'
+AC7   False    False    False False http=303 sourced=False body='Location: https://agent-science-33kamss2jq-uc.a.run.app/sear'
+AC8   True     True     True  True  [SOURCED] 2012/28/EU
+AC9   True     True     True  True  items=600 has_561_line=True
+AC10  True     True     True  True  has_247_line=True
+AC11  False    False    False False http=200 panel=False stub=True body='<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name='
+AC12  True     True     True  True  http=200 pep8=True body='<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name='
+
+Baseline:  10/12 = 0.833  95% CI [0.552, 0.953]
+Shipping:  10/12 = 0.833  95% CI [0.552, 0.953]
+Delta (shipping - baseline): +0
+McNemar:   p=1.0000 (no discordant pairs — arms identical on every item)
+FINDING: arms agree on this set.

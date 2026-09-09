@@ -1,0 +1,13 @@
+COMPOUND BASELINE EVAL — paraphrase subject, exact vs soft term
+
+Scenario: historical paraphrase B (different wording, same must_contain)
+
+baseline-soft-term     A=2 B=1 corpus_hits=2  compound=PASS
+shipping               A=2 B=3 corpus_hits=0  compound=FAIL
+shipping               A=2 B=1 corpus_hits=2  compound=PASS
+
+On paraphrase B, gold compounds=False
+Soft baseline correct:  0/1
+Shipping correct:       1/1
+Exact-claim B (control) compounds=True (A=2→B=1, hits=2)
+FINDING: soft-term baseline false-PASS on paraphrase; shipping refuses silent reuse — integrity earns its keep.

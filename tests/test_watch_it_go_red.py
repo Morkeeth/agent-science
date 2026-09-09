@@ -1105,6 +1105,14 @@ def t_one_key_per_document_not_per_url_spelling():
         "canonicalisation collapsed two different EUR-Lex documents into one key"
     assert canonical(eur).endswith("32012L0028"), \
         "a query string was stripped; that changes which document is cited"
+    # Percent-encoding is spelling, not identity. Routing builds CELEX:… while seed
+    # and live redirects often store CELEX%3A… — two keys for one document broke the
+    # free CELEX lookup (measured 2026-09-08: cache hit on %3A, miss on colon → UNSOURCED).
+    eur_colon = "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32012L0028"
+    assert canonical(eur) == canonical(eur_colon), (
+        f"CELEX %%3A and CELEX: must share one document key; "
+        f"got {canonical(eur)!r} vs {canonical(eur_colon)!r}"
+    )
 
 
 def _ensure_fixture_documents():

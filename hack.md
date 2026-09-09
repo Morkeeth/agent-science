@@ -2,7 +2,7 @@
 doc: hack
 project: Agent Science
 phase: SHIP
-last-touched: 2026-09-03 12:10 UTC
+last-touched: 2026-09-09 00:20 UTC
 canonical: true
 event: Agentic Cinema · Parallel track · deadline 2026-09-09 14:00 PDT
 supersedes: docs/PHASE0-LADDER.md ClickHouse-track note (runtime track is Parallel)
@@ -300,14 +300,55 @@ submission craft, supported by a real tendency, **not** as the explanation of th
 - [x] **Honesty & limitations** section carrying our worst number — README §Honesty & limitations; PITCH first screen
 - [ ] **Answer the track brief in the track's own words on the first screen** — judge pack § above; must land on Devpost ¶1 + video 0:00
 - [ ] **Video verified attached and public on the live entry page, from a logged-out browser** — not in a checklist file, on the page.
-- [ ] **Every artifact claim measured at the submitted commit.** Four retros of that loss failed this row.
+- [x] **Every artifact claim measured at the submitted commit.** — `python3 scripts/eval_artifact_claims.py` (2026-09-09: watched RED on stale pack AC7/AC11; after pack refresh, arms agree). Companion: `scripts/eval_compound_baseline.py`.
 
 Full record: `fleet-ops (internal)/retros/QWEN-LOSS-RETRO-2026-08-30.md` (corrected) ·
 `QWEN-FIELD-TEST-2026-08-30.md` (the n=40 falsification) · playbook lesson 97.
 
 ---
 
-## 🎯 NOW — Partner night wave (fresh compound + timeout finding)
+## 🎯 NOW — Sep 9 night wave: submit-path truth at object
+
+**Slice:** Close embarrassing submit gaps — compound exact-assertion, hosted stranger truth, Qwen artifact-claim gate with baseline arm, deploy prep (no deploy).
+
+### Build (shipped 2026-09-09)
+
+- [x] Offline compound restored under exact-claim integrity — `compound-mini-B` + receipt A=2→B=1, corpus_hits=2
+- [x] CELEX `%3A` vs `:` document-cache key collapse — `clearance/instruments.py`
+- [x] Qwen gate: `scripts/eval_compound_baseline.py` (soft-term baseline false-PASS vs shipping)
+- [x] Qwen gate: `scripts/eval_artifact_claims.py` (watched RED on stale pack AC7/AC11)
+- [x] SUBMISSION-PACK + DEVPOST-PASTE truth refresh for `private-workspaces` rev `00028-hed`
+- [x] BLOCKED live compound receipt — keys absent + hosted `/clear` 401
+- [x] Deploy prep only — `docs/DEPLOY-PREP-2026-09-09.md` (Oscar checklist; do not run)
+
+### Verify (one command each)
+
+```bash
+git pull && python3 tests/test_watch_it_go_red.py                    # 72/72
+python3 scripts/bench_check_docs.py                                  # 128/128
+python3 scripts/compound_exhibit_receipt.py                          # A=2→B=1 · hits=2
+python3 scripts/eval_compound_baseline.py                            # soft false-PASS; exact PASS
+python3 scripts/eval_artifact_claims.py                              # no pack false-GREEN
+python3 scripts/eval_refusal_baseline.py                             # 5/6 vs 6/6
+python3 tests/test_registry_surface.py -q                            # 16/16
+curl -sS …/health | python3 -m json.tool                             # mode=private-workspaces
+```
+
+### Receipt
+
+- `docs/RECEIPT-night-wave-2026-09-09.md`
+- `docs/FINDING-compound-paraphrase-reuse-2026-09-09.md`
+- `docs/FINDING-hosted-stranger-surface-2026-09-09.md`
+- `docs/BLOCKED-live-compound-2026-09-09.md`
+
+### BLOCKED
+
+- Live compound exhibit — **PARALLEL_API_KEY** and **GEMINI_API_KEY** missing; hosted `POST /clear` → **401**
+- Video · Devpost submit · deploy promote — Oscar only
+
+---
+
+## 🎯 NOW (prior) — Partner night wave (fresh compound + timeout finding)
 
 **Slice:** Harden partner verify to prove Parallel at runtime; ship fresh compound probe; document orphan-works 504 regression at object.
 
@@ -528,6 +569,7 @@ bash scripts/verify_cold_clone.sh                                               
 
 | When | What | Command | Outcome |
 |------|------|---------|---------|
+| 2026-09-09 night | Submit-path truth at object | `compound_exhibit_receipt.py` · `eval_artifact_claims.py` · `eval_compound_baseline.py` · hosted curl | Compound **A=2→B=1** restored; artifact gate caught Devpost `/visibility` false-GREEN then cleaned; CELEX keys collapsed; live compound **BLOCKED** (no keys + `/clear` 401) |
 | 2026-09-03 night | Fresh compound + timeout finding | `compound_fresh_hosted_probe.py` · `verify_partners_hosted.sh` | **A≥1 Parallel → B drop** · orphan-works Run A **504** @ 300s |
 | 2026-09-03 night | SUBMISSION-PACK + Qwen gates | `bench_check_docs.py` · `eval_verify_holdout.py` · `eval_scorer_symmetry.py` | **127/127** · holdout OK · scorer 5/6 vs 6/6 · offline compound A=2→B=1 |
 | 2026-09-02 | Partner verify re-run | `verify_partners_hosted.sh` · `full_gate.sh` | **4/4 partners** · compound warm-shelf PASS · 72/72 auto-seed |
