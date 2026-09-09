@@ -1,17 +1,37 @@
 # RECEIPT — ADK on default path · 2026-08-30
 
-**Status:** proved locally and on hosted URL (2026-08-30 re-check).
+**Status:** proved locally 2026-09-09 (dual-surface + real `google-adk` 2.7.1). Hosted live still stripped until Oscar deploys.
 
 ## What was verified
 
 | Check | Command | Result |
 |-------|---------|--------|
 | Engine selection controls | `python3 tests/test_adk_default_path.py` | **5/5 passed** |
-| ADK importable in image dep | `python3 -c "from importlib.metadata import version; print(version('google-adk'))"` | **2.7.1** |
-| `/health` engine_default logic | same test suite mocks `adk_available()` | `"engine_default": "adk"` when `AGENT_BUILDER=1` |
+| ADK importable | `python3 -c "from cloud import agent as a; print(a.adk_available(), a.adk_version())"` | **True 2.7.1** |
+| Dual-surface `/health` | `bash scripts/demo_partner_dual_surface.sh` | `"engine_default": "adk"`, `"mode": "private-workspaces+public-desk"` |
+| `partner_status.health_payload` | object call after pip install | `"engine_default": "adk"`, `"agent_builder": true` |
 | Fallback stamps error | `t_run_clearance_falls_back_to_direct_and_stamps_error` | `engine: direct`, `adk_error` present |
 
-## Local /health shape (this VM, no ADC)
+## Local dual-surface /health (2026-09-09)
+
+```bash
+bash scripts/demo_partner_dual_surface.sh
+```
+
+```json
+{
+  "mode": "private-workspaces+public-desk",
+  "gemini_path": "vertex:hack-fleet",
+  "agent_builder": true,
+  "adk_version": "2.7.1",
+  "engine_default": "adk",
+  "public_desk": true
+}
+```
+
+Hosted `00028-hed` still lacks these fields — see `docs/FINDING-hosted-partner-strip-still-dark-2026-09-09.md`.
+
+## Local /health shape (this VM, no ADC) — original 2026-08-30 control
 
 ```bash
 python3 - <<'PY'
