@@ -555,3 +555,56 @@ bash scripts/verify_cold_clone.sh                                               
 ---
 
 *Update NOW after every slice. Oscar owns phase 6–7. Next: EYES on §WINNER ANGLES.*
+
+=====================================================================
+# Judge review module, canonical, from day-run/JUDGE-STAGE-MODULE.md
+=====================================================================
+
+## Judge review at every stage
+
+Required in each project `hack.md`. Keep the product ambition fixed; improve the working flow and proof. A passing test suite, attractive demo or uploaded submission does not establish product completeness. Use current official event and partner rules, dated and linked. Distinguish rule eligibility from a subjective judge score.
+
+At each transition record five short facts: **intended user outcome → action actually observed → exact evidence/object → largest product gap → next build change**. Keep one current record in `hack.md`; append the previous decision once at a slice boundary. Do not create a fresh audit document per feature.
+
+- **Entry/rules:** verify deadline, track, prior-work eligibility, required runtime/partner use and deliverables. An event end date is not a submission deadline.
+- **Idea/wedge:** compare the actual competitor products. State one user, painful moment, signature interaction and reason to return. A map, chatbot, dashboard or sponsor logo is not a wedge.
+- **Vision/spec:** write the judge's complete task and success/failure states. Map each claimed partner to an essential step. Ask what useful outcome disappears if that partner is removed.
+- **First vertical slice:** execute the signature interaction through the real integration as early as authorized access permits. Keep live, captured, replayed and synthetic paths distinct. A list-models response, import or configuration flag is not completed provider execution.
+- **Each substantial integration:** run one real success and one failure case against the path users invoke. Record provider/query or operation, timestamp, chain/block where relevant, response/receipt and user-visible effect. Verify the actual deployment identity and effective access rather than inferring it from one IAM listing.
+- **Product/design:** a reviewer without implementation intentions completes the task and returns to saved state on phone and desktop. Open and inspect the screenshots. Missing screenshots cannot support a visual verdict. Preserve the bigger vision; reduce steps and internal explanations rather than reducing the product to a disclaimer.
+- **Pre-demo:** use the actual submitted user flow. The film may shorten waiting; it must not substitute fixture behaviour for claimed live functionality. Demo timing remains the user's choice. A real historical transaction does not prove a complete current financial flow.
+- **Release/submission:** name exact repo/default-branch commit, hosted revision, demo version and form values. Check public bytes/history for private material before publication, preserve human changes, and require the actual event-specific submission receipt. “Published project page” is not “submitted to this event.” Keep final outward actions within the user's authority.
+- **Pre-results retro:** freeze what was submitted, prior expectations, known gaps and scoped costs. Assess official criteria against demonstrated evidence, not internal effort. Label scores subjective. Do not estimate placing without reviewing the field.
+- **Results retro:** append placement, prize and judge feedback when available. Preserve the pre-results assessment to avoid rewriting the lesson around winning or losing.
+
+A failed stage selects the next product change; it does not trigger repeated broad audits. Use one independent cold review and one targeted repair pass per slice, then return concrete remaining gaps. Do not call all work done while a sponsor's required functional flow exists only in a test or UI.
+
+General reference examples (always re-read for the event): https://agentic-cinema.devpost.com/ and https://ethglobal.com/events/ethonline2026/info/details and https://ethglobal.com/events/ethonline2026/prizes .
+
+## Current stage record · 2026-09-09 · release and submission
+
+- **Intended user outcome:** a documentary editor with a script line they cannot defend opens one
+  saved public investigation, reads the exact passages behind the disagreement, and leaves with a
+  narration they can defend plus an evidence brief.
+- **Action actually observed:** hosted mode booted locally on candidate 3daa5ec. `/` 200,
+  `/judge` 200, `/judge/demo` 200. The Voyager boundary case renders end to end: editorial claim
+  under review, four dated NASA sources with capture dates, an explicit definition tension, a
+  revised narration that rejects the absolute phrasing, editor guidance and a production brief.
+  Private routes stay shut: `/cases` 303, `/registry` 303, `/api/cases` 401.
+- **Exact evidence:** six screenshots at
+  `day-run/2026-09-09/science-lastpush/worktree/docs/assets/judge-2026-09-09/`, desktop 1440 and
+  phone 390, opened and read. Zero horizontal overflow at either width on all three pages.
+  Suite 569 passed, 3 skipped, 66 subtests.
+- **Largest product gap:** the case is CAPTURED and the page says so on itself. No live provider
+  execution is demonstrated on the judge path. A Cloud Run traffic split and runtime service account
+  are deployment identity, not evidence a provider ran.
+- **Next build change:** one real success and one real failure against the path a user actually
+  invokes, recording provider, query, timestamp, response and the user-visible effect.
+
+**Submission receipt, event specific:** Agentic Cinema, project 1420614, `submitted_at`
+2026-09-09T03:39:07-04:00, which is 09:39 Paris. Source authenticated
+`devpost_hackathons.get_project`. Stepper and terms are not exposed by that call and stay unverified.
+
+**Note on where this module lives.** `hack.md` was deliberately REMOVED from the public candidate by
+the safe-package cleanup, as internal operating context. So this record belongs in the working repo
+and must NOT be re-added to the public tree.
