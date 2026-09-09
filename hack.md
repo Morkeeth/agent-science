@@ -2,7 +2,7 @@
 doc: hack
 project: Agent Science
 phase: SHIP
-last-touched: 2026-09-03 12:10 UTC
+last-touched: 2026-09-09 08:30 UTC
 canonical: true
 event: Agentic Cinema · Parallel track · deadline 2026-09-09 14:00 PDT
 supersedes: docs/PHASE0-LADDER.md ClickHouse-track note (runtime track is Parallel)
@@ -307,7 +307,46 @@ Full record: `fleet-ops (internal)/retros/QWEN-LOSS-RETRO-2026-08-30.md` (correc
 
 ---
 
-## 🎯 NOW — Partner night wave (fresh compound + timeout finding)
+## 🎯 NOW — Partner dual-surface restore (Sep 9 submit path)
+
+**Slice:** Restore public partner desk beside private `/cases` after hosted strip; prove with embarrassing live-vs-local eval; Oscar deploy checklist ready.
+
+### Build (shipped 2026-09-09)
+
+- [x] Dual-surface routing — `cloud/partner_status.py` + `cloud/service.py` (public `/health` `/partners` `/clear` beside private `/cases`)
+- [x] Hosted partner controls — `tests/test_hosted_partner_surfaces.py` **5/5** · `bash scripts/demo_partner_dual_surface.sh`
+- [x] Embarrassing eval — `python3 scripts/eval_hosted_partner_surface.py` · live shipping **FAIL** · local shipping **PASS**
+- [x] Partner doc + deploy checklist — `docs/PARTNER-INTEGRATIONS-2026-08-30.md` · `deploy.sh` candidate verify
+- [x] Promise line — README clearance promise + PITCH honesty re-derived
+- [x] Qwen eval re-run — baseline 5/6 vs shipping 6/6 delta +1; ablation same
+- [x] Live compound — honest BLOCKED (`docs/BLOCKED-live-compound-2026-09-09.md`) — no keys + hosted dark
+- [x] SUBMISSION-PACK truth — partner hosted row corrected; stranger dual-surface command; **128/128**
+- [x] Design partner loop — `docs/DESIGN-PARTNER-LOOP.md` (login-wall honesty until Oscar deploy)
+
+### Verify (one command each)
+
+```bash
+git pull && python3 tests/test_watch_it_go_red.py                    # 72/72
+python3 tests/test_hosted_partner_surfaces.py                        # 5/5
+bash scripts/demo_partner_dual_surface.sh                            # local prove OK
+python3 scripts/eval_hosted_partner_surface.py                       # live FAIL / local PASS
+python3 scripts/bench_check_docs.py                                  # 128/128
+python3 scripts/eval_refusal_baseline.py && python3 scripts/eval_refusal_ablation.py
+```
+
+### Receipt
+
+- `docs/RECEIPT-partner-dual-surface-2026-09-09.md`
+- `docs/FINDING-hosted-partner-strip-still-dark-2026-09-09.md`
+
+### BLOCKED
+
+- Live hosted remains partner-dark on `00028-hed` until Oscar `bash deploy.sh` of this branch
+- Live compound exhibit — no Parallel/Gemini keys on this VM; orphan-works 504 history
+
+---
+
+## 🎯 NOW (prior) — Partner night wave (fresh compound + timeout finding)
 
 **Slice:** Harden partner verify to prove Parallel at runtime; ship fresh compound probe; document orphan-works 504 regression at object.
 
@@ -528,6 +567,7 @@ bash scripts/verify_cold_clone.sh                                               
 
 | When | What | Command | Outcome |
 |------|------|---------|---------|
+| 2026-09-09 | Partner dual-surface restore | `eval_hosted_partner_surface.py` · `demo_partner_dual_surface.sh` · `test_hosted_partner_surfaces.py` | **live shipping FAIL** (00028 strip) · **local shipping PASS** · 72/72 · 128/128 |
 | 2026-09-03 night | Fresh compound + timeout finding | `compound_fresh_hosted_probe.py` · `verify_partners_hosted.sh` | **A≥1 Parallel → B drop** · orphan-works Run A **504** @ 300s |
 | 2026-09-03 night | SUBMISSION-PACK + Qwen gates | `bench_check_docs.py` · `eval_verify_holdout.py` · `eval_scorer_symmetry.py` | **127/127** · holdout OK · scorer 5/6 vs 6/6 · offline compound A=2→B=1 |
 | 2026-09-02 | Partner verify re-run | `verify_partners_hosted.sh` · `full_gate.sh` | **4/4 partners** · compound warm-shelf PASS · 72/72 auto-seed |

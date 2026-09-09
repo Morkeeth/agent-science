@@ -1,13 +1,20 @@
 # DESIGN PARTNER LOOP — friction template · slice 6 prep
 
-**Audience:** Oscar sends to one real clearance lead before Sep 9.  
+**Audience:** Oscar sends to one real clearance lead before/at Sep 9.  
 **Goal:** one production runs their script through the desk; friction list lands in `CURSOR-LOG.md`.
+
+**Hosted honesty (2026-09-09):** live revision `00028-hed` is **partner-dark** (login wall; stripped `/health`). Oscar must `bash deploy.sh` this dual-surface branch and pass `verify_partners_hosted.sh` before sending a partner to the public URL. Until then, run the partner on a local dual-surface demo:
+
+```bash
+bash scripts/demo_partner_dual_surface.sh
+# or: python3 cloud/service.py with AGENT_SCIENCE_HOSTED=1 (see script)
+```
 
 ---
 
 ## Script upload flow (what the partner does)
 
-1. Open hosted desk: `https://agent-science-568004190078.us-central1.run.app/` (after Oscar deploy).
+1. Open hosted desk: `https://agent-science-568004190078.us-central1.run.app/` (**after** Oscar dual-surface deploy — expect clearance form, not `/login`).
 2. Set **subject shelf** — a tag their team reuses across episodes (e.g. `season-2-ep3`).
 3. Paste **documentary narration** (plain text, not PDF).
 4. Click **Clear script** → gap report HTML or JSON via API:
@@ -17,6 +24,8 @@
      -d '{"script":"<paste>","subject":"<their-tag>"}'
    ```
 5. **Second script** on same subject — partner should see `corpus_hits ≥ 1` and fewer Parallel calls (compounding).
+
+Private research (`/cases`) stays behind workspace login and is **not** the partner trial path.
 
 ---
 
@@ -32,6 +41,7 @@
 | 6 | Subject tag — intuitive or confusing? | | |
 | 7 | Output format — HTML memo vs JSON for their pipeline? | | |
 | 8 | Blocker that would stop them paying? | | |
+| 9 | Did `/health` show `engine_default: adk` and `parallel: true`? | | |
 
 ---
 
@@ -41,6 +51,7 @@
 - `corpus_hits` on run 2
 - Count of UNSOURCED by `cause` (especially `no_independent_source`, `search_found_no_admissible_source`)
 - Time-to-report (wall clock)
+- Whether partner hit the login wall (means deploy not dual-surface)
 
 ---
 
@@ -50,7 +61,7 @@
 >  
 > We built a desk that returns every checkable claim as SOURCED (verbatim quote + URL) or UNSOURCED (named reason).  
 >  
-> **Try it:** [hosted URL] — paste one page of narration, pick a subject tag, clear. Paste a second page with the **same tag** and tell us if the Parallel call count drops.  
+> **Try it:** [hosted URL after dual-surface deploy] — paste one page of narration, pick a subject tag, clear. Paste a second page with the **same tag** and tell us if the Parallel call count drops.  
 >  
 > **Reply with:** anything wrongly sourced/unsourced, and whether the refusal reasons are usable in your workflow.  
 >  

@@ -2,6 +2,8 @@
 
 Research a builder question, inspect the source evidence, and record a decision that can change when its evidence changes.
 
+**Clearance promise (same constraint):** paste a documentary script; get every checkable claim back as a **verbatim quote + URL** (SOURCED) or **UNSOURCED** with a named reason. If the document does not contain the exact passage, refuse — never paraphrase. Local prove: `bash scripts/demo_partner_dual_surface.sh`.
+
 Agent Science is a CLI/MCP research companion for coding work. Public-source discovery, versioned evidence, decisions and repo experiments work locally without a hosted account. The CLI and MCP interface keep the question, exact source quotations, source snapshots, actual search attempts, repo context and decision history together.
 
 ## Use it from your terminal

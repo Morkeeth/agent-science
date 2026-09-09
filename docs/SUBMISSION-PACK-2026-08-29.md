@@ -1,8 +1,8 @@
 # SUBMISSION PACK — Agentic Cinema · slice 7
 
-**Date:** 2026-09-03 · **Repo:** https://github.com/Morkeeth/agent-science @ `main`  
+**Date:** 2026-09-09 · **Repo:** https://github.com/Morkeeth/agent-science @ `main`  
 **Hosted:** https://agent-science-568004190078.us-central1.run.app · **Deadline:** 2026-09-09 14:00 PT  
-**Scope:** docs + offline controls — no public repo flip, no video upload, no Devpost submit, no `deploy.sh`
+**Scope:** docs + offline controls + dual-surface code — no public flip, no video upload, no Devpost submit, no `deploy.sh` run from agents
 
 ---
 
@@ -11,13 +11,14 @@
 ```bash
 git clone https://github.com/Morkeeth/agent-science.git && cd agent-science
 bash scripts/verify_cold_clone.sh
+bash scripts/demo_partner_dual_surface.sh
 python3 tests/test_registry_surface.py -q
 python3 scripts/compound_exhibit_receipt.py
 bash scripts/demo_truth_layer.sh
 python3 ask_registry.py "agentlint" | head -5
 ```
 
-Offline compound receipt writes `docs/COMPOUND-EXHIBIT-2026-08-29.md` with A=2→B=1 Parallel, corpus_hits≥1 — no Gemini/Parallel keys required.
+Offline compound receipt writes `docs/COMPOUND-EXHIBIT-2026-08-29.md` with A=2→B=1 Parallel, corpus_hits≥1 — no Gemini/Parallel keys required. Dual-surface demo proves public `/health`+`/partners` beside private `/api/cases` without Cloud Run.
 
 ---
 
@@ -27,13 +28,13 @@ Offline compound receipt writes `docs/COMPOUND-EXHIBIT-2026-08-29.md` with A=2�
 |------|-------------|--------|----------|
 | Video | ≤ 3 min (≤ 180 s) | [ ] | Script: `docs/VIDEO-SCRIPT-2026-08-29.md` — beats sum **178 s** |
 | Devpost | All mandatory fields filled | [ ] | Paste block below (§1–3 from `PITCH.md`) |
-| Public repo | Stranger can clone | [ ] | Private until submit — flip visibility on GitHub |
+| Public repo | Stranger can clone | [x] | github.com/Morkeeth/agent-science — public since 2026-08-22 |
 | OSI licence | Open-source approved | [x] | `LICENSE` (MIT) |
 | Sealed prediction | Pre-registered, falsifiable | [x] | `docs/SEALED-PREDICTION-2026-08-31.md` — hosted A=1→B=0, corpus_hits=1 |
-| Partner integrations | All four called at runtime | [x] docs | `docs/PARTNER-INTEGRATIONS-2026-08-30.md` |
-| ADK default path | `engine_default: adk` | [x] local / [x] hosted | `docs/RECEIPT-adk-default-path-2026-08-30.md` |
+| Partner integrations | All four called at runtime | [x] code + local dual-surface · [ ] hosted live `00028-hed` | `docs/PARTNER-INTEGRATIONS-2026-08-30.md` · `docs/FINDING-hosted-partner-strip-still-dark-2026-09-09.md` |
+| ADK default path | `engine_default: adk` | [x] local controls · [ ] hosted until Oscar dual-surface deploy | `docs/RECEIPT-adk-default-path-2026-08-30.md` · `python3 tests/test_adk_default_path.py` |
 
-**Controls re-measured 2026-09-03** (run each at object):
+**Controls re-measured 2026-09-09** (run each at object):
 
 | Suite | Command | Result |
 |-------|---------|--------|
@@ -50,6 +51,8 @@ Offline compound receipt writes `docs/COMPOUND-EXHIBIT-2026-08-29.md` with A=2�
 | parallel_integration | `python3 tests/test_parallel_integration.py` | **6/6** |
 | **Total** | 11 suites | **128/128** |
 | docs gate | `python3 scripts/bench_check_docs.py` | **128/128 match** |
+| hosted partner surfaces | `python3 tests/test_hosted_partner_surfaces.py` | **5/5** (local hosted-mode) |
+| partner surface eval | `python3 scripts/eval_hosted_partner_surface.py` | live shipping **FAIL** · local shipping **PASS** |
 | holdout freeze | `python3 scripts/eval_verify_holdout.py` | **4 files pinned** |
 | scorer symmetry | `python3 scripts/eval_scorer_symmetry.py` | baseline **5/6** vs shipping **6/6** on delivered labels |
 

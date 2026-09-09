@@ -1,37 +1,65 @@
 # PARTNER INTEGRATIONS — Agent Science · Sep 9 path
 
-**Date:** 2026-08-30 · **Last verified:** 2026-09-03 · **Repo:** Morkeeth/agent-science · **Scope:** all four partners wired in code; deploy is Oscar's click.
+**Date:** 2026-08-30 · **Last verified:** 2026-09-09 · **Repo:** Morkeeth/agent-science  
+**Scope:** all four partners wired in code; dual-surface restore on this branch; deploy is Oscar's click.
 
 Each partner must be **called at runtime** on the default path — not documented only.
+
+---
+
+## Live object (2026-09-09 — still RED until Oscar deploys)
+
+```bash
+curl -sS https://agent-science-568004190078.us-central1.run.app/health
+# → {"ok": true, "service": "agent-science", "mode": "private-workspaces",
+#     "revision": "agent-science-00028-hed"}
+# Missing: gemini · parallel · agent_builder · engine_default
+bash scripts/verify_partners_hosted.sh   # exit 1
+python3 scripts/eval_hosted_partner_surface.py
+# live: naive PASS · shipping FAIL
+# local dual-surface: shipping PASS
+```
+
+Finding: `docs/FINDING-hosted-partner-strip-still-dark-2026-09-09.md`
 
 ---
 
 ## Oscar deploy checklist (one pass)
 
 1. **Rotate keys** if any revision ever had plaintext env vars (`deploy.sh` note).
-2. **`bash deploy.sh`** — Oscar only; writes Secret Manager, IAM, Cloud Run revision.
-3. **Verify all four partners at runtime (one command):**
+2. **`bash deploy.sh`** — Oscar only; writes Secret Manager, IAM, Cloud Run **candidate** (no traffic).
+3. **Verify candidate before promote:**
    ```bash
-   bash scripts/verify_partners_hosted.sh
+   bash scripts/verify_partners_hosted.sh https://workspace-candidate---<service>.run.app
    ```
-   Expect: health OK · `engine_default: adk` · `/clear` stamps `engine: adk` with `parallel_calls ≥ 1` on fresh claim · compound-mini PASS · compound-fresh PASS (A_parallel≥1, B_hits≥1).
-4. **Compound with Parallel drop (video beat):**
+   Expect: `mode=private-workspaces+public-desk` · `engine_default: adk` · `/clear` stamps `engine: adk` with `parallel_calls ≥ 1` on fresh claim · compound probes PASS.
+4. **Promote** the exact candidate revision only after step 3 is green.
+5. **Compound with Parallel drop (video beat):**
    ```bash
    python3 scripts/compound_fresh_hosted_probe.py
    ```
-   Expect: Run A `parallel_calls ≥ 1` → Run B `parallel_calls ≤ A` with `corpus_hits ≥ 1`.
-5. **Or verify /health alone:**
+6. **Or verify /health alone after promote:**
    ```bash
    curl -s https://agent-science-568004190078.us-central1.run.app/health | python3 -m json.tool
    ```
-   Expect: `"gemini_path": "vertex:hack-fleet"`, `"parallel": true`, `"engine_default": "adk"`.
-6. **Verify /clear** (JSON):
-   ```bash
-   curl -s -X POST https://agent-science-568004190078.us-central1.run.app/clear \
-     -H 'Content-Type: application/json' \
-     -d '{"script":"The Dust Bowl displaced 2.5 million people.","subject":"dust-bowl"}' \
-     | python3 -c "import sys,json; d=json.load(sys.stdin); print('engine',d.get('engine')); print('parallel_calls',d.get('parallel_calls'))"
-   ```
+   Expect: `"gemini_path": "vertex:hack-fleet"`, `"parallel": true`, `"engine_default": "adk"`,
+   `"mode": "private-workspaces+public-desk"`.
+
+---
+
+## Dual surface (one Cloud Run process)
+
+| Path | Auth | Role |
+|------|------|------|
+| `/health`, `/partners`, `/`, `/clear`, `/registry`, `/visibility/ui` | public | partner track + clearance desk |
+| `/cases`, `/api/cases`, `/login` | workspace bearer/session | private research |
+
+Shared builder: `cloud/partner_status.py`. Local prove (no deploy, no keys):
+
+```bash
+bash scripts/demo_partner_dual_surface.sh
+python3 tests/test_hosted_partner_surfaces.py
+```
 
 ---
 
@@ -100,19 +128,21 @@ curl -s -X POST https://api.parallel.ai/v1/search \
 
 | Field | Value |
 |-------|-------|
-| **Role** | Hosted clearance desk — paste script, get gap report |
+| **Role** | Hosted dual surface — public clearance desk + private research workspaces |
 | **Entrypoint** | `cloud/service.py` (Dockerfile `CMD`) |
 | **Deploy script** | `deploy.sh` (Oscar only — never run from agent) |
 | **Project / region** | `hack-fleet` / `us-central1` (env: `GCP_PROJECT`, `GCP_REGION`) |
 | **Service name** | `agent-science` (`GCP_SERVICE`) |
 | **Corpus shelf** | GCS `gs://hack-fleet-agent-science-corpus/corpus.db` via `CORPUS_GCS_URI` |
 
-### `/health` spec
+### `/health` spec (after dual-surface deploy)
 
 ```json
 {
   "ok": true,
   "service": "agent-science",
+  "mode": "private-workspaces+public-desk",
+  "revision": "agent-science-…",
   "gemini": true,
   "gemini_path": "vertex:hack-fleet",
   "parallel": true,
@@ -122,7 +152,9 @@ curl -s -X POST https://api.parallel.ai/v1/search \
   "last_parallel_search_id": "srch_…",
   "agent_builder": true,
   "adk_version": "2.7.1",
-  "engine_default": "adk"
+  "engine_default": "adk",
+  "workspace": true,
+  "public_desk": true
 }
 ```
 
@@ -132,6 +164,7 @@ curl -s -X POST https://api.parallel.ai/v1/search \
 | `parallel` | `PARALLEL_API_KEY` present in env |
 | `agent_builder` | `google-adk` importable |
 | `engine_default` | What `POST /clear` will use: `adk` or `direct` |
+| `mode` | Must be `private-workspaces+public-desk` on hosted — stripped `private-workspaces` is the 00026/00028 regression |
 
 ### Routes
 
@@ -142,6 +175,7 @@ curl -s -X POST https://api.parallel.ai/v1/search \
 | GET | `/` | — | Desk UI (HTML form → POST /clear) |
 | GET | `/corpus?subject=` | — | `{subject, remembered, total}` |
 | POST | `/clear` | `{"script","subject"}` | Gap report JSON; `engine` field stamped |
+| GET/POST | `/cases`, `/api/cases` | workspace auth | Private research (not partner proof) |
 
 **Local desk:**
 ```bash
@@ -165,11 +199,13 @@ curl -s localhost:8099/health
 
 **Receipt:** `docs/RECEIPT-adk-default-path-2026-08-30.md`
 
-**Controls:** `python3 tests/test_adk_default_path.py` — engine selection without live model.
+**Controls:** `python3 tests/test_adk_default_path.py` — engine selection without live model; uses `partner_status.health_payload`.
 
 **Gap report fields when ADK runs:** `engine: "adk"`, `adk_version`, `adk_tool_calls`, `model_routing`.
 
 **Fallback:** if ADK raises, direct pipeline runs with `engine: "direct"` and `adk_error` — never silent.
+
+**Local note (this VM):** `google-adk` may be absent → `engine_default: direct` is honest. Cloud Run image installs `requirements.txt` so hosted should report `adk` after dual-surface deploy.
 
 ---
 
@@ -178,8 +214,8 @@ curl -s localhost:8099/health
 ```bash
 git clone https://github.com/Morkeeth/agent-science.git && cd agent-science
 bash scripts/verify_cold_clone.sh
+bash scripts/demo_partner_dual_surface.sh
+python3 scripts/eval_hosted_partner_surface.py
 ```
 
-Receipts: `docs/RECEIPT-hosted-partner-runtime-2026-08-30.md`, `docs/RECEIPT-live-compound-exhibit-2026-08-30.md`.
-
-Live `/clear` requires Oscar deploy + keys. Offline controls prove partner **code paths** exist and are tested.
+Live `/clear` with Parallel requires Oscar deploy + keys. Offline controls prove partner **code paths** and the dual-surface shape.

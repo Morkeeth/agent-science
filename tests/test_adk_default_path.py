@@ -24,19 +24,17 @@ def t_health_reports_engine_default_adk_when_configured():
     saved = os.environ.get("AGENT_BUILDER")
     try:
         os.environ["AGENT_BUILDER"] = "1"
+        os.environ.setdefault("GCP_PROJECT", "hack-fleet")
         svc = _reload_service()
+        from cloud import partner_status
         with patch.object(svc.adk_agent, "adk_available", return_value=True):
             with patch.object(svc.adk_agent, "adk_version", return_value="2.7.1"):
-                # Mirror GET /health payload construction
-                adk_ok = svc.adk_agent.adk_available()
-                payload = {
-                    "engine_default": "adk" if (svc.ADK_DEFAULT and adk_ok) else "direct",
-                    "agent_builder": adk_ok,
-                    "adk_version": svc.adk_agent.adk_version(),
-                }
+                payload = partner_status.health_payload(adk_default=svc.ADK_DEFAULT)
         assert payload["engine_default"] == "adk", payload
         assert payload["agent_builder"] is True
         assert payload["adk_version"] == "2.7.1"
+        assert "gemini_path" in payload
+        assert "parallel" in payload
     finally:
         if saved is None:
             os.environ.pop("AGENT_BUILDER", None)
