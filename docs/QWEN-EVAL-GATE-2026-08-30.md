@@ -9,6 +9,11 @@
 > **Re-verified 2026-09-01:** same delta +1; see `docs/RECEIPT-partner-integrations-night-2026-09-01.md` §6.
 
 > **Re-verified 2026-09-03:** holdout freeze + scorer symmetry gates shipped; see `docs/RECEIPT-night-wave-2026-09-03.md`.
+>
+> **Re-verified 2026-09-10:** cost gate shipped — `python3 scripts/eval_cost_baseline.py`
+> (Parallel Search price card dated 2026-09-10 from docs.parallel.ai; naive 5 calls vs
+> shipping 3; paraphrase counter 0 hits; always-silent 3/6 vs shipping 6/6). Billing
+> console still BLOCKED. See `docs/RECEIPT-night-wave-2026-09-10.md`.
 
 # QWEN EVAL GATE — alternative arm · 2026-08-30
 
@@ -119,3 +124,4 @@ Re-derives all 9 suite counts against `docs/SUBMISSION-PACK-2026-08-29.md` — e
 - [x] Offline path with no API key
 - [x] Wilson CI + McNemar (n=6)
 - [x] Honesty carries worst number (tie + RC5 false-GREEN both arms)
+- [x] **Cost from published price card × measured calls** — `scripts/eval_cost_baseline.py` (card date 2026-09-10). **Billing console still open / Oscar-only.**

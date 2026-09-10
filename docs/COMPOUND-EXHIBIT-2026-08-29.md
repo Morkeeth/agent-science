@@ -1,6 +1,6 @@
 # COMPOUND EXHIBIT — orphan-works A/B
 
-**Date:** 2026-09-03 00:07 UTC · **Subject:** `orphan-works` · **Mode:** offline
+**Date:** 2026-09-10 00:13 UTC · **Subject:** `orphan-works` · **Mode:** offline
 **Fixtures:** `compound-mini-A.txt` → `compound-mini-B.txt`
 
 ## Quantified compounding
@@ -21,7 +21,7 @@ Network boundaries faked; verdict rules run for real:
 - instruments.document → fixture bodies (no HTTP)
 - StringLocator (DEFAULT) + verify + independence — real shipping rules
 
-Ground-truth Parallel calls at fake boundary (Run A only): `3`
+Ground-truth Parallel calls at fake boundary (A+B find_sources): `3`
 
 ## Registry backfill
 
@@ -52,7 +52,7 @@ PASS  test_visibility_ui_renders_transparency
 
 ```
 PASS  test_not_gameable_reuse_carries_the_original_verdict_both_poles
-PASS  test_second_subject_reuses_the_log_and_spends_no_parallel_call
+PASS  test_second_subject_reuses_support_and_retries_unsettled_claim
 
 2/2 passed
 ```

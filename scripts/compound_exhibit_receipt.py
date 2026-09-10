@@ -74,10 +74,12 @@ _OFFLINE_CLAIMS = {
         _Raw("Member states had until 29 October 2014 to bring it into national law.",
              None, "29 October 2014"),
     ],
+    # Overlapping claims must be IDENTICAL to A — exact-assertion reuse (2026-09-04).
+    # Paraphrases intentionally miss; see docs/FINDING-compound-exact-assertion-2026-09-10.md.
     "B": [
-        _Raw("Europe's answer was Directive 2012/28/EU — known as the Orphan Works Directive —",
+        _Raw("In 2012 the European Union passed Directive 2012/28/EU, the Orphan Works Directive.",
              None, "Directive 2012/28/EU"),
-        _Raw("and the deadline for national transposition was 29 October 2014.",
+        _Raw("Member states had until 29 October 2014 to bring it into national law.",
              None, "29 October 2014"),
         _Raw("The British Library has estimated that forty percent of its copyrighted collection is orphaned.",
              None, "forty percent"),
@@ -242,7 +244,7 @@ def _write_receipt(run: dict, *, backfill_rows: int) -> None:
             lines.append(f"- {s}")
         lines += [
             "",
-            f"Ground-truth Parallel calls at fake boundary (Run A only): `{run.get('net_find_calls', '?')}`",
+            f"Ground-truth Parallel calls at fake boundary (A+B find_sources): `{run.get('net_find_calls', '?')}`",
             "",
         ]
     else:

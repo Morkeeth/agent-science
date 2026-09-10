@@ -295,7 +295,7 @@ submission craft, supported by a real tendency, **not** as the explanation of th
 - [x] **Baseline steelmanned** — raw rows printed by eval scripts; RC5 is now the single discordant item (baseline GREEN, shipping UNKNOWN)
 - [x] **Statistic matched to n** — Wilson 95% CI + McNemar in baseline/ablation scripts
 - [x] **Scorer symmetrical** — `python3 scripts/eval_scorer_symmetry.py` · delivered SOURCED/UNSOURCED labels only; baseline **5/6** vs shipping **6/6** (RC5 discordant)
-- [ ] **Cost from billing**, with the price card's date stated.
+- [x] **Cost from published price card × measured calls** — `python3 scripts/eval_cost_baseline.py` · card date **2026-09-10** (docs.parallel.ai Search/advanced $5/1k) · naive 5 calls / shipping 3 / paraphrase counter 0 hits · always-silent 3/6. **Billing console still Oscar-only / BLOCKED on agent VMs.**
 - [x] **Offline path with no API key.**
 - [x] **Honesty & limitations** section carrying our worst number — README §Honesty & limitations; PITCH first screen
 - [ ] **Answer the track brief in the track's own words on the first screen** — judge pack § above; must land on Devpost ¶1 + video 0:00
@@ -307,38 +307,46 @@ Full record: `fleet-ops (internal)/retros/QWEN-LOSS-RETRO-2026-08-30.md` (correc
 
 ---
 
-## 🎯 NOW — Partner night wave (fresh compound + timeout finding)
+## 🎯 NOW — Sep 9 submit-path night wave (truth refresh + eval gate + deploy prep)
 
-**Slice:** Harden partner verify to prove Parallel at runtime; ship fresh compound probe; document orphan-works 504 regression at object.
+**Slice:** Close submit-path gaps that embarrass us or help a stranger — re-measure pack counts at object · one falsifiable Qwen gate with baseline arm · live compound or honest BLOCKED · deploy.sh prep for Oscar (no deploy).
 
-### Build (shipped 2026-09-03)
+**Floor (do not redo):** `test_watch_it_go_red` 72/72 · slice 7 docs already on main.
 
-- [x] Fresh compound probe — `python3 scripts/compound_fresh_hosted_probe.py` (A_parallel≥1 → B drop + corpus_hits)
-- [x] Partner verify hardened — `bash scripts/verify_partners_hosted.sh` (Parallel ≥1 on fresh claim + compound-fresh)
-- [x] Orphan-works timeout finding — `docs/FINDING-orphan-works-timeout-2026-09-03.md` (Run A now 504 @ 300s)
-- [x] Receipt — `docs/RECEIPT-partner-night-2026-09-03.md`
+### Build (shipped 2026-09-10)
 
-### Verify (one command each)
+- [x] SUBMISSION-PACK truth refresh — **128/128** at object; stranger block + cost eval; public-repo row corrected
+- [x] Qwen cost gate — `scripts/eval_cost_baseline.py` (naive / shipping / paraphrase / silent) + FINDING on exact-assertion compound
+- [x] Compound fixture realign — identical overlap in `compound-mini-B.txt`; receipt A=2→B=1 · hits=2
+- [x] Live compound exhibit — **BLOCKED** (PARALLEL+GEMINI missing; hosted `/search` sign-in)
+- [x] Slice 1 deploy prep only — `docs/DEPLOY-PREP-2026-09-10.md` (no deploy run)
+
+### Verify (one command each — tick only after RUN)
 
 ```bash
-git pull && python3 tests/test_watch_it_go_red.py                    # 72/72
-bash scripts/verify_partners_hosted.sh                               # 4/4 partners + Parallel + compound-fresh
-python3 scripts/compound_fresh_hosted_probe.py                       # A≥1 Parallel → B corpus_hits≥1
-bash scripts/full_gate.sh                                            # FULL GATE OK
-python3 scripts/bench_check_docs.py                                  # 127/127
+git pull && python3 tests/test_watch_it_go_red.py 2>&1 | tail -3   # 72 passed
+python3 scripts/bench_check_docs.py                                 # 128/128
+python3 scripts/compound_exhibit_receipt.py                         # A=2→B=1 hits=2
+python3 scripts/eval_cost_baseline.py                               # naive 5 / shipping 3
 python3 scripts/eval_refusal_baseline.py && python3 scripts/eval_refusal_ablation.py
+python3 tests/test_registry_surface.py -q                           # 16/16
 ```
 
 ### Receipt
 
-- `docs/RECEIPT-partner-night-2026-09-03.md`
-- `docs/FINDING-orphan-works-timeout-2026-09-03.md`
+- `docs/RECEIPT-night-wave-2026-09-10.md`
+- `docs/FINDING-compound-exact-assertion-2026-09-10.md`
+- `docs/DEPLOY-PREP-2026-09-10.md`
 
 ### BLOCKED
 
-- Orphan-works full script — **504 @ 300s on Run A** (was Run B only). Oscar: raise `deploy.sh --timeout` or film compound-fresh.
+- Live Parallel/Gemini on this VM — keys absent
+- Billing console cost — Oscar only (price-card×calls shipped instead)
+- Hosted stranger `/search` — private-workspaces sign-in (`00028-hed`)
+- Outward: Devpost · video · deploy/promote — Oscar only
 
 ---
+
 
 ## 🎯 NOW (merged 2026-09-03, Cursor lane) — Night wave: SUBMISSION-PACK + Qwen eval gates (build lane)
 
@@ -528,6 +536,7 @@ bash scripts/verify_cold_clone.sh                                               
 
 | When | What | Command | Outcome |
 |------|------|---------|---------|
+| 2026-09-10 night | Submit-path gaps | `compound_exhibit_receipt.py` · `eval_cost_baseline.py` · `bench_check_docs.py` | **FINDING** paraphrase compound red → fixture realign A=2→B=1 · cost naive 5/ship 3 · **128/128** · live **BLOCKED** · deploy prep |
 | 2026-09-03 night | Fresh compound + timeout finding | `compound_fresh_hosted_probe.py` · `verify_partners_hosted.sh` | **A≥1 Parallel → B drop** · orphan-works Run A **504** @ 300s |
 | 2026-09-03 night | SUBMISSION-PACK + Qwen gates | `bench_check_docs.py` · `eval_verify_holdout.py` · `eval_scorer_symmetry.py` | **127/127** · holdout OK · scorer 5/6 vs 6/6 · offline compound A=2→B=1 |
 | 2026-09-02 | Partner verify re-run | `verify_partners_hosted.sh` · `full_gate.sh` | **4/4 partners** · compound warm-shelf PASS · 72/72 auto-seed |
