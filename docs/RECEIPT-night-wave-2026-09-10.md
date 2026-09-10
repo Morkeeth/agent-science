@@ -15,6 +15,8 @@
 4. **SUBMISSION-PACK truth refresh** — controls re-measured **128/128**; public-repo row corrected; stranger block adds `eval_cost_baseline.py`; hosted stranger path honesty.
 5. **Deploy prep** — `docs/DEPLOY-PREP-2026-09-10.md` matches current 45-line no-traffic candidate `deploy.sh` (Sep-3 prep was stale).
 6. **full_gate** — §5a runs cost baseline.
+7. **Exact-assertion control** — `tests/test_compound_exact_assertion.py` (paraphrase must stay red; identical compounds; naive spends more).
+8. **evidence_cases isolation** — test setUp pins `AGENT_SCIENCE_SEARCH_DIR` so warm `~/.agent-science/search` cannot fake zero live discovery (was 0!=3).
 
 ---
 
@@ -46,8 +48,11 @@ python3 scripts/eval_scorer_symmetry.py
 python3 tests/test_registry_surface.py -q
 # 16/16 passed
 
-python3 review/corpus_compound_receipt.py
-# run2 50/50 reuse · PITCH compounding VERIFIED
+python3 tests/test_compound_exact_assertion.py
+# 3/3 passed (paraphrase red · identical green · naive > shipping)
+
+python3 -m unittest tests.test_evidence_cases -q
+# Ran 14 tests … OK
 
 test -n "$PARALLEL_API_KEY" || test -f ~/.config/keys/parallel.key; echo parallel_exit:$?
 # parallel_exit:1
@@ -97,6 +102,6 @@ test -n "$GEMINI_API_KEY" || test -f ~/.config/keys/gemini.key        # exit 1
 - **Prompt said fix stale 26/13** — that fraction was **not present** in `docs/SUBMISSION-PACK-2026-08-29.md` at object tonight; fixed the stale claims that *were* there (public-repo checkbox, compound semantics, partner expected 6 in `bench_check_docs.py`).
 - **Cost gate is not billing** — USD figures are card×`parallel_calls`, not Parallel invoices.
 - **British Library claim still refuses independence** on the offline fixture (`no_independent_source` / bl.uk) — compounding demo only needs the Parallel counter + corpus hits, but Run B still shows an UNSOURCED row.
+- **`test_evidence_cases` discovery isolation** — fixed: setUp now pins `AGENT_SCIENCE_SEARCH_DIR`; was failing 0!=3 against warm home cache (control patched the wrong object).
 - **Did not run full `full_gate.sh` end-to-end** — hosted long_run/stranger will hit the sign-in wall; offline subset + cost gate verified instead.
-- **`test_evidence_cases.py` 1 failure** under PYTHONPATH (`called.call_count` 0!=3) — left broken; not in the 11-suite pack gate.
 - **Devpost paste still cites old commit `e6793ab` and “265+ claims”** — not re-derived at hosted object (sign-in); left for Oscar paste pass.

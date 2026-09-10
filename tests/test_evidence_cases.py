@@ -17,7 +17,14 @@ class CaseTests(unittest.TestCase):
     def setUp(self):
         self.temp=tempfile.TemporaryDirectory();self.root=Path(self.temp.name)
         self.db=self.root/'cases.db'
-        self.env=patch.dict(os.environ,{'AGENT_SCIENCE_CASES_DB':str(self.db)})
+        self.search_dir=self.root/'search';self.search_dir.mkdir()
+        self.env=patch.dict(os.environ,{
+            'AGENT_SCIENCE_CASES_DB':str(self.db),
+            # Production find_sources reads private_paths(), not search.CACHE.
+            # Without this, a warm ~/.agent-science/search cache makes live=True
+            # look like zero discovery attempts (measured 2026-09-10).
+            'AGENT_SCIENCE_SEARCH_DIR':str(self.search_dir),
+        })
         self.env.start()
         self.cache=patch.object(instruments,'DOCS',self.root/'documents.json');self.cache.start()
         self.search_cache=patch.object(search,'CACHE',self.root/'search.json');self.search_cache.start()
