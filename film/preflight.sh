@@ -15,10 +15,16 @@ grep -q "CONTRARY" "$FILM_DIR/voiceover.txt" || red "missing CONTRARY in spine"
 grep -q "$PARALLEL_A" "$FILM_DIR/voiceover.txt" || red "missing parallel A"
 grep -q "$PARALLEL_B" "$FILM_DIR/voiceover.txt" || red "missing parallel B"
 
-ok "hosted /health"
+ok "hosted /health (partner fields)"
 HEALTH="$(curl -sS --max-time 20 "$HOSTED_URL/health" || true)"
-echo "$HEALTH" | python3 -c "import json,sys; d=json.load(sys.stdin); assert d.get('ok') and d.get('engine_default')=='adk'" \
-  || red "/health bad"
+echo "$HEALTH" | python3 -c "
+import json,sys
+d=json.load(sys.stdin)
+assert d.get('ok'), d
+if d.get('mode')=='private-workspaces' and 'engine_default' not in d:
+    raise SystemExit('hosted /health stripped partner fields — see docs/FINDING-hosted-partner-surfaces-2026-09-10.md; Oscar deploy required')
+assert d.get('engine_default')=='adk', d
+" || red "/health bad"
 
 ok "hosted /visibility/ui"
 curl -sf --max-time 20 "$VISIBILITY_URL" | grep -q Transparency || red "visibility UI missing Transparency pane"
