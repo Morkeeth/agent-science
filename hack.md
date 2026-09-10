@@ -319,7 +319,8 @@ Full record: `fleet-ops (internal)/retros/QWEN-LOSS-RETRO-2026-08-30.md` (correc
 - [x] Qwen cost gate — `scripts/eval_cost_baseline.py` (naive / shipping / paraphrase / silent) + FINDING on exact-assertion compound
 - [x] Compound fixture realign — identical overlap in `compound-mini-B.txt`; receipt A=2→B=1 · hits=2
 - [x] Live compound exhibit — **BLOCKED** (PARALLEL+GEMINI missing; hosted `/search` sign-in)
-- [x] Slice 1 deploy prep only — `docs/DEPLOY-PREP-2026-09-10.md` (no deploy run)
+- [x] Exact-assertion RED control — `tests/test_compound_exact_assertion.py` + cold-clone step 8a
+- [x] evidence_cases discovery isolation — `AGENT_SCIENCE_SEARCH_DIR` in setUp (was false ambient)
 
 ### Verify (one command each — tick only after RUN)
 
