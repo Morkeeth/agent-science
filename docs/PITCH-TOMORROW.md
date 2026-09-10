@@ -13,6 +13,8 @@
 >
 > **Proof:** hosted compound exhibit — Run A **1** Parallel call, Run B **0** with
 > `corpus_hits=1` on repeat. Four partners wired at runtime: Vertex, Parallel, Cloud Run, ADK.
+> Public proof after deploy: `GET /health` + `GET /partners` (hosted is private workspaces;
+> shared `/clear` is local desk — see `docs/FINDING-hosted-partner-surfaces-2026-09-10.md`).
 >
 > **Constraint:** if the document does not contain the exact passage, refuse — never paraphrase,
 > never infer. We refused our own pitch headline in the product because of this rule

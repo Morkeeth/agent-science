@@ -1,22 +1,46 @@
 # DESIGN PARTNER LOOP — friction template · slice 6 prep
 
-**Audience:** Oscar sends to one real clearance lead before Sep 9.  
-**Goal:** one production runs their script through the desk; friction list lands in `CURSOR-LOG.md`.
+**Audience:** Oscar sends to one real clearance / research lead.  
+**Goal:** one production runs a real question or script through Agent Science; friction lands in `CURSOR-LOG.md`.
+
+**Product front door:** CLI/MCP first. Hosted Cloud Run is a **private workspace** (login token). Shared public `/clear` is local-only.
 
 ---
 
-## Script upload flow (what the partner does)
+## Path A — Terminal (preferred, no hosted account)
 
-1. Open hosted desk: `https://agent-science-568004190078.us-central1.run.app/` (after Oscar deploy).
-2. Set **subject shelf** — a tag their team reuses across episodes (e.g. `season-2-ep3`).
-3. Paste **documentary narration** (plain text, not PDF).
-4. Click **Clear script** → gap report HTML or JSON via API:
+1. Clone and install:
    ```bash
-   curl -s -X POST https://agent-science-568004190078.us-central1.run.app/clear \
-     -H 'Content-Type: application/json' \
-     -d '{"script":"<paste>","subject":"<their-tag>"}'
+   git clone https://github.com/Morkeeth/agent-science.git && cd agent-science
+   python3 scripts/install-cli.py
+   pip install -r requirements.txt   # Parallel SDK + ADK when keys exist
    ```
-5. **Second script** on same subject — partner should see `corpus_hits ≥ 1` and fewer Parallel calls (compounding).
+2. Cold path without keys:
+   ```bash
+   bash scripts/verify_cold_clone.sh
+   python3 -m clearance lookup "Directive 2012/28/EU"
+   ```
+3. Script clearance on the local desk (ADK default when `AGENT_BUILDER=1`):
+   ```bash
+   export PORT=8099 AGENT_BUILDER=1
+   # PARALLEL_API_KEY / Vertex ADC for live discovery — partner's own keys
+   python3 cloud/service.py
+   curl -s -X POST localhost:8099/clear \
+     -H 'Content-Type: application/json' \
+     -d '{"script":"<paste narration>","subject":"<their-tag>"}'
+   ```
+4. Second script, **same subject** — look for `corpus_hits ≥ 1` and fewer `parallel_calls`.
+
+---
+
+## Path B — Hosted private workspace (Oscar issues access token)
+
+1. Open `https://agent-science-568004190078.us-central1.run.app/` → sign in with token Oscar sends (never put the token in a URL).
+2. Create a research case from their real question; enable live research only if budget allows.
+3. Inspect sources, record a decision with rationale + evidence IDs.
+4. Public partner proof (no login): `/health` and `/partners` — confirm Parallel/Gemini/ADK readiness fields.
+
+Do **not** tell partners to `POST /clear` on the hosted URL — that route is gated (401). Clearance demo = Path A.
 
 ---
 
@@ -24,37 +48,40 @@
 
 | # | Question | Partner answer | Our action |
 |---|----------|----------------|------------|
-| 1 | How long from paste to report? | | |
-| 2 | Any claim wrongly SOURCED? (paste claim_id) | | |
-| 3 | Any claim wrongly UNSOURCED that they would clear manually? | | |
-| 4 | Was the **reason** on UNSOURCED actionable? | | |
-| 5 | Did compounding work on script 2? (Parallel delta) | | |
-| 6 | Subject tag — intuitive or confusing? | | |
-| 7 | Output format — HTML memo vs JSON for their pipeline? | | |
-| 8 | Blocker that would stop them paying? | | |
+| 1 | Path used — CLI desk or hosted workspace? | | |
+| 2 | How long from paste/question to usable output? | | |
+| 3 | Any claim wrongly SOURCED? (paste claim_id / quote) | | |
+| 4 | Any refuse that they would have cleared manually? | | |
+| 5 | Was the UNSOURCED / refuse **reason** actionable? | | |
+| 6 | Did compounding work on run 2? (Parallel delta / corpus_hits) | | |
+| 7 | Subject tag / case naming — intuitive or confusing? | | |
+| 8 | Output format — HTML / JSON / CLI — fit for their pipeline? | | |
+| 9 | Blocker that would stop them paying or adopting? | | |
 
 ---
 
 ## What we measure from the session
 
-- `parallel_calls` run 1 vs run 2 (from JSON report)
+- `parallel_calls` run 1 vs run 2 (JSON report) when using local `/clear`
 - `corpus_hits` on run 2
-- Count of UNSOURCED by `cause` (especially `no_independent_source`, `search_found_no_admissible_source`)
+- Count of UNSOURCED by `cause`
 - Time-to-report (wall clock)
+- Hosted: whether `/health` showed `engine_default: adk` and `parallel: true` after Oscar deploy
 
 ---
 
 ## Oscar → partner email (draft)
 
-> Subject: 15-minute clearance desk trial  
+> Subject: 15-minute Agent Science trial  
 >  
-> We built a desk that returns every checkable claim as SOURCED (verbatim quote + URL) or UNSOURCED (named reason).  
+> We built a truth desk: every checkable claim comes back SOURCED (verbatim quote + URL) or UNSOURCED (named reason). Same layer powers agent research cases.  
 >  
-> **Try it:** [hosted URL] — paste one page of narration, pick a subject tag, clear. Paste a second page with the **same tag** and tell us if the Parallel call count drops.  
+> **Try it (no account):** clone https://github.com/Morkeeth/agent-science · `bash scripts/verify_cold_clone.sh` · paste one page into local `POST /clear` (README).  
+> **Or:** I can send a hosted workspace token for private cases.  
 >  
-> **Reply with:** anything wrongly sourced/unsourced, and whether the refusal reasons are usable in your workflow.  
+> **Reply with:** anything wrongly sourced/unsourced, and whether refusal reasons are usable.  
 >  
-> Constraint we won't break: if the document doesn't contain the exact passage, we refuse — no paraphrase.
+> Constraint we will not break: if the document does not contain the exact passage, we refuse — no paraphrase.
 
 ---
 

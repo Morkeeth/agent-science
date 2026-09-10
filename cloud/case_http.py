@@ -189,8 +189,13 @@ class WorkspaceHTTP:
         parsed = urlsplit(h.path)
         path = parsed.path.rstrip('/') or '/'
         if h.command == 'GET' and path == '/health':
-            return self.send(200, {'ok': True, 'service': 'agent-science', 'mode': 'private-workspaces',
-                                   'revision': os.getenv('K_REVISION', 'local')})
+            # Partner readiness must stay public — judges and verify_partners_hosted.sh
+            # read this without a workspace token. Secrets never appear here.
+            from cloud import partners as partner_surface
+            return self.send(200, partner_surface.health_payload(mode='private-workspaces'))
+        if h.command == 'GET' and path == '/partners':
+            from cloud import partners as partner_surface
+            return self.send(200, partner_surface.manifest())
         expected_origin = os.getenv('AGENT_SCIENCE_PUBLIC_ORIGIN', '').rstrip('/')
         if self.secure and h.command == 'GET' and not self.api and expected_origin:
             # Cloud Run has multiple aliases. Forms and session cookies must use

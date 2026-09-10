@@ -2,6 +2,10 @@
 
 Research a builder question, inspect the source evidence, and record a decision that can change when its evidence changes.
 
+**You get:** a gap report or research case where every checkable claim is SOURCED (exact passage + citation) or refused with a named cause — and a decision you can reopen when evidence changes.  
+**Proof:** verbatim quote occurrence in a saved source snapshot, or an explicit UNSOURCED / refuse reason — never a paraphrase.  
+**Constraint:** if the document does not contain the exact passage, refuse — never infer.
+
 Agent Science is a CLI/MCP research companion for coding work. Public-source discovery, versioned evidence, decisions and repo experiments work locally without a hosted account. The CLI and MCP interface keep the question, exact source quotations, source snapshots, actual search attempts, repo context and decision history together.
 
 ## Use it from your terminal

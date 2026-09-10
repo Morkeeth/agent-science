@@ -37,9 +37,25 @@ def t_parallel_entrypoint_wired_in_facts():
 def t_gcp_service_health_shape():
     svc = importlib.import_module("cloud.service")
     src = inspect.getsource(svc)
-    assert "engine_default" in src
-    assert "gemini_path" in src or "parallel" in src
+    assert "health_payload" in src
     assert "_run_clearance" in src
+    from cloud import partners
+    payload = partners.health_payload()
+    for field in ("ok", "gemini", "gemini_path", "parallel", "agent_builder", "engine_default"):
+        assert field in payload, f"health_payload missing {field}"
+
+
+def t_hosted_case_http_exposes_partner_health():
+    """Private-workspaces mode must not strip partner fields from /health."""
+    from cloud import case_http, partners
+    src = inspect.getsource(case_http.WorkspaceHTTP.route)
+    assert "health_payload" in src
+    assert "path == '/partners'" in src or 'path == "/partners"' in src
+    hosted = partners.health_payload(mode="private-workspaces")
+    assert hosted["mode"] == "private-workspaces"
+    assert hosted["engine_default"] in ("adk", "direct")
+    assert hosted["clear_path"] == "local-desk"
+    assert "parallel" in hosted
 
 
 def t_adk_default_engine_wired():

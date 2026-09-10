@@ -1,36 +1,40 @@
 # PARTNER INTEGRATIONS — Agent Science · Sep 9 path
 
-**Date:** 2026-08-30 · **Last verified:** 2026-09-03 · **Repo:** Morkeeth/agent-science · **Scope:** all four partners wired in code; deploy is Oscar's click.
+**Date:** 2026-08-30 · **Last verified:** 2026-09-10 · **Repo:** Morkeeth/agent-science · **Scope:** all four partners wired in code; deploy is Oscar's click.
 
 Each partner must be **called at runtime** on the default path — not documented only.
+
+**Hosted product boundary (2026-09):** Cloud Run serves **private workspaces**. Shared `/clear`, `/search`, `/ingest` are **local-only**. Public partner proof on hosted is `GET /health` + `GET /partners`. Parallel still runs on authenticated live research (`cloud/case_worker.py`). Finding when health lost partner fields: `docs/FINDING-hosted-partner-surfaces-2026-09-10.md`.
 
 ---
 
 ## Oscar deploy checklist (one pass)
 
 1. **Rotate keys** if any revision ever had plaintext env vars (`deploy.sh` note).
-2. **`bash deploy.sh`** — Oscar only; writes Secret Manager, IAM, Cloud Run revision.
-3. **Verify all four partners at runtime (one command):**
+2. **`bash deploy.sh`** — Oscar only; writes Secret Manager, IAM, Cloud Run candidate revision (no traffic until promote).
+3. **Verify partner readiness on hosted (one command):**
    ```bash
    bash scripts/verify_partners_hosted.sh
    ```
-   Expect: health OK · `engine_default: adk` · `/clear` stamps `engine: adk` with `parallel_calls ≥ 1` on fresh claim · compound-mini PASS · compound-fresh PASS (A_parallel≥1, B_hits≥1).
-4. **Compound with Parallel drop (video beat):**
+   Expect: health OK with partner fields · `engine_default: adk` · public `/partners` · hosted `/clear` **401/gated** (workspace boundary). Compound probes run only if `/clear` is open (local desk).
+4. **Local clear + Parallel (ADK engine stamp):**
    ```bash
-   python3 scripts/compound_fresh_hosted_probe.py
-   ```
-   Expect: Run A `parallel_calls ≥ 1` → Run B `parallel_calls ≤ A` with `corpus_hits ≥ 1`.
-5. **Or verify /health alone:**
-   ```bash
-   curl -s https://agent-science-568004190078.us-central1.run.app/health | python3 -m json.tool
-   ```
-   Expect: `"gemini_path": "vertex:hack-fleet"`, `"parallel": true`, `"engine_default": "adk"`.
-6. **Verify /clear** (JSON):
-   ```bash
-   curl -s -X POST https://agent-science-568004190078.us-central1.run.app/clear \
+   export PORT=8099 AGENT_BUILDER=1 GCP_PROJECT=hack-fleet
+   # PARALLEL_API_KEY from Secret Manager / ~/.config/keys/parallel.key
+   python3 cloud/service.py
+   curl -s -X POST localhost:8099/clear \
      -H 'Content-Type: application/json' \
      -d '{"script":"The Dust Bowl displaced 2.5 million people.","subject":"dust-bowl"}' \
      | python3 -c "import sys,json; d=json.load(sys.stdin); print('engine',d.get('engine')); print('parallel_calls',d.get('parallel_calls'))"
+   ```
+5. **Or verify /health alone (public, no token):**
+   ```bash
+   curl -s https://agent-science-568004190078.us-central1.run.app/health | python3 -m json.tool
+   ```
+   Expect after deploy: `"gemini": true`, `"parallel": true`, `"engine_default": "adk"`, and if `mode=private-workspaces` also `clear_path=local-desk`.
+6. **Judge manifest:**
+   ```bash
+   curl -s https://agent-science-568004190078.us-central1.run.app/partners | python3 -m json.tool | head -40
    ```
 
 ---
@@ -66,7 +70,7 @@ env -u GEMINI_API_KEY -u GOOGLE_API_KEY python3 agent_science.py fixtures/script
 | **SDK entrypoint** | `clearance/search.py` — `find_sources()` |
 | **SDK package** | `parallel-web==1.3.2` (`requirements.txt`, Docker image) — primary transport |
 | **Fallback** | Same REST endpoint via urllib if SDK import fails (cold clone without pip) |
-| **Called from** | `clearance/facts.py` → `agent_science.py` on every live `/clear` |
+| **Called from** | `clearance/facts.py` → live `/clear`; `clearance/cases.py` + `cloud/case_worker.py` on hosted live research |
 | **Env vars** | `PARALLEL_API_KEY` (injected from Secret Manager on Cloud Run) |
 | **Secret Manager name** | `parallel-api-key` (override: `PARALLEL_SECRET` in `deploy.sh`) |
 | **Local key path** | `~/.config/keys/parallel.key` (0600) |
@@ -109,6 +113,8 @@ curl -s -X POST https://api.parallel.ai/v1/search \
 
 ### `/health` spec
 
+Built by `cloud/partners.health_payload()` — same shape on local desk and hosted workspaces.
+
 ```json
 {
   "ok": true,
@@ -122,26 +128,34 @@ curl -s -X POST https://api.parallel.ai/v1/search \
   "last_parallel_search_id": "srch_…",
   "agent_builder": true,
   "adk_version": "2.7.1",
-  "engine_default": "adk"
+  "engine_default": "adk",
+  "mode": "private-workspaces",
+  "revision": "agent-science-…",
+  "clear_path": "local-desk",
+  "parallel_hosted_path": "workspace-live-research"
 }
 ```
 
 | Field | Meaning |
 |-------|---------|
-| `gemini_path` | `vertex:<project>`, `api-key`, or `none` |
-| `parallel` | `PARALLEL_API_KEY` present in env |
+| `gemini_path` | `vertex:<project\|adc>`, `api-key`, or `none` |
+| `parallel` | `PARALLEL_API_KEY` present in env (Secret Manager on Cloud Run) |
 | `agent_builder` | `google-adk` importable |
-| `engine_default` | What `POST /clear` will use: `adk` or `direct` |
+| `engine_default` | Default for **local** `POST /clear`: `adk` or `direct` |
+| `mode` | Present on hosted: `private-workspaces` |
+| `clear_path` | Hosted: `local-desk` (shared `/clear` not public) |
+| `parallel_hosted_path` | Hosted: `workspace-live-research` |
 
 ### Routes
 
-| Method | Path | Body | Response |
-|--------|------|------|----------|
-| GET | `/health` | — | JSON above |
-| GET | `/partners` | — | Track manifest — all four partners + checklist |
-| GET | `/` | — | Desk UI (HTML form → POST /clear) |
-| GET | `/corpus?subject=` | — | `{subject, remembered, total}` |
-| POST | `/clear` | `{"script","subject"}` | Gap report JSON; `engine` field stamped |
+| Method | Path | Where | Response |
+|--------|------|-------|----------|
+| GET | `/health` | local + hosted (public) | JSON above |
+| GET | `/partners` | local + hosted (public) | Track manifest — all four partners + checklist |
+| GET | `/` | local desk | Clearance UI → POST /clear |
+| GET | `/` · `/cases` | hosted | Login → private workspace |
+| POST | `/clear` | **local only** | Gap report JSON; `engine` stamped |
+| POST | `/api/cases` | hosted (auth) | Research case; Parallel when `live=true` |
 
 **Local desk:**
 ```bash

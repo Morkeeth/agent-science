@@ -59,6 +59,29 @@ class HostedFlow(unittest.TestCase):
         self.assertEqual(self.request('GET','/stats',token=None)[0],303)
         self.assertEqual(self.request('POST','/search',{},token=TOKEN_A)[0],404)
 
+    def test_anonymous_partner_health_and_manifest_are_public(self):
+        """Judges must see partner wiring without a workspace token.
+
+        Watched RED on 2026-09-10 against revision agent-science-00028-hed:
+        /health returned only ok/service/mode/revision — no gemini/parallel/adk.
+        """
+        code, _, health = self.request('GET', '/health', token=None)
+        self.assertEqual(code, 200)
+        self.assertEqual(health.get('mode'), 'private-workspaces')
+        self.assertTrue(health.get('ok'))
+        for field in ('gemini', 'gemini_path', 'parallel', 'parallel_sdk',
+                      'agent_builder', 'engine_default', 'clear_path',
+                      'parallel_hosted_path'):
+            self.assertIn(field, health, f'/health missing {field}')
+        self.assertEqual(health['clear_path'], 'local-desk')
+        self.assertEqual(health['parallel_hosted_path'], 'workspace-live-research')
+
+        code, _, partners = self.request('GET', '/partners', token=None)
+        self.assertEqual(code, 200)
+        self.assertIn('partners', partners)
+        self.assertTrue(partners['track_checklist']['public_partner_health'])
+        self.assertTrue(partners['track_checklist']['shared_clear_local_only'])
+
     def test_real_worker_create_idempotency_and_restart(self):
         code,_,result=self.create(); self.assertEqual(code,201,result)
         self.assertEqual(self.create()[0],200)

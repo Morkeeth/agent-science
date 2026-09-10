@@ -74,9 +74,13 @@ def t_partners_manifest_importable():
 
 def t_health_has_partners_route():
     svc = (ROOT / "cloud" / "service.py").read_text()
+    case_http = (ROOT / "cloud" / "case_http.py").read_text()
+    partners = (ROOT / "cloud" / "partners.py").read_text()
     assert 'path == "/partners"' in svc
-    assert "parallel_sdk" in svc
-
+    assert "path == '/partners'" in case_http or 'path == "/partners"' in case_http
+    assert "health_payload" in partners
+    assert "parallel_sdk" in partners
+    assert "engine_default" in partners
 
 def t_requirements_pins_parallel_web():
     req = (ROOT / "requirements.txt").read_text()
