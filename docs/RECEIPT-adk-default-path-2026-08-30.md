@@ -60,6 +60,16 @@ curl -s https://agent-science-568004190078.us-central1.run.app/health | python3 
 Fix in tree (`cloud/partners.health_payload` + `case_http`); live URL waits on Oscar `deploy.sh`.
 See `docs/FINDING-hosted-partner-surfaces-2026-09-10.md`.
 
+## Local SDK (re-measured 2026-09-10 after `pip install -r requirements.txt`)
+
+```bash
+python3 -c "from importlib.metadata import version; print(version('google-adk'))"
+# → 2.7.1
+python3 -c "from cloud.agent import adk_available, adk_version; print(adk_available(), adk_version())"
+# → True 2.7.1
+```
+
 ## What is NOT proved here
 
 - **Live ADK model call on this VM** — no Vertex ADC or Gemini key locally; tool path proved by Aug 23 receipt (`docs/RECEIPT-agent-builder.md`) and engine-selection tests above.
+- **Hosted `/health` engine_default on live revision** — stripped on `agent-science-00028-hed`; fix awaits Oscar deploy.
