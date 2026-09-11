@@ -329,6 +329,7 @@ bash scripts/prove_partners_local.sh                     # PROVE_PARTNERS_LOCAL 
 python3 tests/test_partner_runtime.py                    # 8/8
 python3 scripts/bench_check_docs.py                      # 129/129
 bash scripts/verify_partners_hosted.sh                   # RED until Oscar redeploy (expected)
+python3 scripts/check_hosted_partner_claims.py           # docs vs live — EXIT 0 when hedges honest
 python3 scripts/eval_refusal_baseline.py && python3 scripts/eval_refusal_ablation.py
 ```
 
@@ -568,6 +569,7 @@ bash scripts/verify_cold_clone.sh                                               
 |------|------|---------|---------|
 | 2026-09-11 night | Hosted partner proof dark | `curl …/health` · `verify_partners_hosted.sh` | Live health **stripped** · EXIT 1 · FINDING shipped |
 | 2026-09-11 night | Restore + local prove | `prove_partners_local.sh` · partner_runtime | **engine_default: adk** · 8/8 · 129/129 · clear stays 401 |
+| 2026-09-11 night | Docs-vs-live control | `check_hosted_partner_claims.py` | Watched RED on planted STATUS claim · GREEN when hedged |
 | 2026-09-11 night | Qwen eval re-run | `eval_refusal_baseline.py` · ablation | baseline/ablation **5/6** · shipping **6/6** · delta +1 |
 | 2026-09-03 night | Fresh compound + timeout finding | `compound_fresh_hosted_probe.py` · `verify_partners_hosted.sh` | **A≥1 Parallel → B drop** · orphan-works Run A **504** @ 300s |
 | 2026-09-03 night | SUBMISSION-PACK + Qwen gates | `bench_check_docs.py` · `eval_verify_holdout.py` · `eval_scorer_symmetry.py` | **127/127** · holdout OK · scorer 5/6 vs 6/6 · offline compound A=2→B=1 |
