@@ -54,6 +54,8 @@
 | Hosted /visibility/ui | `curl -sS -L …/visibility/ui?q=ralph+loop+agentic` | public entry · “local-only research route” |
 | Repo public MIT | `curl …/repos/Morkeeth/agent-science` | `private=false` · `license=MIT` |
 | Live keys | env + `~/.config/keys/*.key` | **absent** |
+| New-user trial | `bash scripts/new_user_trial.sh` | local OK · hosted anonymous **BLOCKED** · exit 0 |
+| Long run | `bash scripts/long_run_goal.sh` | **passed=12 failed=0** · receipt `docs/LONG-RUN-RECEIPT-2026-09-11.md` |
 
 ---
 

@@ -531,7 +531,7 @@ bash scripts/verify_cold_clone.sh                                               
 
 | When | What | Command | Outcome |
 |------|------|---------|---------|
-| 2026-09-11 night | Artifact claims + pack + compound exact-assertion | `eval_artifact_claims.py` · `compound_exhibit_receipt.py` · `bench_check_docs.py` | shipping **8/8** vs baseline **3/8** (+5) · offline A=2→B=1 · **128/128** · live compound **BLOCKED** · first compound re-run **RED** until fixtures matched exact assertions |
+| 2026-09-11 night | Artifact claims + pack + compound exact-assertion | `eval_artifact_claims.py` · `compound_exhibit_receipt.py` · `bench_check_docs.py` · `new_user_trial.sh` · `long_run_goal.sh` | shipping **8/8** vs baseline **3/8** (+5) · offline A=2→B=1 · **128/128** · live compound **BLOCKED** · first compound re-run **RED** until exact assertions · stranger scripts honest on private-workspaces · long run **12/12** |
 | 2026-09-03 night | Fresh compound + timeout finding | `compound_fresh_hosted_probe.py` · `verify_partners_hosted.sh` | **A≥1 Parallel → B drop** · orphan-works Run A **504** @ 300s |
 | 2026-09-03 night | SUBMISSION-PACK + Qwen gates | `bench_check_docs.py` · `eval_verify_holdout.py` · `eval_scorer_symmetry.py` | **127/127** · holdout OK · scorer 5/6 vs 6/6 · offline compound A=2→B=1 |
 | 2026-09-02 | Partner verify re-run | `verify_partners_hosted.sh` · `full_gate.sh` | **4/4 partners** · compound warm-shelf PASS · 72/72 auto-seed |
