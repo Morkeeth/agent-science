@@ -25,15 +25,12 @@ def t_health_reports_engine_default_adk_when_configured():
     try:
         os.environ["AGENT_BUILDER"] = "1"
         svc = _reload_service()
+        from cloud import partners
         with patch.object(svc.adk_agent, "adk_available", return_value=True):
             with patch.object(svc.adk_agent, "adk_version", return_value="2.7.1"):
-                # Mirror GET /health payload construction
-                adk_ok = svc.adk_agent.adk_available()
-                payload = {
-                    "engine_default": "adk" if (svc.ADK_DEFAULT and adk_ok) else "direct",
-                    "agent_builder": adk_ok,
-                    "adk_version": svc.adk_agent.adk_version(),
-                }
+                with patch.object(partners.adk_agent, "adk_available", return_value=True):
+                    with patch.object(partners.adk_agent, "adk_version", return_value="2.7.1"):
+                        payload = partners.health_payload()
         assert payload["engine_default"] == "adk", payload
         assert payload["agent_builder"] is True
         assert payload["adk_version"] == "2.7.1"

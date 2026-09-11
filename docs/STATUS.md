@@ -2,7 +2,7 @@
 doc: status
 project: Agent Science
 canonical: true
-last-updated: 2026-09-01T05:45:00Z
+last-updated: 2026-09-11T04:20:00Z
 deadline: 2026-09-09T14:00:00-07:00
 ---
 
@@ -64,11 +64,10 @@ deadline: 2026-09-09T14:00:00-07:00
 | | |
 |---|---|
 | **URL** | https://agent-science-568004190078.us-central1.run.app |
-| **Revision** | `agent-science-00018-n4s` · `parallel_sdk: true` · **`/truths/ui` live** |
-| **Health** | `engine_default: adk` · 265 claims · hit rate ~0.80 |
-| **New** | `GET /visibility/ui` — full websearch panel for judges (film this) |
-| **New** | `GET /truths/ui` — truths dashboard |
-| **Stats** | 265 claims · hit rate ~0.80 · queries logged growing |
+| **Revision** | `agent-science-00028-hed` · `mode: private-workspaces` |
+| **Health (live 2026-09-11)** | **STRIPPED** — only `ok/service/mode/revision` until Oscar redeploys partner-proof fix · FINDING-hosted-partner-proof-dark-2026-09-11 |
+| **Partners** | `/partners` → 303 login on 00028; fixed in tree (public again after deploy) |
+| **Local prove** | `bash scripts/prove_partners_local.sh` → `engine_default: adk` when google-adk present |
 
 **Compound (sealed):** `longrun-0831-1320` A=**1** → B=**0** Parallel · B `corpus_hits=1`
 

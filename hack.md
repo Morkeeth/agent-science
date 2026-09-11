@@ -2,7 +2,7 @@
 doc: hack
 project: Agent Science
 phase: SHIP
-last-touched: 2026-09-03 12:10 UTC
+last-touched: 2026-09-11 04:20 UTC
 canonical: true
 event: Agentic Cinema · Parallel track · deadline 2026-09-09 14:00 PDT
 supersedes: docs/PHASE0-LADDER.md ClickHouse-track note (runtime track is Parallel)
@@ -307,7 +307,45 @@ Full record: `fleet-ops (internal)/retros/QWEN-LOSS-RETRO-2026-08-30.md` (correc
 
 ---
 
-## 🎯 NOW — Partner night wave (fresh compound + timeout finding)
+## 🎯 NOW — Partner proof under private-workspaces (2026-09-11)
+
+**Slice:** Hosted `/health` partner fields went dark on private-workspaces; restore public admissibility proof; re-derive counts; honest BLOCKED for live clear/compound.
+
+### Build
+
+- [x] Watched RED at live object — `bash scripts/verify_partners_hosted.sh` EXIT 1 on rev `agent-science-00028-hed`
+- [x] Shared `cloud/partners.health_payload()` · public `/partners` before auth in `case_http.py`
+- [x] Local prove — `bash scripts/prove_partners_local.sh` → `engine_default: adk` with `google-adk==2.7.1`
+- [x] Partner doc + design-partner loop updated for private-workspaces boundary
+- [x] FINDING + RECEIPT + BLOCKED-live-compound
+- [x] SUBMISSION-PACK re-derived — partner_runtime **8/8** · total **129/129**
+- [x] Qwen eval re-run — baseline/ablation 5/6 vs shipping 6/6, delta +1
+
+### Verify (one command each)
+
+```bash
+python3 tests/test_watch_it_go_red.py                    # 72/72
+bash scripts/prove_partners_local.sh                     # PROVE_PARTNERS_LOCAL OK
+python3 tests/test_partner_runtime.py                    # 8/8
+python3 scripts/bench_check_docs.py                      # 129/129
+bash scripts/verify_partners_hosted.sh                   # RED until Oscar redeploy (expected)
+python3 scripts/eval_refusal_baseline.py && python3 scripts/eval_refusal_ablation.py
+```
+
+### Receipt
+
+- `docs/FINDING-hosted-partner-proof-dark-2026-09-11.md`
+- `docs/RECEIPT-partner-hosted-proof-2026-09-11.md`
+- `docs/BLOCKED-live-compound-2026-09-11.md`
+
+### BLOCKED
+
+- Live `/health` partner fields — **Oscar deploy** (outward)
+- Live `/clear` + compound — no workspace token · no Parallel/Gemini keys on this VM
+
+---
+
+## 🎯 NOW (prior) — Partner night wave (fresh compound + timeout finding)
 
 **Slice:** Harden partner verify to prove Parallel at runtime; ship fresh compound probe; document orphan-works 504 regression at object.
 
@@ -528,6 +566,9 @@ bash scripts/verify_cold_clone.sh                                               
 
 | When | What | Command | Outcome |
 |------|------|---------|---------|
+| 2026-09-11 night | Hosted partner proof dark | `curl …/health` · `verify_partners_hosted.sh` | Live health **stripped** · EXIT 1 · FINDING shipped |
+| 2026-09-11 night | Restore + local prove | `prove_partners_local.sh` · partner_runtime | **engine_default: adk** · 8/8 · 129/129 · clear stays 401 |
+| 2026-09-11 night | Qwen eval re-run | `eval_refusal_baseline.py` · ablation | baseline/ablation **5/6** · shipping **6/6** · delta +1 |
 | 2026-09-03 night | Fresh compound + timeout finding | `compound_fresh_hosted_probe.py` · `verify_partners_hosted.sh` | **A≥1 Parallel → B drop** · orphan-works Run A **504** @ 300s |
 | 2026-09-03 night | SUBMISSION-PACK + Qwen gates | `bench_check_docs.py` · `eval_verify_holdout.py` · `eval_scorer_symmetry.py` | **127/127** · holdout OK · scorer 5/6 vs 6/6 · offline compound A=2→B=1 |
 | 2026-09-02 | Partner verify re-run | `verify_partners_hosted.sh` · `full_gate.sh` | **4/4 partners** · compound warm-shelf PASS · 72/72 auto-seed |

@@ -37,9 +37,13 @@ def t_parallel_entrypoint_wired_in_facts():
 def t_gcp_service_health_shape():
     svc = importlib.import_module("cloud.service")
     src = inspect.getsource(svc)
-    assert "engine_default" in src
-    assert "gemini_path" in src or "parallel" in src
+    assert "health_payload" in src
     assert "_run_clearance" in src
+    from cloud import partners
+    payload = partners.health_payload()
+    assert "engine_default" in payload
+    assert "gemini_path" in payload
+    assert "parallel" in payload
 
 
 def t_adk_default_engine_wired():
@@ -128,6 +132,27 @@ def t_requirements_pins_parallel_web():
     req = (ROOT / "requirements.txt").read_text()
     assert "parallel-web==" in req
     assert "google-adk==" in req
+
+
+def t_hosted_health_payload_carries_partner_fields():
+    """Private-workspaces /health must still name all four partners.
+
+    Control watched RED on live rev agent-science-00028-hed (2026-09-11): health
+    returned only ok/service/mode/revision. Shared health_payload closes that gap.
+    """
+    from cloud import partners
+    payload = partners.health_payload(mode="private-workspaces", revision="test")
+    for key in (
+        "ok", "service", "gemini", "gemini_path", "parallel", "parallel_sdk",
+        "agent_builder", "engine_default", "mode", "revision",
+    ):
+        assert key in payload, f"missing {key}"
+    assert payload["mode"] == "private-workspaces"
+    assert payload["engine_default"] in ("adk", "direct")
+    # case_http must call the shared builder, not a stripped stub
+    src = (ROOT / "cloud" / "case_http.py").read_text()
+    assert "health_payload" in src
+    assert "public_manifest" in src
 
 
 if __name__ == "__main__":

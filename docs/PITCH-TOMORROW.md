@@ -48,7 +48,7 @@
 |---------|----------|
 | Truth layer code on `main` | `clearance/visibility.py`, `contrary.py`, `stack_fit.py` |
 | **276 claims** on shelf (live 2026-09-02) | hosted `/truths/ui` · `curl -s …/truths/ui` → Shelf line **276** · hit rate 0.66 |
-| **Deployed** | `GET /health` → `engine_default: adk`, `parallel_sdk: true` |
+| **Deployed** | Live URL up · `/health` on rev 00028 is **stripped** until Oscar redeploys partner-proof fix · local `prove_partners_local.sh` → `engine_default: adk` |
 | `/truths/ui` live | `curl …/truths/ui` → dashboard HTML |
 | 52 inbox ingests | `python3 scripts/auto_ingest_inbox.py` → receipt `docs/RECEIPT-agent-science-shape-2026-09-01.md` |
 | Film scout | `docs/FILM-SCOUT-COMMANDS.md` |
@@ -122,7 +122,7 @@ open https://agent-science-568004190078.us-central1.run.app/truths/ui
 | Claim | Proof | Status |
 |-------|-------|--------|
 | Run A **1** → B **0** Parallel, `corpus_hits=1` | `docs/SEALED-PREDICTION-2026-08-31.md` (cold subject); warm shelf may show A=0 | ✅ sealed |
-| Four partners at runtime | `GET /health` → adk, parallel_sdk, gemini, vertex | ✅ live |
+| Four partners at runtime | Local prove + code path · live `/health` RED on 00028 | ⚠️ deploy |
 | `/visibility/ui` CONTRARY + transparency keys | https://agent-science-568004190078.us-central1.run.app/visibility/ui?q=ralph+loop+agentic | ✅ live |
 | **276** claims on shelf | `curl -s …/truths/ui` → `Shelf: 276 claims` (2026-09-02 ~23:40Z) | ✅ live |
 | 52 inbox ingests | `docs/RECEIPT-agent-science-shape-2026-09-01.md` | ✅ receipt |

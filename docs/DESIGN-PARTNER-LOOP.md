@@ -1,22 +1,51 @@
 # DESIGN PARTNER LOOP — friction template · slice 6 prep
 
-**Audience:** Oscar sends to one real clearance lead before Sep 9.  
-**Goal:** one production runs their script through the desk; friction list lands in `CURSOR-LOG.md`.
+**Audience:** Oscar sends to one real clearance / licensing lead.  
+**Goal:** one production runs a script through the stack; friction list lands in `CURSOR-LOG.md`.  
+**Updated:** 2026-09-11 — hosted desk is private-workspaces; public anonymous `/clear` is gone.
+
+---
+
+## Two paths (pick one for the partner)
+
+### A · Local / CLI (preferred for builders — no hosted account)
+
+```bash
+git clone https://github.com/Morkeeth/agent-science.git && cd agent-science
+python3 scripts/boot_registry.py
+python3 -m clearance lookup "Directive 2012/28/EU"
+# script clearance on local desk (keys optional for fixture path):
+python3 scripts/seed_document_cache.py
+python3 agent_science.py fixtures/scripts/split-sentence.txt
+```
+
+Or MCP: `bash scripts/install-mcp.sh` → tool `science_lookup` / `science_clear`.
+
+### B · Hosted workspace (Oscar issues a bearer / login key)
+
+1. Open https://agent-science-568004190078.us-central1.run.app/login
+2. Paste the access key Oscar sent (never put the key in a URL).
+3. Create a research case for their clearance question — **not** the old public paste desk.
+4. Public partner proof (no key): `GET /health` and `GET /partners` after Oscar redeploys the 2026-09-11 fix.
+
+**Do not** email partners the old `POST /clear` curl against the hosted URL — it redirects to login (measured 2026-09-11).
 
 ---
 
 ## Script upload flow (what the partner does)
 
-1. Open hosted desk: `https://agent-science-568004190078.us-central1.run.app/` (after Oscar deploy).
-2. Set **subject shelf** — a tag their team reuses across episodes (e.g. `season-2-ep3`).
-3. Paste **documentary narration** (plain text, not PDF).
-4. Click **Clear script** → gap report HTML or JSON via API:
-   ```bash
-   curl -s -X POST https://agent-science-568004190078.us-central1.run.app/clear \
-     -H 'Content-Type: application/json' \
-     -d '{"script":"<paste>","subject":"<their-tag>"}'
-   ```
-5. **Second script** on same subject — partner should see `corpus_hits ≥ 1` and fewer Parallel calls (compounding).
+1. Choose path A or B above.
+2. Set a **subject shelf** / case label their team reuses (e.g. `season-2-ep3`).
+3. Paste **documentary narration** (plain text).
+4. Run clearance → gap report: every claim SOURCED (verbatim + URL) or UNSOURCED (named cause).
+5. **Second script** on the same shelf — watch for corpus reuse / fewer live search calls.
+
+Local JSON shape (local desk):
+```bash
+curl -s -X POST http://127.0.0.1:8099/clear \
+  -H 'Content-Type: application/json' \
+  -d '{"script":"<paste>","subject":"<their-tag>"}'
+```
 
 ---
 
@@ -28,29 +57,33 @@
 | 2 | Any claim wrongly SOURCED? (paste claim_id) | | |
 | 3 | Any claim wrongly UNSOURCED that they would clear manually? | | |
 | 4 | Was the **reason** on UNSOURCED actionable? | | |
-| 5 | Did compounding work on script 2? (Parallel delta) | | |
-| 6 | Subject tag — intuitive or confusing? | | |
+| 5 | Did compounding work on script 2? (search / Parallel delta) | | |
+| 6 | Subject/case label — intuitive or confusing? | | |
 | 7 | Output format — HTML memo vs JSON for their pipeline? | | |
-| 8 | Blocker that would stop them paying? | | |
+| 8 | Login / key friction on hosted (if used)? | | |
+| 9 | Blocker that would stop them paying? | | |
 
 ---
 
 ## What we measure from the session
 
-- `parallel_calls` run 1 vs run 2 (from JSON report)
+- Live search / `parallel_calls` run 1 vs run 2 (from JSON report)
 - `corpus_hits` on run 2
-- Count of UNSOURCED by `cause` (especially `no_independent_source`, `search_found_no_admissible_source`)
+- Count of UNSOURCED by `cause`
 - Time-to-report (wall clock)
+- Whether they needed a hosted account (path B) or stayed local (path A)
 
 ---
 
 ## Oscar → partner email (draft)
 
-> Subject: 15-minute clearance desk trial  
+> Subject: 15-minute clearance / truth-layer trial  
 >  
-> We built a desk that returns every checkable claim as SOURCED (verbatim quote + URL) or UNSOURCED (named reason).  
+> We built a stack that returns every checkable claim as SOURCED (verbatim quote + URL) or UNSOURCED (named reason).  
 >  
-> **Try it:** [hosted URL] — paste one page of narration, pick a subject tag, clear. Paste a second page with the **same tag** and tell us if the Parallel call count drops.  
+> **Try it locally (no account):** clone https://github.com/Morkeeth/agent-science and run the stranger block in the README / SUBMISSION-PACK — or paste one page into a local desk.  
+>  
+> **Hosted (if I sent you a key):** sign in at the hosted URL I gave you, open Cases, and work one question. Public `/health` shows partner wiring without logging in.  
 >  
 > **Reply with:** anything wrongly sourced/unsourced, and whether the refusal reasons are usable in your workflow.  
 >  

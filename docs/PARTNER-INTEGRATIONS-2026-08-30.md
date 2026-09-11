@@ -1,8 +1,10 @@
 # PARTNER INTEGRATIONS — Agent Science · Sep 9 path
 
-**Date:** 2026-08-30 · **Last verified:** 2026-09-03 · **Repo:** Morkeeth/agent-science · **Scope:** all four partners wired in code; deploy is Oscar's click.
+**Date:** 2026-08-30 · **Last verified:** 2026-09-11 · **Repo:** Morkeeth/agent-science · **Scope:** all four partners wired in code; deploy is Oscar's click.
 
 Each partner must be **called at runtime** on the default path — not documented only.
+
+**2026-09-11 finding:** live Cloud Run rev `agent-science-00028-hed` served a stripped `/health` under `private-workspaces` (no `engine_default` / partner fields) and redirected `/partners` to login. That made STATUS and old receipts read green while `bash scripts/verify_partners_hosted.sh` went **RED**. Fix is in tree (`cloud/partners.health_payload` + public `/partners`); **Oscar must redeploy** for live to heal. See `docs/FINDING-hosted-partner-proof-dark-2026-09-11.md`.
 
 ---
 
@@ -10,28 +12,47 @@ Each partner must be **called at runtime** on the default path — not documente
 
 1. **Rotate keys** if any revision ever had plaintext env vars (`deploy.sh` note).
 2. **`bash deploy.sh`** — Oscar only; writes Secret Manager, IAM, Cloud Run revision.
-3. **Verify all four partners at runtime (one command):**
+3. **Verify public partner surfaces (one command):**
    ```bash
    bash scripts/verify_partners_hosted.sh
    ```
-   Expect: health OK · `engine_default: adk` · `/clear` stamps `engine: adk` with `parallel_calls ≥ 1` on fresh claim · compound-mini PASS · compound-fresh PASS (A_parallel≥1, B_hits≥1).
-4. **Compound with Parallel drop (video beat):**
+   Expect after this branch is deployed: `/health` carries `gemini`, `parallel`, `agent_builder`, `engine_default` · `/partners` JSON (not login HTML).
+   Under `mode: private-workspaces` without `AGENT_SCIENCE_WORKSPACE_TOKEN`, steps 3–5 (`/clear` + compound) report **BLOCKED** honestly — not false-green.
+4. **Prove clear+Parallel with a workspace bearer (optional, Oscar):**
    ```bash
-   python3 scripts/compound_fresh_hosted_probe.py
+   AGENT_SCIENCE_WORKSPACE_TOKEN=<bearer> bash scripts/verify_partners_hosted.sh
    ```
-   Expect: Run A `parallel_calls ≥ 1` → Run B `parallel_calls ≤ A` with `corpus_hits ≥ 1`.
-5. **Or verify /health alone:**
+5. **Local proof without deploy:**
+   ```bash
+   bash scripts/prove_partners_local.sh
+   ```
+   Expect: hosted-mode `/health` partner fields · `/partners` OK · anonymous `/clear` stays 401 · `engine_default: adk` when `google-adk` importable.
+6. **Or verify /health alone (after deploy):**
    ```bash
    curl -s https://agent-science-568004190078.us-central1.run.app/health | python3 -m json.tool
    ```
-   Expect: `"gemini_path": "vertex:hack-fleet"`, `"parallel": true`, `"engine_default": "adk"`.
-6. **Verify /clear** (JSON):
+   Expect: `"mode": "private-workspaces"` **and** `"engine_default": "adk"` (or `direct` with `agent_builder: false` named), `"gemini_path": "vertex:…"`, `"parallel": true`.
+7. **Local desk `/clear` (not hosted):**
    ```bash
-   curl -s -X POST https://agent-science-568004190078.us-central1.run.app/clear \
+   # non-hosted local service — see Local desk below
+   curl -s -X POST http://127.0.0.1:8099/clear \
      -H 'Content-Type: application/json' \
      -d '{"script":"The Dust Bowl displaced 2.5 million people.","subject":"dust-bowl"}' \
      | python3 -c "import sys,json; d=json.load(sys.stdin); print('engine',d.get('engine')); print('parallel_calls',d.get('parallel_calls'))"
    ```
+
+---
+
+## Hosted boundary (private-workspaces)
+
+| Surface | Public? | Notes |
+|---------|---------|-------|
+| `GET /health` | **Yes** | Full partner admissibility fields (must not be a liveness stub) |
+| `GET /partners` | **Yes** | Track checklist for judges |
+| `POST /clear`, `/search`, `/ingest`, `/registry` | **No** | Local-only or workspace auth — AGENTS.md |
+| `/cases`, `/api/cases` | Auth | Workspace bearer / session |
+
+Do not claim hosted anonymous `/clear` compound after private-workspaces. Offline compound + local prove remain authoritative until a tokenized hosted clear is measured.
 
 ---
 
@@ -109,10 +130,14 @@ curl -s -X POST https://api.parallel.ai/v1/search \
 
 ### `/health` spec
 
+Public under private-workspaces. Builder: `cloud/partners.health_payload()`.
+
 ```json
 {
   "ok": true,
   "service": "agent-science",
+  "mode": "private-workspaces",
+  "revision": "agent-science-…",
   "gemini": true,
   "gemini_path": "vertex:hack-fleet",
   "parallel": true,
@@ -128,26 +153,30 @@ curl -s -X POST https://api.parallel.ai/v1/search \
 
 | Field | Meaning |
 |-------|---------|
+| `mode` | `private-workspaces` on Cloud Run hosted path |
 | `gemini_path` | `vertex:<project>`, `api-key`, or `none` |
 | `parallel` | `PARALLEL_API_KEY` present in env |
 | `agent_builder` | `google-adk` importable |
-| `engine_default` | What `POST /clear` will use: `adk` or `direct` |
+| `engine_default` | What `/clear` will use when that route is available: `adk` or `direct` |
 
 ### Routes
 
-| Method | Path | Body | Response |
+| Method | Path | Auth | Response |
 |--------|------|------|----------|
-| GET | `/health` | — | JSON above |
-| GET | `/partners` | — | Track manifest — all four partners + checklist |
-| GET | `/` | — | Desk UI (HTML form → POST /clear) |
-| GET | `/corpus?subject=` | — | `{subject, remembered, total}` |
-| POST | `/clear` | `{"script","subject"}` | Gap report JSON; `engine` field stamped |
+| GET | `/health` | public | JSON above |
+| GET | `/partners` | public | Track manifest — all four partners + checklist |
+| GET | `/` | login → `/cases` | Private workspace UI |
+| POST | `/clear` | **local desk only** (hosted: gated) | Gap report JSON; `engine` field stamped |
+| GET | `/corpus?subject=` | local desk | `{subject, remembered, total}` |
+| GET/POST | `/cases`, `/api/cases` | workspace bearer | Private research |
 
 **Local desk:**
 ```bash
 export PORT=8099 AGENT_BUILDER=1 GCP_PROJECT=hack-fleet
+# do NOT set AGENT_SCIENCE_HOSTED / K_SERVICE for the clearance desk
 python3 cloud/service.py
 curl -s localhost:8099/health
+bash scripts/prove_partners_local.sh   # private-workspaces shape without deploy
 ```
 
 ---
@@ -178,8 +207,9 @@ curl -s localhost:8099/health
 ```bash
 git clone https://github.com/Morkeeth/agent-science.git && cd agent-science
 bash scripts/verify_cold_clone.sh
+bash scripts/prove_partners_local.sh
 ```
 
-Receipts: `docs/RECEIPT-hosted-partner-runtime-2026-08-30.md`, `docs/RECEIPT-live-compound-exhibit-2026-08-30.md`.
+Receipts: `docs/RECEIPT-partner-hosted-proof-2026-09-11.md`, `docs/FINDING-hosted-partner-proof-dark-2026-09-11.md`.
 
-Live `/clear` requires Oscar deploy + keys. Offline controls prove partner **code paths** exist and are tested.
+Hosted `/clear` requires Oscar deploy + workspace token. Offline controls prove partner **code paths** and local private-workspaces health shape.

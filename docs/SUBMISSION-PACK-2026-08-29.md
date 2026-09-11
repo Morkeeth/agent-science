@@ -11,6 +11,7 @@
 ```bash
 git clone https://github.com/Morkeeth/agent-science.git && cd agent-science
 bash scripts/verify_cold_clone.sh
+bash scripts/prove_partners_local.sh
 python3 tests/test_registry_surface.py -q
 python3 scripts/compound_exhibit_receipt.py
 bash scripts/demo_truth_layer.sh
@@ -30,10 +31,10 @@ Offline compound receipt writes `docs/COMPOUND-EXHIBIT-2026-08-29.md` with A=2�
 | Public repo | Stranger can clone | [ ] | Private until submit — flip visibility on GitHub |
 | OSI licence | Open-source approved | [x] | `LICENSE` (MIT) |
 | Sealed prediction | Pre-registered, falsifiable | [x] | `docs/SEALED-PREDICTION-2026-08-31.md` — hosted A=1→B=0, corpus_hits=1 |
-| Partner integrations | All four called at runtime | [x] docs | `docs/PARTNER-INTEGRATIONS-2026-08-30.md` |
-| ADK default path | `engine_default: adk` | [x] local / [x] hosted | `docs/RECEIPT-adk-default-path-2026-08-30.md` |
+| Partner integrations | All four called at runtime | [x] code · [ ] live health until Oscar redeploy | `docs/PARTNER-INTEGRATIONS-2026-08-30.md` · FINDING 2026-09-11 |
+| ADK default path | `engine_default: adk` | [x] local · [ ] hosted health stripped on 00028 | `docs/RECEIPT-partner-hosted-proof-2026-09-11.md` |
 
-**Controls re-measured 2026-09-03** (run each at object):
+**Controls re-measured 2026-09-11** (run each at object):
 
 | Suite | Command | Result |
 |-------|---------|--------|
@@ -46,12 +47,14 @@ Offline compound receipt writes `docs/COMPOUND-EXHIBIT-2026-08-29.md` with A=2�
 | search_path | `python3 tests/test_search_path.py` | **5/5** |
 | source_map | `python3 tests/test_source_map.py` | **3/3** |
 | refusal_correctness | `python3 tests/test_refusal_correctness.py` | **6/6** |
-| partner_runtime | `python3 tests/test_partner_runtime.py` | **7/7** |
+| partner_runtime | `python3 tests/test_partner_runtime.py` | **8/8** |
 | parallel_integration | `python3 tests/test_parallel_integration.py` | **6/6** |
-| **Total** | 11 suites | **128/128** |
-| docs gate | `python3 scripts/bench_check_docs.py` | **128/128 match** |
+| **Total** | 11 suites | **129/129** |
+| docs gate | `python3 scripts/bench_check_docs.py` | **129/129 match** |
 | holdout freeze | `python3 scripts/eval_verify_holdout.py` | **4 files pinned** |
 | scorer symmetry | `python3 scripts/eval_scorer_symmetry.py` | baseline **5/6** vs shipping **6/6** on delivered labels |
+| partner local prove | `bash scripts/prove_partners_local.sh` | **PROVE_PARTNERS_LOCAL OK** · `engine_default: adk` |
+| hosted partner verify | `bash scripts/verify_partners_hosted.sh` | **RED** on rev 00028 — FINDING 2026-09-11 |
 
 **Compound exhibit (offline, 2026-09-03):** `python3 scripts/compound_exhibit_receipt.py` · A=**2**→B=**1** Parallel · B corpus hits=**2** — `docs/COMPOUND-EXHIBIT-2026-08-29.md`. Live hosted (2026-08-31): `long_run_goal.sh` · A=**1**→B=**0** · sealed `docs/SEALED-PREDICTION-2026-08-31.md`. Orphan-works full script: run B **504** — do not claim on video.
 

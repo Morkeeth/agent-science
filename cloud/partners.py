@@ -8,6 +8,72 @@ from clearance import search as parallel_search
 from cloud import agent as adk_agent
 
 
+def adk_is_default() -> bool:
+    """Same rule as cloud.service.ADK_DEFAULT — Agent Builder on unless explicitly off."""
+    return os.environ.get("AGENT_BUILDER", "1").strip().lower() not in (
+        "0", "false", "off", "no",
+    )
+
+
+def resolve_gemini_path() -> str:
+    """Label how Gemini is wired — never returns key material."""
+    if os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY"):
+        return "api-key"
+    proj = (
+        os.environ.get("GCP_PROJECT")
+        or os.environ.get("GOOGLE_CLOUD_PROJECT")
+        or (os.environ.get("K_SERVICE") and "adc")
+    )
+    if proj:
+        return f"vertex:{proj}"
+    try:
+        from clearance import gemini as _g
+        p = _g.vertex_project()
+        if p and _g.vertex_token():
+            return f"vertex:{p}"
+    except Exception:
+        pass
+    return "none"
+
+
+def health_payload(*, mode: str | None = None, revision: str | None = None) -> dict:
+    """Public partner admissibility surface for GET /health.
+
+    Private workspaces may hide /clear and /search. They must not hide whether
+    Gemini, Parallel, Cloud Run, and ADK are wired — that is the track proof.
+    """
+    gemini_path = resolve_gemini_path()
+    adk_ok = adk_agent.adk_available()
+    adk_default = adk_is_default() and adk_ok
+    payload = {
+        "ok": True,
+        "service": "agent-science",
+        "gemini": gemini_path != "none",
+        "gemini_path": gemini_path,
+        "parallel": bool(os.environ.get("PARALLEL_API_KEY")),
+        "parallel_sdk": parallel_search.sdk_available(),
+        "parallel_sdk_version": parallel_search.sdk_version(),
+        "parallel_transport": parallel_search.integration_info()["transport"],
+        "last_parallel_search_id": parallel_search.last_search_id(),
+        "agent_builder": adk_ok,
+        "adk_version": adk_agent.adk_version(),
+        "engine_default": "adk" if adk_default else "direct",
+    }
+    if mode is not None:
+        payload["mode"] = mode
+    if revision is not None:
+        payload["revision"] = revision
+    return payload
+
+
+def public_manifest() -> dict:
+    gemini_path = resolve_gemini_path()
+    return manifest(
+        gemini_path=gemini_path,
+        adk_default=adk_is_default() and adk_agent.adk_available(),
+    )
+
+
 def manifest(*, gemini_path: str, adk_default: bool) -> dict:
     root = Path(__file__).resolve().parents[1]
     return {
@@ -56,6 +122,7 @@ def manifest(*, gemini_path: str, adk_default: bool) -> dict:
             "docs/PARTNER-INTEGRATIONS-2026-08-30.md",
             "docs/PARTNER-INTEGRATION-RESEARCH-2026-08-31.md",
             "docs/RECEIPT-adk-default-path-2026-08-30.md",
+            "docs/FINDING-hosted-partner-proof-dark-2026-09-11.md",
         ],
         "repo_root": str(root),
     }

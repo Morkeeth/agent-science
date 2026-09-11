@@ -1,53 +1,38 @@
 # RECEIPT — ADK on default path · 2026-08-30
 
-**Status:** proved locally and on hosted URL (2026-08-30 re-check).
+**Status:** proved locally 2026-09-11 (`engine_default: adk` with real `google-adk==2.7.1` import).  
+**Hosted:** 2026-08-30 green · **2026-09-11 RED** — private-workspaces stripped `/health` (FINDING); fix in tree awaiting Oscar deploy.
 
 ## What was verified
 
 | Check | Command | Result |
 |-------|---------|--------|
 | Engine selection controls | `python3 tests/test_adk_default_path.py` | **5/5 passed** |
-| ADK importable in image dep | `python3 -c "from importlib.metadata import version; print(version('google-adk'))"` | **2.7.1** |
-| `/health` engine_default logic | same test suite mocks `adk_available()` | `"engine_default": "adk"` when `AGENT_BUILDER=1` |
+| ADK importable | `python3 -c "from cloud import agent as a; print(a.adk_available(), a.adk_version())"` | **True 2.7.1** (2026-09-11) |
+| Shared health payload | `bash scripts/prove_partners_local.sh` | **`engine_default: adk`** · `agent_builder: true` |
 | Fallback stamps error | `t_run_clearance_falls_back_to_direct_and_stamps_error` | `engine: direct`, `adk_error` present |
 
-## Local /health shape (this VM, no ADC)
+## Local prove (2026-09-11)
 
 ```bash
-python3 - <<'PY'
-import os, json
-from unittest.mock import patch
-os.environ["AGENT_BUILDER"] = "1"
-os.environ["GCP_PROJECT"] = "hack-fleet"
-import importlib
-from cloud import service as svc
-importlib.reload(svc)
-with patch.object(svc.adk_agent, "adk_available", return_value=True):
-    with patch.object(svc.adk_agent, "adk_version", return_value="2.7.1"):
-        adk_ok = svc.adk_agent.adk_available()
-        print(json.dumps({
-            "ok": True,
-            "service": "agent-science",
-            "agent_builder": adk_ok,
-            "adk_version": svc.adk_agent.adk_version(),
-            "engine_default": "adk" if (svc.ADK_DEFAULT and adk_ok) else "direct",
-        }, indent=2))
-PY
+bash scripts/prove_partners_local.sh
 ```
-
-Output on this run:
 
 ```json
 {
-  "ok": true,
-  "service": "agent-science",
+  "gemini": true,
+  "parallel": true,
+  "parallel_sdk": false,
   "agent_builder": true,
+  "engine_default": "adk",
+  "gemini_path": "vertex:hack-fleet",
+  "mode": "private-workspaces",
   "adk_version": "2.7.1",
-  "engine_default": "adk"
+  "revision": "local"
 }
 ```
 
-## Hosted /health (measured 2026-08-30)
+## Hosted /health (measured 2026-09-11 — still broken until deploy)
 
 ```bash
 curl -s https://agent-science-568004190078.us-central1.run.app/health | python3 -m json.tool
@@ -57,15 +42,14 @@ curl -s https://agent-science-568004190078.us-central1.run.app/health | python3 
 {
   "ok": true,
   "service": "agent-science",
-  "gemini": true,
-  "gemini_path": "vertex:hack-fleet",
-  "parallel": true,
-  "agent_builder": true,
-  "adk_version": "2.7.1",
-  "engine_default": "adk"
+  "mode": "private-workspaces",
+  "revision": "agent-science-00028-hed"
 }
 ```
 
+Partner fields absent — see `docs/FINDING-hosted-partner-proof-dark-2026-09-11.md`.
+
 ## What is NOT proved here
 
-- **Live ADK model call on this VM** — no Vertex ADC or Gemini key locally; tool path proved by Aug 23 receipt (`docs/RECEIPT-agent-builder.md`) and engine-selection tests above.
+- **Live ADK model call on hosted `/clear`** — route gated; no workspace token on this VM.
+- **Live health after fix** — requires Oscar `deploy.sh`.

@@ -59,6 +59,26 @@ class HostedFlow(unittest.TestCase):
         self.assertEqual(self.request('GET','/stats',token=None)[0],303)
         self.assertEqual(self.request('POST','/search',{},token=TOKEN_A)[0],404)
 
+    def test_anonymous_partner_surfaces_stay_public(self):
+        """Private workspaces hide /clear — not partner admissibility proof.
+
+        Watched RED 2026-09-11 against revision 00028 (health lacked gemini/parallel/
+        engine_default). Fix: shared health_payload + public /partners.
+        """
+        code, _, health = self.request('GET', '/health', token=None)
+        self.assertEqual(code, 200, health)
+        for key in ('gemini', 'parallel', 'parallel_sdk', 'agent_builder', 'engine_default', 'gemini_path', 'mode'):
+            self.assertIn(key, health, f'/health missing {key}: {health}')
+        self.assertEqual(health['mode'], 'private-workspaces')
+        self.assertIn(health['engine_default'], ('adk', 'direct'))
+
+        code, _, partners = self.request('GET', '/partners', token=None)
+        self.assertEqual(code, 200, partners)
+        checklist = partners.get('track_checklist') or {}
+        for key in ('parallel_search_at_runtime', 'gemini_at_runtime', 'adk_agent_builder', 'hosted_url_required'):
+            self.assertIn(key, checklist, partners)
+        self.assertEqual(partners.get('track'), 'Parallel')
+
     def test_real_worker_create_idempotency_and_restart(self):
         code,_,result=self.create(); self.assertEqual(code,201,result)
         self.assertEqual(self.create()[0],200)
