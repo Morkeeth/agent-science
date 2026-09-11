@@ -15,10 +15,24 @@ grep -q "CONTRARY" "$FILM_DIR/voiceover.txt" || red "missing CONTRARY in spine"
 grep -q "$PARALLEL_A" "$FILM_DIR/voiceover.txt" || red "missing parallel A"
 grep -q "$PARALLEL_B" "$FILM_DIR/voiceover.txt" || red "missing parallel B"
 
-ok "hosted /health"
+ok "hosted /health (partner fields — public)"
 HEALTH="$(curl -sS --max-time 20 "$HOSTED_URL/health" || true)"
-echo "$HEALTH" | python3 -c "import json,sys; d=json.load(sys.stdin); assert d.get('ok') and d.get('engine_default')=='adk'" \
-  || red "/health bad"
+echo "$HEALTH" | python3 -c "
+import json,sys
+d=json.load(sys.stdin)
+assert d.get('ok'), d
+missing=[f for f in ('engine_default','parallel','gemini','agent_builder') if f not in d]
+if missing:
+    raise SystemExit('stripped partner fields '+str(missing)+' — Oscar deploy docs/FINDING-hosted-partner-health-regression-2026-09-11.md')
+assert d.get('engine_default')=='adk', d.get('engine_default')
+" || red "/health bad (need partner fields + engine_default=adk after deploy)"
+
+ok "hosted /partners (public, no auth)"
+curl -sf --max-time 20 "$HOSTED_URL/partners" | python3 -c "
+import json,sys
+d=json.load(sys.stdin)
+assert (d.get('track_checklist') or {}).get('parallel_search_at_runtime') is True, d
+" || red "/partners not public JSON"
 
 ok "hosted /visibility/ui"
 curl -sf --max-time 20 "$VISIBILITY_URL" | grep -q Transparency || red "visibility UI missing Transparency pane"

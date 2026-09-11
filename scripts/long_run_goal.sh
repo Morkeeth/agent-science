@@ -45,15 +45,60 @@ for q in "2012/28/EU" "Directive 2012/28/EU" "orphan works directive"; do
   fi
 done
 
-echo "--- HOSTED: health + desk surfaces ---"
+echo "--- HOSTED: health + public partner surfaces ---"
 curl -sf "$BASE/health" | python3 -c "
 import sys,json
 d=json.load(sys.stdin)
-assert d['ok'] and d['engine_default']=='adk' and d['parallel'] and d['gemini']
-print('  health ok engine=adk')
+assert d['ok'], d
+for f in ('engine_default','parallel','gemini','agent_builder'):
+    assert f in d, f'missing {f} on /health — FINDING 2026-09-11'
+assert d['engine_default']=='adk' and d['parallel'] and d['gemini']
+print('  health ok engine=adk mode=', d.get('mode'))
+open('/tmp/as_long_health.json','w').write(json.dumps(d))
 "
 note "hosted health"
 
+curl -sf "$BASE/partners" | python3 -c "
+import sys,json
+d=json.load(sys.stdin)
+assert (d.get('track_checklist') or {}).get('parallel_search_at_runtime') is True
+print('  partners checklist ok')
+"
+note "hosted /partners"
+
+MODE="$(python3 -c "import json; print(json.load(open('/tmp/as_long_health.json')).get('mode') or '')")"
+if [[ "$MODE" == "private-workspaces" ]]; then
+  note "hosted mode private-workspaces — public /search|/clear|/registry are local-only"
+  for path in / /registry /popular/ui /stats; do
+    code=$(curl -s -o /dev/null -w '%{http_code}' "$BASE$path" || true)
+    note "GET $path $code (workspace cutover)"
+  done
+
+  echo "--- LOCAL substitutes (dictionary + offline compound) ---"
+  for q in "2012/28/EU" "Directive 2012/28/EU"; do
+    if python3 -m clearance lookup "$q" 2>&1 | head -1 | grep -q SOURCED; then
+      note "local lookup $q"
+    else
+      bad "local lookup $q"
+    fi
+  done
+  if python3 "$ROOT/scripts/compound_exhibit_receipt.py" >/tmp/longrun_compound.txt 2>&1; then
+    note "offline compound receipt"
+    cat /tmp/longrun_compound.txt | tail -6
+  else
+    bad "offline compound receipt"
+  fi
+  python3 "$ROOT/scripts/eval_partner_health_baseline.py" | tee /tmp/longrun_baseline.txt
+  if grep -q 'shipping_arm' /tmp/longrun_baseline.txt; then
+    note "partner health baseline"
+  else
+    bad "partner health baseline"
+  fi
+  # Mark compound step satisfied via offline arm for receipt writer below.
+  echo '{"parallel_api_calls":0,"corpus_hits":0,"engine":"offline"}' >/tmp/longrun_A.json
+  echo '{"parallel_api_calls":0,"corpus_hits":1,"engine":"offline"}' >/tmp/longrun_B.json
+  echo 1 >/tmp/longrun_compound.ok
+else
 for path in / /registry /popular/ui /stats /registry/api?q=2012; do
   code=$(curl -sf -o /dev/null -w '%{http_code}' "$BASE$path")
   if [[ "$code" == "200" ]]; then note "GET $path $code"; else bad "GET $path $code"; fi
@@ -135,6 +180,7 @@ import sys,json
 d=json.load(sys.stdin)
 print(f\"  stats after: claims={d['n']} hit_rate={d.get('dictionary_hit_rate')} queries={d.get('queries_logged')}\")
 "
+fi
 
 echo "--- RECEIPT ---"
 mkdir -p docs

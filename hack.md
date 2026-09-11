@@ -320,6 +320,8 @@ Full record: `fleet-ops (internal)/retros/QWEN-LOSS-RETRO-2026-08-30.md` (correc
 - [x] Partner doc + design-partner loop corrected — `docs/PARTNER-INTEGRATIONS-2026-08-30.md` · `docs/DESIGN-PARTNER-LOOP.md`
 - [x] SUBMISSION-PACK re-derived — done-when: `python3 scripts/bench_check_docs.py` → 129/129
 - [x] Live compound — BLOCKED doc naming missing `PARALLEL_API_KEY` + hosted `/clear` local-only
+- [x] Offline compound exhibit repaired under exact-assertion reuse — done-when: `env -u PARALLEL_API_KEY python3 scripts/compound_exhibit_receipt.py` → A=2→B=1 · corpus_hits=2 · exit 0
+- [x] Stranger trial workspace-aware — done-when: local hosted sim `bash scripts/new_user_trial.sh http://127.0.0.1:8765` → Trial OK
 
 ### Verify (one command each)
 
@@ -567,6 +569,7 @@ bash scripts/verify_cold_clone.sh                                               
 | When | What | Command | Outcome |
 |------|------|---------|---------|
 | 2026-09-11 night | Hosted partner health regression | `curl …/health` · `eval_partner_health_baseline.py` | Live **1/8** stripped · shipping **8/8** · `/partners` public in code · deploy Oscar |
+| 2026-09-11 night | Compound exhibit under exact-assertion | `compound_exhibit_receipt.py` | Was A=2 B=3 hits=0 (paraphrase); fixtures fixed → **A=2→B=1 hits=2** |
 | 2026-09-03 night | Fresh compound + timeout finding | `compound_fresh_hosted_probe.py` · `verify_partners_hosted.sh` | **A≥1 Parallel → B drop** · orphan-works Run A **504** @ 300s |
 | 2026-09-03 night | SUBMISSION-PACK + Qwen gates | `bench_check_docs.py` · `eval_verify_holdout.py` · `eval_scorer_symmetry.py` | **127/127** · holdout OK · scorer 5/6 vs 6/6 · offline compound A=2→B=1 |
 | 2026-09-02 | Partner verify re-run | `verify_partners_hosted.sh` · `full_gate.sh` | **4/4 partners** · compound warm-shelf PASS · 72/72 auto-seed |

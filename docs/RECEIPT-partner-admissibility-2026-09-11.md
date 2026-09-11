@@ -13,6 +13,9 @@
 4. SUBMISSION-PACK counts re-derived: partner_runtime **8/8**, total **129/129**.
 5. Design-partner loop corrected away from dead public `/clear` URL.
 6. Finding doc naming the regression at object.
+7. Offline compound exhibit repaired under exact-assertion reuse
+   (`compound-mini-B` shares verbatim overlap; paraphrase correctly scored 0).
+8. Workspace-aware `new_user_trial.sh` / `long_run_goal.sh` / `film/preflight.sh`.
 
 ## VERIFIED (commands run)
 
@@ -33,6 +36,9 @@ python3 -c "from cloud import partners, agent; from clearance import search; \
   import os; os.environ.update(AGENT_BUILDER='1',GCP_PROJECT='hack-fleet',PARALLEL_API_KEY='pk-live-abc'); \
   print(agent.adk_available(), search.sdk_available(), partners.health()['engine_default'])"
   → True True adk
+env -u PARALLEL_API_KEY python3 scripts/compound_exhibit_receipt.py
+  → A=2→B=1 Parallel · corpus_hits B=2 · exit 0
+bash scripts/new_user_trial.sh http://127.0.0.1:8765 → Trial OK (workspace path)
 ```
 
 Local hosted simulation (AGENT_SCIENCE_HOSTED=1):
