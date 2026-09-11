@@ -30,6 +30,7 @@ python3 -m unittest tests.test_hosted_flow -q  # OK (incl. anonymous partner sur
 python3 tests/test_watch_it_go_red.py          # 72/72
 python3 scripts/eval_refusal_baseline.py       # baseline 5/6 · shipping 6/6 · delta +1
 python3 scripts/eval_refusal_ablation.py       # ablation 5/6 · shipping 6/6 · delta +1
+python3 scripts/check_hosted_partner_claims.py # docs honest vs stripped live health
 ```
 
 ### ADK import on this VM (after `pip install google-adk==2.7.1`)
