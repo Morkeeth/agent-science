@@ -332,6 +332,8 @@ python3 tests/test_registry_surface.py -q                            # registry 
 ### Receipt
 
 - `docs/RECEIPT-night-wave-2026-09-11.md`
+- `docs/FINDING-exact-assertion-compound-2026-09-11.md`
+- `docs/LONG-RUN-RECEIPT-2026-09-11.md` — local 12/12 · hosted anonymous desk skipped (private-workspaces)
 
 ### BLOCKED (expected until measured)
 

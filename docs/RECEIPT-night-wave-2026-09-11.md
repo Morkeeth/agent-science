@@ -30,6 +30,12 @@
 5. **Deploy prep for current `deploy.sh`** — `docs/DEPLOY-PREP-2026-09-11.md`  
    - Private-workspace candidate (`--no-traffic`); no Oscar deploy click
 
+6. **Stranger scripts honest under private-workspaces**  
+   - `new_user_trial.sh` — local compound + login-wall BLOCKED exit 0  
+   - `long_run_goal.sh` — skips anonymous desk; offline compound + artifact-claims substitute · **12/12**  
+   - `full_gate.sh` includes `eval_artifact_claims.py`  
+   - `docs/FINDING-exact-assertion-compound-2026-09-11.md`
+
 ---
 
 ## VERIFIED (command → observed)
