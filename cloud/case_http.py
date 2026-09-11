@@ -189,8 +189,14 @@ class WorkspaceHTTP:
         parsed = urlsplit(h.path)
         path = parsed.path.rstrip('/') or '/'
         if h.command == 'GET' and path == '/health':
-            return self.send(200, {'ok': True, 'service': 'agent-science', 'mode': 'private-workspaces',
-                                   'revision': os.getenv('K_REVISION', 'local')})
+            # Partner admissibility surface — public even on private workspaces.
+            # Stripping these fields made verify_partners_hosted.sh false-red for
+            # weeks after the workspace cutover (measured 2026-09-11 on rev 00028).
+            from cloud import partners as partner_manifest
+            return self.send(200, partner_manifest.health(mode='private-workspaces'))
+        if h.command == 'GET' and path == '/partners':
+            from cloud import partners as partner_manifest
+            return self.send(200, partner_manifest.manifest())
         expected_origin = os.getenv('AGENT_SCIENCE_PUBLIC_ORIGIN', '').rstrip('/')
         if self.secure and h.command == 'GET' and not self.api and expected_origin:
             # Cloud Run has multiple aliases. Forms and session cookies must use

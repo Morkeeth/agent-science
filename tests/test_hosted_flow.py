@@ -59,6 +59,20 @@ class HostedFlow(unittest.TestCase):
         self.assertEqual(self.request('GET','/stats',token=None)[0],303)
         self.assertEqual(self.request('POST','/search',{},token=TOKEN_A)[0],404)
 
+    def test_anonymous_partner_surfaces_public(self):
+        """Partner admissibility must survive the private-workspaces cutover."""
+        code,_,health=self.request('GET','/health',token=None)
+        self.assertEqual(code,200)
+        self.assertTrue(isinstance(health,dict))
+        for field in ('gemini','gemini_path','parallel','parallel_sdk','agent_builder','engine_default','mode'):
+            self.assertIn(field,health,field)
+        self.assertEqual(health.get('mode'),'private-workspaces')
+        self.assertIn(health.get('engine_default'),('adk','direct'))
+        code,_,partners=self.request('GET','/partners',token=None)
+        self.assertEqual(code,200)
+        self.assertTrue(partners.get('track_checklist',{}).get('parallel_search_at_runtime'))
+        self.assertTrue(partners.get('track_checklist',{}).get('hosted_clear_local_only'))
+
     def test_real_worker_create_idempotency_and_restart(self):
         code,_,result=self.create(); self.assertEqual(code,201,result)
         self.assertEqual(self.create()[0],200)

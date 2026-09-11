@@ -74,8 +74,15 @@ def t_partners_manifest_importable():
 
 def t_health_has_partners_route():
     svc = (ROOT / "cloud" / "service.py").read_text()
+    case_http = (ROOT / "cloud" / "case_http.py").read_text()
     assert 'path == "/partners"' in svc
-    assert "parallel_sdk" in svc
+    assert "partner_manifest.health" in svc
+    assert "partner_manifest.manifest" in svc or "partner_manifest.manifest()" in svc
+    # Hosted cutover must keep the public partner surfaces.
+    assert "partner_manifest.health" in case_http
+    assert "partner_manifest.manifest" in case_http
+    from cloud import partners
+    assert "parallel_sdk" in partners.health()
 
 
 def t_requirements_pins_parallel_web():

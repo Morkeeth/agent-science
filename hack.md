@@ -2,7 +2,7 @@
 doc: hack
 project: Agent Science
 phase: SHIP
-last-touched: 2026-09-03 12:10 UTC
+last-touched: 2026-09-11 12:30 UTC
 canonical: true
 event: Agentic Cinema · Parallel track · deadline 2026-09-09 14:00 PDT
 supersedes: docs/PHASE0-LADDER.md ClickHouse-track note (runtime track is Parallel)
@@ -307,7 +307,45 @@ Full record: `fleet-ops (internal)/retros/QWEN-LOSS-RETRO-2026-08-30.md` (correc
 
 ---
 
-## 🎯 NOW — Partner night wave (fresh compound + timeout finding)
+## 🎯 NOW — Partner hosted admissibility (2026-09-11)
+
+**Slice:** Restore public `/health` + `/partners` after private-workspaces cutover stripped partner proof; ship baseline arm that beats the naive stripped health; honest BLOCKED for live clear.
+
+### Build
+
+- [x] Shared `cloud/partners.health()` — done-when: `python3 -c "from cloud import partners; print(partners.health().get('engine_default'))"`
+- [x] Hosted `case_http` serves full `/health` + `/partners` before auth — done-when: `python3 -m unittest tests.test_hosted_flow.HostedFlow.test_anonymous_partner_surfaces_public`
+- [x] RED control + baseline — done-when: `python3 scripts/eval_partner_health_baseline.py` → naive 1/8 · shipping 8/8
+- [x] `verify_partners_hosted.sh` rewritten for workspace boundary — done-when: script exists; live URL still fails until Oscar deploy (correct)
+- [x] Partner doc + design-partner loop corrected — `docs/PARTNER-INTEGRATIONS-2026-08-30.md` · `docs/DESIGN-PARTNER-LOOP.md`
+- [x] SUBMISSION-PACK re-derived — done-when: `python3 scripts/bench_check_docs.py` → 129/129
+- [x] Live compound — BLOCKED doc naming missing `PARALLEL_API_KEY` + hosted `/clear` local-only
+
+### Verify (one command each)
+
+```bash
+git pull && python3 tests/test_watch_it_go_red.py                    # 72/72
+python3 tests/test_partner_runtime.py                                # 8/8
+python3 -m unittest tests.test_hosted_flow                           # OK
+python3 scripts/eval_partner_health_baseline.py                      # shipping 8/8 · live naive until deploy
+python3 scripts/bench_check_docs.py                                  # 129/129
+python3 scripts/eval_refusal_baseline.py && python3 scripts/eval_refusal_ablation.py
+```
+
+### Receipt
+
+- `docs/RECEIPT-partner-admissibility-2026-09-11.md`
+- `docs/FINDING-hosted-partner-health-regression-2026-09-11.md`
+- `docs/BLOCKED-live-compound-2026-09-11.md`
+
+### BLOCKED
+
+- Hosted live `/health` still stripped on rev `00028-hed` until Oscar `deploy.sh`
+- Live Parallel clear — no `PARALLEL_API_KEY` / `~/.config/keys/parallel.key` on this VM; hosted `/clear` is local-only by design
+
+---
+
+## 🎯 NOW (prior) — Partner night wave (fresh compound + timeout finding)
 
 **Slice:** Harden partner verify to prove Parallel at runtime; ship fresh compound probe; document orphan-works 504 regression at object.
 
@@ -528,6 +566,7 @@ bash scripts/verify_cold_clone.sh                                               
 
 | When | What | Command | Outcome |
 |------|------|---------|---------|
+| 2026-09-11 night | Hosted partner health regression | `curl …/health` · `eval_partner_health_baseline.py` | Live **1/8** stripped · shipping **8/8** · `/partners` public in code · deploy Oscar |
 | 2026-09-03 night | Fresh compound + timeout finding | `compound_fresh_hosted_probe.py` · `verify_partners_hosted.sh` | **A≥1 Parallel → B drop** · orphan-works Run A **504** @ 300s |
 | 2026-09-03 night | SUBMISSION-PACK + Qwen gates | `bench_check_docs.py` · `eval_verify_holdout.py` · `eval_scorer_symmetry.py` | **127/127** · holdout OK · scorer 5/6 vs 6/6 · offline compound A=2→B=1 |
 | 2026-09-02 | Partner verify re-run | `verify_partners_hosted.sh` · `full_gate.sh` | **4/4 partners** · compound warm-shelf PASS · 72/72 auto-seed |

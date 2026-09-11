@@ -37,9 +37,15 @@ def t_parallel_entrypoint_wired_in_facts():
 def t_gcp_service_health_shape():
     svc = importlib.import_module("cloud.service")
     src = inspect.getsource(svc)
-    assert "engine_default" in src
-    assert "gemini_path" in src or "parallel" in src
+    assert "partner_manifest.health" in src
+    assert 'path == "/health"' in src
+    assert 'path == "/partners"' in src
     assert "_run_clearance" in src
+    from cloud import partners
+    payload = partners.health()
+    assert "engine_default" in payload
+    assert "gemini_path" in payload
+    assert "parallel" in payload
 
 
 def t_adk_default_engine_wired():
@@ -122,6 +128,46 @@ def t_partner_manifest_survives_cold_start():
         assert out["verified_calls_logged"] == 2
     finally:
         search.RECEIPTS = real
+
+
+def t_hosted_health_exposes_partners():
+    """RED control for the 2026-09-11 regression: private-workspaces /health
+    must not strip partner fields. Watched red against the stripped shape first.
+    """
+    from cloud import partners
+
+    naive = {
+        "ok": True,
+        "service": "agent-science",
+        "mode": "private-workspaces",
+        "revision": "agent-science-00028-hed",
+    }
+    naive_score = partners.partner_proof_score(naive, None)
+    assert naive_score["score"] <= 1, naive_score
+
+    with patch.dict(os.environ, {"AGENT_BUILDER": "1", "GCP_PROJECT": "hack-fleet", "PARALLEL_API_KEY": "pk-live-abc"}, clear=False):
+        with patch("cloud.agent.adk_available", return_value=True):
+            with patch("cloud.agent.adk_version", return_value="2.7.1"):
+                payload = partners.health(mode="private-workspaces")
+                manifest = partners.manifest(gemini_path="vertex:hack-fleet", adk_default=True)
+
+    for field in (
+        "gemini",
+        "gemini_path",
+        "parallel",
+        "parallel_sdk",
+        "agent_builder",
+        "engine_default",
+        "mode",
+        "revision",
+    ):
+        assert field in payload, field
+    assert payload["engine_default"] == "adk"
+    assert payload["gemini_path"].startswith("vertex:")
+    assert payload["mode"] == "private-workspaces"
+    shipping = partners.partner_proof_score(payload, manifest)
+    assert shipping["score"] == shipping["denominator"], shipping
+    assert shipping["score"] > naive_score["score"]
 
 
 def t_requirements_pins_parallel_web():

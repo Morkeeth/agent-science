@@ -1,8 +1,10 @@
 # PARTNER INTEGRATIONS — Agent Science · Sep 9 path
 
-**Date:** 2026-08-30 · **Last verified:** 2026-09-03 · **Repo:** Morkeeth/agent-science · **Scope:** all four partners wired in code; deploy is Oscar's click.
+**Date:** 2026-08-30 · **Last verified:** 2026-09-11 · **Repo:** Morkeeth/agent-science · **Scope:** all four partners wired in code; deploy is Oscar's click.
 
 Each partner must be **called at runtime** on the default path — not documented only.
+
+**2026-09-11 object check:** live revision `agent-science-00028-hed` stripped partner fields from `/health` after the private-workspaces cutover. Code on this branch restores public `/health` + `/partners`. Hosted stays red until Oscar redeploys — see `docs/FINDING-hosted-partner-health-regression-2026-09-11.md`.
 
 ---
 
@@ -10,28 +12,39 @@ Each partner must be **called at runtime** on the default path — not documente
 
 1. **Rotate keys** if any revision ever had plaintext env vars (`deploy.sh` note).
 2. **`bash deploy.sh`** — Oscar only; writes Secret Manager, IAM, Cloud Run revision.
-3. **Verify all four partners at runtime (one command):**
+3. **Verify public partner surfaces (one command):**
    ```bash
    bash scripts/verify_partners_hosted.sh
    ```
-   Expect: health OK · `engine_default: adk` · `/clear` stamps `engine: adk` with `parallel_calls ≥ 1` on fresh claim · compound-mini PASS · compound-fresh PASS (A_parallel≥1, B_hits≥1).
-4. **Compound with Parallel drop (video beat):**
+   Expect: `/health` carries `gemini` · `parallel` · `parallel_sdk` · `agent_builder` · `engine_default: adk` · `/partners` HTTP 200 without auth · stranger-proof score 8/8 vs naive 1/8 · hosted `POST /clear` stays 401/404 (local-only).
+4. **Baseline score (embarrassing arm included):**
    ```bash
-   python3 scripts/compound_fresh_hosted_probe.py
+   python3 scripts/eval_partner_health_baseline.py
    ```
-   Expect: Run A `parallel_calls ≥ 1` → Run B `parallel_calls ≤ A` with `corpus_hits ≥ 1`.
-5. **Or verify /health alone:**
+5. **Local `/clear` ADK + Parallel proof** (keys required; not on hosted):
+   ```bash
+   VERIFY_LOCAL_CLEAR=1 bash scripts/verify_partners_hosted.sh
+   # or local desk:
+   export AGENT_BUILDER=1 PARALLEL_API_KEY=… GCP_PROJECT=hack-fleet
+   python3 cloud/service.py   # then POST /clear on :8080
+   ```
+6. **Or verify /health alone after deploy:**
    ```bash
    curl -s https://agent-science-568004190078.us-central1.run.app/health | python3 -m json.tool
    ```
-   Expect: `"gemini_path": "vertex:hack-fleet"`, `"parallel": true`, `"engine_default": "adk"`.
-6. **Verify /clear** (JSON):
-   ```bash
-   curl -s -X POST https://agent-science-568004190078.us-central1.run.app/clear \
-     -H 'Content-Type: application/json' \
-     -d '{"script":"The Dust Bowl displaced 2.5 million people.","subject":"dust-bowl"}' \
-     | python3 -c "import sys,json; d=json.load(sys.stdin); print('engine',d.get('engine')); print('parallel_calls',d.get('parallel_calls'))"
-   ```
+   Expect: `"gemini_path": "vertex:…"`, `"parallel": true`, `"engine_default": "adk"`, `"mode": "private-workspaces"`.
+
+---
+
+## Hosted vs local boundary
+
+| Surface | Local desk (`python3 cloud/service.py`) | Hosted Cloud Run (`K_SERVICE`) |
+|---------|------------------------------------------|--------------------------------|
+| `GET /health` | full partner payload | full partner payload (public) |
+| `GET /partners` | track manifest | track manifest (public) |
+| `POST /clear` | ADK default + Parallel | **local-only** — 401 without workspace; do not demo on hosted URL |
+| `GET/POST /search` | dictionary websearch | local-only |
+| `/cases` | n/a | private research workspace (token) |
 
 ---
 
@@ -100,8 +113,8 @@ curl -s -X POST https://api.parallel.ai/v1/search \
 
 | Field | Value |
 |-------|-------|
-| **Role** | Hosted clearance desk — paste script, get gap report |
-| **Entrypoint** | `cloud/service.py` (Dockerfile `CMD`) |
+| **Role** | Hosted private research workspaces + public partner proof surfaces |
+| **Entrypoint** | `cloud/service.py` → `cloud/case_http.py` when `K_SERVICE` / `AGENT_SCIENCE_HOSTED=1` |
 | **Deploy script** | `deploy.sh` (Oscar only — never run from agent) |
 | **Project / region** | `hack-fleet` / `us-central1` (env: `GCP_PROJECT`, `GCP_REGION`) |
 | **Service name** | `agent-science` (`GCP_SERVICE`) |
@@ -113,6 +126,7 @@ curl -s -X POST https://api.parallel.ai/v1/search \
 {
   "ok": true,
   "service": "agent-science",
+  "mode": "private-workspaces",
   "gemini": true,
   "gemini_path": "vertex:hack-fleet",
   "parallel": true,
@@ -122,7 +136,8 @@ curl -s -X POST https://api.parallel.ai/v1/search \
   "last_parallel_search_id": "srch_…",
   "agent_builder": true,
   "adk_version": "2.7.1",
-  "engine_default": "adk"
+  "engine_default": "adk",
+  "revision": "agent-science-…"
 }
 ```
 
@@ -131,17 +146,17 @@ curl -s -X POST https://api.parallel.ai/v1/search \
 | `gemini_path` | `vertex:<project>`, `api-key`, or `none` |
 | `parallel` | `PARALLEL_API_KEY` present in env |
 | `agent_builder` | `google-adk` importable |
-| `engine_default` | What `POST /clear` will use: `adk` or `direct` |
+| `engine_default` | What local `POST /clear` will use: `adk` or `direct` |
+| `mode` | `private-workspaces` on hosted |
 
 ### Routes
 
-| Method | Path | Body | Response |
-|--------|------|------|----------|
-| GET | `/health` | — | JSON above |
-| GET | `/partners` | — | Track manifest — all four partners + checklist |
-| GET | `/` | — | Desk UI (HTML form → POST /clear) |
-| GET | `/corpus?subject=` | — | `{subject, remembered, total}` |
-| POST | `/clear` | `{"script","subject"}` | Gap report JSON; `engine` field stamped |
+| Method | Path | Hosted | Response |
+|--------|------|--------|----------|
+| GET | `/health` | public | JSON above |
+| GET | `/partners` | public | Track manifest — all four partners + checklist |
+| GET | `/cases` | token | Private research workspace |
+| POST | `/clear` | **local desk only** | Gap report JSON; `engine` field stamped |
 
 **Local desk:**
 ```bash
@@ -178,8 +193,9 @@ curl -s localhost:8099/health
 ```bash
 git clone https://github.com/Morkeeth/agent-science.git && cd agent-science
 bash scripts/verify_cold_clone.sh
+python3 scripts/eval_partner_health_baseline.py
 ```
 
-Receipts: `docs/RECEIPT-hosted-partner-runtime-2026-08-30.md`, `docs/RECEIPT-live-compound-exhibit-2026-08-30.md`.
+Receipts: `docs/RECEIPT-partner-admissibility-2026-09-11.md`, `docs/FINDING-hosted-partner-health-regression-2026-09-11.md`.
 
-Live `/clear` requires Oscar deploy + keys. Offline controls prove partner **code paths** exist and are tested.
+Live hosted partner fields require Oscar deploy. Offline controls prove partner **code paths** exist and are tested.
