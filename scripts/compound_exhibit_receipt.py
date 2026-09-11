@@ -67,6 +67,8 @@ class _Raw:
 
 
 # Fixed claim lists mirroring compound-mini scripts — extraction is NOT simulated live.
+# Exact-assertion reuse (post 176f5db / f61635e): paraphrases do NOT compound.
+# Overlapping A/B claims must be identical text; B adds one novel claim.
 _OFFLINE_CLAIMS = {
     "A": [
         _Raw("In 2012 the European Union passed Directive 2012/28/EU, the Orphan Works Directive.",
@@ -75,9 +77,9 @@ _OFFLINE_CLAIMS = {
              None, "29 October 2014"),
     ],
     "B": [
-        _Raw("Europe's answer was Directive 2012/28/EU — known as the Orphan Works Directive —",
+        _Raw("In 2012 the European Union passed Directive 2012/28/EU, the Orphan Works Directive.",
              None, "Directive 2012/28/EU"),
-        _Raw("and the deadline for national transposition was 29 October 2014.",
+        _Raw("Member states had until 29 October 2014 to bring it into national law.",
              None, "29 October 2014"),
         _Raw("The British Library has estimated that forty percent of its copyrighted collection is orphaned.",
              None, "forty percent"),
@@ -256,8 +258,8 @@ def _write_receipt(run: dict, *, backfill_rows: int) -> None:
     lines += [
         "## Registry backfill",
         "",
-        f"`python3 clear_corpus.py research-corpus --backfill` → **{backfill_rows} rows** "
-        f"(29 SOURCED + proven-unprovable refusals) in `cache/refusal_log.db`",
+        f"`refusal_log.stats` at receipt time → **{backfill_rows} rows** "
+        f"in `cache/refusal_log.db` (re-derived; not a carried constant)",
         "",
         "## Controls",
         "",

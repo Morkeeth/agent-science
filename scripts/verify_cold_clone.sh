@@ -47,4 +47,8 @@ python3 scripts/eval_refusal_ablation.py 2>&1 | tail -2
 python3 scripts/eval_scorer_symmetry.py 2>&1 | tail -3
 
 echo
+echo "10. Artifact claims at object (title-trust baseline vs open-object shipping)..."
+python3 scripts/eval_artifact_claims.py 2>&1 | tail -6
+
+echo
 echo "=== cold-clone verify OK ==="

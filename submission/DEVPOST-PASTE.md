@@ -26,23 +26,23 @@ python, parallel-web (Parallel Search SDK 1.3.2), gemini (Vertex AI), google-clo
 
 ## Try it in 60 seconds (judges)
 
-Browser, no clone:
+**Hosted (2026-09-11):** Cloud Run is a **private research workspace** (`/health` → `mode=private-workspaces`). Anonymous `/search`, `/partners`, `/registry` redirect to **sign-in**. `/visibility/ui` is a public entry that states older visibility/clear routes are **local-only**, not an anonymous hosted desk. Do not judge the product by expecting CONTRARY stamps or free `/search` without a token.
 
-- Websearch companion with the full search shown: https://agent-science-568004190078.us-central1.run.app/visibility/ui?q=ralph+loop+agentic
-- Clearance desk (paste a script): https://agent-science-568004190078.us-central1.run.app/
-- Truths dashboard: https://agent-science-568004190078.us-central1.run.app/truths/ui
-- Partner manifest: https://agent-science-568004190078.us-central1.run.app/health
+Hosted URL (workspace sign-in): https://agent-science-568004190078.us-central1.run.app  
+`/health` (anonymous JSON): `ok` · `mode=private-workspaces`
 
-Terminal, no keys:
+**Terminal, no keys (authoritative stranger path):**
 
 ```
 git clone https://github.com/Morkeeth/agent-science.git && cd agent-science
 bash scripts/verify_cold_clone.sh
+python3 tests/test_registry_surface.py -q
+python3 scripts/compound_exhibit_receipt.py
+python3 scripts/eval_artifact_claims.py
 bash scripts/demo_truth_layer.sh
-bash scripts/demo_clearance_desk.sh
 ```
 
-A fresh clone of that repository ran those three commands on 2026-09-03 with exit code 0, 0, 0 (72/72 mutation-watched controls, 127/127 doc-checked controls, holdout OK, registry 16/16, eval delta +1).
+Re-measured 2026-09-11: registry **16/16**, offline compound A=**2**→B=**1** with corpus_hits=**2**, artifact-claims shipping **8/8** (baseline title-trust **3/8**), pack docs gate **128/128**, watch_it_go_red **72/72**.
 
 ## About the project
 
@@ -56,8 +56,8 @@ Every claim it clears joins a shelf. A claim proven, or proven unprovable, once 
 
 ### Technological implementation
 
-- Parallel Search API at runtime through the official parallel-web SDK (1.3.2), used for discovery on a dictionary miss; the hosted `/health` endpoint reports `parallel_sdk: true` and `parallel_transport: parallel-web`.
-- Gemini on Vertex AI (`gemini-3.5-flash`) extracts claims and proposes candidate passages; it is never allowed to write the verdict.
+- Parallel Search API at runtime through the official parallel-web SDK on the **local / tokenized** path; anonymous hosted `/health` (2026-09-11) reports only `ok` · `mode=private-workspaces` · revision — it no longer exposes `parallel_sdk` / `engine_default` flags.
+- Gemini on Vertex AI extracts claims and proposes candidate passages on the live local path; it is never allowed to write the verdict.
 - Google Cloud Run hosts the desk, the websearch companion and the JSON API; the shelf (the refusal log and the corpus SQLite files) is pulled from and pushed to a Google Cloud Storage bucket around each write (`CORPUS_GCS_URI` and `REFUSAL_LOG_GCS_URI`, set by `deploy.sh`).
 - Agent Development Kit (2.7.1) is the default clearance engine (`engine_default: adk`; the report names the tool call `clear_script_tool`).
 - Verbatim verification is deterministic code: the fetched document must contain the proposed span, or the row is refused. An independence check refuses claims where every supporting document derives from one origin.
