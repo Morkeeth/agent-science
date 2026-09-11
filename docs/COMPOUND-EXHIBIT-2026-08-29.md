@@ -1,6 +1,6 @@
 # COMPOUND EXHIBIT — orphan-works A/B
 
-**Date:** 2026-09-11 00:18 UTC · **Subject:** `orphan-works` · **Mode:** offline
+**Date:** 2026-09-11 00:20 UTC · **Subject:** `orphan-works` · **Mode:** offline
 **Fixtures:** `compound-mini-A.txt` → `compound-mini-B.txt`
 
 ## Quantified compounding
@@ -25,7 +25,7 @@ Ground-truth Parallel calls at fake boundary (Run A only): `3`
 
 ## Registry backfill
 
-`refusal_log.stats` at receipt time → **0 rows** in `cache/refusal_log.db` (re-derived; not a carried constant)
+`refusal_log.stats` at receipt time → **2 rows** in `cache/refusal_log.db` (re-derived; not a carried constant)
 
 ## Controls
 
