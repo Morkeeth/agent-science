@@ -46,15 +46,15 @@ Offline compound receipt writes `docs/COMPOUND-EXHIBIT-2026-08-29.md` with A=2�
 | search_path | `python3 tests/test_search_path.py` | **5/5** |
 | source_map | `python3 tests/test_source_map.py` | **3/3** |
 | refusal_correctness | `python3 tests/test_refusal_correctness.py` | **6/6** |
-| partner_runtime | `python3 tests/test_partner_runtime.py` | **10/10** |
+| partner_runtime | `python3 tests/test_partner_runtime.py` | **11/11** |
 | parallel_integration | `python3 tests/test_parallel_integration.py` | **6/6** |
-| **Total** | 11 suites | **131/131** |
-| docs gate | `python3 scripts/bench_check_docs.py` | **131/131 match** |
+| **Total** | 11 suites | **132/132** |
+| docs gate | `python3 scripts/bench_check_docs.py` | **132/132 match** |
 | holdout freeze | `python3 scripts/eval_verify_holdout.py` | **4 files pinned** |
 | scorer symmetry | `python3 scripts/eval_scorer_symmetry.py` | baseline **5/6** vs shipping **6/6** on delivered labels |
-| hosted partner verify | `bash scripts/verify_partners_hosted.sh` | **RED on live rev 00026** until Oscar redeploys this branch — local HTTP suite green |
+| hosted partner verify | `bash scripts/verify_partners_hosted.sh` · `python3 scripts/watch_hosted_partner_health.py` | **RED on live rev 00028-hed** (remeasured 2026-09-12) until Oscar redeploys — local prove green |
 
-**Compound exhibit (offline, 2026-09-07):** `python3 scripts/compound_exhibit_receipt.py` · A=**2**→B=**1** Parallel · B corpus hits=**2** — `docs/COMPOUND-EXHIBIT-2026-08-29.md` (fixture aligned to exact-assertion integrity; see `docs/FINDING-compound-exhibit-integrity-2026-09-07.md`). Live hosted (2026-08-31): `long_run_goal.sh` · A=**1**→B=**0** · sealed `docs/SEALED-PREDICTION-2026-08-31.md`. Orphan-works full script: run B **504** — do not claim on video. Hosted partner `/health` stripped on rev `00026` until Oscar redeploys this branch.
+**Compound exhibit (offline, 2026-09-07):** `python3 scripts/compound_exhibit_receipt.py` · A=**2**→B=**1** Parallel · B corpus hits=**2** — `docs/COMPOUND-EXHIBIT-2026-08-29.md` (fixture aligned to exact-assertion integrity; see `docs/FINDING-compound-exhibit-integrity-2026-09-07.md`). Live hosted (2026-08-31): `long_run_goal.sh` · A=**1**→B=**0** · sealed `docs/SEALED-PREDICTION-2026-08-31.md`. Orphan-works full script: run B **504** — do not claim on video. Hosted partner `/health` still stripped on rev `00028-hed` (2026-09-12) until Oscar redeploys this branch.
 
 **Eval gate:** `docs/QWEN-EVAL-GATE-2026-08-30.md` — baseline **5/6 = 0.833** vs shipping **6/6 = 1.000**, delta +1 (RC5); McNemar p=1.0000 at n=6. Holdout + symmetrical scorer re-run 2026-09-03: `docs/RECEIPT-night-wave-2026-09-03.md`.
 

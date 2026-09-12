@@ -126,6 +126,7 @@ def manifest(*, gemini_path: str | None = None, adk_default: bool | None = None)
             "docs/PARTNER-INTEGRATION-RESEARCH-2026-08-31.md",
             "docs/RECEIPT-adk-default-path-2026-08-30.md",
             "docs/RECEIPT-partner-admissibility-2026-09-07.md",
+            "docs/RECEIPT-partner-admissibility-2026-09-12.md",
         ],
         "repo_root": str(root),
     }

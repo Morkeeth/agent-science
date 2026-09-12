@@ -14,6 +14,8 @@
 1. Open hosted desk: `https://agent-science-568004190078.us-central1.run.app/login`
 2. Paste the **access key** Oscar sent (never put it in a URL or shared doc).
 3. Confirm public partner wiring (optional): open `/health` — expect `engine_default: adk` and `parallel: true`.
+   Until Oscar redeploys the partner-admissibility revision, live `/health` may be stripped — check with:
+   `python3 scripts/watch_hosted_partner_health.py` (partner arm must be GREEN).
 4. Clear via API (or Oscar-provided form once filmed):
    ```bash
    export AGENT_SCIENCE_WORKSPACE_TOKEN='<invite key>'

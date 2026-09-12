@@ -50,6 +50,30 @@ def t_partner_health_exposes_engine_and_parallel_fields():
     assert h["parallel"] is True
 
 
+def t_naive_ok_only_arm_greens_stripped_liveness():
+    """Baseline arm any team ships in two hours — GREEN on the defect payload.
+
+    Measured 2026-09-07 and again 2026-09-12 against live Cloud Run: docs that
+    only checked ok/service stayed green while partner fields were gone. This
+    control freezes that failure mode so we cannot forget it.
+    """
+    sys.path.insert(0, str(ROOT / "scripts"))
+    import watch_hosted_partner_health as watch
+
+    stripped = {
+        "ok": True,
+        "service": "agent-science",
+        "mode": "private-workspaces",
+        "revision": "agent-science-00028-hed",
+    }
+    assert watch.naive_ok_only(stripped) is True
+    ok, missing = watch.partner_admissible(stripped)
+    assert ok is False
+    assert "engine_default" in missing
+    assert "gemini" in missing
+    assert "parallel" in missing
+
+
 def t_partner_manifest_checklist_not_hardcoded_true_without_wiring():
     from cloud import partners
 

@@ -2,7 +2,7 @@
 doc: status
 project: Agent Science
 canonical: true
-last-updated: 2026-09-01T05:45:00Z
+last-updated: 2026-09-12T13:30:00Z
 deadline: 2026-09-09T14:00:00-07:00
 ---
 
@@ -11,7 +11,7 @@ deadline: 2026-09-09T14:00:00-07:00
 > **For Claude / fleet:** this file is the single “where we are” surface.  
 > `hack.md` = process · `CLAUDE.md` = entry · this file = gates + evidence.
 
-**Last gate run:** 2026-09-07 — partner admissibility night · `bench_check_docs.py` **131/131** · live `/health` **RED** (stripped) until Oscar redeploys `cursor/partner-admissibility-hosted-68f4`
+**Last gate run:** 2026-09-12 — partner admissibility re-land · `bench_check_docs.py` **132/132** · live `/health` **RED** on `00028-hed` (stripped) until Oscar redeploys `cursor/partner-admissibility-restore-abf6`
 
 ---
 
@@ -21,8 +21,8 @@ deadline: 2026-09-09T14:00:00-07:00
 |-------|--------|
 | **Product noun** | **Agent Science** — truth layer for what people believe and use · B lead · A on the same layer |
 | **Product** | LIVE on Cloud Run · public repo · sealed prediction |
-| **Build lane** | WOW websearch transparency · CONTRARY stamp · stack-fit · community notes · `/truths/ui` |
-| **Oscar** | **Film 30 min** — `docs/PITCH-TOMORROW.md` · transparency WOW first · Devpost paste ready |
+| **Build lane** | Partner admissibility restore — public `/health`+`/partners` + auth `/api/clear` |
+| **Oscar** | **`bash deploy.sh`** then promote · `bash scripts/verify_partners_hosted.sh` · film · Devpost |
 | **Film lead** | Ask → sourced/refuse → free on re-ask · ≥2 domains · E&O as *a* truth not the only story |
 
 ---
@@ -31,8 +31,8 @@ deadline: 2026-09-09T14:00:00-07:00
 
 | Phase | Gate | Status |
 |-------|------|--------|
-| 0–4 Build | Partners, registry, compound, ADK | ✅ |
-| 5 Exhibit | Stranger one-click hosted | ✅ `long_run_goal.sh` 19/19 |
+| 0–4 Build | Partners, registry, compound, ADK | ✅ in code · ⛔ hosted partner surfaces until redeploy |
+| 5 Exhibit | Stranger one-click hosted | ⚠️ long-run scripts expect partner `/health` fields |
 | 6 Freeze | Oscar cold browser + film | ⛔ **video** |
 | 7 Submit | Devpost + sealed + public repo | ⚠️ repo public · sealed ✅ · **Devpost + video** ⛔ |
 
@@ -43,14 +43,17 @@ deadline: 2026-09-09T14:00:00-07:00
 | Gate | Result | Command / doc |
 |------|--------|----------------|
 | Mutation controls | **72/72** | `test_watch_it_go_red.py` |
-| All test suites | **131/131** + truth-layer suites | `bench_check_docs.py` + `full_gate.sh` |
+| All test suites | **132/132** + truth-layer suites | `bench_check_docs.py` + `full_gate.sh` |
 | Secret scan | **6/6** | `test_secret_surfaces.py` |
-| Partner runtime | **10/10** + **6/6** parallel | `test_partner_runtime.py` + `test_parallel_integration.py` |
+| Partner runtime | **11/11** + **6/6** parallel | `test_partner_runtime.py` + `test_parallel_integration.py` |
 | ADK default | **5/5** | `test_adk_default_path.py` |
+| Hosted flow | **15 OK** | `python3 -m unittest tests.test_hosted_flow` |
+| Local partner prove | ✅ | `python3 scripts/prove_partner_surfaces_local.py` |
+| Hosted partner health | **RED** | `python3 scripts/watch_hosted_partner_health.py` · rev `00028-hed` |
 | Registry surface | **16/16** | `test_registry_surface.py` |
 | Cold clone | ✅ | `verify_cold_clone.sh` |
-| Hosted long run | **19/19** | `long_run_goal.sh` |
-| Stranger trial | ✅ | `new_user_trial.sh` |
+| Hosted long run | **19/19** (pre-strip measure) | `long_run_goal.sh` |
+| Stranger trial | ✅ (pre-strip measure) | `new_user_trial.sh` |
 | Sealed prediction | ✅ | `SEALED-PREDICTION-2026-08-31.md` |
 | Public repo | ✅ | github.com/Morkeeth/agent-science |
 | Video | ⛔ | `VIDEO-SCRIPT-2026-08-29.md` |
@@ -64,22 +67,24 @@ deadline: 2026-09-09T14:00:00-07:00
 | | |
 |---|---|
 | **URL** | https://agent-science-568004190078.us-central1.run.app |
-| **Revision** | `agent-science-00018-n4s` · `parallel_sdk: true` · **`/truths/ui` live** |
-| **Health** | live `00026-zel` **stripped** (finding 2026-09-07) · code fix awaits Oscar deploy · expect `engine_default: adk` after promote |
-| **New** | `GET /visibility/ui` — full websearch panel for judges (film this) |
-| **New** | `GET /truths/ui` — truths dashboard |
-| **Stats** | 265 claims · hit rate ~0.80 · queries logged growing |
+| **Revision** | `agent-science-00028-hed` · mode `private-workspaces` |
+| **Health** | **STRIPPED** — only `ok/service/mode/revision` · finding `docs/FINDING-hosted-partner-health-stripped-2026-09-07.md` · fix awaits Oscar deploy |
+| **Naive vs partner** | ok-only arm **GREEN** · partner arm **RED** (`watch_hosted_partner_health.py`) |
+| **After promote expect** | `engine_default: adk` · `gemini_path: vertex:…` · `parallel: true` · public `/partners` |
 
-**Compound (sealed):** `longrun-0831-1320` A=**1** → B=**0** Parallel · B `corpus_hits=1`
+**Compound (sealed offline):** `compound_exhibit_receipt.py` A=**2** → B=**1** Parallel · B corpus hits ≥1  
+**Compound (sealed hosted, pre-strip):** `longrun-0831-1320` A=**1** → B=**0** Parallel · B `corpus_hits=1`
 
 ---
 
 ## Oscar checklist (only human work left)
 
-1. **Read** `docs/PITCH-TOMORROW.md` — 30s pitch + morning plan
-2. **Record** ≤180s — transparency WOW first · `docs/FILM-SCOUT-COMMANDS.md`
-3. **Devpost** — `docs/DEVPOST-READY.md` (elevator pitch updated)
-4. **Verify** logged-out: video on live entry page
+1. **Merge + `bash deploy.sh`** — partner-admissibility branch · promote candidate after `verify_partners_hosted.sh`
+2. **Export** `AGENT_SCIENCE_WORKSPACE_TOKEN` · re-run verify for `/api/clear` + compound
+3. **Read** `docs/PITCH-TOMORROW.md` — 30s pitch + morning plan
+4. **Record** ≤180s — transparency WOW first · `docs/FILM-SCOUT-COMMANDS.md`
+5. **Devpost** — `docs/DEVPOST-READY.md` (elevator pitch updated)
+6. **Verify** logged-out: video on live entry page
 
 ---
 
@@ -104,6 +109,7 @@ bash scripts/full_gate.sh
 
 | When (UTC) | What |
 |------------|------|
+| 2026-09-12 | Partner admissibility re-land · local prove + hosted RED control · 132/132 |
 | 2026-09-01 06:00 | **Hammer** — `/visibility/ui` hosted · demo_truth_layer.sh · README truth-layer lead · Devpost §0 |
 | 2026-08-31 21:23 | Truth layer night — transparency, CONTRARY, stack-fit, community notes, `/truths/ui` (branch) |
 | 2026-08-31 21:55 | Competitor research — websearch field map + steal angles → `RESEARCH-WEBSEARCH-COMPETITORS-2026-08-31.md` |

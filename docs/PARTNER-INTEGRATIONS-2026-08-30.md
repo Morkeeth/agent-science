@@ -1,10 +1,20 @@
 # PARTNER INTEGRATIONS — Agent Science · Sep 9 path
 
-**Date:** 2026-08-30 · **Last verified:** 2026-09-07 · **Repo:** Morkeeth/agent-science  
+**Date:** 2026-08-30 · **Last verified:** 2026-09-12 · **Repo:** Morkeeth/agent-science  
 **Scope:** all four partners wired in code; hosted is private-workspaces; deploy is Oscar's click.
 
 Each partner must be **called at runtime** on the default path — not documented only.  
-**Finding (2026-09-07):** live rev `00026-zel` stripped partner fields from `/health`. Fix is in code; hosted stays RED until Oscar redeploys. See `docs/FINDING-hosted-partner-health-stripped-2026-09-07.md`.
+**Finding (2026-09-07, re-measured 2026-09-12):** live rev `00028-hed` still strips partner fields from `/health`. Fix is in code on this branch; hosted stays RED until Oscar redeploys. See `docs/FINDING-hosted-partner-health-stripped-2026-09-07.md`.
+
+**One-command local prove (no keys, no network):**
+```bash
+PYTHONPATH=. python3 scripts/prove_partner_surfaces_local.py
+```
+
+**One-command live watch (expect RED until deploy):**
+```bash
+python3 scripts/watch_hosted_partner_health.py
+```
 
 ---
 
@@ -74,7 +84,8 @@ Each partner must be **called at runtime** on the default path — not documente
 
 **Deploy wiring (`deploy.sh`):**
 ```bash
---set-secrets="PARALLEL_API_KEY=${SECRET}:latest,…"
+# Immutable enabled secret versions — not :latest
+--set-secrets="PARALLEL_API_KEY=${PARALLEL_SECRET}:${PARALLEL_VERSION},AGENT_SCIENCE_ACCESS_CONFIG=${ACCESS_SECRET}:${ACCESS_VERSION}"
 ```
 
 **Offline:** `cache/searches.json` — seeded by `python3 scripts/seed_document_cache.py`.  

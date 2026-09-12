@@ -2,7 +2,7 @@
 doc: hack
 project: Agent Science
 phase: SHIP
-last-touched: 2026-09-07 00:20 UTC
+last-touched: 2026-09-12 13:15 UTC
 canonical: true
 event: Agentic Cinema · Parallel track · deadline 2026-09-09 14:00 PDT
 supersedes: docs/PHASE0-LADDER.md ClickHouse-track note (runtime track is Parallel)
@@ -307,7 +307,48 @@ Full record: `fleet-ops (internal)/retros/QWEN-LOSS-RETRO-2026-08-30.md` (correc
 
 ---
 
-## 🎯 NOW — Partner admissibility on private workspaces (2026-09-07)
+## 🎯 NOW — Partner admissibility re-land (2026-09-12)
+
+**Slice:** Live `00028-hed` still strips partner `/health` five days after the finding — re-land the fix on a shippable branch, add a naive-baseline RED control, prove local GREEN, leave hosted RED for Oscar deploy.
+
+### Build (this night)
+
+- [x] Re-measure live object — `python3 scripts/watch_hosted_partner_health.py` → **RED** on `00028-hed` · naive ok-only **GREEN**
+- [x] Cherry-pick partner-admissible surfaces onto `cursor/partner-admissibility-restore-abf6`
+- [x] `scripts/prove_partner_surfaces_local.py` — cold HTTP prove, no network/keys
+- [x] `scripts/watch_hosted_partner_health.py` — live watch with baseline arm
+- [x] Naive-baseline unit control — `t_naive_ok_only_arm_greens_stripped_liveness`
+- [x] Partner doc + STATUS + SUBMISSION-PACK **132/132** truth refresh at object
+- [x] Qwen eval re-run — baseline/ablation/scorer/holdout at object
+- [x] Receipt — `docs/RECEIPT-partner-admissibility-2026-09-12.md`
+
+### Verify (one command each)
+
+```bash
+python3 tests/test_watch_it_go_red.py                    # 72/72
+python3 tests/test_partner_runtime.py                    # 11/11
+PYTHONPATH=. python3 -m unittest tests.test_hosted_flow  # 15 OK
+PYTHONPATH=. python3 scripts/prove_partner_surfaces_local.py
+python3 scripts/bench_check_docs.py                      # 132/132
+python3 scripts/eval_refusal_baseline.py && python3 scripts/eval_refusal_ablation.py
+python3 scripts/watch_hosted_partner_health.py           # RED until Oscar deploy
+bash scripts/verify_partners_hosted.sh                   # RED on live until Oscar deploy
+```
+
+### Receipt
+
+- `docs/RECEIPT-partner-admissibility-2026-09-12.md`
+- `docs/FINDING-hosted-partner-health-stripped-2026-09-07.md` (re-measured)
+- `docs/BLOCKED-live-compound-2026-09-07.md`
+
+### BLOCKED
+
+- Live hosted still `00028-hed` stripped health — Oscar `deploy.sh` + promote
+- This VM: no Parallel/Gemini/workspace token — live clear/compound not re-run here
+
+---
+
+## 🎯 NOW (prior) — Partner admissibility on private workspaces (2026-09-07)
 
 **Slice:** Hosted private-workspaces stripped partner `/health` fields — restore public partner surfaces + auth-gated `/api/clear` without reopening unauthenticated clearance. Oscar redeploy required for live GREEN.
 
@@ -568,6 +609,7 @@ bash scripts/verify_cold_clone.sh                                               
 
 | When | What | Command | Outcome |
 |------|------|---------|---------|
+| 2026-09-12 | Partner admissibility re-land | `watch_hosted_partner_health.py` · `prove_partner_surfaces_local.py` · `bench_check_docs.py` | live **00028-hed RED** · naive GREEN · local PROVE OK · **132/132** · 11/11 partner |
 | 2026-09-07 night | Partner admissibility | `test_partner_runtime` · `test_hosted_flow` · live `curl /health` | **10/10** · **15 OK** · live `/health` **RED** (stripped) until Oscar deploy · finding + auth `/api/clear` shipped |
 | 2026-09-07 night | Compound exhibit integrity | `compound_exhibit_receipt.py` | **RED** under paraphrase fixtures post-`f61635e` → fixture exact-assertion fix → A=**2**→B=**1**, hits=**2**, exit 0 |
 | 2026-09-07 night | Qwen eval re-measure | `eval_refusal_baseline` · ablation · scorer · holdout | baseline **5/6** vs shipping **6/6** · holdout OK · bench **131/131** |
