@@ -300,7 +300,7 @@ submission craft, supported by a real tendency, **not** as the explanation of th
 - [x] **Honesty & limitations** section carrying our worst number — README §Honesty & limitations; PITCH first screen; tonight: paraphrase arm fails compound (A=2→B=3 hits=0)
 - [ ] **Answer the track brief in the track's own words on the first screen** — judge pack § above; must land on Devpost ¶1 + video 0:00
 - [ ] **Video verified attached and public on the live entry page, from a logged-out browser** — not in a checklist file, on the page.
-- [ ] **Every artifact claim measured at the submitted commit.** Four retros of that loss failed this row. Tonight re-measured pack controls at HEAD; submit commit still Oscar.
+- [x] **Every artifact claim measured at the submitted commit.** — `python3 scripts/eval_artifact_claims.py` at HEAD (2026-09-12): **128/128** suites + frozen corpus **312** · soft `265+` removed from pack · submit-tag re-measure still Oscar at seal time.
 
 Full record: `fleet-ops (internal)/retros/QWEN-LOSS-RETRO-2026-08-30.md` (corrected) ·
 `QWEN-FIELD-TEST-2026-08-30.md` (the n=40 falsification) · playbook lesson 97.
@@ -316,6 +316,7 @@ Full record: `fleet-ops (internal)/retros/QWEN-LOSS-RETRO-2026-08-30.md` (correc
 - [x] Compound cost arms gate — `python3 scripts/eval_compound_cost_arms.py` (NAIVE / PARAPHRASE / EXACT + dated price card)
 - [x] Stranger offline compound restored — exact-overlap `compound-mini-B.txt`; paraphrase kept as baseline fixture
 - [x] Controls — `python3 tests/test_compound_cost_arms.py` (paraphrase watched RED)
+- [x] Artifact claims at HEAD — `python3 scripts/eval_artifact_claims.py` (NAIVE trusts docs; shipping re-derives; soft `265+` removed)
 - [x] SUBMISSION-PACK truth refresh — public-repo row fixed; controls **128/128** at object; hosted 501 noted
 - [x] Live compound BLOCKED — `docs/RECEIPT-live-compound-BLOCKED-2026-09-12.md`
 - [x] Deploy prep — `docs/DEPLOY-PREP-2026-09-12.md` (no deploy run)
@@ -326,10 +327,12 @@ Full record: `fleet-ops (internal)/retros/QWEN-LOSS-RETRO-2026-08-30.md` (correc
 git pull && python3 tests/test_watch_it_go_red.py                    # 72/72
 python3 scripts/bench_check_docs.py                                  # 128/128
 python3 scripts/eval_compound_cost_arms.py                           # GATE OK
+python3 scripts/eval_artifact_claims.py                              # 128/128 + 312 frozen
 python3 scripts/compound_exhibit_receipt.py                          # A=2→B=1 hits=2
 python3 tests/test_compound_cost_arms.py                             # 5/5
 python3 tests/test_registry_surface.py -q                            # 16/16
 python3 scripts/eval_refusal_baseline.py                             # 5/6 vs 6/6
+bash scripts/verify_cold_clone.sh                                    # stranger OK
 ```
 
 ### Receipt
@@ -567,6 +570,7 @@ bash scripts/verify_cold_clone.sh                                               
 | When | What | Command | Outcome |
 |------|------|---------|---------|
 | 2026-09-12 night | Compound regression + cost gate | `eval_compound_cost_arms.py` · `compound_exhibit_receipt.py` | **PARAPHRASE RED** (A=2→B=3 hits=0) · **EXACT GREEN** (A=2→B=1 hits=2) · price card 2026-09-12 · hosted `/search` **501** · keys missing |
+| 2026-09-12 night | Artifact claims at HEAD | `eval_artifact_claims.py` · `freeze_population.py --check` | **128/128** + frozen **312** · soft `265+` removed from pack · NAIVE baseline would have trusted stale |
 | 2026-09-03 night | Fresh compound + timeout finding | `compound_fresh_hosted_probe.py` · `verify_partners_hosted.sh` | **A≥1 Parallel → B drop** · orphan-works Run A **504** @ 300s |
 | 2026-09-03 night | SUBMISSION-PACK + Qwen gates | `bench_check_docs.py` · `eval_verify_holdout.py` · `eval_scorer_symmetry.py` | **127/127** · holdout OK · scorer 5/6 vs 6/6 · offline compound A=2→B=1 |
 | 2026-09-02 | Partner verify re-run | `verify_partners_hosted.sh` · `full_gate.sh` | **4/4 partners** · compound warm-shelf PASS · 72/72 auto-seed |

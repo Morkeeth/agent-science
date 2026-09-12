@@ -51,4 +51,8 @@ echo "10. Compound cost arms (NAIVE / PARAPHRASE / EXACT + price card)..."
 python3 scripts/eval_compound_cost_arms.py 2>&1 | tail -8
 
 echo
+echo "11. Artifact claims at HEAD (shipping re-derives; soft +claims forbidden)..."
+python3 scripts/eval_artifact_claims.py 2>&1 | tail -6
+
+echo
 echo "=== cold-clone verify OK ==="
