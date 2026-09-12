@@ -54,6 +54,7 @@ Offline compound receipt writes `docs/COMPOUND-EXHIBIT-2026-08-29.md` with A=2�
 | holdout freeze | `python3 scripts/eval_verify_holdout.py` | **4 files pinned** |
 | scorer symmetry | `python3 scripts/eval_scorer_symmetry.py` | baseline **5/6** vs shipping **6/6** on delivered labels |
 | compound cost arms | `python3 scripts/eval_compound_cost_arms.py` | NAIVE fail · PARAPHRASE fail · EXACT **A=2→B=1 hits=2** |
+| artifact claims | `python3 scripts/eval_artifact_claims.py` | **128/128** suites + frozen corpus **312** |
 
 **Compound exhibit (offline, 2026-09-12):** `python3 scripts/compound_exhibit_receipt.py` · A=**2**→B=**1** Parallel · B corpus hits=**2** — `docs/COMPOUND-EXHIBIT-2026-08-29.md`. **Regression found tonight:** paraphrase B (pre-fix) scored A=2→B=3 hits=0 under exact-assertion binding — preserved as baseline arm. Live hosted compound: **BLOCKED** (no keys; `/search` **501** on private-workspaces) — `docs/RECEIPT-live-compound-BLOCKED-2026-09-12.md`. Orphan-works full script: prior run B **504** — do not claim on video.
 
@@ -91,7 +92,7 @@ Copy everything between the lines into Devpost project description / inspiration
 When you or your agent websearches, you get a **full visibility panel**: what was searched (every angle, every tier), what the field runs (GitHub ★, blogs, peers), and a primary verdict — **sourced verbatim**, **refused with cause**, or **CONTRARY TO RESEARCH** when practitioners outrun papers. Stack-fit scores whether a truth fits *your* repo. The shelf compounds: ask once, free forever.
 
 **Try it:** https://agent-science-568004190078.us-central1.run.app/visibility/ui?q=ralph+loop+agentic  
-**Truths dashboard:** `/truths/ui` · **265+ claims** on disk
+**Truths dashboard:** `/truths/ui` · frozen research-corpus **312** claims (`research-corpus/MANIFEST.json`, `python3 scripts/freeze_population.py --check`) · local registry size varies by boot
 
 Clearance and E&O insurance? One paying vertical on the same layer — sections below.
 

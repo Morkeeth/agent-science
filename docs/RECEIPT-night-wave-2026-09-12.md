@@ -10,11 +10,12 @@
 1. **Qwen falsifiable gate with baseline arm** — `scripts/eval_compound_cost_arms.py`
    - Arms: **NAIVE** (always re-search) · **PARAPHRASE** (old compound-mini-B wording) · **EXACT** (sealed-prediction shape)
    - Cost from dated Parallel Search **price card** (not invoice): `fixtures/price-cards/parallel-search-2026-09-12.json`
-2. **Stranger offline compound restored** — `compound-mini-B.txt` exact-overlap + one new claim; paraphrase preserved as `compound-mini-B-paraphrase.txt`
-3. **Controls** — `tests/test_compound_cost_arms.py` (paraphrase watched RED; exact watched GREEN)
-4. **SUBMISSION-PACK truth refresh** — counts re-measured at object; public-repo row corrected; hosted private-workspaces noted
-5. **Live compound BLOCKED receipt** — keys missing; hosted `/search` **501** unauthenticated
-6. **Deploy prep refresh** — `docs/DEPLOY-PREP-2026-09-12.md` matching current `deploy.sh` (candidate tag; no deploy run)
+2. **Artifact claims at HEAD** — `scripts/eval_artifact_claims.py` (NAIVE trusts docs; shipping re-derives; soft `265+` removed)
+3. **Stranger offline compound restored** — `compound-mini-B.txt` exact-overlap + one new claim; paraphrase preserved as `compound-mini-B-paraphrase.txt`
+4. **Controls** — `tests/test_compound_cost_arms.py` (paraphrase watched RED; exact watched GREEN)
+5. **SUBMISSION-PACK truth refresh** — counts re-measured at object; public-repo row corrected; hosted private-workspaces noted
+6. **Live compound BLOCKED receipt** — keys missing; hosted `/search` **501** unauthenticated
+7. **Deploy prep refresh** — `docs/DEPLOY-PREP-2026-09-12.md` matching current `deploy.sh` (candidate tag; no deploy run)
 
 ---
 
@@ -26,6 +27,7 @@
 | docs gate | `python3 scripts/bench_check_docs.py` | **128/128** |
 | refusal baseline | `python3 scripts/eval_refusal_baseline.py` | baseline **5/6**, shipping **6/6**, δ+1 |
 | compound cost arms | `python3 scripts/eval_compound_cost_arms.py` | NAIVE fail · PARAPHRASE fail · EXACT A=2→B=1 hits=2 · GATE OK |
+| artifact claims | `python3 scripts/eval_artifact_claims.py` | **128/128** + frozen **312** · soft unbound=0 |
 | offline compound | `python3 scripts/compound_exhibit_receipt.py` | A=**2**→B=**1**, corpus_hits=**2**, exit 0 |
 | cost-arm controls | `python3 tests/test_compound_cost_arms.py` | **5/5** |
 | registry surface | `python3 tests/test_registry_surface.py -q` | **16/16** |
@@ -56,6 +58,8 @@ Price card: `https://docs.parallel.ai/getting-started/pricing.md` fetched **2026
 5. **McNemar on refusal set still n=6, p=1.0** — delta +1 is real, not significant.
 6. **NAIVE and PARAPHRASE cost the same** on this fixture ($0.004 turbo) — paraphrase gets zero shelf benefit; only EXACT saves $0.001. Embarrassing for any pitch that treated paraphrased "same claim" as free.
 7. **Registry backfill measured 239 rows / 25 SOURCED** locally after boot — older receipts carried "29 SOURCED"; compound receipt no longer prints that carried figure.
+8. **Pack soft `265+ claims`** was unbound — removed; frozen denominator is **312** via `freeze_population.py --check`. Hosted `298 claims` in `submission/DEVPOST-PASTE.md` was **not** re-verified tonight (private-workspaces; no bearer).
+9. **Submit-tag seal** of artifact claims still Oscar — gate measures HEAD, not a future Devpost commit.
 
 ---
 
