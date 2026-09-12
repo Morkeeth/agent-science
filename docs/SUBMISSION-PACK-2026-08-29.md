@@ -1,6 +1,6 @@
 # SUBMISSION PACK — Agentic Cinema · slice 7
 
-**Date:** 2026-09-03 · **Repo:** https://github.com/Morkeeth/agent-science @ `main`  
+**Date:** 2026-09-12 · **Repo:** https://github.com/Morkeeth/agent-science @ `main`  
 **Hosted:** https://agent-science-568004190078.us-central1.run.app · **Deadline:** 2026-09-09 14:00 PT  
 **Scope:** docs + offline controls — no public repo flip, no video upload, no Devpost submit, no `deploy.sh`
 
@@ -13,11 +13,12 @@ git clone https://github.com/Morkeeth/agent-science.git && cd agent-science
 bash scripts/verify_cold_clone.sh
 python3 tests/test_registry_surface.py -q
 python3 scripts/compound_exhibit_receipt.py
+python3 scripts/eval_compound_cost_arms.py
 bash scripts/demo_truth_layer.sh
 python3 ask_registry.py "agentlint" | head -5
 ```
 
-Offline compound receipt writes `docs/COMPOUND-EXHIBIT-2026-08-29.md` with A=2→B=1 Parallel, corpus_hits≥1 — no Gemini/Parallel keys required.
+Offline compound receipt writes `docs/COMPOUND-EXHIBIT-2026-08-29.md` with A=2→B=1 Parallel (claims-searched), corpus_hits≥1 — no Gemini/Parallel keys required. Overlapping B claims must be **exact** wording (see `eval_compound_cost_arms.py` PARAPHRASE arm — fails on purpose).
 
 ---
 
@@ -27,13 +28,13 @@ Offline compound receipt writes `docs/COMPOUND-EXHIBIT-2026-08-29.md` with A=2�
 |------|-------------|--------|----------|
 | Video | ≤ 3 min (≤ 180 s) | [ ] | Script: `docs/VIDEO-SCRIPT-2026-08-29.md` — beats sum **178 s** |
 | Devpost | All mandatory fields filled | [ ] | Paste block below (§1–3 from `PITCH.md`) |
-| Public repo | Stranger can clone | [ ] | Private until submit — flip visibility on GitHub |
+| Public repo | Stranger can clone | [x] | **PUBLIC since 2026-08-22** (GitHub `PublicEvent 2026-08-22T17:17:41Z`) — pack row was stale when it still said private |
 | OSI licence | Open-source approved | [x] | `LICENSE` (MIT) |
 | Sealed prediction | Pre-registered, falsifiable | [x] | `docs/SEALED-PREDICTION-2026-08-31.md` — hosted A=1→B=0, corpus_hits=1 |
 | Partner integrations | All four called at runtime | [x] docs | `docs/PARTNER-INTEGRATIONS-2026-08-30.md` |
-| ADK default path | `engine_default: adk` | [x] local / [x] hosted | `docs/RECEIPT-adk-default-path-2026-08-30.md` |
+| ADK default path | `engine_default: adk` | [x] local / [x] hosted (pre private-workspaces) | `docs/RECEIPT-adk-default-path-2026-08-30.md` |
 
-**Controls re-measured 2026-09-03** (run each at object):
+**Controls re-measured 2026-09-12** (run each at object):
 
 | Suite | Command | Result |
 |-------|---------|--------|
@@ -52,10 +53,13 @@ Offline compound receipt writes `docs/COMPOUND-EXHIBIT-2026-08-29.md` with A=2�
 | docs gate | `python3 scripts/bench_check_docs.py` | **128/128 match** |
 | holdout freeze | `python3 scripts/eval_verify_holdout.py` | **4 files pinned** |
 | scorer symmetry | `python3 scripts/eval_scorer_symmetry.py` | baseline **5/6** vs shipping **6/6** on delivered labels |
+| compound cost arms | `python3 scripts/eval_compound_cost_arms.py` | NAIVE fail · PARAPHRASE fail · EXACT **A=2→B=1 hits=2** |
 
-**Compound exhibit (offline, 2026-09-03):** `python3 scripts/compound_exhibit_receipt.py` · A=**2**→B=**1** Parallel · B corpus hits=**2** — `docs/COMPOUND-EXHIBIT-2026-08-29.md`. Live hosted (2026-08-31): `long_run_goal.sh` · A=**1**→B=**0** · sealed `docs/SEALED-PREDICTION-2026-08-31.md`. Orphan-works full script: run B **504** — do not claim on video.
+**Compound exhibit (offline, 2026-09-12):** `python3 scripts/compound_exhibit_receipt.py` · A=**2**→B=**1** Parallel · B corpus hits=**2** — `docs/COMPOUND-EXHIBIT-2026-08-29.md`. **Regression found tonight:** paraphrase B (pre-fix) scored A=2→B=3 hits=0 under exact-assertion binding — preserved as baseline arm. Live hosted compound: **BLOCKED** (no keys; `/search` **501** on private-workspaces) — `docs/RECEIPT-live-compound-BLOCKED-2026-09-12.md`. Orphan-works full script: prior run B **504** — do not claim on video.
 
-**Eval gate:** `docs/QWEN-EVAL-GATE-2026-08-30.md` — baseline **5/6 = 0.833** vs shipping **6/6 = 1.000**, delta +1 (RC5); McNemar p=1.0000 at n=6. Holdout + symmetrical scorer re-run 2026-09-03: `docs/RECEIPT-night-wave-2026-09-03.md`.
+**Eval gate:** `docs/QWEN-EVAL-GATE-2026-08-30.md` + `scripts/eval_compound_cost_arms.py` · refusal baseline **5/6** vs shipping **6/6**; compound arms GATE OK with dated price card (not invoice). Receipt: `docs/RECEIPT-night-wave-2026-09-12.md`.
+
+**Hosted note (2026-09-12):** `curl …/health` → `mode=private-workspaces`, rev `agent-science-00028-hed`. Unauthenticated `/search` and `/partners` return **501**. Stranger demo path for submit is **offline cold clone**, not open hosted search.
 
 ---
 
@@ -136,7 +140,7 @@ market.
 | Repo | `https://github.com/Morkeeth/agent-science` @ `e6793ab` |
 | Entry point | `python3 agent_science.py <script.txt>` — Gemini + Parallel **live by default** |
 | Hosted | https://agent-science-568004190078.us-central1.run.app — `POST /clear` · `GET /corpus` |
-| Controls | registry **16/16** · cross-subject reuse **2/2** · compound exhibit B **1** Parallel vs A **2** (offline) |
+| Controls | registry **16/16** · cross-subject reuse **2/2** · compound exhibit B **1** Parallel vs A **2** (offline exact-overlap; paraphrase arm fails) |
 | License | `LICENSE` (MIT) |
 | Gap report | `fixtures/gap-report-600.md` — **561 of 600 (94%)** not sellable as-is |
 | Second question | `fixtures/shift-ai-training-vs-noncommercial.md` — 247 of 600 flip |
@@ -164,9 +168,10 @@ object was.
 
 ## Oscar checklist (outward acts — not done in this slice)
 
-- [ ] `git push` + flip repo to public on GitHub
+- [x] Repo public (since 2026-08-22) — do not re-flip
 - [ ] Record video from `docs/VIDEO-SCRIPT-2026-08-29.md` (≤ 180 s)
 - [ ] Upload video to Devpost
 - [ ] Paste Devpost block + fill remaining fields (built with, links, screenshot)
 - [ ] Seal prediction hash in Devpost / commit message after live A/B
-- [ ] `bash deploy.sh` — hosted `engine_default: adk` + durable corpus shelf (slice 1)
+- [ ] `bash deploy.sh` candidate + promote — see `docs/DEPLOY-PREP-2026-09-12.md` (Oscar only)
+- [ ] Invoice-backed Parallel cost line (price card gate is offline stand-in)

@@ -1,0 +1,14 @@
+{
+  "provider": "Parallel",
+  "product": "Search API",
+  "source_url": "https://docs.parallel.ai/getting-started/pricing.md",
+  "fetched_at": "2026-09-12T13:12:00Z",
+  "currency": "USD",
+  "unit": "per_request_default_10_results",
+  "modes": {
+    "turbo_or_fast": 0.001,
+    "basic_or_advanced": 0.005
+  },
+  "billing_note": "Price card from public docs, NOT an invoice. Exact billing requires Parallel console/invoice \u2014 Oscar only.",
+  "used_by": "scripts/eval_compound_cost_arms.py"
+}

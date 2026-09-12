@@ -47,4 +47,8 @@ python3 scripts/eval_refusal_ablation.py 2>&1 | tail -2
 python3 scripts/eval_scorer_symmetry.py 2>&1 | tail -3
 
 echo
+echo "10. Compound cost arms (NAIVE / PARAPHRASE / EXACT + price card)..."
+python3 scripts/eval_compound_cost_arms.py 2>&1 | tail -8
+
+echo
 echo "=== cold-clone verify OK ==="
