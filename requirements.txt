@@ -10,3 +10,6 @@ google-cloud-storage==3.4.1
 
 # Public paper source extraction runs in a bounded subprocess.
 pypdf==6.14.2
+
+# full_gate.sh §4a research suites (not on the serving path).
+pytest==8.4.2
