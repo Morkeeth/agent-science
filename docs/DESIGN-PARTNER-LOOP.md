@@ -31,6 +31,8 @@
 ```bash
 git clone https://github.com/Morkeeth/agent-science.git && cd agent-science
 pip install -r requirements.txt
+# Partner surfaces without keys (proves /health + /partners + auth boundary):
+PYTHONPATH=. python3 scripts/prove_partner_surfaces_local.py
 export PARALLEL_API_KEY=…   # or ~/.config/keys/parallel.key
 export PORT=8099 AGENT_BUILDER=1 GCP_PROJECT=hack-fleet
 python3 cloud/service.py

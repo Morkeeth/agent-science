@@ -47,3 +47,13 @@ That gap is why STATUS and old receipts stayed “healthy” after the private-w
 - **No workspace token / Parallel key on this VM** — cannot prove live `POST /api/clear` or orphan-works A/B here; offline eval + local HTTP prove remain authoritative.
 - **Outward acts** (deploy, Devpost, video) remain Oscar-only.
 - Promise-line README rewrite not re-opened: product ruling keeps CLI/MCP as front door; clearance promise remains in PITCH/SUBMISSION-PACK.
+
+## FULL GATE (2026-09-12)
+
+```text
+bash scripts/full_gate.sh
+# Local through cold-clone: OK (secrets · 72/72 · partner 11/11 · ADK 5/5 · 132/132 · evals · privacy)
+# Hosted long run: RED — curl /health assert engine_default==adk fails on 00028-hed (expected until deploy)
+```
+
+`pip install -r requirements.txt` now includes `pytest` so §4a research suites run after a cold install (was ModuleNotFoundError without it).
