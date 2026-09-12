@@ -9,6 +9,10 @@
 > **Re-verified 2026-09-01:** same delta +1; see `docs/RECEIPT-partner-integrations-night-2026-09-01.md` §6.
 
 > **Re-verified 2026-09-03:** holdout freeze + scorer symmetry gates shipped; see `docs/RECEIPT-night-wave-2026-09-03.md`.
+>
+> **Re-verified 2026-09-12:** compound cost arms + dated price card (not invoice) —
+> `python3 scripts/eval_compound_cost_arms.py` · see `docs/RECEIPT-night-wave-2026-09-12.md`.
+> Finding that embarrasses us: paraphrase B fails compound under exact-assertion binding.
 
 # QWEN EVAL GATE — alternative arm · 2026-08-30
 
@@ -119,3 +123,5 @@ Re-derives all 9 suite counts against `docs/SUBMISSION-PACK-2026-08-29.md` — e
 - [x] Offline path with no API key
 - [x] Wilson CI + McNemar (n=6)
 - [x] Honesty carries worst number (tie + RC5 false-GREEN both arms)
+- [x] **Cost from dated price card** (2026-09-12) — `scripts/eval_compound_cost_arms.py`; NOT invoice
+- [x] **Compound alternative arms** — NAIVE + PARAPHRASE baselines vs EXACT shipping shape
