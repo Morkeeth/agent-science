@@ -38,6 +38,7 @@
 | holdout | `python3 scripts/eval_verify_holdout.py` | HOLDOUT OK · 4 files |
 | hosted health | `curl -sf …/health` | `ok` · `mode=private-workspaces` · rev `agent-science-00028-hed` |
 | hosted /search | `curl -sS …/search` (no follow) | **303**; `-L` → Sign-in HTML **200** |
+| hosted public entry | `curl -sS -L …/` | title **Agent Science · public entry**; `/judge/demo` read-only exhibit |
 | live keys | env / `~/.config/keys/` | **missing** |
 | demo truth layer | `bash scripts/demo_truth_layer.sh` | exit 0 |
 | public repo | `gh repo view Morkeeth/agent-science --json visibility` | **PUBLIC** |
@@ -74,11 +75,11 @@ Price card: `https://docs.parallel.ai/getting-started/pricing.md` fetched **2026
 
 | Dimension | Status | Evidence |
 |-----------|--------|----------|
-| 1. Promised user value | **observed** (offline) | Gap report / compound receipt with verbatim SOURCED rows + Parallel drop on exact reuse |
-| 2. Independent use | **partial** | Cold clone one-command works without keys; hosted URL alone does **not** deliver search without sign-in |
-| 3. Distinctive promise | **observed** | Exact-assertion compound + refuse pole + baseline arms that can embarrass us |
-| 4. Action and return | **partial** | Offline re-ask compounds; hosted return path is workspace login (untested without bearer) |
-| 5. Access | **partial** | Public repo + offline path open; hosted judge desk requires credentials |
+| 1. Promised user value | **observed** (offline + hosted public) | Offline: gap/compound with verbatim SOURCED + Parallel drop. Hosted: `/judge/demo` read-only claim exhibit; hostname check |
+| 2. Independent use | **partial** | Cold clone one-command works without keys; hosted public entry usable without token; full workspace needs sign-in |
+| 3. Distinctive promise | **observed** | Exact-assertion compound + refuse pole + baseline arms that can embarrass us; public entry keeps uncertainty |
+| 4. Action and return | **partial** | Offline re-ask compounds; hosted return is workspace login (bearer untested) |
+| 5. Access | **observed** (public entry) / **absent** (workspace) | Public repo + offline path + `/` public entry + `/judge/demo`; research workspace requires token |
 
 Subjective: restoring exact-B is the right stranger demo; it also makes the product's exact-assertion integrity visible rather than hidden by a soft match.
 

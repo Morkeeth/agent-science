@@ -1,7 +1,10 @@
-HOSTED PROBE 2026-09-13
+HOSTED PROBE 2026-09-13 (re-measure)
 {"ok": true, "service": "agent-science", "mode": "private-workspaces", "revision": "agent-science-00028-hed"}
-/search 303
-/partners 303
-/registry 303
-/visibility/ui 303
-/search follow title: <title>Sign in · Agent Science</title>
+nofollow 303 /
+nofollow 303 /search
+nofollow 303 /partners
+nofollow 303 /judge/demo
+nofollow 303 /login
+nofollow 200 /health
+follow / title: <title>Agent Science · public entry · Agent Science</title>
+follow /judge/demo title: <title>Agent Science · public evidence case · Agent Science</title>

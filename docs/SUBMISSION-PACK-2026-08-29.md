@@ -61,7 +61,7 @@ Offline compound receipt writes `docs/COMPOUND-EXHIBIT-2026-08-29.md` with A=2�
 
 **Eval gate:** `docs/QWEN-EVAL-GATE-2026-08-30.md` + `scripts/eval_compound_cost_arms.py` · refusal baseline **5/6** vs shipping **6/6**; compound arms GATE OK with dated price card `fixtures/price-cards/parallel-search-2026-09-13.json` (not invoice). Receipt: `docs/RECEIPT-night-wave-2026-09-13.md`.
 
-**Hosted note (2026-09-13):** `curl …/health` → `mode=private-workspaces`, rev `agent-science-00028-hed`. Unauthenticated `/search` **303** → Sign-in HTML (earlier receipts said **501** — wrong at today's object). Stranger demo path for submit is **offline cold clone**, not open hosted search.
+**Hosted note (2026-09-13):** `curl …/health` → `mode=private-workspaces`, rev `agent-science-00028-hed`. Unauthenticated `/` **303** then followed public entry (“Inspect the evidence…”); `/judge/demo` is a read-only public exhibit; `/search` **303→Sign-in**. Earlier receipts that said bare **501** on `/search` were wrong at today's object. Stranger **compound** demo for submit remains **offline cold clone**; hosted public entry is evidence-inspection, not live Parallel clear.
 
 ---
 
