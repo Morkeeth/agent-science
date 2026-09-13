@@ -28,7 +28,14 @@ from clearance import instruments, search as _search  # noqa: E402
 from clearance.locate import DEFAULT  # noqa: E402
 import agent_science  # noqa: E402
 
-PRICE_CARD = ROOT / "fixtures/price-cards/parallel-search-2026-09-12.json"
+def _latest_price_card() -> Path:
+    cards = sorted((ROOT / "fixtures/price-cards").glob("parallel-search-*.json"))
+    if not cards:
+        raise FileNotFoundError("no fixtures/price-cards/parallel-search-*.json")
+    return cards[-1]
+
+
+PRICE_CARD = _latest_price_card()
 OFFLINE_A = ROOT / "fixtures/scripts/compound-mini-A.txt"
 OFFLINE_B_EXACT = ROOT / "fixtures/scripts/compound-mini-B.txt"
 OFFLINE_B_PARA = ROOT / "fixtures/scripts/compound-mini-B-paraphrase.txt"

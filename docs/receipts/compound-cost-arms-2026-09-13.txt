@@ -1,0 +1,20 @@
+COMPOUND COST ARMS — offline · price card (not invoice)
+Price card: https://docs.parallel.ai/getting-started/pricing.md
+Fetched at: 2026-09-13T22:28:00Z
+Search turbo/fast: $0.001/req · basic/advanced: $0.005/req
+NOTE: Price card from public docs, NOT an invoice. Exact billing requires Parallel console/invoice — Oscar only.
+
+arm          A_pc B_pc B_hits finds   $turbo     $adv pass
+----------------------------------------------------------
+NAIVE           2    3      0     4   0.0040   0.0200 NO
+PARAPHRASE      2    3      0     4   0.0040   0.0200 NO
+EXACT           2    1      2     3   0.0030   0.0150 YES
+
+FINDINGS (re-derived this run — do not carry forward):
+- NAIVE baseline never compounds: B_pc=3 hits=0 pass=False
+- PARAPHRASE (old exhibit B wording) under exact-assertion binding: B_pc=3 hits=0 pass=False — embarrassing: demo shape broken by paraphrase
+- EXACT overlapping claims restore sealed shape: A=2→B=1 hits=2 pass=True
+- EXACT vs PARAPHRASE: corpus_hits delta=+2, B parallel_calls saved=+2
+- Cost (price card 2026-09-13, turbo): NAIVE $0.0040 · PARAPHRASE $0.0040 · EXACT $0.0030 (NOT invoice — Price card from public docs, NOT an invoice. Exa…)
+
+GATE OK — EXACT compounds; PARAPHRASE and NAIVE do not.

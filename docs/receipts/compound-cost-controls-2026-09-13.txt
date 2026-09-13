@@ -1,0 +1,8 @@
+PASS  test_price_card_is_dated_not_invoice
+PASS  test_paraphrase_fixture_differs_from_exact_b
+PASS  test_eval_gate_exits_zero_with_expected_pattern
+PASS  test_offline_compound_exhibit_passes_on_exact_b
+PASS  test_watch_paraphrase_arm_go_red_when_forced_as_exhibit_b
+PASS  test_cold_clone_reports_compound_exit_explicitly
+
+6/6 passed

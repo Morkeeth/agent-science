@@ -1,6 +1,6 @@
 # SUBMISSION PACK — Agentic Cinema · slice 7
 
-**Date:** 2026-09-12 · **Repo:** https://github.com/Morkeeth/agent-science @ `main`  
+**Date:** 2026-09-13 · **Repo:** https://github.com/Morkeeth/agent-science @ `main`  
 **Hosted:** https://agent-science-568004190078.us-central1.run.app · **Deadline:** 2026-09-09 14:00 PT  
 **Scope:** docs + offline controls — no public repo flip, no video upload, no Devpost submit, no `deploy.sh`
 
@@ -14,11 +14,12 @@ bash scripts/verify_cold_clone.sh
 python3 tests/test_registry_surface.py -q
 python3 scripts/compound_exhibit_receipt.py
 python3 scripts/eval_compound_cost_arms.py
+python3 scripts/eval_artifact_claims.py
 bash scripts/demo_truth_layer.sh
 python3 ask_registry.py "agentlint" | head -5
 ```
 
-Offline compound receipt writes `docs/COMPOUND-EXHIBIT-2026-08-29.md` with A=2→B=1 Parallel (claims-searched), corpus_hits≥1 — no Gemini/Parallel keys required. Overlapping B claims must be **exact** wording (see `eval_compound_cost_arms.py` PARAPHRASE arm — fails on purpose).
+Offline compound receipt writes `docs/COMPOUND-EXHIBIT-2026-08-29.md` with A=2→B=1 Parallel (claims-searched), corpus_hits≥1 — no Gemini/Parallel keys required. Overlapping B claims must be **exact** wording (see `eval_compound_cost_arms.py` PARAPHRASE arm — fails on purpose). `verify_cold_clone.sh` exits non-zero if the compound exhibit fails (watched RED 2026-09-13).
 
 ---
 
@@ -34,7 +35,7 @@ Offline compound receipt writes `docs/COMPOUND-EXHIBIT-2026-08-29.md` with A=2�
 | Partner integrations | All four called at runtime | [x] docs | `docs/PARTNER-INTEGRATIONS-2026-08-30.md` |
 | ADK default path | `engine_default: adk` | [x] local / [x] hosted (pre private-workspaces) | `docs/RECEIPT-adk-default-path-2026-08-30.md` |
 
-**Controls re-measured 2026-09-12** (run each at object):
+**Controls re-measured 2026-09-13** (run each at object):
 
 | Suite | Command | Result |
 |-------|---------|--------|
@@ -56,11 +57,11 @@ Offline compound receipt writes `docs/COMPOUND-EXHIBIT-2026-08-29.md` with A=2�
 | compound cost arms | `python3 scripts/eval_compound_cost_arms.py` | NAIVE fail · PARAPHRASE fail · EXACT **A=2→B=1 hits=2** |
 | artifact claims | `python3 scripts/eval_artifact_claims.py` | **128/128** suites + frozen corpus **312** |
 
-**Compound exhibit (offline, 2026-09-12):** `python3 scripts/compound_exhibit_receipt.py` · A=**2**→B=**1** Parallel · B corpus hits=**2** — `docs/COMPOUND-EXHIBIT-2026-08-29.md`. **Regression found tonight:** paraphrase B (pre-fix) scored A=2→B=3 hits=0 under exact-assertion binding — preserved as baseline arm. Live hosted compound: **BLOCKED** (no keys; `/search` **501** on private-workspaces) — `docs/RECEIPT-live-compound-BLOCKED-2026-09-12.md`. Orphan-works full script: prior run B **504** — do not claim on video.
+**Compound exhibit (offline, 2026-09-13):** `python3 scripts/compound_exhibit_receipt.py` · A=**2**→B=**1** Parallel · B corpus hits=**2** — `docs/COMPOUND-EXHIBIT-2026-08-29.md`. **Regression:** paraphrase B scored A=2→B=3 hits=0 under exact-assertion binding — preserved as baseline arm; cold-clone exits 3 when forced. Live hosted compound: **BLOCKED** (no keys) — `docs/RECEIPT-live-compound-BLOCKED-2026-09-13.md`. Orphan-works full script: prior run B **504** — do not claim on video.
 
-**Eval gate:** `docs/QWEN-EVAL-GATE-2026-08-30.md` + `scripts/eval_compound_cost_arms.py` · refusal baseline **5/6** vs shipping **6/6**; compound arms GATE OK with dated price card (not invoice). Receipt: `docs/RECEIPT-night-wave-2026-09-12.md`.
+**Eval gate:** `docs/QWEN-EVAL-GATE-2026-08-30.md` + `scripts/eval_compound_cost_arms.py` · refusal baseline **5/6** vs shipping **6/6**; compound arms GATE OK with dated price card `fixtures/price-cards/parallel-search-2026-09-13.json` (not invoice). Receipt: `docs/RECEIPT-night-wave-2026-09-13.md`.
 
-**Hosted note (2026-09-12):** `curl …/health` → `mode=private-workspaces`, rev `agent-science-00028-hed`. Unauthenticated `/search` and `/partners` return **501**. Stranger demo path for submit is **offline cold clone**, not open hosted search.
+**Hosted note (2026-09-13):** `curl …/health` → `mode=private-workspaces`, rev `agent-science-00028-hed`. Unauthenticated `/search` **303** → Sign-in HTML (earlier receipts said **501** — wrong at today's object). Stranger demo path for submit is **offline cold clone**, not open hosted search.
 
 ---
 
@@ -174,5 +175,5 @@ object was.
 - [ ] Upload video to Devpost
 - [ ] Paste Devpost block + fill remaining fields (built with, links, screenshot)
 - [ ] Seal prediction hash in Devpost / commit message after live A/B
-- [ ] `bash deploy.sh` candidate + promote — see `docs/DEPLOY-PREP-2026-09-12.md` (Oscar only)
+- [ ] `bash deploy.sh` candidate + promote — see `docs/DEPLOY-PREP-2026-09-13.md` (Oscar only)
 - [ ] Invoice-backed Parallel cost line (price card gate is offline stand-in)

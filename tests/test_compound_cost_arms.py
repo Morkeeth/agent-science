@@ -19,10 +19,17 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 EVAL = ROOT / "scripts/eval_compound_cost_arms.py"
-CARD = ROOT / "fixtures/price-cards/parallel-search-2026-09-12.json"
+CARD_DIR = ROOT / "fixtures/price-cards"
 PARA = ROOT / "fixtures/scripts/compound-mini-B-paraphrase.txt"
 EXACT_B = ROOT / "fixtures/scripts/compound-mini-B.txt"
 EXHIBIT = ROOT / "scripts/compound_exhibit_receipt.py"
+COLD = ROOT / "scripts/verify_cold_clone.sh"
+
+
+def _latest_card() -> Path:
+    cards = sorted(CARD_DIR.glob("parallel-search-*.json"))
+    assert cards, "missing price cards"
+    return cards[-1]
 
 
 def _run(cmd: list[str]) -> subprocess.CompletedProcess:
@@ -30,7 +37,7 @@ def _run(cmd: list[str]) -> subprocess.CompletedProcess:
 
 
 def test_price_card_is_dated_not_invoice():
-    card = json.loads(CARD.read_text())
+    card = json.loads(_latest_card().read_text())
     assert card.get("fetched_at"), "price card missing fetched_at"
     assert "NOT an invoice" in card.get("billing_note", "")
     assert card["modes"]["turbo_or_fast"] > 0
@@ -52,6 +59,8 @@ def test_eval_gate_exits_zero_with_expected_pattern():
     assert "GATE OK" in out
     # Pattern lines
     assert "embarrassing: demo shape broken by paraphrase" in out
+    # Must load a dated card (re-derived path), not a hard-coded week-old path only
+    assert "Fetched at:" in out
     print("PASS  test_eval_gate_exits_zero_with_expected_pattern")
 
 
@@ -69,8 +78,6 @@ def test_watch_paraphrase_arm_go_red_when_forced_as_exhibit_b():
     """Control's control: if we temporarily point exhibit B claims at paraphrase,
     the exhibit must exit non-zero. Restores files after.
     """
-    import importlib.util
-
     # Direct unit: run eval and assert PARAPHRASE line shows pass=NO
     r = _run([sys.executable, str(EVAL)])
     lines = [ln for ln in r.stdout.splitlines() if ln.startswith("PARAPHRASE")]
@@ -80,6 +87,15 @@ def test_watch_paraphrase_arm_go_red_when_forced_as_exhibit_b():
     print("PASS  test_watch_paraphrase_arm_go_red_when_forced_as_exhibit_b")
 
 
+def test_cold_clone_reports_compound_exit_explicitly():
+    """verify_cold_clone must surface compound exit — not hide it behind head|grep."""
+    text = COLD.read_text()
+    assert "COMPOUND_RC" in text, "cold clone must capture compound exit code"
+    assert "head -4" not in text.split("Offline compound")[1].split("Eval gate")[0], (
+        "compound step must not pipe through head (SIGPIPE false-red risk)")
+    print("PASS  test_cold_clone_reports_compound_exit_explicitly")
+
+
 if __name__ == "__main__":
     tests = [
         test_price_card_is_dated_not_invoice,
@@ -87,6 +103,7 @@ if __name__ == "__main__":
         test_eval_gate_exits_zero_with_expected_pattern,
         test_offline_compound_exhibit_passes_on_exact_b,
         test_watch_paraphrase_arm_go_red_when_forced_as_exhibit_b,
+        test_cold_clone_reports_compound_exit_explicitly,
     ]
     failed = 0
     for t in tests:

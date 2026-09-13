@@ -1,0 +1,7 @@
+HOSTED PROBE 2026-09-13
+{"ok": true, "service": "agent-science", "mode": "private-workspaces", "revision": "agent-science-00028-hed"}
+/search 303
+/partners 303
+/registry 303
+/visibility/ui 303
+/search follow title: <title>Sign in · Agent Science</title>

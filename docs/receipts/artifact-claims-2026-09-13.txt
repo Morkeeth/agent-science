@@ -1,0 +1,33 @@
+ARTIFACT CLAIMS AT HEAD — baseline trusts docs; shipping re-derives
+
+NAIVE  watch_it_go_red        trusts doc 72/72 (not run)
+NAIVE  adk_default_path       trusts doc 5/5 (not run)
+NAIVE  registry_surface       trusts doc 16/16 (not run)
+NAIVE  cross_subject_reuse    trusts doc 2/2 (not run)
+NAIVE  backfill_seeds_reuse   trusts doc 2/2 (not run)
+NAIVE  clear_corpus           trusts doc 4/4 (not run)
+NAIVE  search_path            trusts doc 5/5 (not run)
+NAIVE  source_map             trusts doc 3/3 (not run)
+NAIVE  refusal_correctness    trusts doc 6/6 (not run)
+NAIVE  partner_runtime        trusts doc 7/7 (not run)
+NAIVE  parallel_integration   trusts doc 6/6 (not run)
+NAIVE  soft_claims          trusts 0 soft number(s) unread
+NAIVE  overall              PASS (baseline never opens the object)
+
+SHIP   watch_it_go_red        doc=72/72 measured=72/72 OK
+SHIP   adk_default_path       doc=5/5 measured=5/5 OK
+SHIP   registry_surface       doc=16/16 measured=16/16 OK
+SHIP   cross_subject_reuse    doc=2/2 measured=2/2 OK
+SHIP   backfill_seeds_reuse   doc=2/2 measured=2/2 OK
+SHIP   clear_corpus           doc=4/4 measured=4/4 OK
+SHIP   search_path            doc=5/5 measured=5/5 OK
+SHIP   source_map             doc=3/3 measured=3/3 OK
+SHIP   refusal_correctness    doc=6/6 measured=6/6 OK
+SHIP   partner_runtime        doc=7/7 measured=7/7 OK
+SHIP   parallel_integration   doc=6/6 measured=6/6 OK
+SHIP   research_corpus       manifest=312 freeze_check=312 OK
+SHIP   soft_unbound_numbers  count=0 OK
+
+Baseline arm: PASS (trusted docs without execution) — this is the two-hour version that ships stale ratios.
+Shipping arm: PASS — 128/128 suite tests + 312 frozen corpus claims match objects.
+GATE OK — artifact claims at HEAD match measured objects; no soft +claims.

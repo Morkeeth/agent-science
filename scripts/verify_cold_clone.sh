@@ -38,7 +38,19 @@ python3 tests/test_registry_surface.py -q 2>&1 | tail -1
 
 echo
 echo "8. Offline compound receipt..."
-python3 scripts/compound_exhibit_receipt.py 2>&1 | grep -E 'parallel_calls|corpus_hits|Mode:' | head -4
+# Capture full output + exit explicitly. Do NOT pipe through head — SIGPIPE can
+# turn a green compound (exit 0) into a false red, and grepping alone used to
+# hide exit 3 as "OK" when callers ignored pipefail.
+set +e
+COMPOUND_OUT=$(python3 scripts/compound_exhibit_receipt.py 2>&1)
+COMPOUND_RC=$?
+set -e
+echo "$COMPOUND_OUT" | grep -E 'parallel_calls|corpus_hits|Mode:|exhibit failed' | head -6 || true
+if [[ "$COMPOUND_RC" -ne 0 ]]; then
+  echo "FAIL: compound_exhibit_receipt.py exited $COMPOUND_RC (stranger compound broken)"
+  exit "$COMPOUND_RC"
+fi
+echo "compound_exhibit_receipt.py exit 0"
 
 echo
 echo "9. Eval gate (baseline + ablation + scorer symmetry)..."

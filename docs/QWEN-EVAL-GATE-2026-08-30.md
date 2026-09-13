@@ -123,5 +123,6 @@ Re-derives all 9 suite counts against `docs/SUBMISSION-PACK-2026-08-29.md` — e
 - [x] Offline path with no API key
 - [x] Wilson CI + McNemar (n=6)
 - [x] Honesty carries worst number (tie + RC5 false-GREEN both arms)
-- [x] **Cost from dated price card** (2026-09-12) — `scripts/eval_compound_cost_arms.py`; NOT invoice
+- [x] **Cost from dated price card** (2026-09-13 re-fetch) — `scripts/eval_compound_cost_arms.py`; NOT invoice
 - [x] **Compound alternative arms** — NAIVE + PARAPHRASE baselines vs EXACT shipping shape
+- [x] **Artifact claims at HEAD** — `scripts/eval_artifact_claims.py` (2026-09-13: 128/128 + 312)
