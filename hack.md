@@ -342,7 +342,7 @@ bash scripts/verify_cold_clone.sh                                    # exit 0; e
 ### BLOCKED
 
 - Live compound — no PARALLEL/GEMINI keys on this VM
-- Hosted stranger desk — `private-workspaces`; unauthenticated routes **303 → Sign-in**
+- Hosted full workspace — token required; public entry + `/judge/demo` are open after follow
 - Invoice-backed cost — price card only; console billing = Oscar
 - Devpost / video / deploy promote — Oscar only
 
