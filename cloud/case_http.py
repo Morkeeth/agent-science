@@ -189,8 +189,17 @@ class WorkspaceHTTP:
         parsed = urlsplit(h.path)
         path = parsed.path.rstrip('/') or '/'
         if h.command == 'GET' and path == '/health':
-            return self.send(200, {'ok': True, 'service': 'agent-science', 'mode': 'private-workspaces',
-                                   'revision': os.getenv('K_REVISION', 'local')})
+            # Partner fields stay public on hosted — a private-workspaces mode that
+            # drops them made verify_partners_hosted.sh read green in docs while RED
+            # at the object (measured 2026-09-13 on rev agent-science-00028-hed).
+            from cloud import partners as partner_manifest
+            payload = partner_manifest.health_payload(mode='private-workspaces')
+            payload.setdefault('revision', os.getenv('K_REVISION', 'local'))
+            return self.send(200, payload)
+        if h.command == 'GET' and path == '/partners':
+            # Judge/track manifest — no secrets, no tenant data. Must not require login.
+            from cloud import partners as partner_manifest
+            return self.send(200, partner_manifest.manifest())
         expected_origin = os.getenv('AGENT_SCIENCE_PUBLIC_ORIGIN', '').rstrip('/')
         if self.secure and h.command == 'GET' and not self.api and expected_origin:
             # Cloud Run has multiple aliases. Forms and session cookies must use

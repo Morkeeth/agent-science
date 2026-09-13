@@ -59,6 +59,22 @@ class HostedFlow(unittest.TestCase):
         self.assertEqual(self.request('GET','/stats',token=None)[0],303)
         self.assertEqual(self.request('POST','/search',{},token=TOKEN_A)[0],404)
 
+    def test_anonymous_partner_health_and_partners_stay_public(self):
+        from cloud import partners
+        with patch.object(partners.adk_agent, 'adk_available', return_value=True), \
+             patch.object(partners.adk_agent, 'adk_version', return_value='2.7.1'), \
+             patch.dict(os.environ, {'AGENT_BUILDER':'1','GCP_PROJECT':'hack-fleet','PARALLEL_API_KEY':'pk-live-abc-fixture'}, clear=False):
+            code,_,health=self.request('GET','/health',token=None)
+            self.assertEqual(code,200)
+            self.assertEqual(health.get('mode'),'private-workspaces')
+            self.assertEqual(health.get('engine_default'),'adk')
+            self.assertTrue(health.get('gemini'))
+            self.assertTrue(health.get('parallel'))
+            code,_,manifest=self.request('GET','/partners',token=None)
+            self.assertEqual(code,200)
+            self.assertIn('gemini_vertex', manifest.get('partners',{}))
+            self.assertTrue(manifest.get('track_checklist',{}).get('adk_agent_builder'))
+
     def test_real_worker_create_idempotency_and_restart(self):
         code,_,result=self.create(); self.assertEqual(code,201,result)
         self.assertEqual(self.create()[0],200)

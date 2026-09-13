@@ -1,5 +1,13 @@
 # Agent Science
 
+**You get:** every checkable claim back as a verbatim quote with its source URL, or UNSOURCED with a named reason — and a local research companion that keeps questions, source snapshots, and decisions together so they can change when the evidence changes.
+
+**Proof:** offline compound exhibit (`python3 scripts/compound_exhibit_receipt.py`) and partner wiring (`bash scripts/verify_partners_local.sh` → `engine_default: adk`). Hosted private workspaces: https://agent-science-568004190078.us-central1.run.app — after deploy, `GET /health` and `GET /partners` stay public.
+
+**Constraint:** if the document does not contain the exact passage, refuse — never paraphrase, never infer.
+
+---
+
 Research a builder question, inspect the source evidence, and record a decision that can change when its evidence changes.
 
 Agent Science is a CLI/MCP research companion for coding work. Public-source discovery, versioned evidence, decisions and repo experiments work locally without a hosted account. The CLI and MCP interface keep the question, exact source quotations, source snapshots, actual search attempts, repo context and decision history together.

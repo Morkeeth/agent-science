@@ -37,9 +37,94 @@ def t_parallel_entrypoint_wired_in_facts():
 def t_gcp_service_health_shape():
     svc = importlib.import_module("cloud.service")
     src = inspect.getsource(svc)
-    assert "engine_default" in src
-    assert "gemini_path" in src or "parallel" in src
+    assert "engine_default" in src or "health_payload" in src
+    assert "gemini_path" in src or "health_payload" in src or "parallel" in src
     assert "_run_clearance" in src
+    from cloud import partners
+    with patch.object(partners.adk_agent, "adk_available", return_value=True):
+        with patch.object(partners.adk_agent, "adk_version", return_value="2.7.1"):
+            with patch.dict(os.environ, {"AGENT_BUILDER": "1", "GCP_PROJECT": "hack-fleet"}, clear=False):
+                payload = partners.health_payload()
+    assert payload["engine_default"] == "adk"
+    assert payload["gemini"] is True
+    assert payload["gemini_path"].startswith("vertex:")
+
+
+def t_hosted_private_workspaces_exposes_partner_health_and_partners():
+    """Hosted mode must not strip partner fields from /health or gate /partners.
+
+    Measured RED on 2026-09-13 against rev agent-science-00028-hed before this fix:
+    /health returned only ok/service/mode/revision; /partners returned 303 to login.
+    """
+    import hashlib
+    import http.client
+    import json
+    import tempfile
+    import threading
+    from http.server import HTTPServer
+
+    from cloud.service import Handler
+
+    token = "a" * 48
+    config = {
+        "session_key": "s" * 48,
+        "users": {"alice": hashlib.sha256(token.encode()).hexdigest()},
+    }
+    origin = "http://127.0.0.1:18770"
+    temp = tempfile.TemporaryDirectory()
+    env = patch.dict(
+        os.environ,
+        {
+            "AGENT_SCIENCE_HOSTED": "1",
+            "AGENT_SCIENCE_ALLOW_HTTP": "1",
+            "AGENT_SCIENCE_PUBLIC_ORIGIN": origin,
+            "AGENT_SCIENCE_ACCESS_CONFIG": json.dumps(config),
+            "AGENT_SCIENCE_WORKSPACE_DIR": temp.name,
+            "AGENT_BUILDER": "1",
+            "GCP_PROJECT": "hack-fleet",
+            "PARALLEL_API_KEY": "pk-live-abc-fixture",
+        },
+        clear=False,
+    )
+    env.start()
+    server = HTTPServer(("127.0.0.1", 0), Handler)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        from cloud import partners
+
+        with patch.object(partners.adk_agent, "adk_available", return_value=True):
+            with patch.object(partners.adk_agent, "adk_version", return_value="2.7.1"):
+                conn = http.client.HTTPConnection(
+                    "127.0.0.1", server.server_port, timeout=10
+                )
+                conn.request("GET", "/health")
+                resp = conn.getresponse()
+                health = json.loads(resp.read().decode())
+                assert resp.status == 200, health
+                assert health.get("mode") == "private-workspaces", health
+                assert health.get("engine_default") == "adk", health
+                assert health.get("gemini") is True, health
+                assert health.get("parallel") is True, health
+                assert health.get("agent_builder") is True, health
+                conn.close()
+
+                conn = http.client.HTTPConnection(
+                    "127.0.0.1", server.server_port, timeout=10
+                )
+                conn.request("GET", "/partners")
+                resp = conn.getresponse()
+                body = json.loads(resp.read().decode())
+                assert resp.status == 200, body
+                assert "partners" in body, body
+                assert body["track_checklist"]["adk_agent_builder"] is True
+                conn.close()
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join()
+        env.stop()
+        temp.cleanup()
 
 
 def t_adk_default_engine_wired():
