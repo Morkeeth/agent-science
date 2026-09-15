@@ -2,7 +2,7 @@
 doc: hack
 project: Agent Science
 phase: SHIP
-last-touched: 2026-09-03 12:10 UTC
+last-touched: 2026-09-15 00:15 UTC
 canonical: true
 event: Agentic Cinema · Parallel track · deadline 2026-09-09 14:00 PDT
 supersedes: docs/PHASE0-LADDER.md ClickHouse-track note (runtime track is Parallel)
@@ -307,7 +307,45 @@ Full record: `fleet-ops (internal)/retros/QWEN-LOSS-RETRO-2026-08-30.md` (correc
 
 ---
 
-## 🎯 NOW — Partner night wave (fresh compound + timeout finding)
+## 🎯 NOW — Partner hosted admissibility (private-workspace path)
+
+**Slice:** Restore public `/health` + `/partners` partner fields on Cloud Run private-workspace mode; keep `/clear` closed; prove ADK default locally; document Oscar deploy unblock.
+
+### Build (shipped 2026-09-15)
+
+- [x] Shared partner `health_payload` — `cloud/partners.py` (local desk + hosted same shape)
+- [x] Hosted `/health` + anonymous `/partners` — `cloud/case_http.py`
+- [x] Regression controls — `test_partner_runtime` **8/8** · hosted flow anonymous health
+- [x] Partner doc + design-partner loop updated for workspace boundary
+- [x] Qwen eval gate re-run — baseline 5/6 vs shipping 6/6, delta +1
+- [x] SUBMISSION-PACK counts re-derived — **129/129**
+- [x] Live compound — **BLOCKED** missing Parallel/Gemini/workspace token (`docs/BLOCKED-live-compound-2026-09-15.md`)
+
+### Verify (one command each)
+
+```bash
+git pull && python3 tests/test_watch_it_go_red.py                    # 72/72
+python3 tests/test_adk_default_path.py                               # 5/5
+python3 tests/test_partner_runtime.py                                # 8/8
+python3 -m unittest tests.test_hosted_flow.HostedFlow.test_anonymous_partner_health_and_manifest
+python3 scripts/bench_check_docs.py                                  # 129/129
+python3 scripts/eval_refusal_baseline.py && python3 scripts/eval_refusal_ablation.py
+bash scripts/verify_partners_hosted.sh                               # PARTIAL until Oscar redeploy
+```
+
+### Receipt
+
+- `docs/RECEIPT-partner-hosted-admissibility-2026-09-15.md`
+- `docs/BLOCKED-live-compound-2026-09-15.md`
+
+### BLOCKED
+
+- Hosted `/health` on `agent-science-00028-hed` still thin until Oscar `deploy.sh` + promote.
+- Live Parallel compound — no API keys / workspace token on this VM.
+
+---
+
+## 🎯 NOW (prior) — Partner night wave (fresh compound + timeout finding)
 
 **Slice:** Harden partner verify to prove Parallel at runtime; ship fresh compound probe; document orphan-works 504 regression at object.
 
@@ -528,6 +566,8 @@ bash scripts/verify_cold_clone.sh                                               
 
 | When | What | Command | Outcome |
 |------|------|---------|---------|
+| 2026-09-15 | Partner hosted admissibility | `test_partner_runtime` · local verify :8770 · live curl | **Code restores engine_default:adk**; live `00028-hed` still thin until Oscar deploy |
+| 2026-09-15 | Compound exhibit re-derive | `compound_exhibit_receipt.py` | First run **FAILED** (paraphrase ≠ corpus hit); fixed offline claims → **A=2→B=1**, hits=2 |
 | 2026-09-03 night | Fresh compound + timeout finding | `compound_fresh_hosted_probe.py` · `verify_partners_hosted.sh` | **A≥1 Parallel → B drop** · orphan-works Run A **504** @ 300s |
 | 2026-09-03 night | SUBMISSION-PACK + Qwen gates | `bench_check_docs.py` · `eval_verify_holdout.py` · `eval_scorer_symmetry.py` | **127/127** · holdout OK · scorer 5/6 vs 6/6 · offline compound A=2→B=1 |
 | 2026-09-02 | Partner verify re-run | `verify_partners_hosted.sh` · `full_gate.sh` | **4/4 partners** · compound warm-shelf PASS · 72/72 auto-seed |

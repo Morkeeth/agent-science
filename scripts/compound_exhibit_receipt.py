@@ -74,10 +74,14 @@ _OFFLINE_CLAIMS = {
         _Raw("Member states had until 29 October 2014 to bring it into national law.",
              None, "29 October 2014"),
     ],
+    # B's narration differs in the fixture script, but overlapping checkable claims must
+    # use the same assertion text. corpus.recall requires norm_term(assertion) match —
+    # paraphrase is not a corpus hit (verbatim product). Prior receipts that claimed
+    # A=2→B=1 with differently worded B claims were not re-derivable at this object.
     "B": [
-        _Raw("Europe's answer was Directive 2012/28/EU — known as the Orphan Works Directive —",
+        _Raw("In 2012 the European Union passed Directive 2012/28/EU, the Orphan Works Directive.",
              None, "Directive 2012/28/EU"),
-        _Raw("and the deadline for national transposition was 29 October 2014.",
+        _Raw("Member states had until 29 October 2014 to bring it into national law.",
              None, "29 October 2014"),
         _Raw("The British Library has estimated that forty percent of its copyrighted collection is orphaned.",
              None, "forty percent"),
