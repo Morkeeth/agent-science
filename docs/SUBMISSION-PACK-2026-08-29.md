@@ -86,7 +86,8 @@ Copy everything between the lines into Devpost project description / inspiration
 
 When you or your agent websearches, you get a **full visibility panel**: what was searched (every angle, every tier), what the field runs (GitHub ★, blogs, peers), and a primary verdict — **sourced verbatim**, **refused with cause**, or **CONTRARY TO RESEARCH** when practitioners outrun papers. Stack-fit scores whether a truth fits *your* repo. The shelf compounds: ask once, free forever.
 
-**Try it:** https://agent-science-568004190078.us-central1.run.app/visibility/ui?q=ralph+loop+agentic  
+**Try it:** https://agent-science-568004190078.us-central1.run.app/judge/demo  
+**(Local desk film):** `python3 cloud/service.py` → `/visibility/ui?q=ralph+loop+agentic`  
 **Truths dashboard:** `/truths/ui` · **265+ claims** on disk
 
 Clearance and E&O insurance? One paying vertical on the same layer — sections below.
@@ -133,7 +134,7 @@ market.
 
 | | |
 |---|---|
-| Repo | `https://github.com/Morkeeth/agent-science` @ `e5a337c` |
+| Repo | `https://github.com/Morkeeth/agent-science` @ `42983e1` |
 | Entry point | `python3 agent_science.py <script.txt>` — Gemini + Parallel **live by default** |
 | Hosted | https://agent-science-568004190078.us-central1.run.app — `POST /clear` · `GET /corpus` |
 | Controls | registry **16/16** · cross-subject reuse **2/2** · compound exhibit B **1** Parallel vs A **2** (offline) |
