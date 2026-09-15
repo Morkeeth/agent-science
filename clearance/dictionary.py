@@ -205,9 +205,17 @@ def lookup(query: str, *, subject: str = "stack", live: bool = False,
                     reg["source"] = "registry"
                     return finish(reg)
 
-        cheap = _cheap_route(raw, subject=subject, con=con, trace=trace, **({"refresh": True} if refresh else {}))
-        if cheap and refusal_log.is_settled_for_reuse(verdict=cheap.get("verdict"), cause=cheap.get("cause")):
-            return finish(cheap, COST_CHEAP)
+        # Cheap routing may use the alias target: "orphan works directive" does not
+        # contain a CELEX shape, but canonical_query maps it to "2012/28/EU" which does.
+        # That is routing, not free verdict-reuse of a different assertion.
+        cheap = None
+        for q in dict.fromkeys([raw, canonical_query(raw)]):
+            cheap = _cheap_route(
+                q, subject=subject, con=con, trace=trace,
+                **({"refresh": True} if refresh else {}))
+            if cheap and refusal_log.is_settled_for_reuse(
+                    verdict=cheap.get("verdict"), cause=cheap.get("cause")):
+                return finish(cheap, COST_CHEAP)
         if not live:
             return finish(cheap or {
                 "label": "NOT_CLEARED", "cause": "not_in_registry",

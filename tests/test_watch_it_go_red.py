@@ -1105,6 +1105,10 @@ def t_one_key_per_document_not_per_url_spelling():
         "canonicalisation collapsed two different EUR-Lex documents into one key"
     assert canonical(eur).endswith("32012L0028"), \
         "a query string was stripped; that changes which document is cited"
+    # Percent-encoding is spelling. Seed wrote CELEX%3A; routing constructs CELEX:.
+    routed = "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32012L0028"
+    assert canonical(eur) == canonical(routed), \
+        "CELEX%3A and CELEX: still resolve as different documents"
 
 
 def _ensure_fixture_documents():

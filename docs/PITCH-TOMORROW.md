@@ -30,14 +30,15 @@
 **Product:** Agent Science websearch returns a **full visibility panel** — primary verdict, transparency (angles searched, shallow-route warning, imbalance), field adoption (★), blogs, fleet peers, and **stack-fit**: does this truth fit *your* repo, and what improves if you adopt it?
 
 **Proof on camera:**
-1. **Hosted** `/visibility/ui?q=ralph+loop+agentic` — transparency pane + CONTRARY stamp (no CLI needed) · live 2026-09-02: UI shows primary `CONTRARY_TO_RESEARCH` + the transparency pane; the keys `angles_searched`, `shallow_route`, `imbalance` are in the JSON at `/visibility?q=ralph+loop+agentic`
-2. `/truths/ui` — ranked queries, **276 claims** (live 2026-09-02 ~23:40Z; `curl -s …/truths/ui` → `Shelf: 276 claims · hit rate 0.66 · 191 queries logged`; the shelf grows with use — re-curl before saying a number)
+1. **Hosted partners** — after Oscar redeploy, `curl …/health` shows `engine_default: adk` + `parallel_sdk: true` (revision `00028-hed` is thin — do not film until green). Public story beat: `/judge/demo` (read-only evidence example).
+2. **Local desk transparency WOW** — `python3 cloud/service.py` then `/visibility/ui?q=ralph+loop+agentic` (hosted `/visibility/ui` and `/truths/ui` now say *local-only research route* — see `docs/FINDING-hosted-film-surface-2026-09-15.md`).
 3. Compound: same subject twice → `parallel_calls` drop, `corpus_hits` rise — `docs/SEALED-PREDICTION-2026-08-31.md` (sealed A=1→B=0; warm shelf may show A=0→B=0 with `corpus_hits=1`)
 
 **Moat:** Positive truths + negative truths (named refusal) + popularity → self-tuning dictionary. Competitors prove the first script. We prove the **second costs less** — and we show *how we searched*.
 
 **Hosted:** https://agent-science-568004190078.us-central1.run.app  
-**Film URL:** https://agent-science-568004190078.us-central1.run.app/visibility/ui?q=ralph+loop+agentic  
+**Film URL (hosted):** https://agent-science-568004190078.us-central1.run.app/judge/demo  
+**Film URL (local desk):** http://localhost:8080/visibility/ui?q=ralph+loop+agentic  
 **Revision:** deployed with `/visibility` + `/truths/ui`
 
 ---

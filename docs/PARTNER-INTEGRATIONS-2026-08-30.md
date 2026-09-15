@@ -167,7 +167,7 @@ curl -s localhost:8099/health
 | **Env vars** | `AGENT_BUILDER=1` (disable: `0`/`false`), plus Vertex vars above |
 | **Secret Manager** | None — uses same ADC as Vertex |
 
-**Receipt:** `docs/RECEIPT-adk-default-path-2026-08-30.md` · hosted surface restore `docs/RECEIPT-partner-hosted-admissibility-2026-09-15.md`
+**Receipt:** `docs/RECEIPT-adk-default-path-2026-08-30.md` · hosted surface restore `docs/RECEIPT-partner-hosted-admissibility-2026-09-15.md` · night wave `docs/RECEIPT-partner-integrations-night-2026-09-15.md`
 
 **Controls:** `python3 tests/test_adk_default_path.py` — engine selection without live model.  
 **Hosted regression control:** `python3 tests/test_partner_runtime.py` → `t_hosted_workspace_exposes_partner_health`.
@@ -185,6 +185,10 @@ git clone https://github.com/Morkeeth/agent-science.git && cd agent-science
 bash scripts/verify_cold_clone.sh
 ```
 
-Receipts: `docs/RECEIPT-hosted-partner-runtime-2026-08-30.md`, `docs/RECEIPT-live-compound-exhibit-2026-08-30.md`, `docs/RECEIPT-partner-hosted-admissibility-2026-09-15.md`.
+Receipts: `docs/RECEIPT-hosted-partner-runtime-2026-08-30.md`, `docs/RECEIPT-live-compound-exhibit-2026-08-30.md`, `docs/RECEIPT-partner-hosted-admissibility-2026-09-15.md`, `docs/RECEIPT-partner-integrations-night-2026-09-15.md`.
 
-Live hosted research requires Oscar deploy + workspace access config. Offline controls prove partner **code paths** exist and are tested.
+Live partner RED watcher (expect exit 2 until Oscar redeploy):
+
+```bash
+python3 scripts/watch_partner_health_object.py
+```

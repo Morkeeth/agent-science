@@ -27,7 +27,7 @@ Offline compound receipt writes `docs/COMPOUND-EXHIBIT-2026-08-29.md` with A=2�
 |------|-------------|--------|----------|
 | Video | ≤ 3 min (≤ 180 s) | [ ] | Script: `docs/VIDEO-SCRIPT-2026-08-29.md` — beats sum **178 s** |
 | Devpost | All mandatory fields filled | [ ] | Paste block below (§1–3 from `PITCH.md`) |
-| Public repo | Stranger can clone | [ ] | Private until submit — flip visibility on GitHub |
+| Public repo | Stranger can clone | [x] | Public since 2026-08-22 (`PublicEvent 2026-08-22T17:17:41Z`); re-checked `gh api repos/Morkeeth/agent-science --jq .private` → `false` 2026-09-15 |
 | OSI licence | Open-source approved | [x] | `LICENSE` (MIT) |
 | Sealed prediction | Pre-registered, falsifiable | [x] | `docs/SEALED-PREDICTION-2026-08-31.md` — hosted A=1→B=0, corpus_hits=1 |
 | Partner integrations | All four wired; hosted health surface restored in code | [x] code / [ ] hosted until Oscar deploy | `docs/PARTNER-INTEGRATIONS-2026-08-30.md` · `docs/RECEIPT-partner-hosted-admissibility-2026-09-15.md` |
@@ -133,7 +133,7 @@ market.
 
 | | |
 |---|---|
-| Repo | `https://github.com/Morkeeth/agent-science` @ `e6793ab` |
+| Repo | `https://github.com/Morkeeth/agent-science` @ `e5a337c` |
 | Entry point | `python3 agent_science.py <script.txt>` — Gemini + Parallel **live by default** |
 | Hosted | https://agent-science-568004190078.us-central1.run.app — `POST /clear` · `GET /corpus` |
 | Controls | registry **16/16** · cross-subject reuse **2/2** · compound exhibit B **1** Parallel vs A **2** (offline) |

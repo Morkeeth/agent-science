@@ -16,6 +16,7 @@ grep -q "$PARALLEL_A" "$FILM_DIR/voiceover.txt" || red "missing parallel A"
 grep -q "$PARALLEL_B" "$FILM_DIR/voiceover.txt" || red "missing parallel B"
 
 ok "hosted /health (partner fields — thin stub is a fail)"
+# /health must stay on the configured host (no -L): partner fields are the object.
 HEALTH="$(curl -sS --max-time 20 "$HOSTED_URL/health" || true)"
 echo "$HEALTH" | python3 -c "
 import json, sys
@@ -26,11 +27,30 @@ assert (d.get('gemini_path') or '').startswith('vertex:'), d
 assert 'mode' in d, d
 " || red "/health missing partner fields (redeploy required if live still thin)"
 
-ok "hosted /visibility/ui"
-curl -sf --max-time 20 "$VISIBILITY_URL" | grep -q Transparency || red "visibility UI missing Transparency pane"
+ok "hosted /partners (anonymous JSON — login HTML is a fail)"
+PARTNERS="$(curl -sS --max-time 20 "$HOSTED_URL/partners" || true)"
+echo "$PARTNERS" | python3 -c "
+import json, sys
+raw = sys.stdin.read()
+assert not raw.lstrip().lower().startswith('<!doctype'), 'partners redirected to login HTML'
+d = json.loads(raw)
+tc = d.get('track_checklist') or {}
+assert tc.get('partner_health_public') is True, d
+assert tc.get('adk_agent_builder') is True, d
+" || red "/partners not public partner JSON (redeploy required)"
 
-ok "hosted /truths/ui"
-curl -sf --max-time 20 "$TRUTHS_URL" | grep -q "Truths dashboard" || red "truths ui down"
+ok "hosted public evidence demo (not the old visibility dashboard)"
+# Private-workspace mode retired anonymous /visibility/ui + /truths/ui.
+# Film the public judge demo + partner /health instead.
+JUDGE_URL="${JUDGE_DEMO_URL:-$HOSTED_URL/judge/demo}"
+curl -sfL --max-time 20 "$JUDGE_URL" | grep -q "Public read-only research example" \
+  || red "hosted /judge/demo missing public evidence example"
+
+ok "hosted visibility/truths stay local-only notices (no false film surface)"
+curl -sfL --max-time 20 "$VISIBILITY_URL" | grep -q "local-only research route" \
+  || red "hosted /visibility/ui must say local-only (do not film as transparency WOW)"
+curl -sfL --max-time 20 "$TRUTHS_URL" | grep -q "local-only research route" \
+  || red "hosted /truths/ui must say local-only (do not film as truths dashboard)"
 
 if [ -f demo/demo-final.mp4 ]; then
   DUR="$(ffprobe -v error -show_entries format=duration -of csv=p=0 demo/demo-final.mp4)"
