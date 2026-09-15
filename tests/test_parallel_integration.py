@@ -74,8 +74,13 @@ def t_partners_manifest_importable():
 
 def t_health_has_partners_route():
     svc = (ROOT / "cloud" / "service.py").read_text()
+    case_http = (ROOT / "cloud" / "case_http.py").read_text()
     assert 'path == "/partners"' in svc
-    assert "parallel_sdk" in svc
+    assert "parallel_sdk" in svc or "health_payload" in svc
+    assert "partner_manifest_for_runtime" in case_http
+    assert "health_payload" in case_http
+    # Hosted private-workspace path must not drop the track surface.
+    assert "path == '/partners'" in case_http or 'path == "/partners"' in case_http
 
 
 def t_requirements_pins_parallel_web():

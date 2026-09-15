@@ -35,11 +35,43 @@ def t_parallel_entrypoint_wired_in_facts():
 
 
 def t_gcp_service_health_shape():
+    from cloud import partners
+    payload = partners.health_payload(mode="local-desk")
+    for field in ("ok", "gemini_path", "parallel", "parallel_sdk", "engine_default", "agent_builder"):
+        assert field in payload, field
     svc = importlib.import_module("cloud.service")
     src = inspect.getsource(svc)
-    assert "engine_default" in src
-    assert "gemini_path" in src or "parallel" in src
+    assert "health_payload" in src
     assert "_run_clearance" in src
+
+
+def t_hosted_workspace_exposes_partner_health():
+    """Regression control: private-workspaces mode must not strip partner fields.
+
+    Hosted revision agent-science-00028-hed served only {ok,service,mode,revision}.
+    That made verify_partners_hosted.sh and film/preflight false on the live object.
+    """
+    case_http = (ROOT / "cloud" / "case_http.py").read_text()
+    assert "health_payload" in case_http
+    assert "partner_manifest_for_runtime" in case_http
+    assert "private-workspaces" in case_http
+    from cloud import partners
+    with patch.dict(os.environ, {"AGENT_SCIENCE_HOSTED": "1", "K_SERVICE": "agent-science",
+                                 "AGENT_BUILDER": "1", "GCP_PROJECT": "hack-fleet",
+                                 "PARALLEL_API_KEY": "pk-live-abc"}, clear=False):
+        with patch.object(partners.adk_agent, "adk_available", return_value=True):
+            with patch.object(partners.adk_agent, "adk_version", return_value="2.7.1"):
+                with patch.object(partners.parallel_search, "sdk_available", return_value=True):
+                    with patch.object(partners.parallel_search, "sdk_version", return_value="1.3.2"):
+                        health = partners.health_payload(mode="private-workspaces", revision="test")
+                        manifest = partners.partner_manifest_for_runtime()
+    assert health["engine_default"] == "adk"
+    assert health["mode"] == "private-workspaces"
+    assert health["parallel"] is True
+    assert health["gemini_path"].startswith("vertex:")
+    assert manifest["mode"] == "private-workspaces"
+    assert manifest["track_checklist"]["partner_health_public"] is True
+    assert manifest["track_checklist"]["adk_agent_builder"] is True
 
 
 def t_adk_default_engine_wired():

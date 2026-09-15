@@ -188,9 +188,16 @@ class WorkspaceHTTP:
             raise HTTPError(414, 'Request URL is too long.')
         parsed = urlsplit(h.path)
         path = parsed.path.rstrip('/') or '/'
+        # Track admissibility surfaces stay public. Private research still requires a key.
         if h.command == 'GET' and path == '/health':
-            return self.send(200, {'ok': True, 'service': 'agent-science', 'mode': 'private-workspaces',
-                                   'revision': os.getenv('K_REVISION', 'local')})
+            from cloud import partners as partner_surface
+            return self.send(200, partner_surface.health_payload(
+                mode='private-workspaces',
+                revision=os.getenv('K_REVISION', 'local'),
+            ))
+        if h.command == 'GET' and path == '/partners':
+            from cloud import partners as partner_surface
+            return self.send(200, partner_surface.partner_manifest_for_runtime())
         expected_origin = os.getenv('AGENT_SCIENCE_PUBLIC_ORIGIN', '').rstrip('/')
         if self.secure and h.command == 'GET' and not self.api and expected_origin:
             # Cloud Run has multiple aliases. Forms and session cookies must use

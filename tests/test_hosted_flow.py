@@ -59,6 +59,32 @@ class HostedFlow(unittest.TestCase):
         self.assertEqual(self.request('GET','/stats',token=None)[0],303)
         self.assertEqual(self.request('POST','/search',{},token=TOKEN_A)[0],404)
 
+    def test_anonymous_partner_health_and_manifest(self):
+        """Partner admissibility stays public on the private-workspace hosted path."""
+        with patch.dict(os.environ, {
+            'AGENT_BUILDER':'1','GCP_PROJECT':'hack-fleet','PARALLEL_API_KEY':'pk-live-abc',
+        }, clear=False):
+            with patch('cloud.partners.adk_agent.adk_available', return_value=True):
+                with patch('cloud.partners.adk_agent.adk_version', return_value='2.7.1'):
+                    with patch('cloud.partners.parallel_search.sdk_available', return_value=True):
+                        with patch('cloud.partners.parallel_search.sdk_version', return_value='1.3.2'):
+                            code,_,health=self.request('GET','/health',token=None)
+                            pcode,_,partners=self.request('GET','/partners',token=None)
+        self.assertEqual(code,200,health)
+        self.assertEqual(pcode,200,partners)
+        self.assertTrue(health['ok'])
+        self.assertEqual(health['mode'],'private-workspaces')
+        self.assertEqual(health['engine_default'],'adk')
+        self.assertTrue(health['parallel'])
+        self.assertTrue(health['parallel_sdk'])
+        self.assertTrue(health['agent_builder'])
+        self.assertTrue(health['gemini_path'].startswith('vertex:'))
+        checklist=partners['track_checklist']
+        self.assertTrue(checklist['parallel_search_at_runtime'])
+        self.assertTrue(checklist['gemini_at_runtime'])
+        self.assertTrue(checklist['adk_agent_builder'])
+        self.assertTrue(checklist['partner_health_public'])
+
     def test_real_worker_create_idempotency_and_restart(self):
         code,_,result=self.create(); self.assertEqual(code,201,result)
         self.assertEqual(self.create()[0],200)
