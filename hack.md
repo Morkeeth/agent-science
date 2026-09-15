@@ -300,14 +300,52 @@ submission craft, supported by a real tendency, **not** as the explanation of th
 - [x] **Honesty & limitations** section carrying our worst number — README §Honesty & limitations; PITCH first screen
 - [ ] **Answer the track brief in the track's own words on the first screen** — judge pack § above; must land on Devpost ¶1 + video 0:00
 - [ ] **Video verified attached and public on the live entry page, from a logged-out browser** — not in a checklist file, on the page.
-- [ ] **Every artifact claim measured at the submitted commit.** Four retros of that loss failed this row.
+- [x] **Every artifact claim measured at the submitted commit.** — `python3 scripts/eval_artifact_claims.py` (shipped 2026-09-15; baseline trusts pack wording, shipping re-runs objects; first run caught stale "Private until submit" + pin `e6793ab`)
 
 Full record: `fleet-ops (internal)/retros/QWEN-LOSS-RETRO-2026-08-30.md` (corrected) ·
 `QWEN-FIELD-TEST-2026-08-30.md` (the n=40 falsification) · playbook lesson 97.
 
 ---
 
-## 🎯 NOW — Partner night wave (fresh compound + timeout finding)
+## 🎯 NOW — Night wave 2026-09-15 (Cursor) · SUBMISSION-PACK truth + artifact-claim gate
+
+**Slice:** Re-measure every SUBMISSION-PACK count at object; ship one falsifiable Qwen gate (artifact claims at HEAD vs naive-title baseline); honest live-compound BLOCKED if keys missing; deploy prep only (no deploy).
+
+### Build (shipped 2026-09-15)
+
+- [x] SUBMISSION-PACK truth refresh — re-ran suites → **128/128**; fixed public-repo + commit pin; stranger one-command block; DEVPOST 127→128
+- [x] Qwen gate — `scripts/eval_artifact_claims.py`: shipping re-derives pack claims at HEAD; baseline trusts pack; first run caught false private + stale `e6793ab`
+- [x] CELEX free-tier repair — `canonical()` unquotes encoding; alias cheap-routes via `canonical_query`
+- [x] Compound-mini exact assertions — offline A=2→B=1 restored under shipping corpus identity
+- [x] Live compound — **BLOCKED** receipt naming missing keys + private-workspaces
+- [x] Deploy prep — `docs/DEPLOY-PREP-2026-09-15.md` + `deploy.sh` diff notes for Oscar (do not run deploy)
+
+### Verify (one command each)
+
+```bash
+git pull && python3 tests/test_watch_it_go_red.py                    # 72/72
+python3 scripts/bench_check_docs.py                                  # 128/128
+python3 scripts/eval_artifact_claims.py                              # 7/7 both arms after pack refresh
+python3 -m clearance lookup "2012/28/EU"                             # SOURCED cheap/free
+python3 scripts/compound_exhibit_receipt.py                          # offline A=2→B=1
+python3 scripts/eval_refusal_baseline.py && python3 scripts/eval_refusal_ablation.py
+```
+
+### Receipt
+
+- `docs/RECEIPT-night-wave-2026-09-15.md` (SHIPPED / VERIFIED / WRONG)
+- `docs/FINDING-celex-url-encoding-2026-09-15.md`
+- `docs/RECEIPT-live-compound-BLOCKED-2026-09-15.md`
+- `docs/DEPLOY-PREP-2026-09-15.md`
+
+### BLOCKED
+
+- Live Parallel/Gemini keys absent on this VM
+- Hosted public `/search`/`/clear` — current revision is private-workspaces only
+
+---
+
+## 🎯 NOW (prior 2026-09-03) — Partner night wave (fresh compound + timeout finding)
 
 **Slice:** Harden partner verify to prove Parallel at runtime; ship fresh compound probe; document orphan-works 504 regression at object.
 
@@ -528,6 +566,7 @@ bash scripts/verify_cold_clone.sh                                               
 
 | When | What | Command | Outcome |
 |------|------|---------|---------|
+| 2026-09-15 night | CELEX encode + alias cheap + artifact gate + pack | `lookup 2012/28/EU` · `eval_artifact_claims.py` · `compound_exhibit_receipt.py` · `bench_check_docs.py` | **SOURCED free/cheap** · pack public+pin fixed · offline A=2→B=1 · **128/128** · live compound BLOCKED · hosted private-workspaces |
 | 2026-09-03 night | Fresh compound + timeout finding | `compound_fresh_hosted_probe.py` · `verify_partners_hosted.sh` | **A≥1 Parallel → B drop** · orphan-works Run A **504** @ 300s |
 | 2026-09-03 night | SUBMISSION-PACK + Qwen gates | `bench_check_docs.py` · `eval_verify_holdout.py` · `eval_scorer_symmetry.py` | **127/127** · holdout OK · scorer 5/6 vs 6/6 · offline compound A=2→B=1 |
 | 2026-09-02 | Partner verify re-run | `verify_partners_hosted.sh` · `full_gate.sh` | **4/4 partners** · compound warm-shelf PASS · 72/72 auto-seed |

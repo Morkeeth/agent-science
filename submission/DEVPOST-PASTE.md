@@ -42,7 +42,7 @@ bash scripts/demo_truth_layer.sh
 bash scripts/demo_clearance_desk.sh
 ```
 
-A fresh clone of that repository ran those three commands on 2026-09-03 with exit code 0, 0, 0 (72/72 mutation-watched controls, 127/127 doc-checked controls, holdout OK, registry 16/16, eval delta +1).
+A fresh clone of that repository re-measured on 2026-09-15: 72/72 mutation-watched controls, 128/128 doc-checked controls (`bench_check_docs.py`), holdout OK, registry 16/16, eval delta +1; free-tier `lookup "2012/28/EU"` → SOURCED via CELEX with no Parallel key.
 
 ## About the project
 

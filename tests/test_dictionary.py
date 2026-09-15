@@ -62,10 +62,27 @@ def t_miss_without_live_is_free_not_cleared():
         assert out.get("next_step")
 
 
+def t_alias_reaches_celex_cheap_route():
+    """Casual alias must reach CELEX routing — not die as dictionary_miss.
+
+    Measured 2026-09-15: `orphan works directive` aliased to `2012/28/EU` for
+    topic retrieval, but cheap routing only saw the raw phrase (no CELEX shape)
+    and returned NOT_CLEARED while `lookup 2012/28/EU` was SOURCED.
+    """
+    with tempfile.TemporaryDirectory() as d:
+        db = Path(d) / "t.db"
+        out = dictionary.lookup("orphan works directive", db=db, live=False)
+        assert out["label"] == "SOURCED", out
+        assert out["cost_tier"] == "cheap", out
+        assert out["parallel_api_calls"] == 0
+        assert "32012L0028" in (out.get("citation_url") or "")
+
+
 if __name__ == "__main__":
     for fn in (t_alias_canonicalizes, t_exact_query_replay_is_free,
                t_unsourced_exact_is_not_replayed,
-               t_miss_without_live_is_free_not_cleared):
+               t_miss_without_live_is_free_not_cleared,
+               t_alias_reaches_celex_cheap_route):
         fn()
         print(f"PASS  {fn.__name__}")
-    print("\n4/4 passed")
+    print(f"\n{5}/5 passed")
