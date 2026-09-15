@@ -1,6 +1,6 @@
 # SUBMISSION PACK — Agentic Cinema · slice 7
 
-**Date:** 2026-09-15 · **Repo:** https://github.com/Morkeeth/agent-science @ `main` (`ea05a10` at re-measure)  
+**Date:** 2026-09-15 · **Repo:** https://github.com/Morkeeth/agent-science @ `main` (`1e19e5b` at re-measure)  
 **Hosted:** https://agent-science-568004190078.us-central1.run.app · **Deadline:** 2026-09-09 14:00 PT  
 **Scope:** docs + offline controls + CELEX cache-key fix — no video upload, no Devpost submit, no `deploy.sh` run
 
@@ -139,7 +139,7 @@ market.
 
 | | |
 |---|---|
-| Repo | `https://github.com/Morkeeth/agent-science` @ `ea05a10` |
+| Repo | `https://github.com/Morkeeth/agent-science` @ `1e19e5b` |
 | Entry point | `python3 agent_science.py <script.txt>` — Gemini + Parallel **live by default** |
 | Hosted | https://agent-science-568004190078.us-central1.run.app — private `/cases` workspaces |
 | Controls | registry **16/16** · cross-subject reuse **2/2** · compound exhibit B **1** Parallel vs A **2** (offline) |
