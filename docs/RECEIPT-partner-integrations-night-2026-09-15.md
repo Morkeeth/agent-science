@@ -1,6 +1,6 @@
 # RECEIPT — Partner integrations night · 2026-09-15
 
-**Commit:** 
+**Commit:** `42983e1` (branch tip `e1ab3ec`)  
 **Branch:** `cursor/partner-integrations-night-93d1`  
 **Slice:** All four partners provable in code on the private-workspace path; free-tier CELEX restored; film objects corrected; live thin health watched RED.
 
