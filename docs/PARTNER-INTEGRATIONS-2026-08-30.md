@@ -1,37 +1,59 @@
 # PARTNER INTEGRATIONS — Agent Science · Sep 9 path
 
-**Date:** 2026-08-30 · **Last verified:** 2026-09-03 · **Repo:** Morkeeth/agent-science · **Scope:** all four partners wired in code; deploy is Oscar's click.
+**Date:** 2026-08-30 · **Last verified:** 2026-09-16 · **Repo:** Morkeeth/agent-science · **Scope:** all four partners wired in code; deploy is Oscar's click.
 
 Each partner must be **called at runtime** on the default path — not documented only.
+
+### Hosted mode (private-workspaces) — measured 2026-09-16
+
+Cloud Run sets `K_SERVICE`, so all traffic goes through `cloud/case_http.py` WorkspaceHTTP.
+
+| Route | Auth | Role |
+|-------|------|------|
+| `GET /health` | **public** | Partner proof JSON (`gemini`, `parallel`, `engine_default`, …) + `mode` + `revision` |
+| `GET /partners` | **public** | Track checklist JSON for judges |
+| `POST /clear`, `/search`, `/ingest` | **workspace token / session** | Local-only without auth; not a public desk anymore |
+| `/cases`, `/api/cases` | **workspace** | Private research |
+
+**Finding:** revision `agent-science-00028-hed` returned a stripped `/health` (`ok`/`service`/`mode`/`revision` only). That is a false-green class defect — see `docs/FINDING-hosted-health-partner-strip-2026-09-16.md`. Fix is in tree; live stays RED until Oscar `deploy.sh`.
+
+**Local prove (no network, no real keys):**
+
+```bash
+bash scripts/prove_partner_health_local.sh
+```
 
 ---
 
 ## Oscar deploy checklist (one pass)
 
-1. **Rotate keys** if any revision ever had plaintext env vars (`deploy.sh` note).
-2. **`bash deploy.sh`** — Oscar only; writes Secret Manager, IAM, Cloud Run revision.
-3. **Verify all four partners at runtime (one command):**
+1. **Rotate keys** if any revision ever had plaintext env vars (`deploy.sh` note). Oscar console only.
+2. **`bash deploy.sh`** — Oscar only; writes Secret Manager, IAM, Cloud Run revision. Never `--set-env-vars` for secrets.
+3. **Verify public partner proof (one command):**
    ```bash
    bash scripts/verify_partners_hosted.sh
    ```
-   Expect: health OK · `engine_default: adk` · `/clear` stamps `engine: adk` with `parallel_calls ≥ 1` on fresh claim · compound-mini PASS · compound-fresh PASS (A_parallel≥1, B_hits≥1).
-4. **Compound with Parallel drop (video beat):**
+   Expect: health OK with `engine_default: adk`, `gemini: true`, `parallel: true` · `/partners` JSON checklist true.
+   Steps 3–5 (`/clear` + compound) need `export WORKSPACE_TOKEN=…`; without it the script exits **2** (PARTIAL) after proving public health+partners — not a silent green.
+4. **Compound with Parallel drop (video beat), after token:**
    ```bash
+   export WORKSPACE_TOKEN='…'   # Oscar workspace bearer — never in URL or repo
    python3 scripts/compound_fresh_hosted_probe.py
    ```
-   Expect: Run A `parallel_calls ≥ 1` → Run B `parallel_calls ≤ A` with `corpus_hits ≥ 1`.
 5. **Or verify /health alone:**
    ```bash
    curl -s https://agent-science-568004190078.us-central1.run.app/health | python3 -m json.tool
    ```
-   Expect: `"gemini_path": "vertex:hack-fleet"`, `"parallel": true`, `"engine_default": "adk"`.
-6. **Verify /clear** (JSON):
+   Expect: `"gemini_path": "vertex:…"`, `"parallel": true`, `"engine_default": "adk"`, `"mode": "private-workspaces"`.
+6. **Verify /clear** (workspace bearer — not public):
    ```bash
    curl -s -X POST https://agent-science-568004190078.us-central1.run.app/clear \
+     -H "Authorization: Bearer $WORKSPACE_TOKEN" \
      -H 'Content-Type: application/json' \
      -d '{"script":"The Dust Bowl displaced 2.5 million people.","subject":"dust-bowl"}' \
      | python3 -c "import sys,json; d=json.load(sys.stdin); print('engine',d.get('engine')); print('parallel_calls',d.get('parallel_calls'))"
    ```
+   If `/clear` is not mounted on the workspace desk, use local `python3 cloud/service.py` (no `K_SERVICE`) for ADK+Parallel call proof.
 
 ---
 
@@ -122,32 +144,45 @@ curl -s -X POST https://api.parallel.ai/v1/search \
   "last_parallel_search_id": "srch_…",
   "agent_builder": true,
   "adk_version": "2.7.1",
-  "engine_default": "adk"
+  "engine_default": "adk",
+  "mode": "private-workspaces",
+  "revision": "agent-science-NNNNN-xxx"
 }
 ```
+
+`mode` + `revision` appear on Cloud Run (WorkspaceHTTP). Local desk omits them.
 
 | Field | Meaning |
 |-------|---------|
 | `gemini_path` | `vertex:<project>`, `api-key`, or `none` |
 | `parallel` | `PARALLEL_API_KEY` present in env |
 | `agent_builder` | `google-adk` importable |
-| `engine_default` | What `POST /clear` will use: `adk` or `direct` |
+| `engine_default` | What clearance will use when `/clear` runs: `adk` or `direct` |
+
+Shared builder: `cloud.partners.health_payload()` — used by `cloud/service.py` and `cloud/case_http.py`.
 
 ### Routes
 
 | Method | Path | Body | Response |
 |--------|------|------|----------|
-| GET | `/health` | — | JSON above |
-| GET | `/partners` | — | Track manifest — all four partners + checklist |
-| GET | `/` | — | Desk UI (HTML form → POST /clear) |
-| GET | `/corpus?subject=` | — | `{subject, remembered, total}` |
-| POST | `/clear` | `{"script","subject"}` | Gap report JSON; `engine` field stamped |
+| GET | `/health` | — | JSON above (public on hosted) |
+| GET | `/partners` | — | Track manifest — all four partners + checklist (public on hosted) |
+| GET | `/` | — | Local desk UI; hosted redirects to `/cases` or `/login` |
+| GET | `/corpus?subject=` | — | `{subject, remembered, total}` (local desk) |
+| POST | `/clear` | `{"script","subject"}` | Gap report JSON; `engine` stamped — **local desk, or hosted with workspace auth if mounted** |
 
-**Local desk:**
+**Local desk (ADK default path, no hosted gate):**
 ```bash
 export PORT=8099 AGENT_BUILDER=1 GCP_PROJECT=hack-fleet
+# PARALLEL_API_KEY from ~/.config/keys/parallel.key when proving live Parallel
 python3 cloud/service.py
 curl -s localhost:8099/health
+```
+
+**Hosted partner prove without deploy wait:**
+```bash
+bash scripts/prove_partner_health_local.sh
+python3 tests/test_adk_default_path.py   # 5/5
 ```
 
 ---

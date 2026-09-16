@@ -59,6 +59,48 @@ class HostedFlow(unittest.TestCase):
         self.assertEqual(self.request('GET','/stats',token=None)[0],303)
         self.assertEqual(self.request('POST','/search',{},token=TOKEN_A)[0],404)
 
+    def test_anonymous_health_exposes_partner_fields(self):
+        """Private workspaces must not strip partner proof from /health.
+
+        Watched RED on live revision agent-science-00028-hed (2026-09-16):
+        body was only ok/service/mode/revision — verify_partners_hosted.sh
+        asserted gemini=True against None.
+        """
+        with patch.dict(os.environ, {
+            'AGENT_BUILDER': '1',
+            'GCP_PROJECT': 'hack-fleet',
+            'PARALLEL_API_KEY': 'pk-test-not-live',
+            'K_REVISION': 'test-rev',
+        }):
+            with patch('cloud.agent.adk_available', return_value=True):
+                with patch('cloud.agent.adk_version', return_value='2.7.1'):
+                    code, _, body = self.request('GET', '/health', token=None)
+        self.assertEqual(code, 200)
+        self.assertIsInstance(body, dict)
+        for key in ('gemini', 'parallel', 'agent_builder', 'engine_default',
+                    'gemini_path', 'parallel_sdk', 'mode', 'revision'):
+            self.assertIn(key, body, f'/health missing {key}: {body}')
+        self.assertTrue(body['gemini'])
+        self.assertTrue(body['parallel'])
+        self.assertTrue(body['agent_builder'])
+        self.assertEqual(body['engine_default'], 'adk')
+        self.assertTrue(str(body['gemini_path']).startswith('vertex:'))
+        self.assertEqual(body['mode'], 'private-workspaces')
+        self.assertEqual(body['revision'], 'test-rev')
+
+    def test_anonymous_partners_manifest_public(self):
+        """Judge track checklist must not require a workspace key."""
+        with patch.dict(os.environ, {'AGENT_BUILDER': '1', 'GCP_PROJECT': 'hack-fleet'}):
+            with patch('cloud.agent.adk_available', return_value=True):
+                code, _, body = self.request('GET', '/partners', token=None)
+        self.assertEqual(code, 200)
+        self.assertIsInstance(body, dict)
+        tc = body.get('track_checklist') or {}
+        for key in ('parallel_search_at_runtime', 'gemini_at_runtime',
+                    'adk_agent_builder', 'hosted_url_required'):
+            self.assertTrue(tc.get(key), f'track_checklist.{key}={tc.get(key)}')
+        self.assertIn('partners', body)
+
     def test_real_worker_create_idempotency_and_restart(self):
         code,_,result=self.create(); self.assertEqual(code,201,result)
         self.assertEqual(self.create()[0],200)

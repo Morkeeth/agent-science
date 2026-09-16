@@ -73,9 +73,17 @@ def t_partners_manifest_importable():
 
 
 def t_health_has_partners_route():
+    """Partner proof routes exist on both local desk and hosted WorkspaceHTTP."""
     svc = (ROOT / "cloud" / "service.py").read_text()
-    assert 'path == "/partners"' in svc
-    assert "parallel_sdk" in svc
+    case_http = (ROOT / "cloud" / "case_http.py").read_text()
+    assert 'path == "/partners"' in svc or 'partner_manifest.manifest()' in svc
+    assert "health_payload" in svc
+    assert "path == '/partners'" in case_http or 'path == "/partners"' in case_http
+    assert "health_payload" in case_http
+    from cloud import partners
+    payload = partners.health_payload()
+    assert "parallel_sdk" in payload
+    assert "engine_default" in payload
 
 
 def t_requirements_pins_parallel_web():

@@ -48,7 +48,7 @@
 |---------|----------|
 | Truth layer code on `main` | `clearance/visibility.py`, `contrary.py`, `stack_fit.py` |
 | **276 claims** on shelf (live 2026-09-02) | hosted `/truths/ui` · `curl -s …/truths/ui` → Shelf line **276** · hit rate 0.66 |
-| **Deployed** | `GET /health` → `engine_default: adk`, `parallel_sdk: true` |
+| **Deployed** | Code ships partner `/health`; **live `00028-hed` still stripped** until Oscar deploy — `docs/FINDING-hosted-health-partner-strip-2026-09-16.md` |
 | `/truths/ui` live | `curl …/truths/ui` → dashboard HTML |
 | 52 inbox ingests | `python3 scripts/auto_ingest_inbox.py` → receipt `docs/RECEIPT-agent-science-shape-2026-09-01.md` |
 | Film scout | `docs/FILM-SCOUT-COMMANDS.md` |

@@ -189,8 +189,17 @@ class WorkspaceHTTP:
         parsed = urlsplit(h.path)
         path = parsed.path.rstrip('/') or '/'
         if h.command == 'GET' and path == '/health':
-            return self.send(200, {'ok': True, 'service': 'agent-science', 'mode': 'private-workspaces',
-                                   'revision': os.getenv('K_REVISION', 'local')})
+            # Partner proof stays public on the private-workspaces desk. Auth is
+            # for cases and mutations; judges and deploy verify need gemini /
+            # parallel / engine_default without a workspace key.
+            from cloud import partners as partner_manifest
+            return self.send(200, partner_manifest.health_payload(
+                mode='private-workspaces',
+                revision=os.getenv('K_REVISION', 'local'),
+            ))
+        if h.command == 'GET' and path == '/partners':
+            from cloud import partners as partner_manifest
+            return self.send(200, partner_manifest.manifest())
         expected_origin = os.getenv('AGENT_SCIENCE_PUBLIC_ORIGIN', '').rstrip('/')
         if self.secure and h.command == 'GET' and not self.api and expected_origin:
             # Cloud Run has multiple aliases. Forms and session cookies must use

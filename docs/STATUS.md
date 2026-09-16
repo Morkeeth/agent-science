@@ -2,7 +2,7 @@
 doc: status
 project: Agent Science
 canonical: true
-last-updated: 2026-09-01T05:45:00Z
+last-updated: 2026-09-16T19:00:00Z
 deadline: 2026-09-09T14:00:00-07:00
 ---
 
@@ -11,7 +11,7 @@ deadline: 2026-09-09T14:00:00-07:00
 > **For Claude / fleet:** this file is the single “where we are” surface.  
 > `hack.md` = process · `CLAUDE.md` = entry · this file = gates + evidence.
 
-**Last gate run:** 2026-08-31T21:46:02Z — `bash scripts/full_gate.sh` → **FULL GATE OK** (127/127 · visibility hosted · 19/19 long run)
+**Last gate run:** 2026-09-16 — partner admissibility wave · `bench_check_docs.py` **128/128** · `test_watch_it_go_red.py` **72/72** · live `/health` partner fields **RED** until Oscar deploy (`docs/FINDING-hosted-health-partner-strip-2026-09-16.md`)
 
 ---
 
@@ -43,10 +43,11 @@ deadline: 2026-09-09T14:00:00-07:00
 | Gate | Result | Command / doc |
 |------|--------|----------------|
 | Mutation controls | **72/72** | `test_watch_it_go_red.py` |
-| All test suites | **127/127** + truth-layer suites | `bench_check_docs.py` + `full_gate.sh` |
+| All test suites | **128/128** | `bench_check_docs.py` (re-run 2026-09-16) |
 | Secret scan | **6/6** | `test_secret_surfaces.py` |
-| Partner runtime | **6/6** | `test_partner_runtime.py` + `test_parallel_integration.py` |
+| Partner runtime | **7/7** + parallel **6/6** | `test_partner_runtime.py` + `test_parallel_integration.py` |
 | ADK default | **5/5** | `test_adk_default_path.py` |
+| Hosted partner health (live) | ⛔ RED on `00028-hed` | `verify_partners_hosted.sh` · fix in tree, needs deploy |
 | Registry surface | **16/16** | `test_registry_surface.py` |
 | Cold clone | ✅ | `verify_cold_clone.sh` |
 | Hosted long run | **19/19** | `long_run_goal.sh` |

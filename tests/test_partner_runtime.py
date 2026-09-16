@@ -37,9 +37,19 @@ def t_parallel_entrypoint_wired_in_facts():
 def t_gcp_service_health_shape():
     svc = importlib.import_module("cloud.service")
     src = inspect.getsource(svc)
-    assert "engine_default" in src
-    assert "gemini_path" in src or "parallel" in src
+    assert "health_payload" in src
     assert "_run_clearance" in src
+    from cloud import partners
+    with patch.dict(os.environ, {"AGENT_BUILDER": "1", "GCP_PROJECT": "hack-fleet",
+                                 "PARALLEL_API_KEY": "pk-test"}):
+        with patch.object(partners.adk_agent, "adk_available", return_value=True):
+            with patch.object(partners.adk_agent, "adk_version", return_value="2.7.1"):
+                payload = partners.health_payload(mode="private-workspaces", revision="r1")
+    for key in ("ok", "gemini", "parallel", "agent_builder", "engine_default",
+                "gemini_path", "mode", "revision"):
+        assert key in payload, payload
+    assert payload["engine_default"] == "adk"
+    assert payload["mode"] == "private-workspaces"
 
 
 def t_adk_default_engine_wired():

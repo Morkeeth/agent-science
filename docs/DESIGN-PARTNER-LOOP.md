@@ -1,22 +1,46 @@
 # DESIGN PARTNER LOOP — friction template · slice 6 prep
 
-**Audience:** Oscar sends to one real clearance lead before Sep 9.  
-**Goal:** one production runs their script through the desk; friction list lands in `CURSOR-LOG.md`.
+**Audience:** Oscar sends to one real clearance / research lead.  
+**Goal:** one production runs a real question or script through the desk; friction list lands in `CURSOR-LOG.md`.
+
+**Hosted reality (2026-09-16):** Cloud Run is **private-workspaces**. Unauthenticated paste-to-`/clear` is gone. Partners sign in with a workspace access key Oscar issues; public surfaces are `/health`, `/partners`, and the judge pages Oscar points them at.
 
 ---
 
-## Script upload flow (what the partner does)
+## Script / investigation flow (what the partner does)
 
-1. Open hosted desk: `https://agent-science-568004190078.us-central1.run.app/` (after Oscar deploy).
-2. Set **subject shelf** — a tag their team reuses across episodes (e.g. `season-2-ep3`).
-3. Paste **documentary narration** (plain text, not PDF).
-4. Click **Clear script** → gap report HTML or JSON via API:
-   ```bash
-   curl -s -X POST https://agent-science-568004190078.us-central1.run.app/clear \
-     -H 'Content-Type: application/json' \
-     -d '{"script":"<paste>","subject":"<their-tag>"}'
-   ```
-5. **Second script** on same subject — partner should see `corpus_hits ≥ 1` and fewer Parallel calls (compounding).
+### A · Workspace research desk (hosted default)
+
+1. Open hosted URL: `https://agent-science-568004190078.us-central1.run.app/`
+2. **Sign in** with the access key Oscar sent (not a password; never paste the key into a URL).
+3. Create or open a case for their question / script claim.
+4. Inspect sources (exact quotes) before accepting any SOURCED-looking row.
+5. Record a decision with rationale citing evidence IDs they actually opened.
+6. **Return visit:** open the same case — note whether evidence review flags fired.
+
+### B · Local clearance desk (compound Parallel demo)
+
+For the classic paste-script → gap report (ADK + Parallel), partner runs locally or Oscar demos on a non-hosted desk:
+
+```bash
+git clone https://github.com/Morkeeth/agent-science.git && cd agent-science
+pip install -r requirements.txt
+# Oscar provides PARALLEL_API_KEY out of band — never commit it
+export AGENT_BUILDER=1 GCP_PROJECT=hack-fleet PARALLEL_API_KEY='…'
+python3 cloud/service.py   # local desk :8080 (or PORT=)
+curl -s -X POST localhost:8080/clear \
+  -H 'Content-Type: application/json' \
+  -d '{"script":"<paste>","subject":"<their-tag>"}'
+```
+
+Second script on the **same subject** should show `corpus_hits ≥ 1` and fewer Parallel calls.
+
+### C · One-command stranger smoke (no keys)
+
+```bash
+bash scripts/new_user_trial.sh
+bash scripts/prove_partner_health_local.sh
+```
 
 ---
 
@@ -24,37 +48,41 @@
 
 | # | Question | Partner answer | Our action |
 |---|----------|----------------|------------|
-| 1 | How long from paste to report? | | |
-| 2 | Any claim wrongly SOURCED? (paste claim_id) | | |
-| 3 | Any claim wrongly UNSOURCED that they would clear manually? | | |
-| 4 | Was the **reason** on UNSOURCED actionable? | | |
-| 5 | Did compounding work on script 2? (Parallel delta) | | |
-| 6 | Subject tag — intuitive or confusing? | | |
-| 7 | Output format — HTML memo vs JSON for their pipeline? | | |
-| 8 | Blocker that would stop them paying? | | |
+| 1 | How long from first click to a usable answer? | | |
+| 2 | Was **login / access key** confusing? | | |
+| 3 | Any claim wrongly treated as supported? (paste claim/evidence id) | | |
+| 4 | Any refusal reason that was not actionable? | | |
+| 5 | Did they open the **source snapshot** before trusting a quote? | | |
+| 6 | On a return visit, was review/stale state understandable? | | |
+| 7 | Local `/clear` compounding (if tried) — Parallel drop visible? | | |
+| 8 | Output format — HTML desk vs JSON/MCP for their pipeline? | | |
+| 9 | Blocker that would stop them paying or returning? | | |
 
 ---
 
 ## What we measure from the session
 
-- `parallel_calls` run 1 vs run 2 (from JSON report)
-- `corpus_hits` on run 2
-- Count of UNSOURCED by `cause` (especially `no_independent_source`, `search_found_no_admissible_source`)
-- Time-to-report (wall clock)
+- Time-to-first useful answer (wall clock)
+- Whether they opened source text before deciding
+- Hosted: case version + decision supersede count
+- Local clear (if used): `parallel_calls` run 1 vs run 2, `corpus_hits` on run 2
+- Count of named refusals by cause
 
 ---
 
 ## Oscar → partner email (draft)
 
-> Subject: 15-minute clearance desk trial  
+> Subject: 15-minute Agent Science trial  
 >  
-> We built a desk that returns every checkable claim as SOURCED (verbatim quote + URL) or UNSOURCED (named reason).  
+> We built a desk that returns checkable claims as **verbatim quote + URL** or **UNSOURCED with a named reason** — and remembers what was already proved so the second ask is cheaper.  
 >  
-> **Try it:** [hosted URL] — paste one page of narration, pick a subject tag, clear. Paste a second page with the **same tag** and tell us if the Parallel call count drops.  
+> **Try it:** [hosted URL] — sign in with the access key in this email (do not forward). Open one real question from your week, read the source passages, and tell us what felt wrong.  
 >  
-> **Reply with:** anything wrongly sourced/unsourced, and whether the refusal reasons are usable in your workflow.  
+> Optional compound demo: we can hop on a call and run two scripts on the same subject so you see Parallel calls drop.  
 >  
-> Constraint we won't break: if the document doesn't contain the exact passage, we refuse — no paraphrase.
+> **Reply with:** anything that looked falsely supported, refusal reasons that were useless, and the one blocker that would stop a second visit.  
+>  
+> Constraint we will not break: if the document does not contain the exact passage, we refuse — no paraphrase.
 
 ---
 

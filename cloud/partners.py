@@ -8,7 +8,70 @@ from clearance import search as parallel_search
 from cloud import agent as adk_agent
 
 
-def manifest(*, gemini_path: str, adk_default: bool) -> dict:
+def adk_default_enabled() -> bool:
+    """AGENT_BUILDER defaults on; only an explicit off switch selects direct."""
+    return os.environ.get("AGENT_BUILDER", "1").strip().lower() not in (
+        "0", "false", "off", "no",
+    )
+
+
+def resolve_gemini_path() -> str:
+    """Report how Gemini is reached — never the secret itself."""
+    if os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY"):
+        return "api-key"
+    proj = (
+        os.environ.get("GCP_PROJECT")
+        or os.environ.get("GOOGLE_CLOUD_PROJECT")
+        or (os.environ.get("K_SERVICE") and "adc")
+    )
+    if proj:
+        return f"vertex:{proj}"
+    try:
+        from clearance import gemini as _g
+        p = _g.vertex_project()
+        if p and _g.vertex_token():
+            return f"vertex:{p}"
+    except Exception:
+        pass
+    return "none"
+
+
+def health_payload(*, mode: str | None = None, revision: str | None = None) -> dict:
+    """Public /health shape — partner proof without secrets.
+
+    Private-workspaces Cloud Run must return the same partner fields as the
+    local desk. A stripped liveness-only body made verify_partners_hosted.sh
+    read green on ok=true while gemini/parallel/adk were invisible (2026-09-16).
+    """
+    gemini_path = resolve_gemini_path()
+    adk_ok = adk_agent.adk_available()
+    adk_default = adk_default_enabled() and adk_ok
+    out = {
+        "ok": True,
+        "service": "agent-science",
+        "gemini": gemini_path != "none",
+        "gemini_path": gemini_path,
+        "parallel": bool(os.environ.get("PARALLEL_API_KEY")),
+        "parallel_sdk": parallel_search.sdk_available(),
+        "parallel_sdk_version": parallel_search.sdk_version(),
+        "parallel_transport": parallel_search.integration_info()["transport"],
+        "last_parallel_search_id": parallel_search.last_search_id(),
+        "agent_builder": adk_ok,
+        "adk_version": adk_agent.adk_version(),
+        "engine_default": "adk" if adk_default else "direct",
+    }
+    if mode is not None:
+        out["mode"] = mode
+    if revision is not None:
+        out["revision"] = revision
+    return out
+
+
+def manifest(*, gemini_path: str | None = None, adk_default: bool | None = None) -> dict:
+    if gemini_path is None:
+        gemini_path = resolve_gemini_path()
+    if adk_default is None:
+        adk_default = adk_default_enabled() and adk_agent.adk_available()
     root = Path(__file__).resolve().parents[1]
     return {
         "event": "Agentic Cinema",
@@ -56,6 +119,8 @@ def manifest(*, gemini_path: str, adk_default: bool) -> dict:
             "docs/PARTNER-INTEGRATIONS-2026-08-30.md",
             "docs/PARTNER-INTEGRATION-RESEARCH-2026-08-31.md",
             "docs/RECEIPT-adk-default-path-2026-08-30.md",
+            "docs/RECEIPT-partner-admissibility-2026-09-16.md",
+            "docs/FINDING-hosted-health-partner-strip-2026-09-16.md",
         ],
         "repo_root": str(root),
     }
