@@ -67,6 +67,11 @@ class _Raw:
 
 
 # Fixed claim lists mirroring compound-mini scripts — extraction is NOT simulated live.
+#
+# Overlapping A/B claims must be IDENTICAL assertions. After f61635e / 176f5db the
+# engine binds reuse to the exact assertion; paraphrases intentionally miss.
+# Paraphrase economics are measured by scripts/eval_compound_paraphrase.py — do not
+# silently restore paraphrase reuse here to make this receipt green.
 _OFFLINE_CLAIMS = {
     "A": [
         _Raw("In 2012 the European Union passed Directive 2012/28/EU, the Orphan Works Directive.",
@@ -75,9 +80,9 @@ _OFFLINE_CLAIMS = {
              None, "29 October 2014"),
     ],
     "B": [
-        _Raw("Europe's answer was Directive 2012/28/EU — known as the Orphan Works Directive —",
+        _Raw("In 2012 the European Union passed Directive 2012/28/EU, the Orphan Works Directive.",
              None, "Directive 2012/28/EU"),
-        _Raw("and the deadline for national transposition was 29 October 2014.",
+        _Raw("Member states had until 29 October 2014 to bring it into national law.",
              None, "29 October 2014"),
         _Raw("The British Library has estimated that forty percent of its copyrighted collection is orphaned.",
              None, "forty percent"),
@@ -233,6 +238,13 @@ def _write_receipt(run: dict, *, backfill_rows: int) -> None:
 
     if mode == "offline":
         lines += [
+            "## Assertion identity",
+            "",
+            "Overlapping A/B claims use **identical** assertion text. Exact-assertion "
+            "reuse (f61635e) is the product rule; paraphrased scripts are measured by "
+            "`python3 scripts/eval_compound_paraphrase.py` and must not be silently "
+            "equated to restore this receipt.",
+            "",
             "## Offline simulation (no Gemini/Parallel keys on this VM)",
             "",
             "Network boundaries faked; verdict rules run for real:",
@@ -256,8 +268,8 @@ def _write_receipt(run: dict, *, backfill_rows: int) -> None:
     lines += [
         "## Registry backfill",
         "",
-        f"`python3 clear_corpus.py research-corpus --backfill` → **{backfill_rows} rows** "
-        f"(29 SOURCED + proven-unprovable refusals) in `cache/refusal_log.db`",
+        f"`refusal_log.stats(n)` on default DB at receipt time → **{backfill_rows} rows** "
+        f"in `cache/refusal_log.db` (re-derived; not a carried corpus size).",
         "",
         "## Controls",
         "",
@@ -273,6 +285,7 @@ def _write_receipt(run: dict, *, backfill_rows: int) -> None:
         "",
         "- `python3 review/corpus_compound_receipt.py` — rights-leg 50/50 reuse, zero network on Run 2",
         "- `docs/SECOND-SUBJECT-RECEIPT-2026-08-29.md` — dust-bowl cross-subject reuse",
+        "- `docs/FINDING-paraphrase-compound-2026-09-16.md` — paraphrased B fails shipping compound",
         "",
     ]
     RECEIPT.write_text("\n".join(lines), encoding="utf-8")

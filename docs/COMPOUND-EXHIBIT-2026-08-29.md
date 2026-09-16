@@ -1,6 +1,6 @@
 # COMPOUND EXHIBIT — orphan-works A/B
 
-**Date:** 2026-09-03 00:07 UTC · **Subject:** `orphan-works` · **Mode:** offline
+**Date:** 2026-09-16 11:01 UTC · **Subject:** `orphan-works` · **Mode:** offline
 **Fixtures:** `compound-mini-A.txt` → `compound-mini-B.txt`
 
 ## Quantified compounding
@@ -11,6 +11,10 @@
 
 - Run B parallel < Run A: **yes**
 - corpus_hits B ≥ 1: **yes**
+
+## Assertion identity
+
+Overlapping A/B claims use **identical** assertion text. Exact-assertion reuse (f61635e) is the product rule; paraphrased scripts are measured by `python3 scripts/eval_compound_paraphrase.py` and must not be silently equated to restore this receipt.
 
 ## Offline simulation (no Gemini/Parallel keys on this VM)
 
@@ -25,7 +29,7 @@ Ground-truth Parallel calls at fake boundary (Run A only): `3`
 
 ## Registry backfill
 
-`python3 clear_corpus.py research-corpus --backfill` → **0 rows** (29 SOURCED + proven-unprovable refusals) in `cache/refusal_log.db`
+`refusal_log.stats(n)` on default DB at receipt time → **0 rows** in `cache/refusal_log.db` (re-derived; not a carried corpus size).
 
 ## Controls
 
@@ -52,7 +56,7 @@ PASS  test_visibility_ui_renders_transparency
 
 ```
 PASS  test_not_gameable_reuse_carries_the_original_verdict_both_poles
-PASS  test_second_subject_reuses_the_log_and_spends_no_parallel_call
+PASS  test_second_subject_reuses_support_and_retries_unsettled_claim
 
 2/2 passed
 ```
@@ -61,3 +65,4 @@ PASS  test_second_subject_reuses_the_log_and_spends_no_parallel_call
 
 - `python3 review/corpus_compound_receipt.py` — rights-leg 50/50 reuse, zero network on Run 2
 - `docs/SECOND-SUBJECT-RECEIPT-2026-08-29.md` — dust-bowl cross-subject reuse
+- `docs/FINDING-paraphrase-compound-2026-09-16.md` — paraphrased B fails shipping compound

@@ -1,0 +1,45 @@
+{
+  "price_card": {
+    "ok": true,
+    "url": "https://docs.parallel.ai/resources/pricing",
+    "fetched_at": "2026-09-16T11:01:15Z",
+    "http_status": 200,
+    "bytes": 10459,
+    "search_band_visible": true,
+    "search_low_per_1k": 1.0,
+    "search_high_per_1k": 5.0,
+    "band_source": "docs.parallel.ai Search $1\u2013$5 / 1,000 requests (card text visible)"
+  },
+  "shipping": {
+    "a_parallel": 2,
+    "b_parallel": 1,
+    "b_corpus_hits": 2,
+    "total_parallel": 3,
+    "net_find_calls": 3
+  },
+  "baseline_always_search": {
+    "a_parallel": 2,
+    "b_parallel": 3,
+    "b_corpus_hits": 0,
+    "total_parallel": 5,
+    "net_find_calls": 4
+  },
+  "estimated_usd": {
+    "shipping": {
+      "low": 0.003,
+      "high": 0.015
+    },
+    "baseline": {
+      "low": 0.005,
+      "high": 0.025
+    },
+    "delta_baseline_minus_shipping": {
+      "low": 0.002,
+      "high": 0.010000000000000002
+    }
+  },
+  "billing": {
+    "status": "UNKNOWN",
+    "reason": "no AGENT_SCIENCE_BILLING_INVOICE_USD in env \u2014 Oscar console export required"
+  }
+}

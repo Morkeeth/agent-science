@@ -9,6 +9,9 @@
 > **Re-verified 2026-09-01:** same delta +1; see `docs/RECEIPT-partner-integrations-night-2026-09-01.md` §6.
 
 > **Re-verified 2026-09-03:** holdout freeze + scorer symmetry gates shipped; see `docs/RECEIPT-night-wave-2026-09-03.md`.
+>
+> **2026-09-16:** paraphrase compound gate + cost gate (price card, billing still UNKNOWN) —
+> `docs/RECEIPT-night-wave-2026-09-16.md` · `docs/FINDING-paraphrase-compound-2026-09-16.md`.
 
 # QWEN EVAL GATE — alternative arm · 2026-08-30
 
