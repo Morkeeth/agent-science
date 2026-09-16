@@ -15,9 +15,11 @@ sys.path.insert(0, str(ROOT))
 
 def _load():
     path = ROOT / "scripts/eval_compound_paraphrase.py"
-    spec = importlib.util.spec_from_file_location("eval_compound_paraphrase", path)
+    name = "eval_compound_paraphrase"
+    spec = importlib.util.spec_from_file_location(name, path)
     mod = importlib.util.module_from_spec(spec)
     assert spec.loader is not None
+    sys.modules[name] = mod  # dataclasses need the module present during exec
     spec.loader.exec_module(mod)
     return mod
 
