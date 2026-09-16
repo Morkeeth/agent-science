@@ -67,6 +67,10 @@ class _Raw:
 
 
 # Fixed claim lists mirroring compound-mini scripts — extraction is NOT simulated live.
+# B reuses A's exact assertion strings for the overlapping facts. The registry only
+# authorizes reuse on exact assertions (claim_key), not paraphrase/slot identity —
+# watched RED 2026-09-16 when B used different wording and compound exited 3
+# (A=2→B=3 Parallel, corpus_hits=0).
 _OFFLINE_CLAIMS = {
     "A": [
         _Raw("In 2012 the European Union passed Directive 2012/28/EU, the Orphan Works Directive.",
@@ -75,10 +79,12 @@ _OFFLINE_CLAIMS = {
              None, "29 October 2014"),
     ],
     "B": [
-        _Raw("Europe's answer was Directive 2012/28/EU — known as the Orphan Works Directive —",
+        # Exact same assertions as A — compounds on the subject shelf.
+        _Raw("In 2012 the European Union passed Directive 2012/28/EU, the Orphan Works Directive.",
              None, "Directive 2012/28/EU"),
-        _Raw("and the deadline for national transposition was 29 October 2014.",
+        _Raw("Member states had until 29 October 2014 to bring it into national law.",
              None, "29 October 2014"),
+        # New claim on run B — the only Parallel spend.
         _Raw("The British Library has estimated that forty percent of its copyrighted collection is orphaned.",
              None, "forty percent"),
     ],

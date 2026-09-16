@@ -46,3 +46,8 @@ Local hosted prove sample (`engine_default: adk`, `gemini: true`, `parallel: tru
 - Live URL until `deploy.sh` — health still stripped on `00028-hed`
 - Live `/clear` compound — no `PARALLEL_API_KEY` / workspace token on this VM
 - Key rotation — Oscar only (`AS-KEYS-ROTATE`)
+
+## Follow-on (same night)
+
+- Offline compound was exit 3 (paraphrase B claims); fixed exact-assertion arm — `docs/FINDING-offline-compound-exact-assertion-2026-09-16.md`
+- `bash scripts/verify_cold_clone.sh` → **cold-clone verify OK** (steps 1–10)

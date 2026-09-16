@@ -571,6 +571,7 @@ bash scripts/verify_cold_clone.sh                                               
 
 | When | What | Command | Outcome |
 |------|------|---------|---------|
+| 2026-09-16 night | Offline compound exit 3 (paraphrase≠assertion) | `compound_exhibit_receipt.py` · cold-clone step 8–10 | **A=2→B=1 Parallel, corpus_hits=2** after exact-assertion B arm · cold-clone OK |
 | 2026-09-16 night | Hosted health partner strip found + fixed in tree | `curl …/health` · `prove_partner_health_local.sh` · hosted_flow tests | Live **RED** (`00028-hed` missing partner fields) · local prove **engine_default=adk** · 72/72 · 128/128 |
 | 2026-09-16 night | Qwen eval re-derive | `eval_refusal_baseline.py` · `eval_refusal_ablation.py` | baseline/ablation **5/6** vs shipping **6/6**, delta +1, McNemar p=1.0 |
 | 2026-09-03 night | Fresh compound + timeout finding | `compound_fresh_hosted_probe.py` · `verify_partners_hosted.sh` | **A≥1 Parallel → B drop** · orphan-works Run A **504** @ 300s |

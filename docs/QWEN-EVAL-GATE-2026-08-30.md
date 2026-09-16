@@ -10,6 +10,11 @@
 
 > **Re-verified 2026-09-03:** holdout freeze + scorer symmetry gates shipped; see `docs/RECEIPT-night-wave-2026-09-03.md`.
 
+> **Re-verified 2026-09-16:** `eval_refusal_baseline.py` + `eval_refusal_ablation.py` +
+> `eval_scorer_symmetry.py` → baseline/ablation **5/6 = 0.833** vs shipping **6/6 = 1.000**,
+> delta **+1**, McNemar p=1.0000 (b=0 c=1). Holdout OK (4 files). See
+> `docs/RECEIPT-partner-admissibility-2026-09-16.md`.
+
 # QWEN EVAL GATE — alternative arm · 2026-08-30
 
 **Gate item:** Alternative arm named and run — competent baseline without this project, identical inputs, offline.

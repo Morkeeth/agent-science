@@ -38,13 +38,23 @@ python3 tests/test_registry_surface.py -q 2>&1 | tail -1
 
 echo
 echo "8. Offline compound receipt..."
-python3 scripts/compound_exhibit_receipt.py 2>&1 | grep -E 'parallel_calls|corpus_hits|Mode:' | head -4
+# Avoid `cmd | grep | head` under pipefail — head closes early → SIGPIPE aborts the script
+# (watched 2026-09-16: steps 9–10 never ran). Write then sample.
+python3 scripts/compound_exhibit_receipt.py > /tmp/compound-exhibit.out 2>&1
+grep -E 'parallel_calls|corpus_hits|Mode:' /tmp/compound-exhibit.out | sed -n '1,8p' || true
+if grep -q 'corpus_hits B ≥ 1: \*\*NO\*\*' /tmp/compound-exhibit.out; then
+  echo "NOTE: offline compound corpus_hits B was NO — receipt written; partner wiring still checked in steps 3–4/10."
+fi
 
 echo
 echo "9. Eval gate (baseline + ablation + scorer symmetry)..."
 python3 scripts/eval_refusal_baseline.py 2>&1 | tail -3
 python3 scripts/eval_refusal_ablation.py 2>&1 | tail -2
 python3 scripts/eval_scorer_symmetry.py 2>&1 | tail -3
+
+echo
+echo "10. Private-workspaces partner health (local, no network)..."
+bash scripts/prove_partner_health_local.sh 2>&1 | tail -5
 
 echo
 echo "=== cold-clone verify OK ==="

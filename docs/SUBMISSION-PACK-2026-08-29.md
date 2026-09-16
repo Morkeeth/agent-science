@@ -11,6 +11,8 @@
 ```bash
 git clone https://github.com/Morkeeth/agent-science.git && cd agent-science
 bash scripts/verify_cold_clone.sh
+# includes: 72/72 · ADK path · partners · 128/128 docs · holdout · offline compound ·
+#           baseline/ablation/scorer · prove_partner_health_local (private-workspaces fields)
 python3 tests/test_registry_surface.py -q
 python3 scripts/compound_exhibit_receipt.py
 bash scripts/demo_truth_layer.sh
