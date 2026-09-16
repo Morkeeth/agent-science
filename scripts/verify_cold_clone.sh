@@ -37,14 +37,23 @@ echo "7. Registry surface (stranger block)..."
 python3 tests/test_registry_surface.py -q 2>&1 | tail -1
 
 echo
-echo "8. Offline compound receipt..."
-python3 scripts/compound_exhibit_receipt.py 2>&1 | grep -E 'parallel_calls|corpus_hits|Mode:' | head -4
+echo "8. Offline compound receipt (exact-match overlap)..."
+python3 scripts/compound_exhibit_receipt.py >/tmp/compound_exhibit.out
+grep -E 'parallel_calls|corpus_hits|Mode:|Run B parallel' /tmp/compound_exhibit.out | head -6
 
 echo
 echo "9. Eval gate (baseline + ablation + scorer symmetry)..."
 python3 scripts/eval_refusal_baseline.py 2>&1 | tail -3
 python3 scripts/eval_refusal_ablation.py 2>&1 | tail -2
 python3 scripts/eval_scorer_symmetry.py 2>&1 | tail -3
+
+echo
+echo "10. Paraphrase compound gate (naive baseline may beat shipping)..."
+python3 scripts/eval_compound_paraphrase.py 2>&1 | tail -8
+
+echo
+echo "11. Cost gate (price card · billing may be UNKNOWN)..."
+python3 scripts/eval_cost_gate.py 2>&1 | tail -10
 
 echo
 echo "=== cold-clone verify OK ==="

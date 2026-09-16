@@ -43,7 +43,7 @@ Raw capture: see this night's shell transcript / `docs/RECEIPT-cost-gate-2026-09
 3. **Live orphan-works compound unverified** — no Parallel/Gemini keys; hosted `/clear` path not exercised.
 4. **Hosted stranger `/search` free-tier claim was stale** — current revision login-walls it; older receipts that imply logged-out search are wrong for rev `00028-hed`.
 5. **Naive term arm labels BL claim UNSOURCED** while shipping labels UNVERIFIED INDEPENDENCE — baseline is deliberately weaker on independence; do not treat naive labels as product-correct.
-6. **Did not re-run cold clone from GitHub** of this branch (branch not on remote until push); stranger path assumed after push via pack commands.
+6. **Cold clone script OK locally** (`bash scripts/verify_cold_clone.sh` exit 0 on this branch) — still not a fresh GitHub clone of the unmerged branch tip.
 7. **Registry `stats` n=0 on this VM's local `cache/refusal_log.db`** — backfill row count in compound receipt still prints the hardcoded "29 SOURCED…" parenthetical from the script template while measured backfill_rows was 0; that parenthetical is a carried phrase and should be treated as suspect.
 
 ---
