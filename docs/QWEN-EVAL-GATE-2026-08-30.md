@@ -10,10 +10,12 @@
 
 > **Re-verified 2026-09-03:** holdout freeze + scorer symmetry gates shipped; see `docs/RECEIPT-night-wave-2026-09-03.md`.
 
-> **Re-verified 2026-09-16:** `eval_refusal_baseline.py` + `eval_refusal_ablation.py` +
-> `eval_scorer_symmetry.py` → baseline/ablation **5/6 = 0.833** vs shipping **6/6 = 1.000**,
-> delta **+1**, McNemar p=1.0000 (b=0 c=1). Holdout OK (4 files). See
-> `docs/RECEIPT-partner-admissibility-2026-09-16.md`.
+> **Re-verified 2026-09-17:** cost-from-billing gate shipped —
+> `python3 scripts/eval_cost_from_billing.py` · Parallel Search advanced @$5/1000
+> (price card fetched + rate parsed from body) · ALWAYS_SILENT 3/6 @ $0 vs SHIPPING
+> 6/6 @ 3 Parallel calls · NAIVE_NO_REUSE 5 calls. See
+> `docs/RECEIPT-night-wave-2026-09-17.md`. Hardcoded `29 SOURCED` in compound receipt
+> killed (object was 25 GREEN).
 
 # QWEN EVAL GATE — alternative arm · 2026-08-30
 
@@ -121,6 +123,7 @@ Re-derives all 9 suite counts against `docs/SUBMISSION-PACK-2026-08-29.md` — e
 - [x] External anchor — live rightsstatements.org (`scripts/eval_external_anchor.py`)
 - [x] Holdout frozen — `python3 scripts/eval_verify_holdout.py` (MANIFEST pins set.json + docs)
 - [x] Scorer symmetrical — `python3 scripts/eval_scorer_symmetry.py` (delivered SOURCED/UNSOURCED only)
+- [x] Cost from billing — `python3 scripts/eval_cost_from_billing.py` (dated Parallel price card · three arms)
 - [x] Offline path with no API key
 - [x] Wilson CI + McNemar (n=6)
-- [x] Honesty carries worst number (tie + RC5 false-GREEN both arms)
+- [x] Honesty carries worst number (tie + RC5 false-GREEN both arms; silent wins cost)

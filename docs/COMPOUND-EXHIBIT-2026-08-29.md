@@ -1,6 +1,6 @@
 # COMPOUND EXHIBIT — orphan-works A/B
 
-**Date:** 2026-09-16 19:06 UTC · **Subject:** `orphan-works` · **Mode:** offline
+**Date:** 2026-09-17 20:21 UTC · **Subject:** `orphan-works` · **Mode:** offline
 **Fixtures:** `compound-mini-A.txt` → `compound-mini-B.txt`
 
 ## Quantified compounding
@@ -25,7 +25,7 @@ Ground-truth Parallel calls at fake boundary (Run A only): `3`
 
 ## Registry backfill
 
-`python3 clear_corpus.py research-corpus --backfill` → **0 rows** (29 SOURCED + proven-unprovable refusals) in `cache/refusal_log.db`
+`python3 clear_corpus.py research-corpus --backfill` → **239 rows** (25 SOURCED / GREEN + 214 refused) in `cache/refusal_log.db` — counts from `refusal_log.stats()` this run, not a carried figure.
 
 ## Controls
 

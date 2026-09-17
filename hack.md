@@ -295,7 +295,7 @@ submission craft, supported by a real tendency, **not** as the explanation of th
 - [x] **Baseline steelmanned** — raw rows printed by eval scripts; RC5 is now the single discordant item (baseline GREEN, shipping UNKNOWN)
 - [x] **Statistic matched to n** — Wilson 95% CI + McNemar in baseline/ablation scripts
 - [x] **Scorer symmetrical** — `python3 scripts/eval_scorer_symmetry.py` · delivered SOURCED/UNSOURCED labels only; baseline **5/6** vs shipping **6/6** (RC5 discordant)
-- [ ] **Cost from billing**, with the price card's date stated.
+- [x] **Cost from billing**, with the price card's date stated. — `python3 scripts/eval_cost_from_billing.py` · **2026-09-17:** Parallel Search `advanced` @$5/1000 parsed from `fixtures/price-cards/parallel-search-advanced.json` (fetched `2026-09-17T20:17:40Z` from docs.parallel.ai). Arms: ALWAYS_SILENT 0 calls/$0 · NAIVE_NO_REUSE 5/$0.025 · SHIPPING 3/$0.015 (A=2→B=1). Correctness silent 3/6 vs shipping 6/6. **Not console invoice** (no API key) — price-card estimate only.
 - [x] **Offline path with no API key.**
 - [x] **Honesty & limitations** section carrying our worst number — README §Honesty & limitations; PITCH first screen
 - [ ] **Answer the track brief in the track's own words on the first screen** — judge pack § above; must land on Devpost ¶1 + video 0:00
@@ -307,11 +307,50 @@ Full record: `fleet-ops (internal)/retros/QWEN-LOSS-RETRO-2026-08-30.md` (correc
 
 ---
 
-## 🎯 NOW — Partner admissibility restore (private-workspaces health)
+## 🎯 NOW — Night wave · cost gate + pack truth + deploy prep (2026-09-17)
+
+**Slice:** Close Sep-9 submit-path gaps that embarrass us or help a stranger — not a doc polish pass.
+**One slice:** Qwen **cost-from-billing** gate (baseline arms) + SUBMISSION-PACK re-measure at object + honest live-compound BLOCKED + Oscar deploy prep. No deploy · no Devpost · no public flip.
+
+### Build (this session)
+
+- [ ] Cost-from-billing gate — `scripts/eval_cost_from_billing.py` · Parallel price card dated · ALWAYS_SILENT / NAIVE_NO_REUSE / SHIPPING arms
+- [ ] Kill hardcoded `29 SOURCED` in `compound_exhibit_receipt.py` — re-derive GREEN count at object
+- [ ] SUBMISSION-PACK truth refresh — suite counts · public-repo row · claims count · stranger block
+- [ ] Live compound — BLOCKED receipt if keys/token absent (re-probe at object)
+- [ ] Deploy prep — `docs/DEPLOY-PREP-2026-09-17.md` matching current `deploy.sh` (candidate tag) · partner-health note
+
+### Verify (one command each)
+
+```bash
+git pull && python3 tests/test_watch_it_go_red.py                    # 72/72
+python3 scripts/eval_cost_from_billing.py                            # cost gate + arms
+python3 scripts/bench_check_docs.py                                  # pack counts match
+python3 scripts/compound_exhibit_receipt.py                          # A→B Parallel + sourced count from DB
+python3 scripts/eval_refusal_baseline.py && python3 scripts/eval_refusal_ablation.py
+# Live (expect BLOCKED without keys):
+# env | grep -E 'PARALLEL|GEMINI|WORKSPACE' ; curl hosted /clear
+```
+
+### Receipt
+
+- `docs/RECEIPT-night-wave-2026-09-17.md`
+- `docs/BLOCKED-live-compound-2026-09-17.md`
+- `docs/DEPLOY-PREP-2026-09-17.md`
+
+### BLOCKED
+
+- Live Parallel / Gemini / hosted `/clear` — until keys + workspace token on the VM
+- Hosted partner fields on `/health` — until Oscar `deploy.sh` (still `00028-hed` stripped)
+- Key rotation — Oscar console (`AS-KEYS-ROTATE`)
+
+---
+
+## 🎯 NOW (prior) — Partner admissibility restore (private-workspaces health)
 
 **Slice:** Hosted WorkspaceHTTP stripped partner fields from `/health`; restore public partner proof + doc + controls. Live stays RED until Oscar deploy.
 
-### Build (this session)
+### Build (shipped 2026-09-16)
 
 - [x] Shared `cloud.partners.health_payload()` — local desk + WorkspaceHTTP
 - [x] Public hosted `/health` + `/partners` before auth — `cloud/case_http.py`
@@ -323,30 +362,11 @@ Full record: `fleet-ops (internal)/retros/QWEN-LOSS-RETRO-2026-08-30.md` (correc
 - [x] SUBMISSION-PACK — `bench_check_docs.py` **128/128**
 - [x] Live compound — honest BLOCKED (no Parallel key / workspace token)
 
-### Verify (one command each)
-
-```bash
-git pull && python3 tests/test_watch_it_go_red.py                    # 72/72
-python3 tests/test_adk_default_path.py                               # 5/5
-python3 -m unittest tests.test_hosted_flow -v                        # hosted health+partners public
-bash scripts/prove_partner_health_local.sh                           # private-workspaces partner fields
-python3 scripts/bench_check_docs.py                                  # 128/128
-python3 scripts/eval_refusal_baseline.py && python3 scripts/eval_refusal_ablation.py
-# After Oscar deploy only:
-bash scripts/verify_partners_hosted.sh                               # expect health+partners; clear needs token
-```
-
 ### Receipt
 
 - `docs/RECEIPT-partner-admissibility-2026-09-16.md`
 - `docs/FINDING-hosted-health-partner-strip-2026-09-16.md`
 - `docs/BLOCKED-live-compound-2026-09-16.md`
-
-### BLOCKED
-
-- Live hosted `/health` partner fields — **until Oscar `deploy.sh`** (revision still `00028-hed`)
-- Live compound / Parallel call on hosted `/clear` — **PARALLEL_API_KEY + WORKSPACE_TOKEN** missing on agent VM
-- Key rotation — Oscar console (`AS-KEYS-ROTATE`)
 
 ---
 
