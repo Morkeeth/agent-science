@@ -47,11 +47,12 @@ if grep -q 'corpus_hits B ≥ 1: \*\*NO\*\*' /tmp/compound-exhibit.out; then
 fi
 
 echo
-echo "9. Eval gate (baseline + ablation + scorer + cost-from-billing)..."
+echo "9. Eval gate (baseline + ablation + scorer + cost + second-buyer)..."
 python3 scripts/eval_refusal_baseline.py 2>&1 | tail -3
 python3 scripts/eval_refusal_ablation.py 2>&1 | tail -2
 python3 scripts/eval_scorer_symmetry.py 2>&1 | tail -3
 python3 scripts/eval_cost_from_billing.py 2>&1 | tail -8
+python3 scripts/eval_second_buyer_shift.py 2>&1 | tail -8
 
 echo
 echo "10. Private-workspaces partner health (local, no network)..."

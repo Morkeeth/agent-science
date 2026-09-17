@@ -16,6 +16,7 @@ bash scripts/verify_cold_clone.sh
 python3 tests/test_registry_surface.py -q
 python3 scripts/compound_exhibit_receipt.py
 python3 scripts/eval_cost_from_billing.py
+python3 scripts/eval_second_buyer_shift.py
 bash scripts/demo_truth_layer.sh
 python3 ask_registry.py "agentlint" | head -5
 ```
@@ -56,6 +57,7 @@ Offline compound receipt writes `docs/COMPOUND-EXHIBIT-2026-08-29.md` with A=2�
 | holdout freeze | `python3 scripts/eval_verify_holdout.py` | **4 files pinned** |
 | scorer symmetry | `python3 scripts/eval_scorer_symmetry.py` | baseline **5/6** vs shipping **6/6** on delivered labels |
 | cost-from-billing | `python3 scripts/eval_cost_from_billing.py` | silent **3/6** · shipping **6/6** · compound 5→3 Parallel calls |
+| second-buyer shift | `python3 scripts/eval_second_buyer_shift.py` | noncommercial **247/600** · broadcast **9/600** · gap **561/600** |
 
 **Registry size (local boot, 2026-09-17):** `python3 scripts/boot_registry.py` then `refusal_log.stats()` → **n=239 · cleared=25 · refused=214**. Hosted `/stats` returns **303** under private-workspaces — do not print a hosted claim count from this VM. Older "265+" figures were carried from a prior hosted `/truths/ui` read and are **not** re-verified tonight.
 

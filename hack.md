@@ -2,7 +2,7 @@
 doc: hack
 project: Agent Science
 phase: SHIP
-last-touched: 2026-09-16 19:10 UTC
+last-touched: 2026-09-17 20:30 UTC
 canonical: true
 event: Agentic Cinema · Parallel track · deadline 2026-09-09 14:00 PDT
 supersedes: docs/PHASE0-LADDER.md ClickHouse-track note (runtime track is Parallel)
@@ -314,18 +314,23 @@ Full record: `fleet-ops (internal)/retros/QWEN-LOSS-RETRO-2026-08-30.md` (correc
 
 ### Build (this session)
 
-- [ ] Cost-from-billing gate — `scripts/eval_cost_from_billing.py` · Parallel price card dated · ALWAYS_SILENT / NAIVE_NO_REUSE / SHIPPING arms
-- [ ] Kill hardcoded `29 SOURCED` in `compound_exhibit_receipt.py` — re-derive GREEN count at object
-- [ ] SUBMISSION-PACK truth refresh — suite counts · public-repo row · claims count · stranger block
-- [ ] Live compound — BLOCKED receipt if keys/token absent (re-probe at object)
-- [ ] Deploy prep — `docs/DEPLOY-PREP-2026-09-17.md` matching current `deploy.sh` (candidate tag) · partner-health note
+- [x] Cost-from-billing gate — `scripts/eval_cost_from_billing.py` · Parallel price card dated · ALWAYS_SILENT / NAIVE_NO_REUSE / SHIPPING arms
+- [x] Kill hardcoded `29 SOURCED` in `compound_exhibit_receipt.py` — re-derive GREEN count at object
+- [x] SUBMISSION-PACK truth refresh — suite counts · public-repo row · claims count · stranger block
+- [x] Live compound — BLOCKED receipt if keys/token absent (re-probe at object)
+- [x] Deploy prep — `docs/DEPLOY-PREP-2026-09-17.md` matching current `deploy.sh` (candidate tag) · partner-health note
+- [x] Second-buyer shift at object — `eval_second_buyer_shift.py` · 247 vs 9 nearer-proxy · fix `compare_questions.py` default
+- [x] STATUS.md hosted/local claim scrub — 265 carried → 239 local / hosted 303
+- [x] Cold clone — `bash scripts/verify_cold_clone.sh` → OK (includes cost gate)
 
 ### Verify (one command each)
 
 ```bash
 git pull && python3 tests/test_watch_it_go_red.py                    # 72/72
 python3 scripts/eval_cost_from_billing.py                            # cost gate + arms
+python3 scripts/eval_second_buyer_shift.py                           # 247/600 vs 9/600 proxy
 python3 scripts/bench_check_docs.py                                  # pack counts match
+bash scripts/verify_cold_clone.sh                                    # stranger path
 python3 scripts/compound_exhibit_receipt.py                          # A→B Parallel + sourced count from DB
 python3 scripts/eval_refusal_baseline.py && python3 scripts/eval_refusal_ablation.py
 # Live (expect BLOCKED without keys):
@@ -335,6 +340,7 @@ python3 scripts/eval_refusal_baseline.py && python3 scripts/eval_refusal_ablatio
 ### Receipt
 
 - `docs/RECEIPT-night-wave-2026-09-17.md`
+- `docs/RECEIPT-second-buyer-shift-2026-09-17.md`
 - `docs/BLOCKED-live-compound-2026-09-17.md`
 - `docs/DEPLOY-PREP-2026-09-17.md`
 
@@ -591,6 +597,9 @@ bash scripts/verify_cold_clone.sh                                               
 
 | When | What | Command | Outcome |
 |------|------|---------|---------|
+| 2026-09-17 night | Cost-from-billing gate + kill hardcoded 29 SOURCED | `eval_cost_from_billing.py` · `compound_exhibit_receipt.py` · `test_compound_receipt_counts.py` | silent **3/6@$0** · ship **6/6** · naive 5→ship 3 Parallel · receipt **25 GREEN/239** (was carried 29) · pack 128/128 · live compound **BLOCKED** · deploy prep for candidate-tag `deploy.sh` |
+| 2026-09-17 night | Hosted surface re-probe | `curl …/health` · `/clear` · `/partners` | `00028-hed` stripped · clear **401** · partners/stats/search **303** |
+| 2026-09-17 night | Second-buyer shift at object | `eval_second_buyer_shift.py` · cold-clone | **247/600** noncommercial · **9/600** broadcast · **561/600** gap · `compare_questions.py` default fixed to noncommercial · STATUS 265→239 local |
 | 2026-09-16 night | Offline compound exit 3 (paraphrase≠assertion) | `compound_exhibit_receipt.py` · cold-clone step 8–10 | **A=2→B=1 Parallel, corpus_hits=2** after exact-assertion B arm · cold-clone OK |
 | 2026-09-16 night | Hosted health partner strip found + fixed in tree | `curl …/health` · `prove_partner_health_local.sh` · hosted_flow tests | Live **RED** (`00028-hed` missing partner fields) · local prove **engine_default=adk** · 72/72 · 128/128 |
 | 2026-09-16 night | Qwen eval re-derive | `eval_refusal_baseline.py` · `eval_refusal_ablation.py` | baseline/ablation **5/6** vs shipping **6/6**, delta +1, McNemar p=1.0 |
@@ -647,7 +656,23 @@ A failed stage selects the next product change; it does not trigger repeated bro
 
 General reference examples (always re-read for the event): https://agentic-cinema.devpost.com/ and https://ethglobal.com/events/ethonline2026/info/details and https://ethglobal.com/events/ethonline2026/prizes .
 
-## Current stage record · 2026-09-16 · partner admissibility repair
+## Current stage record · 2026-09-17 · night wave cost gate + pack truth
+
+- **Intended user outcome:** a stranger cold-clones, runs one verify script, sees dated
+  cost arms next to correctness, and reads a pack whose suite counts and repo visibility
+  match the objects — without needing keys.
+- **Action actually observed:** `eval_cost_from_billing.py` exit 0; ALWAYS_SILENT wins
+  cost and loses correctness 3/6 vs 6/6; compound receipt printed 25 GREEN not 29;
+  `bench_check_docs.py` 128/128; hosted `/clear` 401 and `/health` still stripped.
+- **Exact evidence:** `docs/RECEIPT-night-wave-2026-09-17.md` ·
+  `fixtures/price-cards/parallel-search-advanced.json` ·
+  `docs/BLOCKED-live-compound-2026-09-17.md` · `docs/DEPLOY-PREP-2026-09-17.md`.
+- **Largest product gap:** live partner `/health` + live compound still need Oscar deploy
+  and keys; cost gate is price-card estimate, not console billing.
+- **Next build change:** Oscar deploy/promote per DEPLOY-PREP; with token, live compound
+  or keep BLOCKED; optional STATUS.md 265 scrub.
+
+**Prior stage record · 2026-09-16 · partner admissibility repair**
 
 - **Intended user outcome:** a judge or Oscar deploy verify can read partner wiring from
   public `/health` + `/partners` without a workspace key; clearance still refuses paraphrase.

@@ -20,6 +20,12 @@
    (`/clear` 401; no keys/token; health still stripped on `00028-hed`).
 5. **Deploy prep** — `docs/DEPLOY-PREP-2026-09-17.md` matches current candidate-tag
    `deploy.sh` (no agent deploy).
+6. **Second-buyer shift gate** — `scripts/eval_second_buyer_shift.py` re-derives
+   **247/600** noncommercial vs **9/600** broadcast; `compare_questions.py` default
+   fixed to `noncommercial_reuse` (was the nearer-proxy trap).
+7. **STATUS.md scrub** — carried **265** claims / stale rev `00018` → local **239** /
+   live `00028-hed` stripped health.
+8. **Cold clone** — `bash scripts/verify_cold_clone.sh` → OK including cost gate.
 
 ---
 
@@ -34,8 +40,10 @@
 | Baseline / ablation | `eval_refusal_baseline.py` · `eval_refusal_ablation.py` | 5/6 vs 6/6, delta +1 |
 | Scorer symmetry | `python3 scripts/eval_scorer_symmetry.py` | 5/6 vs 6/6 |
 | Cost gate | `python3 scripts/eval_cost_from_billing.py` | silent 3/6@$0 · ship 6/6 · 5→3 calls |
+| Second buyer | `python3 scripts/eval_second_buyer_shift.py` | 247/600 NC · 9/600 broadcast · 561 gap |
 | Compound offline | `python3 scripts/compound_exhibit_receipt.py` | A=2→B=1 · hits=2 · **25 GREEN / 214 refused / 239** |
 | Hardcoded count control | `python3 tests/test_compound_receipt_counts.py` | 2/2 |
+| Cold clone | `bash scripts/verify_cold_clone.sh` | **OK** |
 | Public repo | `gh repo view … --json visibility` | PUBLIC |
 | Hosted health | `curl …/health` | `00028-hed` stripped (no partner fields) |
 | Hosted clear | `curl -X POST …/clear` | **401** |
@@ -75,6 +83,9 @@ Price card fetched: 2026-09-17T20:17:40Z · $5/1000 advanced Search
    table but not significant at n=6; do not pitch "statistically proven".
 7. **Import path for CER** — first `importlib` attempt failed on dataclasses; switched
    to `runpy`. Works, but is uglier than a package layout (not restructured tonight).
+8. **`compare_questions.py` was the nearer proxy** — defaulted to `broadcast` (9/600)
+   while every pitch line says noncommercial (247/600). Found by opening the script
+   object, not by reading the fixture title. Fixed default; both arms still measurable.
 
 ---
 

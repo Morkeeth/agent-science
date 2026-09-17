@@ -9,7 +9,7 @@
 | BLOCKED (RED) | 515 | 86% |
 | UNKNOWN — did not resolve | 37 | 6% |
 
-> **552 of 600 (92%) of this library is not sellable as-is.**
+> **552 of 600 (92%) of this library cannot be broadcast or reused as-is.**
 
 ## Blocked, with the instrument that blocks it
 

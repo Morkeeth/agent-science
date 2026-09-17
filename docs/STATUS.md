@@ -2,7 +2,7 @@
 doc: status
 project: Agent Science
 canonical: true
-last-updated: 2026-09-16T19:00:00Z
+last-updated: 2026-09-17T20:30:00Z
 deadline: 2026-09-09T14:00:00-07:00
 ---
 
@@ -11,7 +11,7 @@ deadline: 2026-09-09T14:00:00-07:00
 > **For Claude / fleet:** this file is the single “where we are” surface.  
 > `hack.md` = process · `CLAUDE.md` = entry · this file = gates + evidence.
 
-**Last gate run:** 2026-09-16 — partner admissibility wave · `bench_check_docs.py` **128/128** · `test_watch_it_go_red.py` **72/72** · live `/health` partner fields **RED** until Oscar deploy (`docs/FINDING-hosted-health-partner-strip-2026-09-16.md`)
+**Last gate run:** 2026-09-17 — night wave cost gate + pack truth · `bench_check_docs.py` **128/128** · `test_watch_it_go_red.py` **72/72** · `eval_cost_from_billing.py` exit 0 · `verify_cold_clone.sh` OK · live `/health` partner fields **RED** until Oscar deploy (`docs/FINDING-hosted-health-partner-strip-2026-09-16.md`) · live compound **BLOCKED** (`docs/BLOCKED-live-compound-2026-09-17.md`)
 
 ---
 
@@ -65,11 +65,12 @@ deadline: 2026-09-09T14:00:00-07:00
 | | |
 |---|---|
 | **URL** | https://agent-science-568004190078.us-central1.run.app |
-| **Revision** | `agent-science-00018-n4s` · `parallel_sdk: true` · **`/truths/ui` live** |
-| **Health** | `engine_default: adk` · 265 claims · hit rate ~0.80 |
+| **Revision** | `agent-science-00028-hed` · mode `private-workspaces` · partner fields **stripped** on live `/health` |
+| **Health** | live keys: `ok/service/mode/revision` only — `engine_default` absent until Oscar deploy |
+| **Local registry** | after `boot_registry.py`: **239** claims (25 GREEN / 214 refused) — re-derive; do not carry 265 |
+| **Hosted stats** | `/stats` → **303** on this revision — hosted claim count not measurable without auth |
 | **New** | `GET /visibility/ui` — full websearch panel for judges (film this) |
-| **New** | `GET /truths/ui` — truths dashboard |
-| **Stats** | 265 claims · hit rate ~0.80 · queries logged growing |
+| **New** | `GET /truths/ui` — truths dashboard (may require workspace session on this rev) |
 
 **Compound (sealed):** `longrun-0831-1320` A=**1** → B=**0** Parallel · B `corpus_hits=1`
 
