@@ -2,7 +2,7 @@
 ## SHARED WORK STATE · revision e2daf56ba4f1 · rendered 2026-09-15 · scope repo cleared
 This repo's rows of the one shared work state. Authorities: todo.md (human), TASKS.yaml (ids), board clocks, Oscar's rulings (local only). Views such as GLANCE, SLASK and ZUP are adapters over the same revision.
 **A CLOSED task stays closed. Do not requeue, re-verify or re-poll it.**
-Before acting, record that you read this revision, exact session and exact rev: `python3 ~/CODE/fleet-ops/state/state.py ack --session <your session id> --consumer <claude|codex|cursor> --rev e2daf56ba4f1`. In a cloud sandbox instead append `{"session":"<your session id>","consumer":"<claude|codex|cursor>","rev":"e2daf56ba4f1","ts":"<iso>","stage":"acknowledged"}` to `.fleet/ACK.jsonl` in this repo and commit it.
+Before acting, record that you read this revision, exact session and exact rev. In a cloud sandbox append `{"session":"<your session id>","consumer":"<claude|codex|cursor>","rev":"e2daf56ba4f1","ts":"<iso>","stage":"acknowledged"}` to `.fleet/ACK.jsonl` in this repo and commit it. On a local fleet-ops checkout: `python3 state/state.py ack --session <your session id> --consumer <claude|codex|cursor> --rev e2daf56ba4f1` from that tool's directory.
 
 ### CLOSED. Not open work.
 - **AS-NIGHTPLAN-2026-09-05** · Overnight research engine build (nightplan) · **DONE**. status `done` in TASKS.yaml

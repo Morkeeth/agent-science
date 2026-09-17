@@ -86,6 +86,12 @@ Price card fetched: 2026-09-17T20:17:40Z · $5/1000 advanced Search
 8. **`compare_questions.py` was the nearer proxy** — defaulted to `broadcast` (9/600)
    while every pitch line says noncommercial (247/600). Found by opening the script
    object, not by reading the fixture title. Fixed default; both arms still measurable.
+9. **`long_run_goal.sh` was a false green** — SIGPIPE on `lookup|head` under pipefail
+   aborted before hosted checks; `exec > >(tee)` then masked `failed=13` as exit 0.
+   Fixed; now exits 1 on private-workspaces. See
+   `docs/FINDING-long-run-false-green-2026-09-17.md`.
+10. **full_gate needed pytest/pypdf** — env gap; added `requirements-dev.txt` + fail-closed
+    missing-dep checks. AGENTS.md `~/CODE/` tripped privacy_grep (scrubbed).
 
 ---
 

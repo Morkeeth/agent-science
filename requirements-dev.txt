@@ -1,0 +1,3 @@
+# Dev / gate-only dependencies (not required for Cloud Run serve path).
+# full_gate.sh section 4a needs these.
+pytest>=8.0
