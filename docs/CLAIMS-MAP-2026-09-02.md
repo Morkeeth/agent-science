@@ -152,14 +152,14 @@ Status key: **PROVEN** = URL 200 today / script output pasted above / file:line.
 |---|---|---|---|
 | P1 | Deadline 2026-09-09 14:00 PDT · "8 days" | Devpost page text "Deadline: Sep 9, 2026 @ 2:00pm PDT" (§B) · 8 days was true for the doc's 09-01 date; today it is 7 | PROVEN (day count updated to 7) |
 | P2 | Run A **1** Parallel → Run B **0**, `corpus_hits=1` (sealed) | `docs/SEALED-PREDICTION-2026-08-31.md` table (A=1, B=0, corpus_hits 0→1, subject `longrun-0831-1320`, commit `c845812`) · today's hosted A/B: first pass (warm shelf) A parallel=0 corpus_hits=0 → B parallel=0 corpus_hits=1; re-run #2 on a fresh subject **A parallel=1 → B parallel=0, corpus_hits 0→1, COMPOUND PASS, 19/19** (§C) — the headline reproduced live today | PROVEN |
-| P3 | Four partners wired at runtime: Vertex, Parallel, Cloud Run, ADK | `/health` → `gemini_path: vertex:hack-fleet`, `parallel_sdk: true` (1.3.2), `engine_default: adk` (2.7.1); host `*.run.app` (§A) | PROVEN |
+| P3 | Four partners wired at runtime: Vertex, Parallel, Cloud Run, ADK | `/health` → `gemini_path: vertex:hack-fleet`, `parallel_sdk: true` (1.3.2), `engine_default: adk` (2.7.1); host `*.run.app` (§A) | **WAS PROVEN 2026-09-02 · RED 2026-09-18** — live `00028-hed` health stripped; see §G |
 | P4 | "We refused our own pitch headline **on camera**" | Refusal: hosted `POST /clear` today → `C1 · UNSOURCED · search_found_no_admissible_source` (§A); `PITCH.md:86-87`; `cache/search_receipts.jsonl:2-5` (`n_candidates: 0`). **"On camera":** `demo/FILM-AND-SUBMIT.md:32` puts the beat at 1:00 in the *script*; nobody in this lane watched `demo/demo-final.mp4` to confirm it is in the cut | refusal PROVEN · "on camera" **UNPROVEN** → softened |
 | P5 | `/visibility/ui?q=ralph+loop+agentic` live: CONTRARY stamp + transparency keys | UI 200 shows `CONTRARY_TO_RESEARCH` + Transparency pane; the literal keys `angles_searched/shallow_route/imbalance` are in the JSON `/visibility?q=…` (§A) | PROVEN (pointer fixed: keys → JSON URL) |
 | P6 | `/truths/ui` — **271 claims** (live 2026-09-02) | `/truths/ui` → `Shelf: 276 claims · hit rate 0.66 · 191 queries logged` (§A) | stale number → **updated to 276** with timestamp |
 | P7 | Hosted URL · film URL · "deployed with `/visibility` + `/truths/ui`" | all 200 (§A) | PROVEN |
 | P8 | Truth layer code on `main`: `clearance/visibility.py`, `contrary.py`, `stack_fit.py` | `git ls-files` → all three tracked | PROVEN |
 | P9 | **284 claims** on shelf (live) / 271 in the same row | live 276 (§A) — the row disagreed with itself | stale → **updated to 276** |
-| P10 | Deployed: `/health` → `engine_default: adk`, `parallel_sdk: true` | §A | PROVEN |
+| P10 | Deployed: `/health` → `engine_default: adk`, `parallel_sdk: true` | §A | **WAS PROVEN 2026-09-02 · RED 2026-09-18** — §G |
 | P11 | `/truths/ui` live → dashboard HTML | 200, 2929 B, "Truths dashboard" (§A) | PROVEN |
 | P12 | 52 inbox ingests | `docs/RECEIPT-agent-science-shape-2026-09-01.md:27` "`auto_ingest_inbox.py` → 52 ingested, 0 failed" — a receipt, not re-run (re-running would ingest again) | PROVEN (receipt) |
 | P13 | Film scout doc | `docs/FILM-SCOUT-COMMANDS.md` tracked | PROVEN |
@@ -218,3 +218,28 @@ Status key: **PROVEN** = URL 200 today / script output pasted above / file:line.
 - No deploy, no push, no Devpost edit, no key touched. Key files were only `ls`-ed to confirm the history control would not early-return.
 - `docs/LONG-RUN-RECEIPT-2026-09-02.md` and `research-inbox/2026-09-02-claim.md` were generated in the **main** tree by my `full_gate.sh` run and left untracked there; `cache/search_receipts.jsonl` gained rows from the demo runs and is left unstaged.
 - Another lane was editing `agent_science.py`, `clearance/refusal_log.py`, `cloud/service.py` in the main tree while this ran (mtimes 23:46–23:47Z); it landed as `a055ba3` on `main` and this branch now sits on top of it. The cold-clone verify below was re-run after the rebase.
+
+## H · Re-measure 2026-09-18 (live objects)
+
+```bash
+curl -sS https://agent-science-568004190078.us-central1.run.app/health
+# {"ok": true, "service": "agent-science", "mode": "private-workspaces",
+#  "revision": "agent-science-00028-hed"}   — no gemini/parallel/engine_default
+
+python3 scripts/eval_hosted_partner_baseline.py
+# naive ok:true PASS · shipping partner fields FAIL · exit 2
+
+curl -sS -o /dev/null -w '%{http_code}\n' …/truths/ui          # 303
+curl -sS -o /dev/null -w '%{http_code}\n' …/visibility/ui?q=x  # 303
+curl -sS -o /dev/null -w '%{http_code}\n' …/partners           # 303
+```
+
+| Claim | 2026-09-02 | 2026-09-18 at object |
+|-------|------------|----------------------|
+| P3 / P10 hosted partner health | PROVEN | **RED** until Oscar deploy of in-tree fix |
+| P5 / P6 / P11 film `/visibility` `/truths` | PROVEN | **RED** on live (303); fixed in tree, undeployed |
+| PITCH "four partners wired at runtime" on hosted | — | Do not say until `verify_partners_hosted.sh` exit 0 |
+
+Findings: `docs/FINDING-partners-checklist-hardcoded-2026-09-18.md`,
+`docs/FINDING-hosted-judge-surfaces-missing-2026-09-18.md`,
+`docs/RECEIPT-partner-judge-surfaces-2026-09-18.md`.

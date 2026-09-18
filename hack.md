@@ -2,7 +2,7 @@
 doc: hack
 project: Agent Science
 phase: SHIP
-last-touched: 2026-09-16 19:10 UTC
+last-touched: 2026-09-18 00:20 UTC
 canonical: true
 event: Agentic Cinema · Parallel track · deadline 2026-09-09 14:00 PDT
 supersedes: docs/PHASE0-LADDER.md ClickHouse-track note (runtime track is Parallel)
@@ -10,14 +10,14 @@ supersedes: docs/PHASE0-LADDER.md ClickHouse-track note (runtime track is Parall
 
 # hack.md — Agentic Cinema constitution + handbook pass
 
-## STATE 2026-09-02 (Fable, probed)
-- **09:0x:** cold clone from GitHub to `/tmp/agent-science-cold`, README as written: `verify_cold_clone.sh` → 6/6 partner wiring · 127/127 SUBMISSION-PACK · eval gate b=0 c=1 p=1.0 · exit 0; `demo_truth_layer.sh` exit 0. Live `/health` 200. Repo PUBLIC since 2026-08-22; `git log -p --all` key scan → only fixtures (`pk-live-abc`). No key ever entered the repo; console rotation = Oscar's word. Final tweaks: fleet-ops `FINAL-TWEAKS-2026-09-02.md`.
+## STATE 2026-09-18 (Cursor, partner + judge surfaces)
+- **00:1x:** Live `00028-hed` still stripped `/health`. New findings: `/partners` checklist had `parallel_search_at_runtime: true` hardcoded; WorkspaceHTTP film routes `/truths/ui`+`/visibility/ui` were unmounted (anon 303, authed 404). Baseline eval: naive `ok:true` PASS / shipping FAIL. Fixes in tree on `cursor/partner-admissibility-night-5719`. Live stays RED until Oscar deploy.
+- **09:0x (prior):** cold clone from GitHub to `/tmp/agent-science-cold`, README as written: `verify_cold_clone.sh` → 6/6 partner wiring · 127/127 SUBMISSION-PACK · eval gate b=0 c=1 p=1.0 · exit 0; `demo_truth_layer.sh` exit 0. Live `/health` 200. Repo PUBLIC since 2026-08-22; `git log -p --all` key scan → only fixtures (`pk-live-abc`). No key ever entered the repo; console rotation = Oscar's word. Final tweaks: fleet-ops `FINAL-TWEAKS-2026-09-02.md`.
 - **14:0x:** main 5d03583 carries the cold-clone transcript + buyer § (E&O underwriter; $15k–80k researcher time per hour-long doc; 0.5–2% premium). Re-clone 14:0x → cold verify OK. Privacy grep scrubbed (COLD-CLONE quote + hack.md path).
 - **21:5x:** Log poison fix — `no_independent_source` no longer freezes cross-subject reuse; GREEN upgrades poisoned rows. Buyer SOURCED+CATCH trace measured locally (EUR-Lex + overnight-museum refuse). Desk report shows buyer-week cleared/caught strip.
 - **23:5x (Fable, branch `fable/claims-map-2026-09-02`):** the 1 privacy file was `scripts/scrub_privacy_paths.py` (its own regexes) → task grep 0. `scripts/privacy_grep.sh` was a **false green** (`xargs rg` with `rg` a shell function → scanned 0 files, printed OK); rewritten on `git grep`, proven red on a planted hit. Claims map `docs/CLAIMS-MAP-2026-09-02.md`: 35 claims, 31 PROVEN, 4 UNPROVEN (softened). Long run 19/19 A=1→B=0. Merge hazard: main tree holds an untracked `docs/LONG-RUN-RECEIPT-2026-09-02.md` that the branch also adds.
 - **2026-09-03 12:1x (Fable, submission lane):** four failing tests fixed (population re-frozen after the path scrub, 312 claims unchanged; desk nav carries "websearch companion"); Cursor `night-wave-submission-eval-4ae1` merged with `--no-ff` after a one-file `hack.md` conflict; film pack COMPLETE (`docs/FILM-PACK-2026-09-03.md`: 6 beats with live output, shot list 3:00, 6 screenshots in `docs/film/`, voiceover 147 s rendered); Devpost paste at `submission/DEVPOST-PASTE.md`; stranger pass from a fresh GitHub clone of `0d48d88`: README's three commands exit 0, 0, 0; privacy grep 0 hits. Fresh compound probe today: A=1 Parallel, B=1 Parallel with 1 corpus hit (B carried a new claim); the A=1 to B=0 headline is the 08-31 and 09-02 measure. Left for Oscar: record, upload, submit, key rotation.
 - **2026-09-03 (Fable):** the buyer § E&O numbers in the 14:0x line above are now sourced/corrected — the "$15k–80k researcher time" and "0.5–2% premium" figures were **removed as unsourced** and E&O restated as a flat premium (~$2,000–$10,000) with primary citations in SUBMISSION.md §Buyer. Claims map S15 now PROVEN, S15b REMOVED; totals 32 PROVEN · 3 UNPROVEN. Cold-clone re-verified.
-
 
 **Repo:** Morkeeth/agent-science · **Event:** Agentic Cinema · Sep 9 2026 14:00 PDT  
 **Spine:** **Agent Science** — the truth layer for what people believe and use. Companion (B) lead; clearance (A) on the same layer. Verify-or-refuse; registry compounds.  
@@ -307,7 +307,54 @@ Full record: `fleet-ops (internal)/retros/QWEN-LOSS-RETRO-2026-08-30.md` (correc
 
 ---
 
-## 🎯 NOW — Partner admissibility restore (private-workspaces health)
+## 🎯 NOW — Partner checklist + judge film surfaces (private-workspaces)
+
+**Slice:** Open live objects; kill hardcoded Parallel checklist; restore public film surfaces; baseline-eval that can go RED on live. Deploy remains Oscar.
+
+### Build (this session)
+
+- [x] `parallel_search_at_runtime` measured from `PARALLEL_API_KEY` — not constant True
+- [x] `parallel_search_proven` from verified receipts
+- [x] Public `/truths/ui` · `/visibility[/ui]` · `/popular[/ui]` on WorkspaceHTTP
+- [x] RED controls — partner_runtime 8/8 · hosted_flow checklist + film tests
+- [x] Baseline eval — `scripts/eval_hosted_partner_baseline.py` (naive PASS / shipping FAIL on live)
+- [x] Local prove — `prove_partner_health_local.sh` + `prove_judge_surfaces_local.sh`
+- [x] STATUS / CLAIMS-MAP / SUBMISSION-PACK **129/129** re-derived at object
+- [x] Partner doc + design-partner loop + BLOCKED live compound refreshed
+- [x] Live compound — honest BLOCKED (no Parallel key / workspace token)
+
+### Verify (one command each)
+
+```bash
+git pull && python3 tests/test_watch_it_go_red.py                    # 72/72
+python3 tests/test_partner_runtime.py                               # 8/8
+python3 -m unittest tests.test_hosted_flow -v                       # film + checklist RED
+bash scripts/prove_partner_health_local.sh                          # engine_default=adk
+bash scripts/prove_judge_surfaces_local.sh                          # truths+visibility public
+python3 scripts/eval_hosted_partner_baseline.py                     # expect exit 2 until deploy
+python3 scripts/bench_check_docs.py                                  # 129/129
+python3 scripts/eval_refusal_baseline.py && python3 scripts/eval_refusal_ablation.py
+# After Oscar deploy only:
+bash scripts/verify_partners_hosted.sh                               # expect health+partners
+bash film/preflight.sh                                               # expect PASS
+```
+
+### Receipt
+
+- `docs/RECEIPT-partner-judge-surfaces-2026-09-18.md`
+- `docs/FINDING-partners-checklist-hardcoded-2026-09-18.md`
+- `docs/FINDING-hosted-judge-surfaces-missing-2026-09-18.md`
+- `docs/BLOCKED-live-compound-2026-09-18.md`
+
+### BLOCKED
+
+- Live hosted partner health + film surfaces — **until Oscar `deploy.sh`** (revision still `00028-hed`)
+- Live compound / Parallel on hosted `/clear` — **PARALLEL_API_KEY + WORKSPACE_TOKEN** missing on agent VM
+- Key rotation — Oscar console (`AS-KEYS-ROTATE`)
+
+---
+
+## 🎯 NOW (prior) — Partner admissibility restore (private-workspaces health)
 
 **Slice:** Hosted WorkspaceHTTP stripped partner fields from `/health`; restore public partner proof + doc + controls. Live stays RED until Oscar deploy.
 
@@ -571,6 +618,7 @@ bash scripts/verify_cold_clone.sh                                               
 
 | When | What | Command | Outcome |
 |------|------|---------|---------|
+| 2026-09-18 night | Hardcoded Parallel checklist + missing film surfaces | `eval_hosted_partner_baseline.py` · `prove_judge_surfaces_local.sh` · partner_runtime 8/8 | Live **naive PASS/shipping FAIL** · checklist RED fixed · film surfaces in tree · 72/72 · **129/129** |
 | 2026-09-16 night | Offline compound exit 3 (paraphrase≠assertion) | `compound_exhibit_receipt.py` · cold-clone step 8–10 | **A=2→B=1 Parallel, corpus_hits=2** after exact-assertion B arm · cold-clone OK |
 | 2026-09-16 night | Hosted health partner strip found + fixed in tree | `curl …/health` · `prove_partner_health_local.sh` · hosted_flow tests | Live **RED** (`00028-hed` missing partner fields) · local prove **engine_default=adk** · 72/72 · 128/128 |
 | 2026-09-16 night | Qwen eval re-derive | `eval_refusal_baseline.py` · `eval_refusal_ablation.py` | baseline/ablation **5/6** vs shipping **6/6**, delta +1, McNemar p=1.0 |
@@ -627,7 +675,23 @@ A failed stage selects the next product change; it does not trigger repeated bro
 
 General reference examples (always re-read for the event): https://agentic-cinema.devpost.com/ and https://ethglobal.com/events/ethonline2026/info/details and https://ethglobal.com/events/ethonline2026/prizes .
 
-## Current stage record · 2026-09-16 · partner admissibility repair
+## Current stage record · 2026-09-18 · partner checklist + judge surfaces
+
+- **Intended user outcome:** a judge or Oscar film preflight can read partner wiring and
+  open `/truths/ui` + `/visibility/ui` without a workspace key; Parallel checklist cannot
+  claim "at runtime" without a key; clearance still refuses paraphrase.
+- **Action actually observed:** live `00028-hed` `/health` still stripped; `/partners` and
+  film UIs **303** login. Locally, `/partners` claimed `parallel_search_at_runtime: true`
+  with no key. After fix, checklist goes RED without key; local prove serves film HTML.
+- **Exact evidence:** `docs/FINDING-partners-checklist-hardcoded-2026-09-18.md` ·
+  `docs/FINDING-hosted-judge-surfaces-missing-2026-09-18.md` ·
+  `python3 scripts/eval_hosted_partner_baseline.py` → exit 2 ·
+  `bash scripts/prove_judge_surfaces_local.sh` · `bench_check_docs.py` → 129/129 · 72/72.
+- **Largest product gap:** live Cloud Run still on `00028-hed`; hosted `/clear` still needs
+  workspace token + Parallel key (absent on this VM).
+- **Next build change:** Oscar `deploy.sh` then `verify_partners_hosted.sh` + `film/preflight.sh`.
+
+**Prior stage record · 2026-09-16 · partner admissibility repair**
 
 - **Intended user outcome:** a judge or Oscar deploy verify can read partner wiring from
   public `/health` + `/partners` without a workspace key; clearance still refuses paraphrase.

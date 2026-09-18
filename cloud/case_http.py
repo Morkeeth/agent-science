@@ -1,4 +1,9 @@
-"""Private hosted research workspace. Legacy public research routes are not exposed.
+"""Private hosted research workspace.
+
+Mutating / shared-history desk routes (/search, /clear, /ingest, /registry) stay
+local-only or workspace-auth. Public read-only judge surfaces (/health, /partners,
+/truths/ui, /visibility[/ui], /popular[/ui]) stay reachable without a token so
+film preflight and partner verify are not false-green on ok:true alone.
 
 All cloud writes use generation preconditions; network work is never replayed on
 conflict. Completed request receipts and case changes share one durable snapshot.
@@ -129,6 +134,37 @@ class WorkspaceHTTP:
         h.close_connection = True
         h.wfile.write(body)
 
+    def _public_judge_get(self, path: str, parsed):
+        """Serve film/judge read-only pages without a workspace token.
+
+        live defaults false — never spend Parallel from an anonymous UI hit.
+        Lazy-import desk helpers to avoid a service ↔ case_http import cycle.
+        """
+        from cloud import service as desk
+        qs = parse_qs(parsed.query, max_num_fields=20)
+        if path in ('/truths/ui', '/truths/ui/'):
+            limit = integer((qs.get('limit') or ['15'])[0], 'limit', 1, 100)
+            return self.send(200, desk._truths_page(limit))
+        if path == '/visibility':
+            q = (qs.get('q') or ['ralph loop agentic'])[0]
+            live = (qs.get('live') or ['false'])[0].lower() in ('1', 'true', 'yes')
+            full = (qs.get('full') or ['true'])[0].lower() not in ('0', 'false', 'no')
+            return self.send(200, desk._visibility_panel(q, live=live, full=full))
+        if path in ('/visibility/ui', '/visibility/ui/'):
+            q = (qs.get('q') or ['ralph loop agentic'])[0]
+            live = (qs.get('live') or ['false'])[0].lower() in ('1', 'true', 'yes')
+            full = (qs.get('full') or ['true'])[0].lower() not in ('0', 'false', 'no')
+            return self.send(200, desk._visibility_page(q, live=live, full=full))
+        if path == '/popular':
+            limit = integer((qs.get('limit') or ['15'])[0], 'limit', 1, 100)
+            from clearance import query_analytics
+            from cloud.service import _log_db
+            return self.send(200, query_analytics.report(db=_log_db(), limit=limit))
+        if path in ('/popular/ui', '/popular/ui/'):
+            limit = integer((qs.get('limit') or ['15'])[0], 'limit', 1, 100)
+            return self.send(200, desk._popular_page(limit))
+        raise HTTPError(404, 'Judge route not found.')
+
     def allowed_origins(self):
         configured = [os.getenv('AGENT_SCIENCE_PUBLIC_ORIGIN',''), *os.getenv('AGENT_SCIENCE_ALLOWED_ORIGINS','').split('|')]
         return {origin.rstrip('/') for origin in configured if origin}
@@ -200,6 +236,16 @@ class WorkspaceHTTP:
         if h.command == 'GET' and path == '/partners':
             from cloud import partners as partner_manifest
             return self.send(200, partner_manifest.manifest())
+        # Judge / film read-only surfaces — public, live=false by default.
+        # Measured RED on live 00028-hed (2026-09-18): anon /truths/ui and
+        # /visibility/ui → 303 login; even with a bearer token → 404 because
+        # WorkspaceHTTP only mounted /cases. Film preflight failed at object.
+        if h.command == 'GET' and path in (
+            '/truths/ui', '/truths/ui/',
+            '/visibility', '/visibility/ui', '/visibility/ui/',
+            '/popular', '/popular/ui', '/popular/ui/',
+        ):
+            return self._public_judge_get(path, parsed)
         expected_origin = os.getenv('AGENT_SCIENCE_PUBLIC_ORIGIN', '').rstrip('/')
         if self.secure and h.command == 'GET' and not self.api and expected_origin:
             # Cloud Run has multiple aliases. Forms and session cookies must use
