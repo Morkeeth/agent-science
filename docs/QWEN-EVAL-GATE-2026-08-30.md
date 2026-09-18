@@ -15,6 +15,12 @@
 > delta **+1**, McNemar p=1.0000 (b=0 c=1). Holdout OK (4 files). See
 > `docs/RECEIPT-partner-admissibility-2026-09-16.md`.
 
+> **Cost-from-billing closed 2026-09-18:** `python3 scripts/eval_cost_from_billing.py` —
+> Parallel public price card `fetched_at_utc=2026-09-18T08:20:49Z`, mode `advanced`
+> `$0.005`/req · naive baseline **5** Parallel = **$0.0250** vs shipping compound **3** =
+> **$0.0150** · **invoice BLOCKED** (no Parallel key) · see
+> `docs/COST-FROM-BILLING-2026-09-18.md`. This is price-card × meter, not an invoice total.
+
 # QWEN EVAL GATE — alternative arm · 2026-08-30
 
 **Gate item:** Alternative arm named and run — competent baseline without this project, identical inputs, offline.
@@ -124,3 +130,8 @@ Re-derives all 9 suite counts against `docs/SUBMISSION-PACK-2026-08-29.md` — e
 - [x] Offline path with no API key
 - [x] Wilson CI + McNemar (n=6)
 - [x] Honesty carries worst number (tie + RC5 false-GREEN both arms)
+- [x] Cost from billing with price card date — `python3 scripts/eval_cost_from_billing.py` (2026-09-18; invoice BLOCKED without key; price-card × meter)
+- [ ] Answer the track brief in the track's own words on the first screen — Oscar Devpost/video
+- [ ] Video verified attached and public on the live entry page — Oscar
+- [ ] Every artifact claim measured at the submitted commit — Oscar seal at submit tag
+

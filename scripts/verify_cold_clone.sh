@@ -53,7 +53,11 @@ python3 scripts/eval_refusal_ablation.py 2>&1 | tail -2
 python3 scripts/eval_scorer_symmetry.py 2>&1 | tail -3
 
 echo
-echo "10. Private-workspaces partner health (local, no network)..."
+echo "10. Cost from billing (dated Parallel price card × meter)..."
+python3 scripts/eval_cost_from_billing.py 2>&1 | tail -8
+
+echo
+echo "11. Private-workspaces partner health (local, no network)..."
 bash scripts/prove_partner_health_local.sh 2>&1 | tail -5
 
 echo
