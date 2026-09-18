@@ -234,8 +234,42 @@ _OFFLINE_CLAIMS = {
     ],
 }
 
+# Synthetic powered set — more overlapping exact assertions so absolute USD is not toy-scale.
+# NOT the live powered-A/B script extract (those need Gemini keys). Same verifier path.
+_POWERED_CLAIMS = {
+    "A": [
+        _Raw("In 2012 the European Union passed Directive 2012/28/EU, the Orphan Works Directive.", None, "Directive 2012/28/EU"),
+        _Raw("Member states had until 29 October 2014 to bring it into national law.", None, "29 October 2014"),
+        _Raw("The British Library has estimated that forty percent of its copyrighted collection is orphaned.", None, "forty percent"),
+        _Raw("Canada Section 77 lets the Copyright Board issue a licence when the owner cannot be located.", None, "Section 77"),
+        _Raw("The UK Intellectual Property Office opened an orphan works licensing scheme in October 2014.", None, "October 2014"),
+        _Raw("EUIPO in Alicante maintains the single EU orphan works register.", None, "Alicante"),
+        _Raw("The Shawn Bentley Orphan Works Act passed the Senate in 2008 and died in the House.", None, "Shawn Bentley"),
+        _Raw("Judge Denny Chin rejected the Google Books settlement in March 2011.", None, "March 2011"),
+    ],
+    "B": [
+        # Exact overlaps with A (compound shelf) + two new spends
+        _Raw("In 2012 the European Union passed Directive 2012/28/EU, the Orphan Works Directive.", None, "Directive 2012/28/EU"),
+        _Raw("Member states had until 29 October 2014 to bring it into national law.", None, "29 October 2014"),
+        _Raw("The British Library has estimated that forty percent of its copyrighted collection is orphaned.", None, "forty percent"),
+        _Raw("Canada Section 77 lets the Copyright Board issue a licence when the owner cannot be located.", None, "Section 77"),
+        _Raw("The UK Intellectual Property Office opened an orphan works licensing scheme in October 2014.", None, "October 2014"),
+        _Raw("EUIPO in Alicante maintains the single EU orphan works register.", None, "Alicante"),
+        _Raw("The Shawn Bentley Orphan Works Act passed the Senate in 2008 and died in the House.", None, "Shawn Bentley"),
+        _Raw("Judge Denny Chin rejected the Google Books settlement in March 2011.", None, "March 2011"),
+        _Raw("By June 2023 the Copyright Board of Canada had issued 321 licences and denied 36 applications.", None, "321"),
+        _Raw("Section 108 of the US Copyright Act still governs library and archive reproduction.", None, "Section 108"),
+    ],
+}
+
 _URL_DIRECTIVE = "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32012L0028"
 _URL_FORTY = "https://www.bl.uk/help/copyright-and-permissions"
+_URL_CA = "https://laws-lois.justice.gc.ca/eng/acts/C-42/page-1.html"
+_URL_UK = "https://www.gov.uk/guidance/copyright-orphan-works"
+_URL_EUIPO = "https://euipo.europa.eu/ohimportal/en/web/observatory/orphan-works-database"
+_URL_BENTLEY = "https://www.copyright.gov/orphan/"
+_URL_CHIN = "https://www.nysd.uscourts.gov/"
+_URL_108 = "https://www.copyright.gov/title17/92chap1.html"
 _DOC_DIRECTIVE = (
     "Directive 2012/28/EU of the European Parliament and of the Council.\n"
     "Member States shall bring into force the laws necessary to comply with this "
@@ -247,17 +281,48 @@ _DOC_FORTY = (
     "The British Library has estimated that forty percent of its copyrighted collection "
     "is orphaned.\n"
 )
+_DOC_CA = (
+    "Copyright Act (Canada).\n"
+    "Canada Section 77 lets the Copyright Board issue a licence when the owner cannot be located.\n"
+    "By June 2023 the Copyright Board of Canada had issued 321 licences and denied 36 applications.\n"
+)
+_DOC_UK = (
+    "UK IPO guidance.\n"
+    "The UK Intellectual Property Office opened an orphan works licensing scheme in October 2014.\n"
+)
+_DOC_EUIPO = (
+    "EUIPO Observatory.\n"
+    "EUIPO in Alicante maintains the single EU orphan works register.\n"
+)
+_DOC_BENTLEY = (
+    "US Copyright Office orphan works.\n"
+    "The Shawn Bentley Orphan Works Act passed the Senate in 2008 and died in the House.\n"
+)
+_DOC_CHIN = (
+    "Court record.\n"
+    "Judge Denny Chin rejected the Google Books settlement in March 2011.\n"
+)
+_DOC_108 = (
+    "US Copyright Act.\n"
+    "Section 108 of the US Copyright Act still governs library and archive reproduction.\n"
+)
+
+_CLAIM_BANK: dict[str, dict[str, list[_Raw]]] = {
+    "mini": _OFFLINE_CLAIMS,
+    "powered-synthetic": _POWERED_CLAIMS,
+}
 
 
 class _FakeExtractor:
     name = "offline-fixed-claims"
 
-    def __init__(self, model="x", *, script_key: str):
+    def __init__(self, model="x", *, script_key: str, bank: str = "mini"):
         self.model = model
         self.script_key = script_key
+        self.bank = bank
 
     def extract(self, script):
-        return list(_OFFLINE_CLAIMS[self.script_key])
+        return list(_CLAIM_BANK[self.bank][self.script_key])
 
 
 class _Net:
@@ -267,12 +332,20 @@ class _Net:
     def find_sources(self, objective, queries, *, live=False, max_results=5, **kw):
         self.find_calls += 1
         blob = objective + " " + " ".join(str(q) for q in queries)
-        if "Directive 2012/28/EU" in blob or "2012/28/EU" in blob:
-            return [_cand(_URL_DIRECTIVE)]
-        if "29 October 2014" in blob:
-            return [_cand(_URL_DIRECTIVE)]
-        if "forty percent" in blob:
-            return [_cand(_URL_FORTY)]
+        rules = [
+            (("Directive 2012/28/EU", "2012/28/EU"), _URL_DIRECTIVE),
+            (("29 October 2014",), _URL_DIRECTIVE),
+            (("forty percent",), _URL_FORTY),
+            (("Section 77", "321"), _URL_CA),
+            (("October 2014",), _URL_UK),
+            (("Alicante",), _URL_EUIPO),
+            (("Shawn Bentley",), _URL_BENTLEY),
+            (("March 2011",), _URL_CHIN),
+            (("Section 108",), _URL_108),
+        ]
+        for keys, url in rules:
+            if any(k in blob for k in keys):
+                return [_cand(url)]
         return []
 
 
@@ -283,10 +356,19 @@ def _cand(url):
 
 
 def _fake_document(url, fetch=False, **kw):
-    return {_URL_DIRECTIVE: _DOC_DIRECTIVE, _URL_FORTY: _DOC_FORTY}.get(url)
+    return {
+        _URL_DIRECTIVE: _DOC_DIRECTIVE,
+        _URL_FORTY: _DOC_FORTY,
+        _URL_CA: _DOC_CA,
+        _URL_UK: _DOC_UK,
+        _URL_EUIPO: _DOC_EUIPO,
+        _URL_BENTLEY: _DOC_BENTLEY,
+        _URL_CHIN: _DOC_CHIN,
+        _URL_108: _DOC_108,
+    }.get(url)
 
 
-def _run_pair(*, shared_corpus: bool) -> dict:
+def _run_pair(*, shared_corpus: bool, bank: str = "mini") -> dict:
     """Run A then B. shared_corpus=True is shipping; False is naive baseline."""
     import agent_science
     from clearance import instruments, search as _search
@@ -315,7 +397,9 @@ def _run_pair(*, shared_corpus: bool) -> dict:
                 db = root / f"corpus-{key}.db"
                 log_db = root / f"refusal-{key}.db"
             agent_science.GeminiExtractor = (
-                lambda model="x", k=key: _FakeExtractor(model, script_key=k)
+                lambda model="x", k=key, b=bank: _FakeExtractor(
+                    model, script_key=k, bank=b
+                )
             )
             results[key] = agent_science.clear_script(
                 path.read_text(), subject=SUBJECT, corpus_db=db, log_db=log_db
@@ -339,6 +423,7 @@ def _run_pair(*, shared_corpus: bool) -> dict:
         "net_find_calls": net.find_calls,
         "a_claims": len(results["A"]["rows"]),
         "b_claims": len(results["B"]["rows"]),
+        "bank": bank,
     }
 
 
@@ -353,6 +438,8 @@ def write_receipt(
     shipping: dict,
     invoice: dict,
     commit: str,
+    powered_baseline: dict | None = None,
+    powered_shipping: dict | None = None,
 ) -> None:
     b_usd = _usd(baseline["total_parallel"], card.rate_used)
     s_usd = _usd(shipping["total_parallel"], card.rate_used)
@@ -398,7 +485,7 @@ def write_receipt(
         "This gate **does not** claim invoice truth without a Parallel billing response.",
         "USD below is **price-card × meter** only.",
         "",
-        "## Arms",
+        "## Arms · compound-mini (default cold-clone gate)",
         "",
         "| Arm | Corpus shelf | A Parallel | B Parallel | Total Parallel | USD (card) | B corpus_hits |",
         "|-----|--------------|----------:|----------:|---------------:|-----------:|--------------:|",
@@ -412,11 +499,39 @@ def write_receipt(
         f"**Delta (baseline − shipping):** {delta_calls:+d} calls · "
         f"${delta_usd:+.4f} · {finding}",
         "",
+    ]
+
+    if powered_baseline and powered_shipping:
+        pb_usd = _usd(powered_baseline["total_parallel"], card.rate_used)
+        ps_usd = _usd(powered_shipping["total_parallel"], card.rate_used)
+        pd_calls = powered_baseline["total_parallel"] - powered_shipping["total_parallel"]
+        pd_usd = pb_usd - ps_usd
+        lines += [
+            "## Arms · powered-synthetic (larger n, still offline)",
+            "",
+            "Fixed claim lists (~8 A / ~10 B exact-assertion overlaps). "
+            "**Not** live `powered-A-law.txt` / `powered-B-archive.txt` Gemini extract "
+            "(those need keys — BLOCKED on this VM).",
+            "",
+            "| Arm | A Parallel | B Parallel | Total | USD (card) | B corpus_hits |",
+            "|-----|----------:|----------:|------:|-----------:|--------------:|",
+            f"| Baseline | {powered_baseline['a_parallel']} | {powered_baseline['b_parallel']} | "
+            f"**{powered_baseline['total_parallel']}** | **${pb_usd:.4f}** | "
+            f"{powered_baseline['b_corpus_hits']} |",
+            f"| Shipping | {powered_shipping['a_parallel']} | {powered_shipping['b_parallel']} | "
+            f"**{powered_shipping['total_parallel']}** | **${ps_usd:.4f}** | "
+            f"{powered_shipping['b_corpus_hits']} |",
+            "",
+            f"**Powered delta:** {pd_calls:+d} calls · ${pd_usd:+.4f}",
+            "",
+        ]
+
+    lines += [
         "## Honesty",
         "",
         "- Gemini extract / locate USD: **not priced** (no dated Gemini price card fetched tonight).",
-        "- Absolute dollars at compound-mini n are tiny; the gate tests *shape* (shared shelf "
-        "beats re-search), not production budget.",
+        "- Absolute dollars even on powered-synthetic remain cents — shape and ratio matter more "
+        "than the dollar printout at this fixture size.",
         "- `measure_compounding.py` still hardcodes `PARALLEL_CALL = 0.005` without a fetch date — "
         "that file is **not** this gate; do not carry its number.",
         "",
@@ -438,11 +553,20 @@ def main() -> int:
         action="store_true",
         help="Refresh fixtures/price-cards snapshot from Parallel docs (needs network)",
     )
+    ap.add_argument(
+        "--skip-powered",
+        action="store_true",
+        help="Only run compound-mini arms (faster)",
+    )
     args = ap.parse_args()
 
     card = load_card(fetch=args.fetch_card)
-    baseline = _run_pair(shared_corpus=False)
-    shipping = _run_pair(shared_corpus=True)
+    baseline = _run_pair(shared_corpus=False, bank="mini")
+    shipping = _run_pair(shared_corpus=True, bank="mini")
+    powered_baseline = powered_shipping = None
+    if not args.skip_powered:
+        powered_baseline = _run_pair(shared_corpus=False, bank="powered-synthetic")
+        powered_shipping = _run_pair(shared_corpus=True, bank="powered-synthetic")
     invoice = _attempt_invoice()
 
     import subprocess
@@ -463,6 +587,8 @@ def main() -> int:
         shipping=shipping,
         invoice=invoice,
         commit=commit,
+        powered_baseline=powered_baseline,
+        powered_shipping=powered_shipping,
     )
 
     b_usd = _usd(baseline["total_parallel"], card.rate_used)
@@ -474,15 +600,31 @@ def main() -> int:
     print(f"  mode={card.shipping_mode} rate=${card.rate_used:.3f}/req")
     print(f"  invoice: {invoice['status']}  invoice_usd={invoice.get('invoice_usd')}")
     print(
-        f"  baseline:  Parallel {baseline['total_parallel']}  "
+        f"  mini baseline:  Parallel {baseline['total_parallel']}  "
         f"(A={baseline['a_parallel']} B={baseline['b_parallel']})  ${b_usd:.4f}"
     )
     print(
-        f"  shipping:  Parallel {shipping['total_parallel']}  "
+        f"  mini shipping:  Parallel {shipping['total_parallel']}  "
         f"(A={shipping['a_parallel']} B={shipping['b_parallel']})  ${s_usd:.4f}"
     )
-    print(f"  delta:     Parallel {baseline['total_parallel'] - shipping['total_parallel']:+d}  "
-          f"${b_usd - s_usd:+.4f}")
+    print(
+        f"  mini delta:     Parallel {baseline['total_parallel'] - shipping['total_parallel']:+d}  "
+        f"${b_usd - s_usd:+.4f}"
+    )
+    if powered_baseline and powered_shipping:
+        pb = _usd(powered_baseline["total_parallel"], card.rate_used)
+        ps = _usd(powered_shipping["total_parallel"], card.rate_used)
+        print(
+            f"  powered baseline: Parallel {powered_baseline['total_parallel']}  ${pb:.4f}"
+        )
+        print(
+            f"  powered shipping: Parallel {powered_shipping['total_parallel']}  ${ps:.4f}"
+        )
+        print(
+            f"  powered delta:    Parallel "
+            f"{powered_baseline['total_parallel'] - powered_shipping['total_parallel']:+d}  "
+            f"${pb - ps:+.4f}"
+        )
     print(f"  receipt:   {RECEIPT.relative_to(ROOT)}")
 
     # Gate: shipping must not cost more Parallel USD than naive baseline.
@@ -495,6 +637,15 @@ def main() -> int:
     if not card.fetched_at_utc:
         print("FAIL  price card missing date")
         return 4
+    if powered_baseline and powered_shipping:
+        pb = _usd(powered_baseline["total_parallel"], card.rate_used)
+        ps = _usd(powered_shipping["total_parallel"], card.rate_used)
+        if ps > pb:
+            print("FAIL  powered-synthetic shipping exceeds baseline")
+            return 5
+        if powered_shipping["b_corpus_hits"] < 1:
+            print("FAIL  powered-synthetic B corpus_hits < 1")
+            return 6
     print("PASS  shipping ≤ baseline on Parallel price-card USD; card dated; invoice status named")
     return 0
 

@@ -595,7 +595,8 @@ bash scripts/verify_cold_clone.sh                                               
 
 | When | What | Command | Outcome |
 |------|------|---------|---------|
-| 2026-09-18 night | Cost-from-billing Qwen gate | `eval_cost_from_billing.py` · `--fetch-card` · `test_cost_from_billing.py` | baseline **5** Parallel **$0.0250** vs shipping **3** **$0.0150** · card dated · invoice **BLOCKED** · 4/4 controls |
+| 2026-09-18 night | Cost-from-billing Qwen gate | `eval_cost_from_billing.py` · `--fetch-card` · `test_cost_from_billing.py` | mini **5→3** Parallel **$0.0250→$0.0150** · powered-synthetic **18→11** **$0.0900→$0.0550** · card dated · invoice **BLOCKED** · 4/4 controls |
+| 2026-09-18 night | Stale "265+ claims" | `boot_registry.py` · `refusal_log.stats` | local shelf **239** (not 265) · hosted `/stats` **303** · FINDING + pack/STATUS fix |
 | 2026-09-18 night | SUBMISSION-PACK truth refresh | suite re-runs · `bench_check_docs.py` · `gh api … visibility` | **128/128** · public-repo row fixed (was stale "Private until submit") · stranger block + cost gate |
 | 2026-09-18 night | Live compound + partners | `curl …/health` · `curl …/partners` · `POST /clear` | health **stripped** `00028-hed` · partners **303→login** · clear **401** · BLOCKED receipt |
 | 2026-09-18 night | Deploy prep (no deploy) | read `deploy.sh` · write `DEPLOY-PREP-2026-09-18.md` | candidate `--no-traffic` · timeout **240** · Oscar promote checklist |

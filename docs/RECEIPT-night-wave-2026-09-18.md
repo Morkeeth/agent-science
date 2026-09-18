@@ -37,7 +37,7 @@
 | Offline compound | `python3 scripts/compound_exhibit_receipt.py` | A=**2**→B=**1** Parallel · corpus_hits B=**2** · exit 0 |
 | Refusal baseline | `python3 scripts/eval_refusal_baseline.py` | baseline **5/6** vs shipping **6/6** · delta +1 |
 | Refusal ablation | `python3 scripts/eval_refusal_ablation.py` | ablation **5/6** vs shipping **6/6** · delta +1 |
-| Cost gate | `python3 scripts/eval_cost_from_billing.py` | baseline Parallel **5** = **$0.0250** · shipping **3** = **$0.0150** · card `fetched_at_utc=2026-09-18T08:20:49Z` · invoice **BLOCKED** · exit 0 |
+| Cost gate | `python3 scripts/eval_cost_from_billing.py` | mini **$0.0250→$0.0150** · powered-synthetic **$0.0900→$0.0550** · invoice **BLOCKED** · exit 0 |
 | Cost card refresh | `python3 scripts/eval_cost_from_billing.py --fetch-card` | live docs.parallel.ai parse OK · same rates |
 | Cost controls | `python3 tests/test_cost_from_billing.py` | **4/4** (undated/malformed card SystemExit watched) |
 | Local partner health | `bash scripts/prove_partner_health_local.sh` | **PROVE_PARTNER_HEALTH_LOCAL OK** · `engine_default=adk` |
@@ -60,8 +60,13 @@
 
 5. **Gemini USD still unpriced** — no dated Gemini price card fetched. Cost gate scopes Parallel Search only.
 
-6. **SUBMISSION-PACK Devpost paste still cites commit `e6793ab` and "265+ claims"** — not re-derived tonight at those objects; left untouched to avoid rewriting the sealed paste block mid-submit. Pack *controls table* was re-measured; paste block was not.
+6. **SUBMISSION-PACK Devpost paste said "265+ claims"** — re-derived at object via
+   `boot_registry.py` → **239**. Fixed paste + STATUS; finding
+   `docs/FINDING-stale-claims-count-2026-09-18.md`. Hosted `/stats` still 303 — cannot
+   re-read the Sept 1 hosted 265 from the public URL.
 
 7. **Cold-clone was re-run after wiring step 10:** `bash scripts/verify_cold_clone.sh` →
-   **cold-clone verify OK** (exit 0) including cost gate PASS. Earlier draft of this receipt
-   claimed it was not run; that was wrong.
+   **cold-clone verify OK** (exit 0) including cost gate PASS.
+
+8. **Live `powered-A/B` scripts not run** — need Gemini keys. Offline `powered-synthetic`
+   arm shipped instead (baseline $0.0900 vs shipping $0.0550).

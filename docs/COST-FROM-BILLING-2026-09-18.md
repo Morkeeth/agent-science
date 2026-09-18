@@ -1,6 +1,6 @@
 # COST FROM BILLING — Qwen PRIOR LOSS gate
 
-**Date:** 2026-09-18 08:24 UTC · **Commit:** `d56aeb8`
+**Date:** 2026-09-18 08:31 UTC · **Commit:** `0f374aa`
 **Fixtures:** `compound-mini-A.txt` → `compound-mini-B.txt` · subject `orphan-works-cost-gate`
 
 ## Price card (not an invoice)
@@ -22,7 +22,7 @@
 This gate **does not** claim invoice truth without a Parallel billing response.
 USD below is **price-card × meter** only.
 
-## Arms
+## Arms · compound-mini (default cold-clone gate)
 
 | Arm | Corpus shelf | A Parallel | B Parallel | Total Parallel | USD (card) | B corpus_hits |
 |-----|--------------|----------:|----------:|---------------:|-----------:|--------------:|
@@ -31,10 +31,21 @@ USD below is **price-card × meter** only.
 
 **Delta (baseline − shipping):** +2 calls · $+0.0100 · shipping cheaper by 2 Parallel call(s), $0.0100 on price card (40% of baseline)
 
+## Arms · powered-synthetic (larger n, still offline)
+
+Fixed claim lists (~8 A / ~10 B exact-assertion overlaps). **Not** live `powered-A-law.txt` / `powered-B-archive.txt` Gemini extract (those need keys — BLOCKED on this VM).
+
+| Arm | A Parallel | B Parallel | Total | USD (card) | B corpus_hits |
+|-----|----------:|----------:|------:|-----------:|--------------:|
+| Baseline | 8 | 10 | **18** | **$0.0900** | 0 |
+| Shipping | 8 | 3 | **11** | **$0.0550** | 7 |
+
+**Powered delta:** +7 calls · $+0.0350
+
 ## Honesty
 
 - Gemini extract / locate USD: **not priced** (no dated Gemini price card fetched tonight).
-- Absolute dollars at compound-mini n are tiny; the gate tests *shape* (shared shelf beats re-search), not production budget.
+- Absolute dollars even on powered-synthetic remain cents — shape and ratio matter more than the dollar printout at this fixture size.
 - `measure_compounding.py` still hardcodes `PARALLEL_CALL = 0.005` without a fetch date — that file is **not** this gate; do not carry its number.
 
 ## Re-run

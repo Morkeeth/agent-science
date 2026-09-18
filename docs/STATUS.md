@@ -60,18 +60,18 @@ deadline: 2026-09-09T14:00:00-07:00
 
 ---
 
-## Hosted (now)
+## Hosted (now — re-probed 2026-09-18)
 
 | | |
 |---|---|
 | **URL** | https://agent-science-568004190078.us-central1.run.app |
-| **Revision** | `agent-science-00018-n4s` · `parallel_sdk: true` · **`/truths/ui` live** |
-| **Health** | `engine_default: adk` · 265 claims · hit rate ~0.80 |
-| **New** | `GET /visibility/ui` — full websearch panel for judges (film this) |
-| **New** | `GET /truths/ui` — truths dashboard |
-| **Stats** | 265 claims · hit rate ~0.80 · queries logged growing |
+| **Revision** | `agent-science-00028-hed` (traffic) |
+| **Health** | **stripped** — `ok/service/mode/revision` only (no `engine_default` / partner fields until Oscar deploy of tree fix) |
+| **Partners / stats / truths** | `/partners`, `/stats`, `/truths/ui` → **303** login under private-workspaces |
+| **Local dictionary after boot** | **239 claims** · 25 sourced · 214 refused — `python3 scripts/boot_registry.py` (not the carried "265" from 2026-09-01) |
 
-**Compound (sealed):** `longrun-0831-1320` A=**1** → B=**0** Parallel · B `corpus_hits=1`
+**Compound (sealed historical):** `longrun-0831-1320` A=**1** → B=**0** Parallel · B `corpus_hits=1`  
+**Live compound tonight:** BLOCKED — `docs/BLOCKED-live-compound-2026-09-18.md`
 
 ---
 
