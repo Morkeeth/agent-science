@@ -1,7 +1,7 @@
 # RECEIPT — Partner + judge-surface night · 2026-09-18
 
 **Branch:** `cursor/partner-admissibility-night-5719`  
-**Commit:** `eb6d4255432ef809b02a7d81de75fc403e801cba`  
+**Commit tip:** `ee88ff19a876c0a331d96f3dbc38d44d74b17157` (fix `eb6d425`)  
 **Slice:** Open live objects; fix hardcoded Parallel checklist; restore public
 judge/film surfaces on WorkspaceHTTP; baseline-eval that can embarrass live;
 refresh STATUS / SUBMISSION-PACK at object.
