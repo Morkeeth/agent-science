@@ -3,7 +3,9 @@
 **Audience:** Oscar sends to one real clearance / research lead.  
 **Goal:** one production runs a real question or script through the desk; friction list lands in `CURSOR-LOG.md`.
 
-**Hosted reality (2026-09-16):** Cloud Run is **private-workspaces**. Unauthenticated paste-to-`/clear` is gone. Partners sign in with a workspace access key Oscar issues; public surfaces are `/health`, `/partners`, and the judge pages Oscar points them at.
+**Hosted reality (2026-09-18):** Cloud Run is **private-workspaces**. Unauthenticated paste-to-`/clear` is gone. Partners sign in with a workspace access key Oscar issues.
+
+**Public without a key (after Oscar deploys this branch):** `/health`, `/partners`, `/truths/ui`, `/visibility/ui`, `/popular/ui`. Live revision `00028-hed` still strips health and 303s film surfaces — do not promise those URLs until `deploy.sh` + `bash film/preflight.sh` exit 0.
 
 ---
 
@@ -40,8 +42,8 @@ Second script on the **same subject** should show `corpus_hits ≥ 1` and fewer 
 ```bash
 bash scripts/new_user_trial.sh
 bash scripts/prove_partner_health_local.sh
+bash scripts/prove_judge_surfaces_local.sh
 ```
-
 ---
 
 ## Friction checklist (partner fills in)

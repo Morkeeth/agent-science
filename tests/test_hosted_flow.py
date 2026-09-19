@@ -89,8 +89,16 @@ class HostedFlow(unittest.TestCase):
         self.assertEqual(body['revision'], 'test-rev')
 
     def test_anonymous_partners_manifest_public(self):
-        """Judge track checklist must not require a workspace key."""
-        with patch.dict(os.environ, {'AGENT_BUILDER': '1', 'GCP_PROJECT': 'hack-fleet'}):
+        """Judge track checklist must not require a workspace key.
+
+        parallel_search_at_runtime is measured from PARALLEL_API_KEY — not a
+        hardcoded True (false-green found 2026-09-18 with key absent).
+        """
+        with patch.dict(os.environ, {
+            'AGENT_BUILDER': '1',
+            'GCP_PROJECT': 'hack-fleet',
+            'PARALLEL_API_KEY': 'pk-test-not-live',
+        }, clear=False):
             with patch('cloud.agent.adk_available', return_value=True):
                 code, _, body = self.request('GET', '/partners', token=None)
         self.assertEqual(code, 200)
@@ -99,7 +107,51 @@ class HostedFlow(unittest.TestCase):
         for key in ('parallel_search_at_runtime', 'gemini_at_runtime',
                     'adk_agent_builder', 'hosted_url_required'):
             self.assertTrue(tc.get(key), f'track_checklist.{key}={tc.get(key)}')
+        self.assertIn('parallel_search_proven', tc)
         self.assertIn('partners', body)
+
+    def test_partners_checklist_goes_red_without_parallel_key(self):
+        """Control: empty PARALLEL_API_KEY must not claim Parallel at runtime."""
+        env = {k: v for k, v in os.environ.items() if k != 'PARALLEL_API_KEY'}
+        env.update({'AGENT_BUILDER': '1', 'GCP_PROJECT': 'hack-fleet'})
+        with patch.dict(os.environ, env, clear=True):
+            os.environ.pop('PARALLEL_API_KEY', None)
+            with patch('cloud.agent.adk_available', return_value=True):
+                code, _, body = self.request('GET', '/partners', token=None)
+        self.assertEqual(code, 200)
+        tc = body.get('track_checklist') or {}
+        self.assertIs(tc.get('parallel_search_at_runtime'), False)
+        self.assertTrue(tc.get('gemini_at_runtime'))
+
+    def test_anonymous_judge_film_surfaces_public(self):
+        """Film preflight surfaces must work without a workspace token.
+
+        Watched RED on live 00028-hed (2026-09-18): /truths/ui and
+        /visibility/ui redirected to login; with bearer → 404 (not mounted).
+        """
+        code, fields, body = self.request('GET', '/truths/ui', token=None)
+        self.assertEqual(code, 200)
+        self.assertIn('text/html', fields.get('Content-Type', ''))
+        self.assertIn('Truths dashboard', body)
+
+        code, fields, body = self.request(
+            'GET', '/visibility/ui?q=ralph+loop+agentic', token=None)
+        self.assertEqual(code, 200)
+        self.assertIn('Transparency', body)
+
+        code, _, body = self.request(
+            'GET', '/visibility?q=ralph+loop+agentic', token=None)
+        self.assertEqual(code, 200)
+        self.assertIsInstance(body, dict)
+        self.assertIn('transparency', body)
+
+        code, fields, body = self.request('GET', '/popular/ui', token=None)
+        self.assertEqual(code, 200)
+        self.assertIn('text/html', fields.get('Content-Type', ''))
+
+        # Mutations / shared history stay shut for anonymous.
+        self.assertEqual(self.request('GET', '/registry', token=None)[0], 303)
+        self.assertEqual(self.request('POST', '/clear', {}, token=None)[0], 401)
 
     def test_real_worker_create_idempotency_and_restart(self):
         code,_,result=self.create(); self.assertEqual(code,201,result)

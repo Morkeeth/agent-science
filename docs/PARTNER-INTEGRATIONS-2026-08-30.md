@@ -1,28 +1,34 @@
 # PARTNER INTEGRATIONS — Agent Science · Sep 9 path
 
-**Date:** 2026-08-30 · **Last verified:** 2026-09-16 · **Repo:** Morkeeth/agent-science · **Scope:** all four partners wired in code; deploy is Oscar's click.
+**Date:** 2026-08-30 · **Last verified:** 2026-09-18 · **Repo:** Morkeeth/agent-science · **Scope:** all four partners wired in code; deploy is Oscar's click.
 
 Each partner must be **called at runtime** on the default path — not documented only.
 
-### Hosted mode (private-workspaces) — measured 2026-09-16
+### Hosted mode (private-workspaces) — measured 2026-09-18
 
 Cloud Run sets `K_SERVICE`, so all traffic goes through `cloud/case_http.py` WorkspaceHTTP.
 
 | Route | Auth | Role |
 |-------|------|------|
 | `GET /health` | **public** | Partner proof JSON (`gemini`, `parallel`, `engine_default`, …) + `mode` + `revision` |
-| `GET /partners` | **public** | Track checklist JSON for judges |
-| `POST /clear`, `/search`, `/ingest` | **workspace token / session** | Local-only without auth; not a public desk anymore |
+| `GET /partners` | **public** | Track checklist JSON for judges (`parallel_search_at_runtime` = key present, not a constant) |
+| `GET /truths/ui` · `/visibility[/ui]` · `/popular[/ui]` | **public** | Film / judge read-only; `live` defaults false |
+| `POST /clear`, `/search`, `/ingest`, `/registry` | **workspace / local-only** | Mutations and shared history stay shut |
 | `/cases`, `/api/cases` | **workspace** | Private research |
 
-**Finding:** revision `agent-science-00028-hed` returned a stripped `/health` (`ok`/`service`/`mode`/`revision` only). That is a false-green class defect — see `docs/FINDING-hosted-health-partner-strip-2026-09-16.md`. Fix is in tree; live stays RED until Oscar `deploy.sh`.
+**Findings (live still RED until Oscar deploy):**
+
+- Revision `agent-science-00028-hed` stripped `/health` — `docs/FINDING-hosted-health-partner-strip-2026-09-16.md`
+- `/partners` checklist hardcoded `parallel_search_at_runtime: true` — `docs/FINDING-partners-checklist-hardcoded-2026-09-18.md`
+- Film surfaces unmounted (303/404) — `docs/FINDING-hosted-judge-surfaces-missing-2026-09-18.md`
+- Baseline: `python3 scripts/eval_hosted_partner_baseline.py` → naive PASS / shipping FAIL on live
 
 **Local prove (no network, no real keys):**
 
 ```bash
 bash scripts/prove_partner_health_local.sh
+bash scripts/prove_judge_surfaces_local.sh
 ```
-
 ---
 
 ## Oscar deploy checklist (one pass)
@@ -166,7 +172,11 @@ Shared builder: `cloud.partners.health_payload()` — used by `cloud/service.py`
 | Method | Path | Body | Response |
 |--------|------|------|----------|
 | GET | `/health` | — | JSON above (public on hosted) |
-| GET | `/partners` | — | Track manifest — all four partners + checklist (public on hosted) |
+| GET | `/partners` | — | Track manifest — checklist measured at object (public) |
+| GET | `/truths/ui` | — | Truths dashboard HTML (public; film) |
+| GET | `/visibility/ui?q=` | — | Visibility HTML — Transparency pane (public; `live` default false) |
+| GET | `/visibility?q=` | — | Visibility JSON (public) |
+| GET | `/popular/ui` | — | Popular queries HTML (public) |
 | GET | `/` | — | Local desk UI; hosted redirects to `/cases` or `/login` |
 | GET | `/corpus?subject=` | — | `{subject, remembered, total}` (local desk) |
 | POST | `/clear` | `{"script","subject"}` | Gap report JSON; `engine` stamped — **local desk, or hosted with workspace auth if mounted** |
@@ -179,12 +189,13 @@ python3 cloud/service.py
 curl -s localhost:8099/health
 ```
 
-**Hosted partner prove without deploy wait:**
+**Hosted partner + film prove without deploy wait:**
 ```bash
 bash scripts/prove_partner_health_local.sh
+bash scripts/prove_judge_surfaces_local.sh
 python3 tests/test_adk_default_path.py   # 5/5
+python3 scripts/eval_hosted_partner_baseline.py   # expect exit 2 until Oscar deploy
 ```
-
 ---
 
 ## 4 · Agent Builder / ADK — default `/clear` engine

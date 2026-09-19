@@ -108,8 +108,15 @@ def manifest(*, gemini_path: str | None = None, adk_default: bool | None = None)
                 "tool": "clear_script_tool",
             },
         },
+        # parallel_search_at_runtime must NOT be a constant True. Watched RED
+        # 2026-09-18: with PARALLEL_API_KEY unset and zero verified receipts the
+        # checklist still claimed Parallel runs at runtime. That is the same
+        # false-green class as stripped /health — a nearer proxy than the call.
         "track_checklist": {
-            "parallel_search_at_runtime": True,
+            "parallel_search_at_runtime": bool(os.environ.get("PARALLEL_API_KEY")),
+            "parallel_search_proven": bool(
+                parallel_search.last_verified_receipt().get("verified_search_id")
+            ),
             "parallel_web_sdk": parallel_search.sdk_available(),
             "gemini_at_runtime": gemini_path != "none",
             "adk_agent_builder": adk_agent.adk_available() and adk_default,
@@ -120,7 +127,10 @@ def manifest(*, gemini_path: str | None = None, adk_default: bool | None = None)
             "docs/PARTNER-INTEGRATION-RESEARCH-2026-08-31.md",
             "docs/RECEIPT-adk-default-path-2026-08-30.md",
             "docs/RECEIPT-partner-admissibility-2026-09-16.md",
+            "docs/RECEIPT-partner-judge-surfaces-2026-09-18.md",
             "docs/FINDING-hosted-health-partner-strip-2026-09-16.md",
+            "docs/FINDING-partners-checklist-hardcoded-2026-09-18.md",
+            "docs/FINDING-hosted-judge-surfaces-missing-2026-09-18.md",
         ],
         "repo_root": str(root),
     }

@@ -134,6 +134,34 @@ def t_partner_manifest_survives_cold_start():
         search.RECEIPTS = real
 
 
+def t_partners_checklist_not_hardcoded_parallel_runtime():
+    """parallel_search_at_runtime must track the key, not a constant True.
+
+    Watched RED 2026-09-18: with PARALLEL_API_KEY unset and zero verified
+    receipts, track_checklist.parallel_search_at_runtime was still True while
+    partners.parallel.runtime was False — judge manifest lied.
+    """
+    import tempfile
+    from clearance import search
+    from cloud import partners
+
+    real = search.RECEIPTS
+    try:
+        search.RECEIPTS = Path(tempfile.mkdtemp()) / "absent.jsonl"
+        env = {k: v for k, v in os.environ.items() if k != "PARALLEL_API_KEY"}
+        with patch.dict(os.environ, env, clear=True):
+            os.environ.pop("PARALLEL_API_KEY", None)
+            tc = partners.manifest()["track_checklist"]
+        assert tc["parallel_search_at_runtime"] is False, tc
+        assert tc["parallel_search_proven"] is False, tc
+
+        with patch.dict(os.environ, {"PARALLEL_API_KEY": "pk-test-not-live"}, clear=False):
+            tc2 = partners.manifest()["track_checklist"]
+        assert tc2["parallel_search_at_runtime"] is True, tc2
+    finally:
+        search.RECEIPTS = real
+
+
 def t_requirements_pins_parallel_web():
     req = (ROOT / "requirements.txt").read_text()
     assert "parallel-web==" in req
