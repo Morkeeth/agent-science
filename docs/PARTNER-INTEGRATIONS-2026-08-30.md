@@ -1,10 +1,10 @@
 # PARTNER INTEGRATIONS — Agent Science · Sep 9 path
 
-**Date:** 2026-08-30 · **Last verified:** 2026-09-18 · **Repo:** Morkeeth/agent-science · **Scope:** all four partners wired in code; deploy is Oscar's click.
+**Date:** 2026-08-30 · **Last verified:** 2026-09-19 · **Repo:** Morkeeth/agent-science · **Scope:** all four partners wired in code; deploy is Oscar's click.
 
 Each partner must be **called at runtime** on the default path — not documented only.
 
-### Hosted mode (private-workspaces) — measured 2026-09-18
+### Hosted mode (private-workspaces) — measured 2026-09-19
 
 Cloud Run sets `K_SERVICE`, so all traffic goes through `cloud/case_http.py` WorkspaceHTTP.
 
@@ -21,7 +21,8 @@ Cloud Run sets `K_SERVICE`, so all traffic goes through `cloud/case_http.py` Wor
 - Revision `agent-science-00028-hed` stripped `/health` — `docs/FINDING-hosted-health-partner-strip-2026-09-16.md`
 - `/partners` checklist hardcoded `parallel_search_at_runtime: true` — `docs/FINDING-partners-checklist-hardcoded-2026-09-18.md`
 - Film surfaces unmounted (303/404) — `docs/FINDING-hosted-judge-surfaces-missing-2026-09-18.md`
-- Baseline: `python3 scripts/eval_hosted_partner_baseline.py` → naive PASS / shipping FAIL on live
+- Baseline: `python3 scripts/eval_hosted_partner_baseline.py` → **naive 3/3 / shipping 0/3** on live (health + partners + truths/ui)
+- Land note: Sep 18 checklist+film fix was unmerged from `main` until 2026-09-19 — see `docs/RECEIPT-partner-honesty-land-2026-09-19.md`
 
 **Local prove (no network, no real keys):**
 

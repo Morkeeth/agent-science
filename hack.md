@@ -307,21 +307,19 @@ Full record: `fleet-ops (internal)/retros/QWEN-LOSS-RETRO-2026-08-30.md` (correc
 
 ---
 
-## 🎯 NOW — Partner checklist + judge film surfaces (private-workspaces)
+## 🎯 NOW — Land partner honesty on main path (2026-09-19)
 
-**Slice:** Open live objects; kill hardcoded Parallel checklist; restore public film surfaces; baseline-eval that can go RED on live. Deploy remains Oscar.
+**Slice:** Sep 18 checklist+film fix never reached `main` — open that object, land it, expand live baseline to `/partners` + `/truths/ui`. Deploy remains Oscar.
 
 ### Build (this session)
 
-- [x] `parallel_search_at_runtime` measured from `PARALLEL_API_KEY` — not constant True
-- [x] `parallel_search_proven` from verified receipts
-- [x] Public `/truths/ui` · `/visibility[/ui]` · `/popular[/ui]` on WorkspaceHTTP
-- [x] RED controls — partner_runtime 8/8 · hosted_flow checklist + film tests
-- [x] Baseline eval — `scripts/eval_hosted_partner_baseline.py` (naive PASS / shipping FAIL on live)
-- [x] Local prove — `prove_partner_health_local.sh` + `prove_judge_surfaces_local.sh`
-- [x] STATUS / CLAIMS-MAP / SUBMISSION-PACK **129/129** re-derived at object
-- [x] Partner doc + design-partner loop + BLOCKED live compound refreshed
-- [x] Live compound — honest BLOCKED (no Parallel key / workspace token)
+- [x] Cherry-pick `eb6d425`+ onto branch from `main` — `parallel_search_at_runtime` measured, not constant True
+- [x] Public `/truths/ui` · `/visibility[/ui]` · `/popular[/ui]` on WorkspaceHTTP (was unmerged)
+- [x] Expand baseline eval H1–H6 — health + partners + truths/ui naive vs shipping
+- [x] Re-derive at object — partner_runtime 8/8 · hosted_flow 17 · bench **129/129** · watch 72/72
+- [x] Local prove with `parallel-web==1.3.2` → `parallel_sdk: true` · `engine_default: adk`
+- [x] Receipt — `docs/RECEIPT-partner-honesty-land-2026-09-19.md`
+- [x] Live compound — still BLOCKED (no Parallel key / workspace token)
 
 ### Verify (one command each)
 
@@ -331,7 +329,7 @@ python3 tests/test_partner_runtime.py                               # 8/8
 python3 -m unittest tests.test_hosted_flow -v                       # film + checklist RED
 bash scripts/prove_partner_health_local.sh                          # engine_default=adk
 bash scripts/prove_judge_surfaces_local.sh                          # truths+visibility public
-python3 scripts/eval_hosted_partner_baseline.py                     # expect exit 2 until deploy
+python3 scripts/eval_hosted_partner_baseline.py                     # expect exit 2 · naive 3/3 shipping 0/3
 python3 scripts/bench_check_docs.py                                  # 129/129
 python3 scripts/eval_refusal_baseline.py && python3 scripts/eval_refusal_ablation.py
 # After Oscar deploy only:
@@ -341,6 +339,7 @@ bash film/preflight.sh                                               # expect PA
 
 ### Receipt
 
+- `docs/RECEIPT-partner-honesty-land-2026-09-19.md`
 - `docs/RECEIPT-partner-judge-surfaces-2026-09-18.md`
 - `docs/FINDING-partners-checklist-hardcoded-2026-09-18.md`
 - `docs/FINDING-hosted-judge-surfaces-missing-2026-09-18.md`
@@ -351,6 +350,25 @@ bash film/preflight.sh                                               # expect PA
 - Live hosted partner health + film surfaces — **until Oscar `deploy.sh`** (revision still `00028-hed`)
 - Live compound / Parallel on hosted `/clear` — **PARALLEL_API_KEY + WORKSPACE_TOKEN** missing on agent VM
 - Key rotation — Oscar console (`AS-KEYS-ROTATE`)
+
+---
+
+## 🎯 NOW (prior) — Partner checklist + judge film surfaces (private-workspaces · unmerged until 2026-09-19)
+
+**Slice:** Open live objects; kill hardcoded Parallel checklist; restore public film surfaces; baseline-eval that can go RED on live. Deploy remains Oscar. *(Built on `cursor/partner-admissibility-night-5719`; landed to main path 2026-09-19.)*
+
+### Build (shipped 2026-09-18, landed 2026-09-19)
+
+- [x] `parallel_search_at_runtime` measured from `PARALLEL_API_KEY` — not constant True
+- [x] `parallel_search_proven` from verified receipts
+- [x] Public `/truths/ui` · `/visibility[/ui]` · `/popular[/ui]` on WorkspaceHTTP
+- [x] RED controls — partner_runtime 8/8 · hosted_flow checklist + film tests
+- [x] Baseline eval — `scripts/eval_hosted_partner_baseline.py`
+- [x] Local prove — `prove_partner_health_local.sh` + `prove_judge_surfaces_local.sh`
+
+### Receipt
+
+- `docs/RECEIPT-partner-judge-surfaces-2026-09-18.md`
 
 ---
 
@@ -618,6 +636,7 @@ bash scripts/verify_cold_clone.sh                                               
 
 | When | What | Command | Outcome |
 |------|------|---------|---------|
+| 2026-09-19 night | Unmerged honesty branch (`eb6d425` not on main); land + expand baseline H1–H6 | `eval_hosted_partner_baseline.py` · prove_* · bench 129 · watch 72 | Live **naive 3/3 / shipping 0/3** · local `engine_default=adk` · `parallel_sdk=true` · checklist measured |
 | 2026-09-18 night | Hardcoded Parallel checklist + missing film surfaces | `eval_hosted_partner_baseline.py` · `prove_judge_surfaces_local.sh` · partner_runtime 8/8 | Live **naive PASS/shipping FAIL** · checklist RED fixed · film surfaces in tree · 72/72 · **129/129** |
 | 2026-09-16 night | Offline compound exit 3 (paraphrase≠assertion) | `compound_exhibit_receipt.py` · cold-clone step 8–10 | **A=2→B=1 Parallel, corpus_hits=2** after exact-assertion B arm · cold-clone OK |
 | 2026-09-16 night | Hosted health partner strip found + fixed in tree | `curl …/health` · `prove_partner_health_local.sh` · hosted_flow tests | Live **RED** (`00028-hed` missing partner fields) · local prove **engine_default=adk** · 72/72 · 128/128 |
@@ -675,7 +694,22 @@ A failed stage selects the next product change; it does not trigger repeated bro
 
 General reference examples (always re-read for the event): https://agentic-cinema.devpost.com/ and https://ethglobal.com/events/ethonline2026/info/details and https://ethglobal.com/events/ethonline2026/prizes .
 
-## Current stage record · 2026-09-18 · partner checklist + judge surfaces
+## Current stage record · 2026-09-19 · partner honesty land on main
+
+- **Intended user outcome:** judge/Oscar can read partner wiring and film surfaces from
+  public `/health` + `/partners` + `/truths/ui`; checklist does not lie without a Parallel key.
+- **Action actually observed:** `eb6d425` was **not** an ancestor of `main` — docs/branches
+  said done; main still hardcoded checklist and lacked film routes. Live `00028-hed`:
+  health stripped; partners/truths **303**. Expanded baseline **naive 3/3 · shipping 0/3**.
+- **Exact evidence:** `docs/RECEIPT-partner-honesty-land-2026-09-19.md` ·
+  `python3 scripts/eval_hosted_partner_baseline.py` exit 2 · prove scripts OK ·
+  `bench_check_docs.py` → 129/129 · watch_it_go_red 72/72.
+- **Largest product gap:** live Cloud Run still on pre-fix revision until Oscar deploy;
+  hosted `/clear` still needs workspace token + Parallel key (absent on this VM).
+- **Next build change:** merge this branch · Oscar `deploy.sh` ·
+  `bash scripts/verify_partners_hosted.sh` · film preflight on new revision.
+
+**Prior stage record · 2026-09-18 · partner checklist + judge surfaces**
 
 - **Intended user outcome:** a judge or Oscar film preflight can read partner wiring and
   open `/truths/ui` + `/visibility/ui` without a workspace key; Parallel checklist cannot

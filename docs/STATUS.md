@@ -2,7 +2,7 @@
 doc: status
 project: Agent Science
 canonical: true
-last-updated: 2026-09-18T00:15:00Z
+last-updated: 2026-09-19T00:12:00Z
 deadline: 2026-09-09T14:00:00-07:00
 ---
 
@@ -11,7 +11,7 @@ deadline: 2026-09-09T14:00:00-07:00
 > **For Claude / fleet:** this file is the single “where we are” surface.  
 > `hack.md` = process · `CLAUDE.md` = entry · this file = gates + evidence.
 
-**Last gate run:** 2026-09-18 — partner + judge-surface night · `bench_check_docs.py` **129/129** · `test_watch_it_go_red.py` **72/72** · live `/health` still stripped on `00028-hed` · naive ok:true PASS / shipping FAIL (`scripts/eval_hosted_partner_baseline.py`)
+**Last gate run:** 2026-09-19 — partner honesty land · `bench_check_docs.py` **129/129** · `test_watch_it_go_red.py` **72/72** · live baseline **naive 3/3 / shipping 0/3** on `00028-hed` · in-tree checklist+film fix on branch awaiting Oscar deploy
 
 ---
 
