@@ -47,11 +47,15 @@ Output on this run:
 }
 ```
 
-## Hosted /health (measured 2026-08-30)
+## Hosted /health (re-measured 2026-09-19)
 
 ```bash
 curl -s https://agent-science-568004190078.us-central1.run.app/health | python3 -m json.tool
 ```
+
+Live revision `agent-science-00028-hed` returns only `{ok, service, mode, revision}` — partner fields stripped. Do **not** claim hosted `engine_default: adk` until Oscar `deploy.sh` + `bash scripts/verify_partners_hosted.sh`.
+
+The 2026-08-30 hosted JSON below is **historical** (pre–private-workspaces strip):
 
 ```json
 {
@@ -66,6 +70,17 @@ curl -s https://agent-science-568004190078.us-central1.run.app/health | python3 
 }
 ```
 
+## Local prove without mocks (2026-09-19)
+
+```bash
+pip install -r requirements.txt
+bash scripts/prove_partner_health_local.sh   # real google-adk + parallel-web
+python3 scripts/prove_adk_clear_path.py      # engine=adk · adk_version=2.7.1
+```
+
+Finding: the previous local prove patched `adk_available` — `docs/FINDING-partner-prove-mocked-adk-2026-09-19.md`.
+
 ## What is NOT proved here
 
-- **Live ADK model call on this VM** — no Vertex ADC or Gemini key locally; tool path proved by Aug 23 receipt (`docs/RECEIPT-agent-builder.md`) and engine-selection tests above.
+- **Live ADK model call on this VM** — no Vertex ADC or Gemini key locally; tool path proved by Aug 23 receipt (`docs/RECEIPT-agent-builder.md`) and engine-selection tests above. `prove_adk_clear_path.py` stubs only the runner, not availability.
+- **Hosted engine_default on current revision** — stripped until Oscar deploy.

@@ -17,7 +17,7 @@ Parallel calls drop because the corpus remembers prior clears.
 
 **Proof on disk:** `python3 scripts/seed_document_cache.py && python3 tests/test_watch_it_go_red.py` → **72/72** · ADK engine selection **5/5** · compound exhibit **2→1** Parallel offline.
 
-**Honesty (worst first):** eval baseline ties shipping at **5/6 = 0.833** with **+0** delta; RC5 false-GREEN on **both** arms; hosted orphan-works run B returned **503** after run A — `docs/RECEIPT-live-compound-exhibit-2026-08-31.md`.
+**Honesty (worst first):** eval baseline **5/6 = 0.833** vs shipping **6/6 = 1.000**, delta **+1** (RC5); McNemar p=1.0000 at n=6 — not significant; CIs overlap. Hosted orphan-works full script **504** @ 300s — `docs/FINDING-orphan-works-timeout-2026-09-03.md`. Live `/health` on `00028-hed` still stripped of partner fields — naive ok:true PASS / shipping FAIL (`python3 scripts/eval_hosted_partner_baseline.py`).
 
 ## 1 · THE COMPANY
 
