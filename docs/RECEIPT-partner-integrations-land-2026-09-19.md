@@ -1,7 +1,7 @@
 # RECEIPT — Partner integrations land · 2026-09-19
 
 **Branch:** `cursor/partner-integrations-land-81e9`  
-**Commit:** `2fcc963a9e8c749aaa0a851bd80954fbf8e467d0`  
+**Commit:** `4c9cfffea8894006d84312a13e54b2706cc955c8`  
 **Slice:** Land unmerged partner-admissibility night; unmask ADK prove; meter search cache; baseline that embarrasses live.
 
 ## Bigger object (not the proxy)
