@@ -24,6 +24,7 @@ CACHE = Path(__file__).resolve().parent.parent / "cache" / "searches.json"
 RECEIPTS = Path(__file__).resolve().parent.parent / "cache" / "search_receipts.jsonl"
 
 LIVE_CALLS = 0
+CACHE_HITS = 0
 LAST_SEARCH_ID: Optional[str] = None
 
 
@@ -31,13 +32,23 @@ def calls() -> int:
     return LIVE_CALLS
 
 
+def cache_hits() -> int:
+    """Cache hits are not Parallel API spend — meter them separately.
+
+    A Parallel drop that is only cache reuse is a soft green, not compound.
+    Finding 2026-09-04: naive log_hits masqueraded as Parallel economics.
+    """
+    return CACHE_HITS
+
+
 def last_search_id() -> Optional[str]:
     return LAST_SEARCH_ID
 
 
 def reset_calls() -> None:
-    global LIVE_CALLS, LAST_SEARCH_ID
+    global LIVE_CALLS, CACHE_HITS, LAST_SEARCH_ID
     LIVE_CALLS = 0
+    CACHE_HITS = 0
     LAST_SEARCH_ID = None
 
 
@@ -117,6 +128,7 @@ def integration_info() -> dict:
         "transport": "parallel-web" if sdk_available() else "urllib-rest",
         "endpoint": ENDPOINT,
         "live_calls": LIVE_CALLS,
+        "cache_hits": CACHE_HITS,
         "last_search_id": LAST_SEARCH_ID,
         "receipts_log": str(RECEIPTS),
         # live_calls/last_search_id are per-process and read 0/None on a cold
@@ -244,9 +256,11 @@ def find_sources(objective: str, queries: list[str], *, mode: str = "advanced",
                  live: bool = False, max_results: int = 6,
                  term: str = "", refresh: bool = False,
                  trace: list | None = None, cache_path=None, receipts_path=None) -> Optional[list[Candidate]]:
+    global CACHE_HITS
     ck = json.dumps({"o": objective, "q": sorted(queries), "m": mode}, sort_keys=True)
     cache = _cache_load(cache_path)
     if not refresh and ck in cache:
+        CACHE_HITS += 1
         out = [Candidate(**c) for c in cache[ck][:max_results]]
         log_receipt(source="parallel", objective=objective, queries=queries,
                     candidates=out, cache_hit=True,path=receipts_path)
@@ -255,6 +269,7 @@ def find_sources(objective: str, queries: list[str], *, mode: str = "advanced",
         return out
     term_key = (term or "").strip().lower()
     if not refresh and term_key and term_key in cache:
+        CACHE_HITS += 1
         out = [Candidate(**c) for c in cache[term_key][:max_results]]
         log_receipt(source="parallel", objective=objective, queries=queries,
                     candidates=out, cache_hit=True,path=receipts_path)

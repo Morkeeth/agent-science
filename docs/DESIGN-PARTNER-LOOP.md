@@ -40,10 +40,19 @@ Second script on the **same subject** should show `corpus_hits ≥ 1` and fewer 
 ### C · One-command stranger smoke (no keys)
 
 ```bash
+pip install -r requirements.txt   # google-adk + parallel-web — prove refuses mocks
 bash scripts/new_user_trial.sh
 bash scripts/prove_partner_health_local.sh
 bash scripts/prove_judge_surfaces_local.sh
+python3 scripts/prove_adk_clear_path.py
+python3 scripts/eval_hosted_partner_baseline.py   # expect exit 2 until Oscar deploy
 ```
+
+**Friction measured 2026-09-19 (agent night, no partner session yet):**
+- Live `/health` still stripped → partner verify + film preflight fail at object
+- Previous local prove patched ADK → false green without `pip install -r requirements.txt`
+- Hosted `/clear` needs `WORKSPACE_TOKEN` — honesty exhibit exits 2 BLOCKED without it
+- Soft compound (flat Parallel + corpus_hits) must not be filmed as STRICT_DROP
 ---
 
 ## Friction checklist (partner fills in)
@@ -58,7 +67,8 @@ bash scripts/prove_judge_surfaces_local.sh
 | 6 | On a return visit, was review/stale state understandable? | | |
 | 7 | Local `/clear` compounding (if tried) — Parallel drop visible? | | |
 | 8 | Output format — HTML desk vs JSON/MCP for their pipeline? | | |
-| 9 | Blocker that would stop them paying or returning? | | |
+| 10 | Did they run `pip install -r requirements.txt` before local prove? | | |
+| 11 | Did hosted `/health` show `engine_default: adk` (post-deploy)? | | |
 
 ---
 

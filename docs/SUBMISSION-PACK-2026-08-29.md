@@ -11,8 +11,9 @@
 ```bash
 git clone https://github.com/Morkeeth/agent-science.git && cd agent-science
 bash scripts/verify_cold_clone.sh
-# includes: 72/72 · ADK path · partners · 129/129 docs · holdout · offline compound ·
-#           baseline/ablation/scorer · prove_partner_health_local (private-workspaces fields)
+# includes: 72/72 · ADK path · partners · 131/131 docs · holdout · offline compound ·
+#           baseline/ablation/scorer · prove_partner_health_local (real google-adk+parallel-web) ·
+#           prove_adk_clear_path · hosted partner baseline (naive PASS / shipping FAIL until deploy)
 python3 tests/test_registry_surface.py -q
 python3 scripts/compound_exhibit_receipt.py
 bash scripts/demo_truth_layer.sh
@@ -29,13 +30,13 @@ Offline compound receipt writes `docs/COMPOUND-EXHIBIT-2026-08-29.md` with A=2�
 |------|-------------|--------|----------|
 | Video | ≤ 3 min (≤ 180 s) | [ ] | Script: `docs/VIDEO-SCRIPT-2026-08-29.md` — beats sum **178 s** |
 | Devpost | All mandatory fields filled | [ ] | Paste block below (§1–3 from `PITCH.md`) |
-| Public repo | Stranger can clone | [ ] | Private until submit — flip visibility on GitHub |
+| Public repo | Stranger can clone | [x] | Public since 2026-08-22 (GitHub PublicEvent) |
 | OSI licence | Open-source approved | [x] | `LICENSE` (MIT) |
 | Sealed prediction | Pre-registered, falsifiable | [x] | `docs/SEALED-PREDICTION-2026-08-31.md` — hosted A=1→B=0, corpus_hits=1 |
 | Partner integrations | All four called at runtime | [x] docs | `docs/PARTNER-INTEGRATIONS-2026-08-30.md` |
 | ADK default path | `engine_default: adk` | [x] local / [ ] hosted until Oscar deploy | `docs/RECEIPT-adk-default-path-2026-08-30.md` · live `00028-hed` stripped — `docs/FINDING-hosted-health-partner-strip-2026-09-16.md` |
 
-**Controls re-measured 2026-09-18** (run each at object):
+**Controls re-measured 2026-09-19** (run each at object):
 
 | Suite | Command | Result |
 |-------|---------|--------|
@@ -48,10 +49,10 @@ Offline compound receipt writes `docs/COMPOUND-EXHIBIT-2026-08-29.md` with A=2�
 | search_path | `python3 tests/test_search_path.py` | **5/5** |
 | source_map | `python3 tests/test_source_map.py` | **3/3** |
 | refusal_correctness | `python3 tests/test_refusal_correctness.py` | **6/6** |
-| partner_runtime | `python3 tests/test_partner_runtime.py` | **8/8** |
+| partner_runtime | `python3 tests/test_partner_runtime.py` | **10/10** |
 | parallel_integration | `python3 tests/test_parallel_integration.py` | **6/6** |
-| **Total** | 11 suites | **129/129** |
-| docs gate | `python3 scripts/bench_check_docs.py` | **129/129 match** |
+| **Total** | 11 suites | **131/131** |
+| docs gate | `python3 scripts/bench_check_docs.py` | **131/131 match** |
 | holdout freeze | `python3 scripts/eval_verify_holdout.py` | **4 files pinned** |
 | scorer symmetry | `python3 scripts/eval_scorer_symmetry.py` | baseline **5/6** vs shipping **6/6** on delivered labels |
 

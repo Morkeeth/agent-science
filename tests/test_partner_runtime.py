@@ -168,6 +168,43 @@ def t_requirements_pins_parallel_web():
     assert "google-adk==" in req
 
 
+def t_prove_partner_health_does_not_mock_adk():
+    """Local partner prove must not patch adk_available — watched RED 2026-09-19.
+
+    Previous prove script returned engine_default=adk while `import google.adk`
+    failed on the agent VM. That is a false-green class defect.
+    """
+    src = (ROOT / "scripts" / "prove_partner_health_local.sh").read_text()
+    assert "patch(" not in src and "unittest.mock" not in src, src[:200]
+    assert "adk_available()" in src
+    assert "sdk_available()" in src
+    assert "parallel_sdk" in src
+
+
+def t_search_cache_hits_metered_separately():
+    """Cache reuse must not count as Parallel API spend."""
+    from clearance import search
+
+    search.reset_calls()
+    assert search.cache_hits() == 0
+    # Exercise via find_sources with a planted cache entry.
+    import json
+    import tempfile
+
+    with tempfile.TemporaryDirectory() as td:
+        cache_path = Path(td) / "searches.json"
+        ck = json.dumps({"o": "obj", "q": ["q1"], "m": "advanced"}, sort_keys=True)
+        cache_path.write_text(json.dumps({
+            ck: [{"url": "https://example.com/x", "title": "t", "excerpt": "e"}]
+        }))
+        out = search.find_sources("obj", ["q1"], live=False, cache_path=cache_path)
+        assert out and out[0].url.endswith("/x")
+        assert search.cache_hits() == 1
+        assert search.calls() == 0
+    search.reset_calls()
+    assert search.cache_hits() == 0
+
+
 if __name__ == "__main__":
     fns = [v for k, v in sorted(globals().items()) if k.startswith("t_") and callable(v)]
     failed = 0
@@ -178,5 +215,8 @@ if __name__ == "__main__":
         except AssertionError as e:
             failed += 1
             print(f"FAIL  {fn.__name__}: {e}")
+        except Exception as e:
+            failed += 1
+            print(f"FAIL  {fn.__name__}: {type(e).__name__}: {e}")
     print(f"\n{len(fns) - failed}/{len(fns)} passed")
     sys.exit(1 if failed else 0)

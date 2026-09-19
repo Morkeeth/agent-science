@@ -9,6 +9,11 @@ echo "=== Agent Science cold-clone verify ==="
 echo "repo: $ROOT"
 echo
 
+echo "0. Partner packages from requirements.txt (google-adk + parallel-web)..."
+# prove_partner_health_local requires real imports — no mocks (FINDING 2026-09-19).
+python3 -m pip install -q -r requirements.txt
+
+echo
 echo "1. Seed offline document cache..."
 python3 scripts/seed_document_cache.py
 
@@ -53,8 +58,16 @@ python3 scripts/eval_refusal_ablation.py 2>&1 | tail -2
 python3 scripts/eval_scorer_symmetry.py 2>&1 | tail -3
 
 echo
-echo "10. Private-workspaces partner health (local, no network)..."
+echo "10. Private-workspaces partner health (local, real ADK+Parallel SDK)..."
 bash scripts/prove_partner_health_local.sh 2>&1 | tail -5
+
+echo
+echo "11. ADK clear-path selection (real import, stubbed runner)..."
+python3 scripts/prove_adk_clear_path.py 2>&1 | tail -3
+
+echo
+echo "12. Hosted partner baseline (naive vs shipping — expect shipping FAIL until deploy)..."
+python3 scripts/eval_hosted_partner_baseline.py 2>&1 | tail -8 || true
 
 echo
 echo "=== cold-clone verify OK ==="
