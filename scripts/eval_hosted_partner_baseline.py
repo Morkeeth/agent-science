@@ -18,6 +18,7 @@ skipping the live URL; record the RED.
 Usage:
   python3 scripts/eval_hosted_partner_baseline.py
   python3 scripts/eval_hosted_partner_baseline.py https://…
+  python3 scripts/eval_hosted_partner_baseline.py --offline-fixtures
 """
 from __future__ import annotations
 
@@ -114,6 +115,8 @@ def shipping_film(code: int, raw: str) -> tuple[bool, str]:
 
 
 def main() -> int:
+    if len(sys.argv) > 1 and sys.argv[1] in ("--offline-fixtures", "--fixtures"):
+        return _offline_fixtures()
     base = (sys.argv[1] if len(sys.argv) > 1 else DEFAULT_URL).rstrip("/")
     stamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     print(f"HOSTED PARTNER BASELINE EVAL · stamp={stamp}")
@@ -137,6 +140,25 @@ def main() -> int:
     print(f"\n--- /truths/ui HTTP {f_code} ---")
     print((f_raw or "")[:120].replace("\n", " "))
 
+    return _score_and_report(
+        health=health,
+        p_code=p_code,
+        partners=partners,
+        p_raw=p_raw or "",
+        f_code=f_code,
+        f_raw=f_raw or "",
+    )
+
+
+def _score_and_report(
+    *,
+    health: dict | None,
+    p_code: int,
+    partners: dict | None,
+    p_raw: str,
+    f_code: int,
+    f_raw: str,
+) -> int:
     rows: list[tuple[str, str, bool, str]] = []
     n_h = naive_health(health)
     s_h, s_h_why = shipping_health(health)
@@ -144,12 +166,12 @@ def main() -> int:
     rows.append(("H2", "shipping health partners", s_h, s_h_why))
 
     n_p = naive_up(p_code)
-    s_p, s_p_why = shipping_partners(p_code, partners, p_raw or "")
+    s_p, s_p_why = shipping_partners(p_code, partners, p_raw)
     rows.append(("H3", "naive partners HTTP<500", n_p, f"HTTP {p_code}"))
     rows.append(("H4", "shipping partners JSON", s_p, s_p_why))
 
     n_f = naive_up(f_code)
-    s_f, s_f_why = shipping_film(f_code, f_raw or "")
+    s_f, s_f_why = shipping_film(f_code, f_raw)
     rows.append(("H5", "naive truths/ui HTTP<500", n_f, f"HTTP {f_code}"))
     rows.append(("H6", "shipping truths/ui public", s_f, s_f_why))
 
@@ -174,6 +196,59 @@ def main() -> int:
         return 0
     print("FINDING: mixed or unreachable — inspect rows above.")
     return 1
+
+
+def _offline_fixtures() -> int:
+    """No network. Prove scoring: stripped desk → naive wins; full desk → tie."""
+    stamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    print(f"HOSTED PARTNER BASELINE EVAL · offline fixtures · stamp={stamp}\n")
+
+    stripped = {"ok": True, "service": "agent-science", "mode": "private-workspaces", "revision": "fixture-stripped"}
+    print("=== fixture A: stripped health + 303 partners/film (00028-hed shape) ===")
+    rc_a = _score_and_report(
+        health=stripped,
+        p_code=303,
+        partners=None,
+        p_raw="",
+        f_code=303,
+        f_raw="",
+    )
+    if rc_a != 2:
+        print(f"FAIL: expected exit 2 when naive beats shipping, got {rc_a}")
+        return 1
+
+    full = {
+        "ok": True,
+        "gemini": True,
+        "parallel": True,
+        "parallel_sdk": True,
+        "agent_builder": True,
+        "engine_default": "adk",
+        "gemini_path": "vertex:hack-fleet",
+    }
+    partners = {
+        "track_checklist": {
+            "parallel_search_at_runtime": True,
+            "gemini_at_runtime": True,
+            "adk_agent_builder": True,
+            "hosted_url_required": True,
+        }
+    }
+    print("\n=== fixture B: full partner health + public film ===")
+    rc_b = _score_and_report(
+        health=full,
+        p_code=200,
+        partners=partners,
+        p_raw="",
+        f_code=200,
+        f_raw="<html>truths dashboard</html>",
+    )
+    if rc_b != 0:
+        print(f"FAIL: expected exit 0 when shipping matches naive, got {rc_b}")
+        return 1
+
+    print("\nOFFLINE FIXTURES OK — stripped → naive wins; full → shipping matches.")
+    return 0
 
 
 if __name__ == "__main__":

@@ -3,7 +3,7 @@
 **Audience:** Oscar sends to one real clearance / research lead.  
 **Goal:** one production runs a real question or script through the desk; friction list lands in `CURSOR-LOG.md`.
 
-**Hosted reality (2026-09-18):** Cloud Run is **private-workspaces**. Unauthenticated paste-to-`/clear` is gone. Partners sign in with a workspace access key Oscar issues.
+**Hosted reality (2026-09-19):** Cloud Run is **private-workspaces**. Unauthenticated paste-to-`/clear` is gone. Partners sign in with a workspace access key Oscar issues.
 
 **Public without a key (after Oscar deploys this branch):** `/health`, `/partners`, `/truths/ui`, `/visibility/ui`, `/popular/ui`. Live revision `00028-hed` still strips health and 303s film surfaces — do not promise those URLs until `deploy.sh` + `bash film/preflight.sh` exit 0.
 

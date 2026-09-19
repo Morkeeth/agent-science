@@ -57,4 +57,12 @@ echo "10. Private-workspaces partner health (local, no network)..."
 bash scripts/prove_partner_health_local.sh 2>&1 | tail -5
 
 echo
+echo "11. Private-workspaces judge film surfaces (local, no network)..."
+bash scripts/prove_judge_surfaces_local.sh 2>&1 | tail -8
+
+echo
+echo "12. Hosted partner baseline scoring (offline fixtures — no live URL)..."
+python3 scripts/eval_hosted_partner_baseline.py --offline-fixtures 2>&1 | tail -12
+
+echo
 echo "=== cold-clone verify OK ==="

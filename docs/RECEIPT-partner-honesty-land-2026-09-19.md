@@ -44,7 +44,9 @@ bash scripts/prove_partner_health_local.sh            → PROVE_PARTNER_HEALTH_L
                                                    · engine_default=adk · parallel_sdk=true (after pip parallel-web==1.3.2)
 bash scripts/prove_judge_surfaces_local.sh            → PROVE_JUDGE_SURFACES_LOCAL OK
 python3 scripts/eval_hosted_partner_baseline.py       → exit 2 · naive 3/3 / shipping 0/3
+python3 scripts/eval_hosted_partner_baseline.py --offline-fixtures → OFFLINE FIXTURES OK
 python3 scripts/bench_check_docs.py                   → 129/129 match
+bash scripts/verify_cold_clone.sh                     → cold-clone verify OK (steps 1–12)
 python3 scripts/eval_refusal_baseline.py              → baseline 5/6=0.833 · shipping 6/6=1.000 · delta +1
 python3 scripts/eval_refusal_ablation.py              → ablation 5/6 · shipping 6/6 · delta +1
 curl -sS …/health                                     → revision 00028-hed stripped

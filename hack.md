@@ -318,8 +318,8 @@ Full record: `fleet-ops (internal)/retros/QWEN-LOSS-RETRO-2026-08-30.md` (correc
 - [x] Expand baseline eval H1–H6 — health + partners + truths/ui naive vs shipping
 - [x] Re-derive at object — partner_runtime 8/8 · hosted_flow 17 · bench **129/129** · watch 72/72
 - [x] Local prove with `parallel-web==1.3.2` → `parallel_sdk: true` · `engine_default: adk`
-- [x] Receipt — `docs/RECEIPT-partner-honesty-land-2026-09-19.md`
-- [x] Live compound — still BLOCKED (no Parallel key / workspace token)
+- [x] Cold-clone steps 11–12 — judge surfaces prove + offline baseline fixtures
+- [x] Live compound — still BLOCKED (no Parallel key / workspace token) · `docs/BLOCKED-live-compound-2026-09-19.md`
 
 ### Verify (one command each)
 
@@ -330,6 +330,8 @@ python3 -m unittest tests.test_hosted_flow -v                       # film + che
 bash scripts/prove_partner_health_local.sh                          # engine_default=adk
 bash scripts/prove_judge_surfaces_local.sh                          # truths+visibility public
 python3 scripts/eval_hosted_partner_baseline.py                     # expect exit 2 · naive 3/3 shipping 0/3
+python3 scripts/eval_hosted_partner_baseline.py --offline-fixtures  # scoring RED/GREEN without network
+bash scripts/verify_cold_clone.sh                                    # steps 1–12 incl. judge surfaces
 python3 scripts/bench_check_docs.py                                  # 129/129
 python3 scripts/eval_refusal_baseline.py && python3 scripts/eval_refusal_ablation.py
 # After Oscar deploy only:
@@ -343,7 +345,7 @@ bash film/preflight.sh                                               # expect PA
 - `docs/RECEIPT-partner-judge-surfaces-2026-09-18.md`
 - `docs/FINDING-partners-checklist-hardcoded-2026-09-18.md`
 - `docs/FINDING-hosted-judge-surfaces-missing-2026-09-18.md`
-- `docs/BLOCKED-live-compound-2026-09-18.md`
+- `docs/BLOCKED-live-compound-2026-09-19.md`
 
 ### BLOCKED
 
