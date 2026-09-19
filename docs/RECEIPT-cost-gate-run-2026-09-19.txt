@@ -1,0 +1,43 @@
+COST GATE — dated price card + null / baseline / shipping
+Price card: fixtures/price-card/parallel.json
+  retrieved_at: 2026-09-19T22:30:00Z
+  source_url:   https://www.parallel.ai/pricing
+  processor:    fast @ $0.0010 / Search API request
+Billing:      RED — fixtures/billing/invoice.json absent — not a price card
+
+ACCURACY (held-out refusal set, offline — Parallel spend $0 every arm)
+id    gold          null      baseline  shipping  n b s
+RC1   SUPPORTED     UNKNOWN   GREEN     GREEN     False True True
+RC2   SUPPORTED     UNKNOWN   GREEN     GREEN     False True True
+RC3   NOT_SUPPORTED UNKNOWN   UNKNOWN   UNKNOWN   True True True
+RC4   NOT_SUPPORTED UNKNOWN   UNKNOWN   UNKNOWN   True True True
+RC5   NOT_SUPPORTED UNKNOWN   GREEN     UNKNOWN   True False True
+RC6   SUPPORTED     UNKNOWN   GREEN     GREEN     False True True
+
+NULL:      3/6 = 0.500  95% CI [0.188, 0.812]
+BASELINE:  5/6 = 0.833  95% CI [0.436, 0.970]
+SHIPPING:  6/6 = 1.000  95% CI [0.610, 1.000]
+McNemar NULL vs SHIPPING:     p=0.2500 (b=0 c=3 discordant)
+McNemar BASELINE vs SHIPPING: p=1.0000 (b=0 c=1 discordant)
+
+FINDING: always-silent NULL does NOT beat SHIPPING on accuracy (3/6 vs 6/6). Cost, not accuracy, is where NULL wins tonight.
+FINDING: offline holdout Parallel spend is $0.0000 for NULL, BASELINE, and SHIPPING alike — a cost gate that only reads this set cannot discriminate arms.
+
+COMPOUND COST (re-derived offline exhibit × dated Search API card)
+  metered parallel_calls  A=2  B=1  corpus_hits_B=2  (compound exit 0)
+  boundary ground-truth Parallel calls (Run A only): 3
+FINDING (embarrassing): meter reports A=2 but fake-boundary ground-truth is 3 — parallel_calls under-counts the search door.
+  priced @fast $0.0010/req → A=$0.0020  B=$0.0010
+  compound saving (price-card): +50% on Parallel line
+  NOTE: price-card estimate, not an invoice. Billing status is RED.
+
+CARRIED FIGURE CHECK — measure_compounding.py PARALLEL_CALL
+  effective PARALLEL_CALL = 0.001 (imported from measure_compounding.PARALLEL_CALL)
+  card fast      = $0.0010
+  card advanced  = $0.0050
+  OK — measure_compounding tracks default processor 'fast' on today's card
+FINDING (was carried): prior hardcoded PARALLEL_CALL=$0.0050 matched Search API *advanced*, not default 'fast' ($0.0010) — 5× overstatement if Fast was the intended tier.
+
+BILLING CHECKLIST ROW
+  RED — fixtures/billing/invoice.json absent — not a price card
+  Do NOT tick hack.md 'Cost from billing'. Price-card arm is shipped; invoice remains Oscar console export → fixtures/billing/invoice.json.

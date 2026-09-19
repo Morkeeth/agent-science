@@ -65,13 +65,14 @@ deadline: 2026-09-09T14:00:00-07:00
 | | |
 |---|---|
 | **URL** | https://agent-science-568004190078.us-central1.run.app |
-| **Revision** | `agent-science-00018-n4s` · `parallel_sdk: true` · **`/truths/ui` live** |
-| **Health** | `engine_default: adk` · 265 claims · hit rate ~0.80 |
+| **Revision** | `agent-science-00028-hed` · mode `private-workspaces` (probed 2026-09-19) |
+| **Health** | **stripped** — `{ok, service, mode, revision}` only; no `engine_default` / gemini / parallel until Oscar deploy |
+| **Local dictionary** | after `boot_registry.py` 2026-09-19 → **239** claims (25 sourced · 214 refused) — do not carry older **265** |
 | **New** | `GET /visibility/ui` — full websearch panel for judges (film this) |
 | **New** | `GET /truths/ui` — truths dashboard |
-| **Stats** | 265 claims · hit rate ~0.80 · queries logged growing |
 
-**Compound (sealed):** `longrun-0831-1320` A=**1** → B=**0** Parallel · B `corpus_hits=1`
+**Compound (sealed):** `longrun-0831-1320` A=**1** → B=**0** Parallel · B `corpus_hits=1`  
+**Live compound 2026-09-19:** BLOCKED — no Parallel key / workspace token (`docs/BLOCKED-live-compound-2026-09-19.md`)
 
 ---
 

@@ -110,7 +110,32 @@ FINDING: tied on external anchor — no measured delta.
 python3 scripts/bench_check_docs.py
 ```
 
-Re-derives all 9 suite counts against `docs/SUBMISSION-PACK-2026-08-29.md` — exit 1 if stale.
+Re-derives suite counts against `docs/SUBMISSION-PACK-2026-08-29.md` — exit 1 if stale.
+
+---
+
+## Cost gate (2026-09-19) — price card dated; billing still RED
+
+```bash
+python3 scripts/eval_cost_gate.py
+python3 scripts/eval_cost_gate.py --require-billing   # exit 3 while invoice absent
+```
+
+| Arm | Accuracy on n=6 holdout | Parallel $ on holdout |
+|-----|-------------------------|------------------------|
+| NULL (always refuse) | 3/6 = 0.500 | $0 |
+| BASELINE (substring) | 5/6 = 0.833 | $0 |
+| SHIPPING | 6/6 = 1.000 | $0 |
+
+Price card: `fixtures/price-card/parallel.json` · retrieved **2026-09-19T22:30:00Z** from
+https://www.parallel.ai/pricing · default Search processor **fast @ $0.001/req**.
+
+Compound (re-derived offline): metered A=2→B=1 Parallel → **$0.002 → $0.001** at Fast.
+Boundary ground-truth on Run A is **3** (meter under-count). Prior hardcoded
+`PARALLEL_CALL=0.005` matched **advanced**, not Fast (**5×** if Fast intended).
+
+**Billing:** `fixtures/billing/invoice.json` absent → RED. Do not tick "Cost from billing"
+until Oscar drops a console export. Full run: `docs/RECEIPT-cost-gate-run-2026-09-19.txt`.
 
 ---
 
@@ -124,3 +149,4 @@ Re-derives all 9 suite counts against `docs/SUBMISSION-PACK-2026-08-29.md` — e
 - [x] Offline path with no API key
 - [x] Wilson CI + McNemar (n=6)
 - [x] Honesty carries worst number (tie + RC5 false-GREEN both arms)
+- [~] Cost from dated price card — **shipped 2026-09-19**; invoice billing still RED / unchecked in hack.md
