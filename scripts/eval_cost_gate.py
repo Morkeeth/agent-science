@@ -218,7 +218,13 @@ def _rederive_compound_parallel() -> dict:
         r"\|\s*(\d+)\s*\|\s*(\d+)\s*\|\s*[+-]?\d+\s*\|\s*(\d+)\s*\|",
         text,
     )
-    boundary = re.search(
+    # New per-run boundary line (after 2026-09-19 fix)
+    per = re.search(
+        r"per run\):\s*A=`(\d+)`\s*·\s*B=`(\d+)`\s*·\s*total=`(\d+)`",
+        text,
+    )
+    # Legacy mislabeled line — keep parse so an old receipt cannot silently pass
+    legacy = re.search(
         r"Ground-truth Parallel calls at fake boundary \(Run A only\):\s*`(\d+)`",
         text,
     )
@@ -229,14 +235,24 @@ def _rederive_compound_parallel() -> dict:
             "exit": proc.returncode,
             "tail": out[-800:],
         }
-    return {
+    result = {
         "ok": True,
         "exit": proc.returncode,
         "a_parallel": int(m.group(1)),
         "b_parallel": int(m.group(2)),
         "b_corpus_hits": int(m.group(3)),
-        "boundary_a_ground_truth": int(boundary.group(1)) if boundary else None,
+        "boundary_a": None,
+        "boundary_b": None,
+        "boundary_total": None,
+        "legacy_mislabeled_a_only": None,
     }
+    if per:
+        result["boundary_a"] = int(per.group(1))
+        result["boundary_b"] = int(per.group(2))
+        result["boundary_total"] = int(per.group(3))
+    if legacy:
+        result["legacy_mislabeled_a_only"] = int(legacy.group(1))
+    return result
 
 
 def _effective_parallel_rate() -> tuple[float | None, str]:
@@ -354,24 +370,52 @@ def main() -> int:
 
     a_pc = compound["a_parallel"]
     b_pc = compound["b_parallel"]
-    a_usd = a_pc * unit
-    b_usd = b_pc * unit
     print(
-        f"  metered parallel_calls  A={a_pc}  B={b_pc}  "
-        f"corpus_hits_B={compound['b_corpus_hits']}  "
+        f"  metered parallel_calls (claims that missed corpus/log → live judge)  "
+        f"A={a_pc}  B={b_pc}  corpus_hits_B={compound['b_corpus_hits']}  "
         f"(compound exit {compound['exit']})"
     )
-    if compound.get("boundary_a_ground_truth") is not None:
-        gt = compound["boundary_a_ground_truth"]
-        print(f"  boundary ground-truth Parallel calls (Run A only): {gt}")
-        if gt != a_pc:
+    if compound.get("boundary_a") is not None:
+        ba, bb, bt = (
+            compound["boundary_a"],
+            compound["boundary_b"],
+            compound["boundary_total"],
+        )
+        print(
+            f"  boundary find_sources (Search API door)  A={ba}  B={bb}  total={bt}"
+        )
+        if ba == a_pc and bb == b_pc:
+            print("  OK — claim-counter and Search door agree this run")
+        else:
             print(
-                f"FINDING (embarrassing): meter reports A={a_pc} but fake-boundary "
-                f"ground-truth is {gt} — parallel_calls under-counts the search door."
+                "FINDING (embarrassing): `parallel_calls` ≠ Search door. "
+                f"Meter A={a_pc}/B={b_pc} vs find_sources A={ba}/B={bb}. "
+                "CELEX/routing can clear a claim with 0 searches while still "
+                "incrementing parallel_calls; judge_claim escalation can fire "
+                "2 searches for 1 parallel_calls increment. Price the door."
             )
-    print(f"  priced @{proc} ${unit:.4f}/req → A=${a_usd:.4f}  B=${b_usd:.4f}")
+        # Price the Search API door, not the claim counter.
+        a_usd = ba * unit
+        b_usd = bb * unit
+        priced_as = "find_sources door"
+    else:
+        a_usd = a_pc * unit
+        b_usd = b_pc * unit
+        priced_as = "parallel_calls (door unavailable — legacy receipt)"
+        if compound.get("legacy_mislabeled_a_only") is not None:
+            print(
+                f"  LEGACY receipt still says 'Run A only': "
+                f"{compound['legacy_mislabeled_a_only']} — that label was A+B. "
+                "Re-run compound_exhibit_receipt.py."
+            )
+    print(
+        f"  priced @{proc} ${unit:.4f}/req on {priced_as} → "
+        f"A=${a_usd:.4f}  B=${b_usd:.4f}"
+    )
     if a_usd:
         print(f"  compound saving (price-card): {1 - b_usd / a_usd:+.0%} on Parallel line")
+    elif a_usd == 0 and b_usd == 0:
+        print("  both runs $0 at the Search door — compounding claim is not a $ story here")
     print(
         "  NOTE: price-card estimate, not an invoice. Billing status is "
         f"{billing['status']}."

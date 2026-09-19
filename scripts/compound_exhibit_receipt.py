@@ -149,25 +149,25 @@ def _run_offline() -> dict:
     from clearance import instruments, search as _search
     from clearance.locate import DEFAULT
 
-    net = _Net()
     saved = (_search.find_sources, instruments.document,
              agent_science.GeminiExtractor, agent_science.GeminiLocator)
-    _search.find_sources = net.find_sources
     instruments.document = _fake_document
     agent_science.GeminiLocator = lambda model="x": DEFAULT
-
-    def _extract_factory(model="x"):
-        # script_key set per run via closure on clear_script call
-        raise RuntimeError("extractor factory not bound")
 
     with tempfile.TemporaryDirectory() as d:
         db = Path(d) / "corpus.db"
         log_db = Path(d) / "refusal_log.db"
         results = {}
+        boundary = {}
         for key, path in (("A", OFFLINE_A), ("B", OFFLINE_B)):
-            agent_science.GeminiExtractor = lambda model="x", k=key: _FakeExtractor(model, script_key=k)
+            net = _Net()
+            _search.find_sources = net.find_sources
+            agent_science.GeminiExtractor = (
+                lambda model="x", k=key: _FakeExtractor(model, script_key=k)
+            )
             results[key] = agent_science.clear_script(
                 path.read_text(), subject=SUBJECT, corpus_db=db, log_db=log_db)
+            boundary[key] = net.find_calls
 
     (_search.find_sources, instruments.document,
      agent_science.GeminiExtractor, agent_science.GeminiLocator) = saved
@@ -183,7 +183,10 @@ def _run_offline() -> dict:
             "instruments.document → fixture bodies (no HTTP)",
             "StringLocator (DEFAULT) + verify + independence — real shipping rules",
         ],
-        "net_find_calls": net.find_calls,
+        # Per-run boundary counters — do NOT share one Net across A and B or the
+        # receipt will mislabel A+B as "Run A only" (caught 2026-09-19).
+        "boundary_find_calls": boundary,
+        "net_find_calls_total": boundary["A"] + boundary["B"],
     }
 
 
@@ -248,7 +251,19 @@ def _write_receipt(run: dict, *, backfill_rows: int) -> None:
             lines.append(f"- {s}")
         lines += [
             "",
-            f"Ground-truth Parallel calls at fake boundary (Run A only): `{run.get('net_find_calls', '?')}`",
+            "Ground-truth `search.find_sources` calls at the fake boundary "
+            f"(per run): A=`{run.get('boundary_find_calls', {}).get('A', '?')}` · "
+            f"B=`{run.get('boundary_find_calls', {}).get('B', '?')}` · "
+            f"total=`{run.get('net_find_calls_total', '?')}`",
+            "",
+            "`parallel_calls` above counts claims that missed corpus/log and entered "
+            "live `judge_claim` — including CELEX/routing clears that never call "
+            "`find_sources`. Escalation inside `judge_claim` can call `find_sources` "
+            "more than once per claim. Price Search spend from the boundary counters "
+            "(or `parallel_api_calls` on a live run), not from `parallel_calls` alone.",
+            "",
+            "A shared counter across A+B was previously mislabeled \"Run A only\" and "
+            "produced a false under-count finding (retracted 2026-09-19).",
             "",
         ]
     else:

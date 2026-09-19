@@ -59,7 +59,7 @@ Offline compound receipt writes `docs/COMPOUND-EXHIBIT-2026-08-29.md` with A=2�
 | scorer symmetry | `python3 scripts/eval_scorer_symmetry.py` | baseline **5/6** vs shipping **6/6** on delivered labels |
 | cost gate | `python3 scripts/eval_cost_gate.py` | NULL **3/6** · baseline **5/6** · shipping **6/6** · billing **RED** |
 
-**Compound exhibit (offline, 2026-09-19):** `python3 scripts/compound_exhibit_receipt.py` · A=**2**→B=**1** Parallel · B corpus hits=**2** — `docs/COMPOUND-EXHIBIT-2026-08-29.md`. Boundary ground-truth on Run A is **3** (meter under-count — see receipt). Live hosted compound: **BLOCKED** tonight (`docs/BLOCKED-live-compound-2026-09-19.md`).
+**Compound exhibit (offline, 2026-09-19):** `python3 scripts/compound_exhibit_receipt.py` · claim-counter `parallel_calls` A=**2**→B=**1** · B corpus hits=**2** · Search door `find_sources` A=**1**→B=**2** (priced Fast: A=$0.001 → B=$0.002 — claim-counter win is not a Search-$ win on this fixture) — `docs/COMPOUND-EXHIBIT-2026-08-29.md`. Live hosted compound: **BLOCKED** tonight (`docs/BLOCKED-live-compound-2026-09-19.md`).
 
 **Eval gate:** `docs/QWEN-EVAL-GATE-2026-08-30.md` — baseline **5/6 = 0.833** vs shipping **6/6 = 1.000**, delta +1 (RC5); McNemar p=1.0000 at n=6. Cost arm 2026-09-19: `docs/RECEIPT-night-wave-2026-09-19.md`.
 

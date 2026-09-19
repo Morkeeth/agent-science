@@ -24,11 +24,11 @@ FINDING: always-silent NULL does NOT beat SHIPPING on accuracy (3/6 vs 6/6). Cos
 FINDING: offline holdout Parallel spend is $0.0000 for NULL, BASELINE, and SHIPPING alike — a cost gate that only reads this set cannot discriminate arms.
 
 COMPOUND COST (re-derived offline exhibit × dated Search API card)
-  metered parallel_calls  A=2  B=1  corpus_hits_B=2  (compound exit 0)
-  boundary ground-truth Parallel calls (Run A only): 3
-FINDING (embarrassing): meter reports A=2 but fake-boundary ground-truth is 3 — parallel_calls under-counts the search door.
-  priced @fast $0.0010/req → A=$0.0020  B=$0.0010
-  compound saving (price-card): +50% on Parallel line
+  metered parallel_calls (claims that missed corpus/log → live judge)  A=2  B=1  corpus_hits_B=2  (compound exit 0)
+  boundary find_sources (Search API door)  A=1  B=2  total=3
+FINDING (embarrassing): `parallel_calls` ≠ Search door. Meter A=2/B=1 vs find_sources A=1/B=2. CELEX/routing can clear a claim with 0 searches while still incrementing parallel_calls; judge_claim escalation can fire 2 searches for 1 parallel_calls increment. Price the door.
+  priced @fast $0.0010/req on find_sources door → A=$0.0010  B=$0.0020
+  compound saving (price-card): -100% on Parallel line
   NOTE: price-card estimate, not an invoice. Billing status is RED.
 
 CARRIED FIGURE CHECK — measure_compounding.py PARALLEL_CALL

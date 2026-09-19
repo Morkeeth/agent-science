@@ -610,7 +610,7 @@ bash scripts/verify_cold_clone.sh                                               
 
 | When | What | Command | Outcome |
 |------|------|---------|---------|
-| 2026-09-19 night | Cost gate + null arm + pack truth | `eval_cost_gate.py` · `--require-billing` · `bench_check_docs.py` · `boot_registry.py` | NULL **3/6** · ship **6/6** · billing **RED exit 3** · prior $0.005 = **5× Fast** · meter A=2 vs GT **3** · dict **239** not 265 · pack **128/128** · live compound BLOCKED · deploy prep only |
+| 2026-09-19 night | Cost gate + null arm + pack truth | `eval_cost_gate.py` · `--require-billing` · `bench_check_docs.py` · `boot_registry.py` · `compound_exhibit_receipt.py` | NULL **3/6** · ship **6/6** · billing **RED exit 3** · prior $0.005 = **5× Fast** · `parallel_calls` 2→1 but `find_sources` **1→2** (−100% Search $) · retracted false "Run A only" label · dict **239** · pack **128/128** · live BLOCKED · deploy prep only |
 | 2026-09-16 night | Offline compound exit 3 (paraphrase≠assertion) | `compound_exhibit_receipt.py` · cold-clone step 8–10 | **A=2→B=1 Parallel, corpus_hits=2** after exact-assertion B arm · cold-clone OK |
 | 2026-09-16 night | Hosted health partner strip found + fixed in tree | `curl …/health` · `prove_partner_health_local.sh` · hosted_flow tests | Live **RED** (`00028-hed` missing partner fields) · local prove **engine_default=adk** · 72/72 · 128/128 |
 | 2026-09-16 night | Qwen eval re-derive | `eval_refusal_baseline.py` · `eval_refusal_ablation.py` | baseline/ablation **5/6** vs shipping **6/6**, delta +1, McNemar p=1.0 |
@@ -673,14 +673,15 @@ General reference examples (always re-read for the event): https://agentic-cinem
   Parallel price card, a null/baseline/shipping accuracy table, and an honest RED when billing
   invoice is absent — without trusting carried $ or claim-count figures.
 - **Action actually observed:** `eval_cost_gate.py` → NULL 3/6 · BASELINE 5/6 · SHIPPING 6/6;
-  billing RED exit 3 with `--require-billing`; compound metered A=2 vs boundary GT 3; local boot
+  billing RED exit 3 with `--require-billing`; `parallel_calls` A=2→B=1 but `find_sources`
+  A=1→B=2 (Search $ −100% on Fast card); retracted false "Run A only" boundary label; local boot
   dictionary **239** (not 265); live `/health` still stripped on `00028-hed`; clear **401**.
 - **Exact evidence:** `docs/RECEIPT-night-wave-2026-09-19.md` · `docs/RECEIPT-cost-gate-run-2026-09-19.txt` ·
   `python3 scripts/bench_check_docs.py` → 128/128 · `gh api … visibility=public`.
-- **Largest product gap:** invoice billing still absent; live partner health undeployed; parallel
-  meter under-counts the search door; hosted stats unreachable (303) so hosted shelf size unverified.
-- **Next build change:** Oscar deploy + invoice export; optionally fix parallel_calls vs boundary
-  ground-truth mismatch; scrub remaining carried **265** in film copy.
+- **Largest product gap:** invoice billing still absent; live partner health undeployed; compound
+  exhibit seals on claim-counter not Search door; hosted stats unreachable (303).
+- **Next build change:** Oscar deploy + invoice export; decide whether sealed compound demos should
+  report `parallel_api_calls` / `find_sources` beside `parallel_calls`; scrub remaining **265** in film copy.
 
 **Prior stage record · 2026-09-16 · partner admissibility repair**
 
