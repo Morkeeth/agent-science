@@ -1,6 +1,7 @@
 # RECEIPT — Partner honesty land on main · 2026-09-19
 
 **Branch:** `cursor/partner-honesty-baseline-ab9b`  
+**Commit tip:** `03c603c` (lands `eb6d425`+ onto main path)  
 **Origin:** cherry-picked unmerged `cursor/partner-admissibility-night-5719` (`eb6d425`+) onto `main`, then expanded the live baseline eval.  
 **Slice:** Land checklist honesty + judge film surfaces that never reached `main`; re-measure at live objects; expand naive-vs-shipping baseline to `/partners` and `/truths/ui`.
 
