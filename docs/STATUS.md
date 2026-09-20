@@ -2,7 +2,7 @@
 doc: status
 project: Agent Science
 canonical: true
-last-updated: 2026-09-16T19:00:00Z
+last-updated: 2026-09-20T18:15:00Z
 deadline: 2026-09-09T14:00:00-07:00
 ---
 
@@ -11,7 +11,7 @@ deadline: 2026-09-09T14:00:00-07:00
 > **For Claude / fleet:** this file is the single “where we are” surface.  
 > `hack.md` = process · `CLAUDE.md` = entry · this file = gates + evidence.
 
-**Last gate run:** 2026-09-16 — partner admissibility wave · `bench_check_docs.py` **128/128** · `test_watch_it_go_red.py` **72/72** · live `/health` partner fields **RED** until Oscar deploy (`docs/FINDING-hosted-health-partner-strip-2026-09-16.md`)
+**Last gate run:** 2026-09-20 — partner call-proof honesty · `bench_check_docs.py` **130/130** · `test_watch_it_go_red.py` **72/72** · `prove_partner_calls_local.py` OK · live `/health` **RED** (`watch_hosted_partner_health.sh`) · gemini env-alone false-green fixed (`docs/FINDING-gemini-health-env-alone-2026-09-20.md`) · PeriodCheck baseline (`docs/BASELINE-periodcheck-partner-proof-2026-09-20.md`)
 
 ---
 
@@ -43,11 +43,12 @@ deadline: 2026-09-09T14:00:00-07:00
 | Gate | Result | Command / doc |
 |------|--------|----------------|
 | Mutation controls | **72/72** | `test_watch_it_go_red.py` |
-| All test suites | **128/128** | `bench_check_docs.py` (re-run 2026-09-16) |
+| All test suites | **130/130** | `bench_check_docs.py` (re-run 2026-09-20) |
 | Secret scan | **6/6** | `test_secret_surfaces.py` |
-| Partner runtime | **7/7** + parallel **6/6** | `test_partner_runtime.py` + `test_parallel_integration.py` |
+| Partner runtime | **9/9** + parallel **6/6** | `test_partner_runtime.py` + `test_parallel_integration.py` |
 | ADK default | **5/5** | `test_adk_default_path.py` |
-| Hosted partner health (live) | ⛔ RED on `00028-hed` | `verify_partners_hosted.sh` · fix in tree, needs deploy |
+| Partner call-proof (local) | ✅ | `prove_partner_calls_local.py` |
+| Hosted partner health (live) | ⛔ RED on `00028-hed` | `watch_hosted_partner_health.sh` · fix in tree, needs deploy |
 | Registry surface | **16/16** | `test_registry_surface.py` |
 | Cold clone | ✅ | `verify_cold_clone.sh` |
 | Hosted long run | **19/19** | `long_run_goal.sh` |
@@ -65,8 +66,8 @@ deadline: 2026-09-09T14:00:00-07:00
 | | |
 |---|---|
 | **URL** | https://agent-science-568004190078.us-central1.run.app |
-| **Revision** | `agent-science-00018-n4s` · `parallel_sdk: true` · **`/truths/ui` live** |
-| **Health** | `engine_default: adk` · 265 claims · hit rate ~0.80 |
+| **Revision** | `agent-science-00028-hed` (measured 2026-09-20) |
+| **Health** | **stripped** — only `ok/service/mode/revision` until Oscar deploy · local prove `engine_default: adk` |
 | **New** | `GET /visibility/ui` — full websearch panel for judges (film this) |
 | **New** | `GET /truths/ui` — truths dashboard |
 | **Stats** | 265 claims · hit rate ~0.80 · queries logged growing |

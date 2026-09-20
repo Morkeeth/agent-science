@@ -57,4 +57,8 @@ echo "10. Private-workspaces partner health (local, no network)..."
 bash scripts/prove_partner_health_local.sh 2>&1 | tail -5
 
 echo
+echo "11. Partner call-proof (mocked Parallel + ADK path)..."
+python3 scripts/prove_partner_calls_local.py 2>&1 | tail -3
+
+echo
 echo "=== cold-clone verify OK ==="

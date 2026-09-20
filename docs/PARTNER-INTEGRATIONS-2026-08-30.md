@@ -1,26 +1,31 @@
 # PARTNER INTEGRATIONS — Agent Science · Sep 9 path
 
-**Date:** 2026-08-30 · **Last verified:** 2026-09-16 · **Repo:** Morkeeth/agent-science · **Scope:** all four partners wired in code; deploy is Oscar's click.
+**Date:** 2026-08-30 · **Last verified:** 2026-09-20 · **Repo:** Morkeeth/agent-science · **Scope:** all four partners wired in code; deploy is Oscar's click.
 
 Each partner must be **called at runtime** on the default path — not documented only.
 
-### Hosted mode (private-workspaces) — measured 2026-09-16
+### Hosted mode (private-workspaces) — measured 2026-09-20
 
 Cloud Run sets `K_SERVICE`, so all traffic goes through `cloud/case_http.py` WorkspaceHTTP.
 
 | Route | Auth | Role |
 |-------|------|------|
-| `GET /health` | **public** | Partner proof JSON (`gemini`, `parallel`, `engine_default`, …) + `mode` + `revision` |
+| `GET /health` | **public** | Partner proof JSON (`gemini`, `parallel`, `engine_default`, receipt ids, …) + `mode` + `revision` |
 | `GET /partners` | **public** | Track checklist JSON for judges |
 | `POST /clear`, `/search`, `/ingest` | **workspace token / session** | Local-only without auth; not a public desk anymore |
 | `/cases`, `/api/cases` | **workspace** | Private research |
 
-**Finding:** revision `agent-science-00028-hed` returned a stripped `/health` (`ok`/`service`/`mode`/`revision` only). That is a false-green class defect — see `docs/FINDING-hosted-health-partner-strip-2026-09-16.md`. Fix is in tree; live stays RED until Oscar `deploy.sh`.
+**Findings (still live RED until Oscar deploy):**
+
+- revision `agent-science-00028-hed` stripped `/health` — `docs/FINDING-hosted-health-partner-strip-2026-09-16.md`
+- `gemini: true` from `GCP_PROJECT` alone without ADC token — fixed in tree 2026-09-20 — `docs/FINDING-gemini-health-env-alone-2026-09-20.md`
 
 **Local prove (no network, no real keys):**
 
 ```bash
-bash scripts/prove_partner_health_local.sh
+bash scripts/prove_partner_health_local.sh          # shape + public routes
+python3 scripts/prove_partner_calls_local.py        # Parallel transport call + ADK path
+bash scripts/watch_hosted_partner_health.sh         # expect RED until deploy
 ```
 
 ---
@@ -137,11 +142,15 @@ curl -s -X POST https://api.parallel.ai/v1/search \
   "service": "agent-science",
   "gemini": true,
   "gemini_path": "vertex:hack-fleet",
+  "gemini_configured": true,
   "parallel": true,
   "parallel_sdk": true,
   "parallel_sdk_version": "1.3.2",
   "parallel_transport": "parallel-web",
   "last_parallel_search_id": "srch_…",
+  "verified_search_id": "search_…",
+  "verified_calls_logged": 25,
+  "last_verified_utc": "2026-09-04T16:13:05+00:00",
   "agent_builder": true,
   "adk_version": "2.7.1",
   "engine_default": "adk",
@@ -154,12 +163,16 @@ curl -s -X POST https://api.parallel.ai/v1/search \
 
 | Field | Meaning |
 |-------|---------|
-| `gemini_path` | `vertex:<project>`, `api-key`, or `none` |
+| `gemini` / `gemini_path` | **Callable** — API key or working Vertex ADC token (`none` if env project alone) |
+| `gemini_configured` | Env intends Gemini (`GCP_PROJECT` / `K_SERVICE` / key) — not proof of call |
 | `parallel` | `PARALLEL_API_KEY` present in env |
+| `verified_search_id` | Durable Parallel call proof from receipts log (survives cold start) |
 | `agent_builder` | `google-adk` importable |
 | `engine_default` | What clearance will use when `/clear` runs: `adk` or `direct` |
 
 Shared builder: `cloud.partners.health_payload()` — used by `cloud/service.py` and `cloud/case_http.py`.
+
+**External baseline:** PeriodCheck proves Parallel via `live-evaluation.json` search_ids, not health — `docs/BASELINE-periodcheck-partner-proof-2026-09-20.md`.
 
 ### Routes
 
@@ -182,7 +195,9 @@ curl -s localhost:8099/health
 **Hosted partner prove without deploy wait:**
 ```bash
 bash scripts/prove_partner_health_local.sh
+python3 scripts/prove_partner_calls_local.py
 python3 tests/test_adk_default_path.py   # 5/5
+python3 tests/test_partner_runtime.py    # 9/9
 ```
 
 ---

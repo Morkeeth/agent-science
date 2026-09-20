@@ -40,6 +40,7 @@ Second script on the **same subject** should show `corpus_hits ≥ 1` and fewer 
 ```bash
 bash scripts/new_user_trial.sh
 bash scripts/prove_partner_health_local.sh
+python3 scripts/prove_partner_calls_local.py   # Parallel transport + ADK path (mocked HTTP)
 ```
 
 ---
