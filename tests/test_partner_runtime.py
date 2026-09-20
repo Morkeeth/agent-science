@@ -44,12 +44,75 @@ def t_gcp_service_health_shape():
                                  "PARALLEL_API_KEY": "pk-test"}):
         with patch.object(partners.adk_agent, "adk_available", return_value=True):
             with patch.object(partners.adk_agent, "adk_version", return_value="2.7.1"):
-                payload = partners.health_payload(mode="private-workspaces", revision="r1")
+                with patch("clearance.gemini.vertex_project", return_value="hack-fleet"):
+                    with patch("clearance.gemini.vertex_token", return_value="ya29.test"):
+                        payload = partners.health_payload(
+                            mode="private-workspaces", revision="r1"
+                        )
     for key in ("ok", "gemini", "parallel", "agent_builder", "engine_default",
-                "gemini_path", "mode", "revision"):
+                "gemini_path", "gemini_configured", "mode", "revision",
+                "verified_search_id", "verified_calls_logged"):
         assert key in payload, payload
     assert payload["engine_default"] == "adk"
     assert payload["mode"] == "private-workspaces"
+    assert payload["gemini"] is True
+    assert payload["gemini_path"].startswith("vertex:")
+
+
+def t_gemini_project_env_alone_is_not_callable():
+    """RED control: GCP_PROJECT without ADC token must not claim gemini:true.
+
+    Watched going red on the old resolve_gemini_path (env → vertex:proj) before
+    the callable check landed 2026-09-20.
+    """
+    from cloud import partners
+    with patch.dict(
+        os.environ,
+        {"GCP_PROJECT": "hack-fleet", "AGENT_BUILDER": "1"},
+        clear=False,
+    ):
+        # Drop any real API keys for this probe.
+        with patch.dict(os.environ, {"GEMINI_API_KEY": "", "GOOGLE_API_KEY": ""}, clear=False):
+            with patch("clearance.gemini.vertex_project", return_value="hack-fleet"):
+                with patch("clearance.gemini.vertex_token", return_value=None):
+                    path = partners.resolve_gemini_path()
+                    payload = partners.health_payload()
+    assert path == "none", path
+    assert payload["gemini"] is False, payload
+    assert payload["gemini_configured"] is True, payload
+    assert payload["gemini_path"] == "none"
+
+
+def t_health_exposes_receipt_backed_parallel_proof():
+    """Health must carry durable Parallel search_id proof, not only live_calls."""
+    import json
+    import tempfile
+    from clearance import search
+    from cloud import partners
+
+    real = search.RECEIPTS
+    try:
+        d = Path(tempfile.mkdtemp())
+        log = d / "ids.jsonl"
+        log.write_text(
+            json.dumps(
+                {
+                    "at": "2026-09-20T00:00:00+00:00",
+                    "source": "parallel",
+                    "search_id": "search_health_proof",
+                }
+            )
+            + "\n"
+        )
+        search.RECEIPTS = log
+        with patch.dict(os.environ, {"PARALLEL_API_KEY": "pk-test"}, clear=False):
+            payload = partners.health_payload()
+        assert payload["verified_search_id"] == "search_health_proof"
+        assert payload["verified_calls_logged"] == 1
+        assert payload["last_verified_utc"] == "2026-09-20T00:00:00+00:00"
+        assert payload["parallel"] is True
+    finally:
+        search.RECEIPTS = real
 
 
 def t_adk_default_engine_wired():

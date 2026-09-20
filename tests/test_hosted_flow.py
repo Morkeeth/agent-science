@@ -74,11 +74,15 @@ class HostedFlow(unittest.TestCase):
         }):
             with patch('cloud.agent.adk_available', return_value=True):
                 with patch('cloud.agent.adk_version', return_value='2.7.1'):
-                    code, _, body = self.request('GET', '/health', token=None)
+                    # gemini:true requires callable Vertex token, not GCP_PROJECT alone.
+                    with patch('clearance.gemini.vertex_project', return_value='hack-fleet'):
+                        with patch('clearance.gemini.vertex_token', return_value='ya29.test'):
+                            code, _, body = self.request('GET', '/health', token=None)
         self.assertEqual(code, 200)
         self.assertIsInstance(body, dict)
         for key in ('gemini', 'parallel', 'agent_builder', 'engine_default',
-                    'gemini_path', 'parallel_sdk', 'mode', 'revision'):
+                    'gemini_path', 'gemini_configured', 'parallel_sdk', 'mode',
+                    'revision', 'verified_search_id', 'verified_calls_logged'):
             self.assertIn(key, body, f'/health missing {key}: {body}')
         self.assertTrue(body['gemini'])
         self.assertTrue(body['parallel'])
@@ -90,9 +94,12 @@ class HostedFlow(unittest.TestCase):
 
     def test_anonymous_partners_manifest_public(self):
         """Judge track checklist must not require a workspace key."""
-        with patch.dict(os.environ, {'AGENT_BUILDER': '1', 'GCP_PROJECT': 'hack-fleet'}):
+        with patch.dict(os.environ, {'AGENT_BUILDER': '1', 'GCP_PROJECT': 'hack-fleet',
+                                     'PARALLEL_API_KEY': 'pk-test-not-live'}):
             with patch('cloud.agent.adk_available', return_value=True):
-                code, _, body = self.request('GET', '/partners', token=None)
+                with patch('clearance.gemini.vertex_project', return_value='hack-fleet'):
+                    with patch('clearance.gemini.vertex_token', return_value='ya29.test'):
+                        code, _, body = self.request('GET', '/partners', token=None)
         self.assertEqual(code, 200)
         self.assertIsInstance(body, dict)
         tc = body.get('track_checklist') or {}

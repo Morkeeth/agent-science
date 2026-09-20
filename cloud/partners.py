@@ -15,17 +15,26 @@ def adk_default_enabled() -> bool:
     )
 
 
+def gemini_env_configured() -> bool:
+    """True when deploy/local env intends Gemini — not proof it can be called."""
+    if os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY"):
+        return True
+    if os.environ.get("GCP_PROJECT") or os.environ.get("GOOGLE_CLOUD_PROJECT"):
+        return True
+    if os.environ.get("K_SERVICE"):
+        return True
+    return False
+
+
 def resolve_gemini_path() -> str:
-    """Report how Gemini is reached — never the secret itself."""
+    """Report how Gemini is reached — never the secret itself.
+
+    GCP_PROJECT / K_SERVICE alone must NOT claim ``vertex:…``. That presence-only
+    path made ``gemini: true`` on local prove while ``vertex_token()`` was absent
+    (measured 2026-09-20). Callable proof requires an API key or a working ADC token.
+    """
     if os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY"):
         return "api-key"
-    proj = (
-        os.environ.get("GCP_PROJECT")
-        or os.environ.get("GOOGLE_CLOUD_PROJECT")
-        or (os.environ.get("K_SERVICE") and "adc")
-    )
-    if proj:
-        return f"vertex:{proj}"
     try:
         from clearance import gemini as _g
         p = _g.vertex_project()
@@ -42,20 +51,29 @@ def health_payload(*, mode: str | None = None, revision: str | None = None) -> d
     Private-workspaces Cloud Run must return the same partner fields as the
     local desk. A stripped liveness-only body made verify_partners_hosted.sh
     read green on ok=true while gemini/parallel/adk were invisible (2026-09-16).
+
+    ``gemini`` / ``gemini_path`` are callable (token or API key). ``gemini_configured``
+    is env intent. Parallel key presence is ``parallel``; durable call proof is the
+    receipt-backed ``verified_search_id`` fields (PeriodCheck-style lineage).
     """
     gemini_path = resolve_gemini_path()
     adk_ok = adk_agent.adk_available()
     adk_default = adk_default_enabled() and adk_ok
+    receipt = parallel_search.last_verified_receipt()
     out = {
         "ok": True,
         "service": "agent-science",
         "gemini": gemini_path != "none",
         "gemini_path": gemini_path,
+        "gemini_configured": gemini_env_configured(),
         "parallel": bool(os.environ.get("PARALLEL_API_KEY")),
         "parallel_sdk": parallel_search.sdk_available(),
         "parallel_sdk_version": parallel_search.sdk_version(),
         "parallel_transport": parallel_search.integration_info()["transport"],
         "last_parallel_search_id": parallel_search.last_search_id(),
+        "verified_search_id": receipt.get("verified_search_id"),
+        "verified_calls_logged": receipt.get("verified_calls_logged"),
+        "last_verified_utc": receipt.get("last_verified_utc"),
         "agent_builder": adk_ok,
         "adk_version": adk_agent.adk_version(),
         "engine_default": "adk" if adk_default else "direct",
@@ -82,8 +100,9 @@ def manifest(*, gemini_path: str | None = None, adk_default: bool | None = None)
                 "module": "clearance/gemini.py",
                 "runtime": gemini_path != "none",
                 "gemini_path": gemini_path,
+                "configured": gemini_env_configured(),
                 "secret_manager": False,
-                "notes": "Vertex ADC on Cloud Run; API key local dev only",
+                "notes": "Vertex ADC on Cloud Run; API key local dev only. runtime=callable token/key, not env alone",
             },
             "parallel": {
                 **parallel_search.integration_info(),
@@ -109,18 +128,25 @@ def manifest(*, gemini_path: str | None = None, adk_default: bool | None = None)
             },
         },
         "track_checklist": {
-            "parallel_search_at_runtime": True,
+            # Presence of wiring intent + key — not a live call count (cold start is 0).
+            "parallel_search_at_runtime": bool(os.environ.get("PARALLEL_API_KEY")),
             "parallel_web_sdk": parallel_search.sdk_available(),
             "gemini_at_runtime": gemini_path != "none",
             "adk_agent_builder": adk_agent.adk_available() and adk_default,
             "hosted_url_required": True,
+            "parallel_receipt_backed": bool(
+                parallel_search.last_verified_receipt().get("verified_search_id")
+            ),
         },
         "receipts": [
             "docs/PARTNER-INTEGRATIONS-2026-08-30.md",
             "docs/PARTNER-INTEGRATION-RESEARCH-2026-08-31.md",
             "docs/RECEIPT-adk-default-path-2026-08-30.md",
             "docs/RECEIPT-partner-admissibility-2026-09-16.md",
+            "docs/RECEIPT-partner-callproof-2026-09-20.md",
             "docs/FINDING-hosted-health-partner-strip-2026-09-16.md",
+            "docs/FINDING-gemini-health-env-alone-2026-09-20.md",
+            "docs/BASELINE-periodcheck-partner-proof-2026-09-20.md",
         ],
         "repo_root": str(root),
     }
