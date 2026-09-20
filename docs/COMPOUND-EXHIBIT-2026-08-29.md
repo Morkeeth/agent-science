@@ -1,6 +1,6 @@
 # COMPOUND EXHIBIT — orphan-works A/B
 
-**Date:** 2026-09-16 19:06 UTC · **Subject:** `orphan-works` · **Mode:** offline
+**Date:** 2026-09-20 18:08 UTC · **Subject:** `orphan-works` · **Mode:** offline
 **Fixtures:** `compound-mini-A.txt` → `compound-mini-B.txt`
 
 ## Quantified compounding

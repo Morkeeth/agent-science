@@ -27,10 +27,14 @@ python3 -m unittest tests.test_hosted_flow -v         → OK
 bash scripts/prove_partner_health_local.sh            → PROVE_PARTNER_HEALTH_LOCAL OK
 python3 scripts/prove_partner_calls_local.py          → PROVE_PARTNER_CALLS_LOCAL OK
 bash scripts/watch_hosted_partner_health.sh           → WATCH RED OK (00028-hed)
-python3 scripts/bench_check_docs.py                   → (after pack update)
+python3 scripts/bench_check_docs.py                   → ALL 130/130 match
 python3 scripts/eval_refusal_baseline.py              → baseline 5/6 · shipping 6/6 · delta +1
 python3 scripts/eval_refusal_ablation.py              → ablation 5/6 · shipping 6/6 · delta +1
+bash scripts/verify_cold_clone.sh                     → cold-clone verify OK (steps 1–11)
 ```
+
+**Commit:** `9bc8b44` (and follow-ups on same branch)
+
 
 ## Live still RED / BLOCKED
 
