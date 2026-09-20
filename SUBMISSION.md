@@ -46,12 +46,12 @@ https://agent-science-568004190078.us-central1.run.app/visibility/ui?q=ralph+loo
 
 ## Runtime integrations
 
-| Integration | Hosted | Receipt |
-|-------------|--------|---------|
-| Parallel Search (SDK) | ✅ | `/health` → `parallel_sdk: true` |
-| Gemini (Vertex) | ✅ | `/health` → `gemini_path: vertex:…` |
-| Google Cloud Run | ✅ | hosted URL |
-| Agent Development Kit | ✅ | `/health` → `engine_default: adk` |
+| Integration | Hosted (live 2026-09-20) | Receipt |
+|-------------|--------------------------|---------|
+| Parallel Search (SDK) | ⛔ `/health` stripped on `00028-hed` · local call-proof ✅ | `prove_partner_calls_local.py` · deploy then `/health` |
+| Gemini (Vertex) | ⛔ stripped · callable health fixed in tree | `FINDING-gemini-health-env-alone-2026-09-20.md` |
+| Google Cloud Run | ✅ | hosted URL (private-workspaces) |
+| Agent Development Kit | ⛔ stripped · local `engine_default: adk` ✅ | `watch_hosted_partner_health.sh` RED until Oscar deploy |
 
 ---
 

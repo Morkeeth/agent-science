@@ -15,10 +15,13 @@ grep -q "CONTRARY" "$FILM_DIR/voiceover.txt" || red "missing CONTRARY in spine"
 grep -q "$PARALLEL_A" "$FILM_DIR/voiceover.txt" || red "missing parallel A"
 grep -q "$PARALLEL_B" "$FILM_DIR/voiceover.txt" || red "missing parallel B"
 
-ok "hosted /health"
+ok "hosted /health (partner fields — RED until Oscar deploy of call-proof fix)"
 HEALTH="$(curl -sS --max-time 20 "$HOSTED_URL/health" || true)"
-echo "$HEALTH" | python3 -c "import json,sys; d=json.load(sys.stdin); assert d.get('ok') and d.get('engine_default')=='adk'" \
-  || red "/health bad"
+echo "$HEALTH" | python3 -c "
+import json,sys
+d=json.load(sys.stdin)
+assert d.get('ok') and d.get('engine_default')=='adk' and d.get('gemini') is True and d.get('parallel') is True, d
+" || red "/health missing partner fields (expected until deploy; see scripts/watch_hosted_partner_health.sh)"
 
 ok "hosted /visibility/ui"
 curl -sf --max-time 20 "$VISIBILITY_URL" | grep -q Transparency || red "visibility UI missing Transparency pane"
