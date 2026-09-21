@@ -1,8 +1,8 @@
 # SUBMISSION PACK — Agentic Cinema · slice 7
 
-**Date:** 2026-09-03 · **Repo:** https://github.com/Morkeeth/agent-science @ `main`  
-**Hosted:** https://agent-science-568004190078.us-central1.run.app · **Deadline:** 2026-09-09 14:00 PT  
-**Scope:** docs + offline controls — no public repo flip, no video upload, no Devpost submit, no `deploy.sh`
+**Date:** 2026-09-21 · **Repo:** https://github.com/Morkeeth/agent-science @ `main` (visibility **public** since 2026-08-22)  
+**Hosted:** https://agent-science-568004190078.us-central1.run.app · revision `agent-science-00028-hed` (partner fields still stripped until Oscar deploy)  
+**Deadline:** 2026-09-09 14:00 PT (elapsed) · **Scope:** docs + offline controls — no video upload, no Devpost submit, no `deploy.sh` from agents
 
 ---
 
@@ -12,9 +12,13 @@
 git clone https://github.com/Morkeeth/agent-science.git && cd agent-science
 bash scripts/verify_cold_clone.sh
 # includes: 72/72 · ADK path · partners · 128/128 docs · holdout · offline compound ·
-#           baseline/ablation/scorer · prove_partner_health_local (private-workspaces fields)
+#           baseline/ablation/scorer · prove_partner_health_local · cost gate · artifact claims
 python3 tests/test_registry_surface.py -q
 python3 scripts/compound_exhibit_receipt.py
+python3 scripts/eval_cost_gate.py
+# NULL 3/6 · BASELINE 5/6 · SHIPPING 6/6 · billing RED without invoice · price card dated
+python3 scripts/eval_artifact_claims.py
+# baseline 3/8 (title trust) · shipping 8/8 (open the object)
 bash scripts/demo_truth_layer.sh
 python3 ask_registry.py "agentlint" | head -5
 ```
@@ -29,13 +33,15 @@ Offline compound receipt writes `docs/COMPOUND-EXHIBIT-2026-08-29.md` with A=2�
 |------|-------------|--------|----------|
 | Video | ≤ 3 min (≤ 180 s) | [ ] | Script: `docs/VIDEO-SCRIPT-2026-08-29.md` — beats sum **178 s** |
 | Devpost | All mandatory fields filled | [ ] | Paste block below (§1–3 from `PITCH.md`) |
-| Public repo | Stranger can clone | [ ] | Private until submit — flip visibility on GitHub |
+| Public repo | Stranger can clone | [x] | `gh api repos/Morkeeth/agent-science` → `visibility=public` (since 2026-08-22) |
 | OSI licence | Open-source approved | [x] | `LICENSE` (MIT) |
 | Sealed prediction | Pre-registered, falsifiable | [x] | `docs/SEALED-PREDICTION-2026-08-31.md` — hosted A=1→B=0, corpus_hits=1 |
-| Partner integrations | All four called at runtime | [x] docs | `docs/PARTNER-INTEGRATIONS-2026-08-30.md` |
-| ADK default path | `engine_default: adk` | [x] local / [x] hosted | `docs/RECEIPT-adk-default-path-2026-08-30.md` |
+| Partner integrations | All four called at runtime | [x] docs / [ ] live health | Live `/health` on `00028-hed` still stripped — `docs/FINDING-hosted-health-partner-strip-2026-09-16.md` |
+| ADK default path | `engine_default: adk` | [x] local / [ ] hosted health | Local prove OK; hosted awaits Oscar deploy |
+| Cost gate | Dated price card + billing | [x] card / [ ] invoice | `python3 scripts/eval_cost_gate.py` · billing RED until Oscar invoice |
+| Artifact claims | Measure pack claims at object | [x] | `python3 scripts/eval_artifact_claims.py` · baseline **3/8** vs shipping **8/8** |
 
-**Controls re-measured 2026-09-03** (run each at object):
+**Controls re-measured 2026-09-21** (run each at object):
 
 | Suite | Command | Result |
 |-------|---------|--------|
@@ -54,10 +60,12 @@ Offline compound receipt writes `docs/COMPOUND-EXHIBIT-2026-08-29.md` with A=2�
 | docs gate | `python3 scripts/bench_check_docs.py` | **128/128 match** |
 | holdout freeze | `python3 scripts/eval_verify_holdout.py` | **4 files pinned** |
 | scorer symmetry | `python3 scripts/eval_scorer_symmetry.py` | baseline **5/6** vs shipping **6/6** on delivered labels |
+| cost gate | `python3 scripts/eval_cost_gate.py` | NULL **3/6** · baseline **5/6** · shipping **6/6** · billing **RED** |
+| artifact claims | `python3 scripts/eval_artifact_claims.py` | baseline **3/8** · shipping **8/8** · delta **+5** |
 
-**Compound exhibit (offline, 2026-09-03):** `python3 scripts/compound_exhibit_receipt.py` · A=**2**→B=**1** Parallel · B corpus hits=**2** — `docs/COMPOUND-EXHIBIT-2026-08-29.md`. Live hosted (2026-08-31): `long_run_goal.sh` · A=**1**→B=**0** · sealed `docs/SEALED-PREDICTION-2026-08-31.md`. Orphan-works full script: run B **504** — do not claim on video.
+**Compound exhibit (offline, 2026-09-21):** `python3 scripts/compound_exhibit_receipt.py` · A=**2**→B=**1** Parallel · B corpus hits=**2** — `docs/COMPOUND-EXHIBIT-2026-08-29.md`. Live hosted (2026-08-31): `long_run_goal.sh` · A=**1**→B=**0** · sealed `docs/SEALED-PREDICTION-2026-08-31.md`. Orphan-works full script: run B **504** — do not claim on video. Live compound tonight: **BLOCKED** (`docs/BLOCKED-live-compound-2026-09-21.md`).
 
-**Eval gate:** `docs/QWEN-EVAL-GATE-2026-08-30.md` — baseline **5/6 = 0.833** vs shipping **6/6 = 1.000**, delta +1 (RC5); McNemar p=1.0000 at n=6. Holdout + symmetrical scorer re-run 2026-09-03: `docs/RECEIPT-night-wave-2026-09-03.md`.
+**Eval gate:** `docs/QWEN-EVAL-GATE-2026-08-30.md` — baseline **5/6 = 0.833** vs shipping **6/6 = 1.000**, delta +1 (RC5); McNemar p=1.0000 at n=6. Cost + artifact gates re-run 2026-09-21: `docs/RECEIPT-night-wave-2026-09-21.md`.
 
 ---
 
@@ -88,8 +96,8 @@ Copy everything between the lines into Devpost project description / inspiration
 
 When you or your agent websearches, you get a **full visibility panel**: what was searched (every angle, every tier), what the field runs (GitHub ★, blogs, peers), and a primary verdict — **sourced verbatim**, **refused with cause**, or **CONTRARY TO RESEARCH** when practitioners outrun papers. Stack-fit scores whether a truth fits *your* repo. The shelf compounds: ask once, free forever.
 
-**Try it:** https://agent-science-568004190078.us-central1.run.app/visibility/ui?q=ralph+loop+agentic  
-**Truths dashboard:** `/truths/ui` · **265+ claims** on disk
+**Try it (local cold clone):** `bash scripts/verify_cold_clone.sh` — hosted `/visibility/ui` and `/truths/ui` are login-gated on private-workspaces until Oscar deploy.  
+**Local registry after boot:** **238 claims** (`python3 scripts/boot_registry.py` · 25 GREEN · 213 UNKNOWN) — hosted claim count not readable anonymously on `00028-hed`
 
 Clearance and E&O insurance? One paying vertical on the same layer — sections below.
 

@@ -15,6 +15,12 @@
 > delta **+1**, McNemar p=1.0000 (b=0 c=1). Holdout OK (4 files). See
 > `docs/RECEIPT-partner-admissibility-2026-09-16.md`.
 
+> **Re-verified 2026-09-21:** cost gate + artifact claims landed.
+> `python3 scripts/eval_cost_gate.py` → NULL **3/6** · BASELINE **5/6** · SHIPPING **6/6** ·
+> billing **RED** (`--require-billing` exit 3) · price card retrieved **2026-09-21T00:10:55Z**.
+> `python3 scripts/eval_artifact_claims.py` → baseline **3/8** · shipping **8/8** · delta **+5**.
+> See `docs/RECEIPT-night-wave-2026-09-21.md`.
+
 # QWEN EVAL GATE — alternative arm · 2026-08-30
 
 **Gate item:** Alternative arm named and run — competent baseline without this project, identical inputs, offline.
@@ -124,3 +130,6 @@ Re-derives all 9 suite counts against `docs/SUBMISSION-PACK-2026-08-29.md` — e
 - [x] Offline path with no API key
 - [x] Wilson CI + McNemar (n=6)
 - [x] Honesty carries worst number (tie + RC5 false-GREEN both arms)
+- [x] Dated price card + null/baseline/shipping cost gate — `scripts/eval_cost_gate.py` (2026-09-21)
+- [ ] Cost from billing — invoice absent; billing RED until `fixtures/billing/invoice.json`
+- [x] Every artifact claim measured at object — `scripts/eval_artifact_claims.py` (2026-09-21)

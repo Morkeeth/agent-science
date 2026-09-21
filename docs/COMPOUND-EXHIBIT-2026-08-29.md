@@ -1,6 +1,6 @@
 # COMPOUND EXHIBIT — orphan-works A/B
 
-**Date:** 2026-09-16 19:06 UTC · **Subject:** `orphan-works` · **Mode:** offline
+**Date:** 2026-09-21 00:13 UTC · **Subject:** `orphan-works` · **Mode:** offline
 **Fixtures:** `compound-mini-A.txt` → `compound-mini-B.txt`
 
 ## Quantified compounding
@@ -21,11 +21,15 @@ Network boundaries faked; verdict rules run for real:
 - instruments.document → fixture bodies (no HTTP)
 - StringLocator (DEFAULT) + verify + independence — real shipping rules
 
-Ground-truth Parallel calls at fake boundary (Run A only): `3`
+Ground-truth `search.find_sources` calls at the fake boundary (per run): A=`1` · B=`2` · total=`3`
+
+`parallel_calls` above counts claims that missed corpus/log and entered live `judge_claim` — including CELEX/routing clears that never call `find_sources`. Escalation inside `judge_claim` can call `find_sources` more than once per claim. Price Search spend from the boundary counters (or `parallel_api_calls` on a live run), not from `parallel_calls` alone.
+
+A shared counter across A+B was previously mislabeled "Run A only" and produced a false under-count finding (retracted 2026-09-19).
 
 ## Registry backfill
 
-`python3 clear_corpus.py research-corpus --backfill` → **0 rows** (29 SOURCED + proven-unprovable refusals) in `cache/refusal_log.db`
+`python3 clear_corpus.py research-corpus --backfill` → **238 rows** (29 SOURCED + proven-unprovable refusals) in `cache/refusal_log.db`
 
 ## Controls
 

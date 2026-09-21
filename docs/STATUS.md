@@ -2,7 +2,7 @@
 doc: status
 project: Agent Science
 canonical: true
-last-updated: 2026-09-16T19:00:00Z
+last-updated: 2026-09-21T00:20:00Z
 deadline: 2026-09-09T14:00:00-07:00
 ---
 
@@ -11,7 +11,7 @@ deadline: 2026-09-09T14:00:00-07:00
 > **For Claude / fleet:** this file is the single “where we are” surface.  
 > `hack.md` = process · `CLAUDE.md` = entry · this file = gates + evidence.
 
-**Last gate run:** 2026-09-16 — partner admissibility wave · `bench_check_docs.py` **128/128** · `test_watch_it_go_red.py` **72/72** · live `/health` partner fields **RED** until Oscar deploy (`docs/FINDING-hosted-health-partner-strip-2026-09-16.md`)
+**Last gate run:** 2026-09-21 — cost + artifact gates · `bench_check_docs.py` **128/128** · `test_watch_it_go_red.py` **72/72** · cost NULL 3/6 · artifact 3/8→8/8 · live `/health` partner fields **RED** until Oscar deploy (`docs/FINDING-hosted-health-partner-strip-2026-09-16.md`)
 
 ---
 
@@ -65,11 +65,10 @@ deadline: 2026-09-09T14:00:00-07:00
 | | |
 |---|---|
 | **URL** | https://agent-science-568004190078.us-central1.run.app |
-| **Revision** | `agent-science-00018-n4s` · `parallel_sdk: true` · **`/truths/ui` live** |
-| **Health** | `engine_default: adk` · 265 claims · hit rate ~0.80 |
-| **New** | `GET /visibility/ui` — full websearch panel for judges (film this) |
-| **New** | `GET /truths/ui` — truths dashboard |
-| **Stats** | 265 claims · hit rate ~0.80 · queries logged growing |
+| **Revision** | `agent-science-00028-hed` · partner fields **stripped** until Oscar deploy |
+| **Health** | liveness only (`ok/service/mode/revision`) — `engine_default` **not** on live body |
+| **Local registry** | **238 claims** after `boot_registry.py` (25 GREEN · 213 UNKNOWN) |
+| **Note** | `/visibility/ui` · `/truths/ui` · `/registry` · `/stats` are login-gated on private-workspaces |
 
 **Compound (sealed):** `longrun-0831-1320` A=**1** → B=**0** Parallel · B `corpus_hits=1`
 

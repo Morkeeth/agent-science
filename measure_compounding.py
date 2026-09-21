@@ -5,17 +5,20 @@ The pitch says "the second production about the same subject costs a fraction of
 first". That has never been measured on the FACT leg. This measures it, on two scripts
 about the same subject, written independently of each other and of any source.
 
-Cost model, stated so the number can be argued with rather than believed:
-  Gemini  ~$0.0001 per call (flash-lite class, short prompts)
-  Parallel ~$0.005 per search  (order-of-magnitude; the shape is what matters)
+Cost model, re-derived from fixtures/price-card/parallel.json (retrieved_at on
+the card). Do not edit the USD figures here — change the card, then re-run.
+Invoice truth is a different object: fixtures/billing/invoice.json.
 """
-import sys, time, pathlib
+import json, sys, time, pathlib
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 import agent_science
 from clearance import corpus
 
-GEMINI_CALL = 0.0001
-PARALLEL_CALL = 0.005
+_ROOT = pathlib.Path(__file__).resolve().parent
+_CARD = json.loads((_ROOT / "fixtures/price-card/parallel.json").read_text())
+_PROC = _CARD["default_processor_for_agent_science"]
+GEMINI_CALL = float(_CARD.get("gemini_flash_lite_usd_per_call_order_of_magnitude", 0.0001))
+PARALLEL_CALL = float(_CARD["search_api_usd_per_request"][_PROC])
 SUBJECT = "orphan-works"
 
 

@@ -1,0 +1,19 @@
+{
+  "provider": "Parallel Web Systems",
+  "source_url": "https://docs.parallel.ai/getting-started/pricing",
+  "retrieved_at": "2026-09-21T00:10:55Z",
+  "retrieved_by": "cursor-night-wave-2026-09-21",
+  "note": "Public pay-as-you-go price card captured from the live pricing page. This is NOT a billing invoice. Invoice truth requires fixtures/billing/invoice.json (Oscar console export).",
+  "free_tier_note": "Free-tier quantity NOT re-derived from docs HTML tonight (marketing pages disagree historically: 5k vs 80k). Do not cite a free-tier count from this card.",
+  "search_api_usd_per_request": {
+    "turbo": 0.001,
+    "fast": 0.001,
+    "basic": 0.005,
+    "advanced": 0.005
+  },
+  "search_api_basis": "Cost per request assuming 10 results (card: $1 or $5 per 1K requests).",
+  "default_processor_for_agent_science": "fast",
+  "gemini_flash_lite_usd_per_call_order_of_magnitude": 0.0001,
+  "gemini_note": "Gemini figure is order-of-magnitude only; not taken from an invoice on this date.",
+  "source_url_marketing": "https://www.parallel.ai/pricing"
+}

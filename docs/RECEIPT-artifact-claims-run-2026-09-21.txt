@@ -1,0 +1,22 @@
+ARTIFACT-CLAIMS EVAL — measure at the submitted object
+Host: https://agent-science-568004190078.us-central1.run.app
+Frozen: 2026-09-11T00:20:00Z · n=8
+Baseline arm: title/URL/pack trust (no object open)
+Shipping arm: curl / GitHub API / local suite at object
+
+id    gold   baseline  shipping  b_ok  s_ok  detail
+AC1   FALSE  TRUE      FALSE     False True  http=200 final=https://agent-science-568004190078.us-central1.run.app/health bytes=109 · missing expect
+AC2   FALSE  TRUE      FALSE     False True  http=200 final=https://agent-science-33kamss2jq-uc.a.run.app/login bytes=7650 · hit forbid
+AC3   FALSE  TRUE      FALSE     False True  http=200 final=https://agent-science-33kamss2jq-uc.a.run.app/login bytes=7650 · hit forbid
+AC4   FALSE  TRUE      FALSE     False True  http=200 final=https://agent-science-33kamss2jq-uc.a.run.app/visibility/ui?q=ralph+loop+agentic bytes=8974 · hit forbid
+AC5   FALSE  TRUE      FALSE     False True  http=200 final=https://agent-science-33kamss2jq-uc.a.run.app/login bytes=7650 · hit forbid
+AC6   TRUE   TRUE      TRUE      True  True  http=200 private=False license=MIT
+AC7   TRUE   TRUE      TRUE      True  True  exit=0 tail=['16/16 passed']
+AC8   TRUE   TRUE      TRUE      True  True  http=200 final=https://agent-science-568004190078.us-central1.run.app/health bytes=109
+
+Baseline:  3/8 = 0.375  95% CI [0.137, 0.694]
+Shipping:  8/8 = 1.000  95% CI [0.676, 1.000]
+Delta (shipping - baseline): +5
+McNemar:   p=0.0625 (b=0 c=5 discordant)
+FINDING: baseline trusted 5/5 known-stale hosted/pack claims; shipping refused 5 of them at object.
+FINDING: shipping beats baseline by opening the object.

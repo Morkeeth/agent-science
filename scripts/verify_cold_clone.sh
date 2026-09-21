@@ -57,4 +57,14 @@ echo "10. Private-workspaces partner health (local, no network)..."
 bash scripts/prove_partner_health_local.sh 2>&1 | tail -5
 
 echo
+echo "11. Cost gate (dated price card + null arm; billing may be RED)..."
+python3 scripts/eval_cost_gate.py 2>&1 | tee /tmp/cost-gate.out | tail -8
+grep -q 'Billing:[[:space:]]*RED\|Billing:[[:space:]]*GREEN' /tmp/cost-gate.out
+
+echo
+echo "12. Artifact claims (open the object; baseline title-trust)..."
+python3 scripts/eval_artifact_claims.py 2>&1 | tee /tmp/artifact-claims.out | tail -8
+grep -E 'Shipping:|FINDING:' /tmp/artifact-claims.out | sed -n '1,6p' || true
+
+echo
 echo "=== cold-clone verify OK ==="

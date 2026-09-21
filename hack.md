@@ -2,7 +2,7 @@
 doc: hack
 project: Agent Science
 phase: SHIP
-last-touched: 2026-09-16 19:10 UTC
+last-touched: 2026-09-21 00:20 UTC
 canonical: true
 event: Agentic Cinema · Parallel track · deadline 2026-09-09 14:00 PDT
 supersedes: docs/PHASE0-LADDER.md ClickHouse-track note (runtime track is Parallel)
@@ -295,19 +295,64 @@ submission craft, supported by a real tendency, **not** as the explanation of th
 - [x] **Baseline steelmanned** — raw rows printed by eval scripts; RC5 is now the single discordant item (baseline GREEN, shipping UNKNOWN)
 - [x] **Statistic matched to n** — Wilson 95% CI + McNemar in baseline/ablation scripts
 - [x] **Scorer symmetrical** — `python3 scripts/eval_scorer_symmetry.py` · delivered SOURCED/UNSOURCED labels only; baseline **5/6** vs shipping **6/6** (RC5 discordant)
-- [ ] **Cost from billing**, with the price card's date stated.
+- [x] **Dated price card + null/baseline/shipping cost gate** — `python3 scripts/eval_cost_gate.py` · card `fixtures/price-card/parallel.json` retrieved **2026-09-21T00:10:55Z** · NULL **3/6** · BASELINE **5/6** · SHIPPING **6/6** · Search-door compound A=$0.001 B=$0.002 (−100% “saving”) · billing control watched RED (`--require-billing` exit 3)
+- [ ] **Cost from billing**, with the price card's date stated. — invoice still absent; do **not** tick until Oscar drops `fixtures/billing/invoice.json`
 - [x] **Offline path with no API key.**
 - [x] **Honesty & limitations** section carrying our worst number — README §Honesty & limitations; PITCH first screen
 - [ ] **Answer the track brief in the track's own words on the first screen** — judge pack § above; must land on Devpost ¶1 + video 0:00
 - [ ] **Video verified attached and public on the live entry page, from a logged-out browser** — not in a checklist file, on the page.
-- [ ] **Every artifact claim measured at the submitted commit.** Four retros of that loss failed this row.
+- [x] **Every artifact claim measured at the submitted commit.** — `python3 scripts/eval_artifact_claims.py` · baseline (title trust) **3/8** vs shipping (open object) **8/8**, delta **+5**, McNemar p=0.0625; 5/5 known-stale hosted claims refused at object (`docs/RECEIPT-artifact-claims-run-2026-09-21.txt`)
 
 Full record: `fleet-ops (internal)/retros/QWEN-LOSS-RETRO-2026-08-30.md` (corrected) ·
 `QWEN-FIELD-TEST-2026-08-30.md` (the n=40 falsification) · playbook lesson 97.
 
 ---
 
-## 🎯 NOW — Partner admissibility restore (private-workspaces health)
+## 🎯 NOW — Night wave 2026-09-21 · Qwen cost + artifact gates · pack truth · BLOCKED compound · deploy prep
+
+**Slice:** Land the unmerged Sep-19 cost gate + Sep-11 artifact-claims gate on main's branch, re-derive every number at object tonight, honest live-compound BLOCKED, Oscar deploy prep only. No Devpost · no video · no deploy · no public flip.
+
+### Build (this session)
+
+- [x] Cost gate — `scripts/eval_cost_gate.py` + `fixtures/price-card/parallel.json` (retrieved **2026-09-21T00:10:55Z**) · arms NULL / BASELINE / SHIPPING · billing RED watched (`--require-billing` exit 3)
+- [x] Artifact claims gate — `scripts/eval_artifact_claims.py` + `fixtures/artifact-claims/set.json` · baseline title-trust **3/8** vs open-object **8/8**
+- [x] SUBMISSION-PACK truth refresh — suite counts **128/128**; fix public-repo lie + unbound 265+; stranger block; date this run
+- [x] Live compound — honest BLOCKED receipt naming missing key/token (re-probed tonight)
+- [x] Deploy prep — `docs/DEPLOY-PREP-2026-09-21.md` matching current `deploy.sh` + partner-health still RED on live `00028-hed`
+- [x] Cold-clone steps 11–12 wire cost + artifact gates
+
+### Verify (one command each)
+
+```bash
+git pull && python3 tests/test_watch_it_go_red.py                    # 72/72
+python3 scripts/eval_cost_gate.py                                   # null/baseline/shipping + price card; billing RED
+python3 scripts/eval_cost_gate.py --require-billing; echo $?        # expect 3
+python3 scripts/eval_artifact_claims.py                             # baseline 3/8 · shipping 8/8
+python3 scripts/bench_check_docs.py                                 # 128/128
+python3 scripts/compound_exhibit_receipt.py                         # offline A→B Parallel
+python3 tests/test_cost_gate.py && python3 tests/test_eval_artifact_claims.py
+# Live (expect BLOCKED without keys):
+curl -sS https://agent-science-568004190078.us-central1.run.app/health
+```
+
+### Receipt
+
+- `docs/RECEIPT-night-wave-2026-09-21.md`
+- `docs/RECEIPT-cost-gate-run-2026-09-21.txt`
+- `docs/RECEIPT-artifact-claims-run-2026-09-21.txt`
+- `docs/BLOCKED-live-compound-2026-09-21.md`
+- `docs/DEPLOY-PREP-2026-09-21.md`
+
+### BLOCKED
+
+- Invoice billing console — Oscar only; gate stays RED without `fixtures/billing/invoice.json`
+- Live hosted `/health` partner fields — until Oscar `deploy.sh` (still `00028-hed` stripped)
+- Live compound — `PARALLEL_API_KEY` + workspace token absent on this VM
+- Key rotation — Oscar console (`AS-KEYS-ROTATE`)
+
+---
+
+## 🎯 NOW (prior) — Partner admissibility restore (private-workspaces health)
 
 **Slice:** Hosted WorkspaceHTTP stripped partner fields from `/health`; restore public partner proof + doc + controls. Live stays RED until Oscar deploy.
 
@@ -571,6 +616,8 @@ bash scripts/verify_cold_clone.sh                                               
 
 | When | What | Command | Outcome |
 |------|------|---------|---------|
+| 2026-09-21 night | Cost gate + artifact claims landed; pack truth | `eval_cost_gate.py` · `eval_artifact_claims.py` · `bench_check_docs.py` | NULL **3/6** · BASELINE **5/6** · SHIPPING **6/6** · billing **RED** exit 3 · artifact **3/8→8/8** · **128/128** · live health still stripped `00028-hed` · compound BLOCKED |
+| 2026-09-21 night | Embarrassing Search-door finding | cost gate compound arm | `parallel_calls` A=2/B=1 ≠ find_sources A=1/B=2 · priced −100% “saving” · prior `$0.005` was 5× Fast overstatement |
 | 2026-09-16 night | Offline compound exit 3 (paraphrase≠assertion) | `compound_exhibit_receipt.py` · cold-clone step 8–10 | **A=2→B=1 Parallel, corpus_hits=2** after exact-assertion B arm · cold-clone OK |
 | 2026-09-16 night | Hosted health partner strip found + fixed in tree | `curl …/health` · `prove_partner_health_local.sh` · hosted_flow tests | Live **RED** (`00028-hed` missing partner fields) · local prove **engine_default=adk** · 72/72 · 128/128 |
 | 2026-09-16 night | Qwen eval re-derive | `eval_refusal_baseline.py` · `eval_refusal_ablation.py` | baseline/ablation **5/6** vs shipping **6/6**, delta +1, McNemar p=1.0 |
@@ -627,7 +674,24 @@ A failed stage selects the next product change; it does not trigger repeated bro
 
 General reference examples (always re-read for the event): https://agentic-cinema.devpost.com/ and https://ethglobal.com/events/ethonline2026/info/details and https://ethglobal.com/events/ethonline2026/prizes .
 
-## Current stage record · 2026-09-16 · partner admissibility repair
+## Current stage record · 2026-09-21 · night-wave cost + artifact gates
+
+- **Intended user outcome:** a stranger can cold-clone, run one verify script, and see both a
+  dated cost gate (with a null arm that can embarrass us) and an artifact-claims gate that refuses
+  stale hosted titles; Oscar gets a deploy checklist that matches today's `deploy.sh`.
+- **Action actually observed:** `eval_cost_gate.py` → NULL 3/6 · BASELINE 5/6 · SHIPPING 6/6 ·
+  billing RED exit 3; Search-door compound priced A=$0.001 B=$0.002 (−100%). 
+  `eval_artifact_claims.py` → baseline 3/8 vs shipping 8/8; 5 known-stale hosted claims refused.
+  Live `/health` still stripped on `00028-hed`. `POST /clear` → 401. No Parallel/Gemini keys on VM.
+- **Exact evidence:** `docs/RECEIPT-night-wave-2026-09-21.md` · cost/artifact run receipts ·
+  `docs/BLOCKED-live-compound-2026-09-21.md` · `docs/DEPLOY-PREP-2026-09-21.md` ·
+  `python3 scripts/bench_check_docs.py` → 128/128 · watch_it_go_red 72/72.
+- **Largest product gap:** live Cloud Run still serves stripped health until Oscar deploy; billing
+  invoice absent so PRIOR LOSS "Cost from billing" stays unticked; hosted stranger path is login.
+- **Next build change:** Oscar `deploy.sh` candidate + promote; drop `fixtures/billing/invoice.json`
+  from console export; with workspace token attempt live compound or keep BLOCKED.
+
+**Prior stage record · 2026-09-16 · partner admissibility repair**
 
 - **Intended user outcome:** a judge or Oscar deploy verify can read partner wiring from
   public `/health` + `/partners` without a workspace key; clearance still refuses paraphrase.

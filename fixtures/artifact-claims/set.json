@@ -1,0 +1,84 @@
+{
+  "frozen_at": "2026-09-11T00:20:00Z",
+  "purpose": "Qwen PRIOR LOSS gate — every artifact claim measured at the submitted object. Baseline arm trusts titles/URL shape (the failure mode that cost the last hackathon). Shipping arm opens the object.",
+  "host": "https://agent-science-568004190078.us-central1.run.app",
+  "items": [
+    {
+      "id": "AC1",
+      "claim": "Hosted /health reports engine_default adk for the judge partner table",
+      "gold": "FALSE",
+      "kind": "hosted_json",
+      "path": "/health",
+      "expect_any": ["\"engine_default\": \"adk\"", "\"engine_default\":\"adk\""],
+      "baseline_hint": "run.app health URL in the pack"
+    },
+    {
+      "id": "AC2",
+      "claim": "Hosted /partners returns the four-partner JSON without a workspace token",
+      "gold": "FALSE",
+      "kind": "hosted_json",
+      "path": "/partners",
+      "expect_any": ["\"parallel\"", "\"adk\"", "partner"],
+      "forbid_any": ["Access token", "Sign in", "Open your workspace"],
+      "baseline_hint": "partners path named in SUBMISSION-PACK"
+    },
+    {
+      "id": "AC3",
+      "claim": "Hosted /search?q=Directive+2012/28/EU&live=false returns free-tier SOURCED JSON anonymously",
+      "gold": "FALSE",
+      "kind": "hosted_json",
+      "path": "/search?q=Directive+2012/28/EU&live=false",
+      "expect_any": ["SOURCED", "sourced"],
+      "forbid_any": ["Access token", "Sign in", "Open your workspace"],
+      "baseline_hint": "search URL in stranger path docs"
+    },
+    {
+      "id": "AC4",
+      "claim": "Hosted /visibility/ui shows CONTRARY_TO_RESEARCH for ralph loop agentic",
+      "gold": "FALSE",
+      "kind": "hosted_html",
+      "path": "/visibility/ui?q=ralph+loop+agentic",
+      "expect_any": ["CONTRARY_TO_RESEARCH", "Contrary to research"],
+      "forbid_any": ["local-only research route", "not an anonymous hosted"],
+      "baseline_hint": "Devpost paste Try it visibility/ui link"
+    },
+    {
+      "id": "AC5",
+      "claim": "Hosted /registry is an anonymous browsable shelf",
+      "gold": "FALSE",
+      "kind": "hosted_html",
+      "path": "/registry",
+      "expect_any": ["registry", "SOURCED", "refusal"],
+      "forbid_any": ["Access token", "Sign in", "Open your workspace"],
+      "baseline_hint": "registry face named in judge pack"
+    },
+    {
+      "id": "AC6",
+      "claim": "GitHub repo Morkeeth/agent-science is public with MIT",
+      "gold": "TRUE",
+      "kind": "github_repo",
+      "repo": "Morkeeth/agent-science",
+      "expect_private": false,
+      "expect_license": "MIT",
+      "baseline_hint": "repo name + MIT in the pack"
+    },
+    {
+      "id": "AC7",
+      "claim": "Offline registry surface control is 16/16",
+      "gold": "TRUE",
+      "kind": "local_suite",
+      "command": ["python3", "tests/test_registry_surface.py", "-q"],
+      "expect_regex": "16/16\\s+passed",
+      "baseline_hint": "registry_surface row title in SUBMISSION-PACK"
+    },
+    {
+      "id": "AC8",
+      "claim": "Hosted /health mode is private-workspaces on revision 00028 family",
+      "gold": "TRUE",
+      "kind": "hosted_json",
+      "path": "/health",
+      "expect_any": ["\"mode\": \"private-workspaces\"", "\"mode\":\"private-workspaces\""],
+      "baseline_hint": "health endpoint exists on run.app"
+    }
+  ]
+}
