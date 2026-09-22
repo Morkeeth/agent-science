@@ -1,0 +1,63 @@
+=== Agent Science cold-clone verify ===
+repo: /workspace
+
+1. Seed offline document cache...
+Seeding document cache…
+  documents[http://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A3…] = 355 chars (live)
+  documents[http://rightsstatements.org/vocab/InC/1.0…] = 1496 chars (live)
+  documents[http://rightsstatements.org/vocab/CNE/1.0…] = 1552 chars (live)
+Seeding search cache…
+  searches: empty result for 94% claim
+  searches: EUR-Lex candidate for orphan-works directive claim
+  wrote /workspace/cache/searches.json (4 entries)
+Done.
+
+2. Mutation controls (watch_it_go_red)...
+72 passed, 0 failed
+
+3. ADK default path...
+5/5 passed
+
+4. Partner runtime wiring...
+7/7 passed
+
+5. SUBMISSION-PACK doc gate...
+ALL 128/128 match SUBMISSION-PACK
+
+6. Holdout freeze gate...
+HOLDOUT OK — 4 files match MANIFEST (frozen 2026-08-22T21:30:00Z)
+
+7. Registry surface (stranger block)...
+16/16 passed
+
+8. Offline compound receipt...
+**Date:** 2026-09-22 00:16 UTC · **Subject:** `orphan-works` · **Mode:** offline
+| Run A parallel_calls | Run B parallel_calls | delta | corpus_hits B |
+- corpus_hits B ≥ 1: **yes**
+
+9. Eval gate (baseline + ablation + scorer symmetry + null arm)...
+Delta (shipping - baseline): +1
+McNemar:   p=1.0000 (b=0 c=1 discordant)
+FINDING: shipping beats baseline by 1 item(s).
+McNemar:   p=1.0000 (b=0 c=1 discordant)
+FINDING: shipping beats ablation by 1 item(s) — verify() earns its keep.
+Delta (shipping - baseline): +1
+McNemar:   p=1.0000 (b=0 c=1 discordant)
+FINDING: shipping beats baseline by 1 delivered label(s).
+Delta (shipping - baseline): +1
+McNemar null vs shipping:    p=0.2500 (b=0 c=3 discordant)
+False-SOURCED rate NULL: 0/3
+False-SOURCED rate BASELINE: 1/3
+False-SOURCED rate SHIPPING: 0/3
+FINDING: on false-SOURCED, NULL ties or beats SHIPPING and beats BASELINE — accuracy alone hid the overclaim rate.
+
+10. Private-workspaces partner health (local, no network)...
+    "hosted_url_required": true
+  },
+  "clear_anonymous_status": 401
+}
+PROVE_PARTNER_HEALTH_LOCAL OK
+
+=== cold-clone verify OK ===
+Optional networked honesty gate (needs outbound HTTPS):
+  python3 scripts/eval_artifact_claims.py

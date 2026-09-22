@@ -320,6 +320,7 @@ Full record: `fleet-ops (internal)/retros/QWEN-LOSS-RETRO-2026-08-30.md` (correc
 - [x] STATUS hosted table corrected at object (`00028-hed`, local-only visibility/truths)
 - [x] Live compound — honest BLOCKED (no Parallel/Gemini keys, no workspace token)
 - [x] Deploy prep only — `docs/DEPLOY-PREP-2026-09-22.md` (matches current `deploy.sh`; no traffic flip)
+- [x] External baseline — PeriodCheck `live-evaluation.json` **13/13** at their object
 
 ### Verify (one command each)
 
