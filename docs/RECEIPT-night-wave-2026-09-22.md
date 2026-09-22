@@ -17,6 +17,7 @@
 3. **SUBMISSION-PACK / STATUS honesty refresh** — stale hosted claims corrected at object.  
 4. **BLOCKED live compound** — `docs/BLOCKED-live-compound-2026-09-22.md`.  
 5. **Deploy prep** — `docs/DEPLOY-PREP-2026-09-22.md` matching current `deploy.sh` (candidate, no traffic).
+6. **External baseline** — `docs/EXTERNAL-BASELINE-PERIODCHECK-2026-09-22.md` (their `live-evaluation.json` 13/13 re-derived).
 
 ---
 
@@ -37,6 +38,8 @@
 | Live /visibility/ui | `curl -sSL …/visibility/ui` | **local-only** notice — not judge panel |
 | Live /partners | `curl -sSL …/partners` | Sign-in HTML, not JSON |
 | Repo visibility | `curl …/repos/Morkeeth/agent-science` | `private=false` · `visibility=public` |
+| PeriodCheck eval JSON | their `live-evaluation.json` | `correct_verdicts` **13**/`gold_claims` **13** · e2e 1.0 |
+| PeriodCheck hosted | `curl …periodcheck-….run.app/` | **200** upload UI |
 | Keys for live compound | env + `~/.config/keys/*` | **all missing** → BLOCKED |
 
 ---

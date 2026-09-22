@@ -618,6 +618,7 @@ bash scripts/verify_cold_clone.sh                                               
 | When | What | Command | Outcome |
 |------|------|---------|---------|
 | 2026-09-22 night | Artifact claims + null arm | `eval_artifact_claims.py` · `eval_null_arm.py` · `test_artifact_claims.py` | NULL **6/10** > doc-baseline **4/10** · OBJECT **10/10** · false-HELD baseline 6/6 · refusal false-SOURCED 0/1/0 · 3/3 RED |
+| 2026-09-22 night | External baseline PeriodCheck | their `live-evaluation.json` + hosted URL | **13/13** gold at object · hosted upload UI 200 · see `EXTERNAL-BASELINE-PERIODCHECK-2026-09-22.md` |
 | 2026-09-22 night | Hosted stranger honesty | `curl …/health` · `/visibility/ui` · `/partners` · GitHub API | rev **00028-hed** stripped · visibility **local-only** · partners Sign-in · repo **public** |
 | 2026-09-22 night | Live compound | key probe | **BLOCKED** — no Parallel/Gemini/workspace token · offline A=2→B=1 |
 | 2026-09-16 night | Offline compound exit 3 (paraphrase≠assertion) | `compound_exhibit_receipt.py` · cold-clone step 8–10 | **A=2→B=1 Parallel, corpus_hits=2** after exact-assertion B arm · cold-clone OK |
