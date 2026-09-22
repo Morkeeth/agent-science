@@ -1,0 +1,15 @@
+{
+  "successful_research": 14,
+  "research_failures": 0,
+  "extracted_claims": 14,
+  "extra_extracted_claims": 1,
+  "gold_claims": 13,
+  "gold_claims_extracted": 13,
+  "gold_extraction_coverage": 1.0,
+  "scored_findings": 13,
+  "correct_verdicts": 13,
+  "accepted_verdict_accuracy": 1.0,
+  "gold_research_coverage": 1.0,
+  "end_to_end_accuracy": 1.0
+}
+gold-linked correct 13
