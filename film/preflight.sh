@@ -15,10 +15,22 @@ grep -q "CONTRARY" "$FILM_DIR/voiceover.txt" || red "missing CONTRARY in spine"
 grep -q "$PARALLEL_A" "$FILM_DIR/voiceover.txt" || red "missing parallel A"
 grep -q "$PARALLEL_B" "$FILM_DIR/voiceover.txt" || red "missing parallel B"
 
-ok "hosted /health"
+ok "hosted /health partner fields"
 HEALTH="$(curl -sS --max-time 20 "$HOSTED_URL/health" || true)"
-echo "$HEALTH" | python3 -c "import json,sys; d=json.load(sys.stdin); assert d.get('ok') and d.get('engine_default')=='adk'" \
-  || red "/health bad"
+echo "$HEALTH" | python3 -c "
+import json,sys
+d=json.load(sys.stdin)
+assert d.get('ok') and d.get('engine_default')=='adk' and d.get('gemini') is True and d.get('parallel') is True
+" || red "/health missing partner fields (stripped ok:true is not enough)"
+
+ok "hosted /partners"
+PARTNERS_CODE="$(curl -sS --max-time 20 -o /tmp/film_partners.json -w '%{http_code}' "$HOSTED_URL/partners" || true)"
+[[ "$PARTNERS_CODE" == "200" ]] || red "/partners HTTP $PARTNERS_CODE (need public JSON, not 303)"
+python3 -c "
+import json
+d=json.load(open('/tmp/film_partners.json'))
+assert 'track_checklist' in d
+" 2>/dev/null || red "/partners body not track checklist JSON"
 
 ok "hosted /visibility/ui"
 curl -sf --max-time 20 "$VISIBILITY_URL" | grep -q Transparency || red "visibility UI missing Transparency pane"

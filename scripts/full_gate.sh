@@ -21,6 +21,20 @@ echo "--- 3. Partner + ADK ---"
 python3 tests/test_partner_runtime.py
 python3 tests/test_parallel_integration.py
 python3 tests/test_adk_default_path.py
+python3 tests/test_partner_admissibility_gate.py
+# Live three-arm gate: exit 2 = local OK / hosted RED (allowed pre-deploy).
+# Exit 1 = local also broken. Exit 0 = hosted admissible.
+set +e
+python3 scripts/partner_admissibility_gate.py
+GATE_RC=$?
+set -e
+if [[ "$GATE_RC" -eq 1 ]]; then
+  echo "FULL GATE FAIL: partner admissibility gate exit 1 (local unpatched broken)"
+  exit 1
+fi
+if [[ "$GATE_RC" -eq 2 ]]; then
+  echo "NOTE: hosted partner fields RED (exit 2) — Oscar deploy required; continuing offline gates"
+fi
 
 echo "--- 4. Product suites ---"
 for f in tests/test_dictionary.py tests/test_registry_surface.py tests/test_routing.py \

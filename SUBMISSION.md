@@ -46,12 +46,14 @@ https://agent-science-568004190078.us-central1.run.app/visibility/ui?q=ralph+loo
 
 ## Runtime integrations
 
-| Integration | Hosted | Receipt |
-|-------------|--------|---------|
-| Parallel Search (SDK) | ✅ | `/health` → `parallel_sdk: true` |
-| Gemini (Vertex) | ✅ | `/health` → `gemini_path: vertex:…` |
-| Google Cloud Run | ✅ | hosted URL |
-| Agent Development Kit | ✅ | `/health` → `engine_default: adk` |
+| Integration | Code path | Hosted `00028-hed` (2026-09-22) | Receipt |
+|-------------|-----------|----------------------------------|---------|
+| Parallel Search (SDK) | `clearance/search.py` | ⛔ not visible on `/health` | gate Arm B FAIL |
+| Gemini (Vertex) | `clearance/gemini.py` | ⛔ not visible on `/health` | gate Arm B FAIL |
+| Google Cloud Run | `deploy.sh` / WorkspaceHTTP | ✅ URL up · mode private-workspaces | curl `/health` |
+| Agent Development Kit | `cloud/agent.py` | ⛔ `engine_default` absent on live | local unpatched C PASS |
+
+Hosted partner proof returns after Oscar `deploy.sh`. Until then: `python3 scripts/partner_admissibility_gate.py` exits **2**.
 
 ---
 

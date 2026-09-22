@@ -61,9 +61,12 @@ They beat us on evidence packaging for the first run. Our compound + refuse spin
 1. Unpatched local ADK prove (find + fix silent patch)
 2. Three-arm admissibility gate with PeriodCheck baseline + JSON receipt
 3. `/partners` 303 watched RED in `verify_partners_hosted.sh`
-4. Partner doc + SUBMISSION-PACK honesty for hosted ADK
-5. Design-partner loop friction note for private-workspaces + prove modes
-6. Qwen eval + bench_check_docs re-derived at object
+4. Public judge/film surfaces on WorkspaceHTTP (`/truths/ui`, `/visibility[/ui]`, `/popular[/ui]`)
+5. Kill hardcoded `parallel_search_at_runtime: True` — tracks key + verified receipt
+6. Partner doc + SUBMISSION-PACK honesty (**129/129**; hosted ADK unchecked)
+7. Design-partner loop friction note for private-workspaces + prove modes
+8. Qwen eval + bench_check_docs re-derived at object
+9. Film preflight asserts partner fields + `/partners` 200 (still RED live until deploy)
 
 ---
 

@@ -24,7 +24,7 @@ SUITES = [
     ("test_search_path.py", "search_path", 5),
     ("test_source_map.py", "source_map", 3),
     ("test_refusal_correctness.py", "refusal_correctness", 6),
-    ("test_partner_runtime.py", "partner_runtime", 6),
+    ("test_partner_runtime.py", "partner_runtime", 8),
     ("test_parallel_integration.py", "parallel_integration", 6),
 ]
 

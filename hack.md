@@ -318,7 +318,10 @@ Full record: `fleet-ops (internal)/retros/QWEN-LOSS-RETRO-2026-08-30.md` (correc
 - [x] Three-arm gate — `python3 scripts/partner_admissibility_gate.py` (A naive · B fields · C unpatched + PeriodCheck)
 - [x] RED tests — `python3 tests/test_partner_admissibility_gate.py` · **6/6**
 - [x] `verify_partners_hosted.sh` — fail on `/partners` non-200 (303 watched)
-- [x] Partner doc + SUBMISSION-PACK honesty (hosted ADK unchecked until deploy)
+- [x] Judge film surfaces on WorkspaceHTTP — `/truths/ui` · `/visibility[/ui]` · `/popular[/ui]` public before auth
+- [x] Kill hardcoded `parallel_search_at_runtime: True` — tracks key + verified receipt
+- [x] `bash scripts/prove_judge_surfaces_local.sh` — Transparency + Truths dashboard locally
+- [x] Partner doc + SUBMISSION-PACK honesty (hosted ADK unchecked; **129/129**)
 - [x] Promise line — README clearance wedge (outcome · proof · constraint)
 - [x] Qwen eval re-derive — baseline/ablation delta +1 at object
 - [x] Design-partner loop — prove modes + hosted RED honesty
@@ -330,13 +333,16 @@ Full record: `fleet-ops (internal)/retros/QWEN-LOSS-RETRO-2026-08-30.md` (correc
 git pull && python3 tests/test_watch_it_go_red.py                    # 72/72
 python3 tests/test_adk_default_path.py                               # 5/5
 python3 tests/test_partner_admissibility_gate.py                     # 6/6
+python3 tests/test_partner_runtime.py                                # 8/8
 bash scripts/prove_partner_health_local.sh                           # unpatched · engine_default=adk
+bash scripts/prove_judge_surfaces_local.sh                           # Transparency + Truths dashboard
 python3 scripts/partner_admissibility_gate.py                        # exit 2 until Oscar deploy
-python3 scripts/bench_check_docs.py                                  # 128/128
+python3 scripts/bench_check_docs.py                                  # 129/129
 python3 scripts/eval_refusal_baseline.py && python3 scripts/eval_refusal_ablation.py
 bash scripts/verify_partners_hosted.sh                               # exit 1 on live strip (watched RED)
 # After Oscar deploy only:
 python3 scripts/partner_admissibility_gate.py                        # expect exit 0
+bash film/preflight.sh                                               # expect PREFLIGHT PASS
 ```
 
 ### Receipt
@@ -619,7 +625,7 @@ bash scripts/verify_cold_clone.sh                                               
 
 | When | What | Command | Outcome |
 |------|------|---------|---------|
-| 2026-09-22 night | Patched ADK prove found + fixed | `prove_partner_health_local.sh` · `partner_admissibility_gate.py` | Unpatched **engine_default=adk** · gate **exit 2** (A PASS/B FAIL/C PASS) · PeriodCheck `/api/health` also shallow · 72/72 · 128/128 · eval delta +1 |
+| 2026-09-22 night | Patched ADK prove found + fixed; judge surfaces landed | `prove_partner_health_local.sh` · `partner_admissibility_gate.py` · `prove_judge_surfaces_local.sh` | Unpatched **engine_default=adk** · gate **exit 2** · local film UIs **OK** · checklist not hardcoded · **129/129** · eval delta +1 |
 | 2026-09-22 night | `/partners` 303 watched | `curl -s -o /dev/null -w '%{http_code}' …/partners` | **303** → run.app · verify script now fails non-200 |
 | 2026-09-16 night | Offline compound exit 3 (paraphrase≠assertion) | `compound_exhibit_receipt.py` · cold-clone step 8–10 | **A=2→B=1 Parallel, corpus_hits=2** after exact-assertion B arm · cold-clone OK |
 | 2026-09-16 night | Hosted health partner strip found + fixed in tree | `curl …/health` · `prove_partner_health_local.sh` · hosted_flow tests | Live **RED** (`00028-hed` missing partner fields) · local prove **engine_default=adk** · 72/72 · 128/128 |
