@@ -2,7 +2,7 @@
 doc: hack
 project: Agent Science
 phase: SHIP
-last-touched: 2026-09-16 19:10 UTC
+last-touched: 2026-09-22 00:30 UTC
 canonical: true
 event: Agentic Cinema · Parallel track · deadline 2026-09-09 14:00 PDT
 supersedes: docs/PHASE0-LADDER.md ClickHouse-track note (runtime track is Parallel)
@@ -300,18 +300,64 @@ submission craft, supported by a real tendency, **not** as the explanation of th
 - [x] **Honesty & limitations** section carrying our worst number — README §Honesty & limitations; PITCH first screen
 - [ ] **Answer the track brief in the track's own words on the first screen** — judge pack § above; must land on Devpost ¶1 + video 0:00
 - [ ] **Video verified attached and public on the live entry page, from a logged-out browser** — not in a checklist file, on the page.
-- [ ] **Every artifact claim measured at the submitted commit.** Four retros of that loss failed this row.
+- [x] **Every artifact claim measured at the submitted commit.** `python3 scripts/eval_artifact_claims.py` · **2026-09-22: NULL 6/10 beats BASELINE (believe docs) 4/10; OBJECT 10/10; false-HELD baseline 6/6** — `docs/QWEN-EVAL-ARTIFACT-CLAIMS-2026-09-22.md`. Four retros of that loss failed this row; this gate is the control, not the explanation.
 
 Full record: `fleet-ops (internal)/retros/QWEN-LOSS-RETRO-2026-08-30.md` (corrected) ·
 `QWEN-FIELD-TEST-2026-08-30.md` (the n=40 falsification) · playbook lesson 97.
 
 ---
 
-## 🎯 NOW — Partner admissibility restore (private-workspaces health)
+## 🎯 NOW — Night wave 2026-09-22 · artifact claims + null arm + honesty refresh
+
+**Slice:** Close the unticked Qwen gate *every artifact claim measured at its object*; ship null/baseline arms that can embarrass docs; refresh SUBMISSION-PACK/STATUS from live probes; BLOCKED live compound; deploy prep only (no deploy).
+
+### Build (this session)
+
+- [x] Artifact-claims set + eval — `fixtures/artifact-claims/set.json` · `scripts/eval_artifact_claims.py`
+- [x] RED control — AC10 planted key · `tests/test_artifact_claims.py` 3/3 (watched lie → CONTROL FAIL)
+- [x] Null arm on refusal holdout — `scripts/eval_null_arm.py` (false-SOURCED metric)
+- [x] SUBMISSION-PACK truth refresh — suite counts re-derived **128/128**; stranger block + honesty on hosted
+- [x] STATUS hosted table corrected at object (`00028-hed`, local-only visibility/truths)
+- [x] Live compound — honest BLOCKED (no Parallel/Gemini keys, no workspace token)
+- [x] Deploy prep only — `docs/DEPLOY-PREP-2026-09-22.md` (matches current `deploy.sh`; no traffic flip)
+
+### Verify (one command each)
+
+```bash
+git pull && python3 tests/test_watch_it_go_red.py                    # 72/72
+python3 scripts/bench_check_docs.py                                  # 128/128
+python3 tests/test_registry_surface.py -q                            # 16/16
+python3 scripts/compound_exhibit_receipt.py                          # offline A=2→B=1
+python3 scripts/eval_refusal_baseline.py && python3 scripts/eval_refusal_ablation.py
+python3 scripts/eval_null_arm.py                                     # NULL/BASE/SHIP + false-SOURCED
+python3 scripts/eval_artifact_claims.py                              # NULL 6/10 > BASE 4/10; OBJECT 10/10
+python3 tests/test_artifact_claims.py                                # 3/3 + RED
+bash scripts/prove_partner_health_local.sh                           # local engine_default=adk
+# After Oscar deploy only:
+bash scripts/verify_partners_hosted.sh
+```
+
+### Receipt
+
+- `docs/RECEIPT-night-wave-2026-09-22.md`
+- `docs/QWEN-EVAL-ARTIFACT-CLAIMS-2026-09-22.md`
+- `docs/BLOCKED-live-compound-2026-09-22.md`
+- `docs/DEPLOY-PREP-2026-09-22.md`
+
+### BLOCKED
+
+- Live hosted `/health` partner fields — **until Oscar `deploy.sh`** (revision still `00028-hed`)
+- Live compound / Parallel on hosted `/clear` — **PARALLEL_API_KEY + GEMINI_API_KEY + WORKSPACE_TOKEN** missing
+- Key rotation — Oscar console (`AS-KEYS-ROTATE`)
+- Hosted `/stats` claim counts — auth-gated; do not carry STATUS "265 / 0.80"
+
+---
+
+## 🎯 NOW (prior) — Partner admissibility restore (private-workspaces health)
 
 **Slice:** Hosted WorkspaceHTTP stripped partner fields from `/health`; restore public partner proof + doc + controls. Live stays RED until Oscar deploy.
 
-### Build (this session)
+### Build (shipped 2026-09-16)
 
 - [x] Shared `cloud.partners.health_payload()` — local desk + WorkspaceHTTP
 - [x] Public hosted `/health` + `/partners` before auth — `cloud/case_http.py`
@@ -571,6 +617,9 @@ bash scripts/verify_cold_clone.sh                                               
 
 | When | What | Command | Outcome |
 |------|------|---------|---------|
+| 2026-09-22 night | Artifact claims + null arm | `eval_artifact_claims.py` · `eval_null_arm.py` · `test_artifact_claims.py` | NULL **6/10** > doc-baseline **4/10** · OBJECT **10/10** · false-HELD baseline 6/6 · refusal false-SOURCED 0/1/0 · 3/3 RED |
+| 2026-09-22 night | Hosted stranger honesty | `curl …/health` · `/visibility/ui` · `/partners` · GitHub API | rev **00028-hed** stripped · visibility **local-only** · partners Sign-in · repo **public** |
+| 2026-09-22 night | Live compound | key probe | **BLOCKED** — no Parallel/Gemini/workspace token · offline A=2→B=1 |
 | 2026-09-16 night | Offline compound exit 3 (paraphrase≠assertion) | `compound_exhibit_receipt.py` · cold-clone step 8–10 | **A=2→B=1 Parallel, corpus_hits=2** after exact-assertion B arm · cold-clone OK |
 | 2026-09-16 night | Hosted health partner strip found + fixed in tree | `curl …/health` · `prove_partner_health_local.sh` · hosted_flow tests | Live **RED** (`00028-hed` missing partner fields) · local prove **engine_default=adk** · 72/72 · 128/128 |
 | 2026-09-16 night | Qwen eval re-derive | `eval_refusal_baseline.py` · `eval_refusal_ablation.py` | baseline/ablation **5/6** vs shipping **6/6**, delta +1, McNemar p=1.0 |
@@ -627,7 +676,24 @@ A failed stage selects the next product change; it does not trigger repeated bro
 
 General reference examples (always re-read for the event): https://agentic-cinema.devpost.com/ and https://ethglobal.com/events/ethonline2026/info/details and https://ethglobal.com/events/ethonline2026/prizes .
 
-## Current stage record · 2026-09-16 · partner admissibility repair
+## Current stage record · 2026-09-22 · artifact-claims honesty gate
+
+- **Intended user outcome:** a stranger or judge who reads STATUS/SUBMISSION-PACK can trust
+  hosted claims, or the pack must refuse them; every numeric/control claim is re-derived at
+  its object before submit paste.
+- **Action actually observed:** `eval_artifact_claims.py` — NULL 6/10 beat doc-baseline 4/10;
+  live `/health` still stripped on `00028-hed`; `/visibility/ui` serves local-only notice;
+  `/partners` is Sign-in; GitHub repo already public while pack checklist said flip.
+- **Exact evidence:** `docs/RECEIPT-night-wave-2026-09-22.md` ·
+  `docs/QWEN-EVAL-ARTIFACT-CLAIMS-2026-09-22.md` · `python3 tests/test_artifact_claims.py` → 3/3 ·
+  offline compound A=2→B=1 · bench_check_docs 128/128 · watch_it_go_red 72/72.
+- **Largest product gap:** live Cloud Run still serves stripped health until Oscar deploy;
+  anonymous judge panel (`/visibility/ui`) is not hosted; live Parallel compound BLOCKED on
+  this VM (no keys/token).
+- **Next build change:** Oscar `deploy.sh` candidate + promote; re-label artifact set after
+  partner fields return; film `/judge/demo` not `/visibility/ui` for hosted stranger path.
+
+**Prior stage record · 2026-09-16 · partner admissibility repair**
 
 - **Intended user outcome:** a judge or Oscar deploy verify can read partner wiring from
   public `/health` + `/partners` without a workspace key; clearance still refuses paraphrase.

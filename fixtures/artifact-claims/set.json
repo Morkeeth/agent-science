@@ -1,0 +1,108 @@
+{
+  "labelled_by": "cursor-night-wave",
+  "labelled_at": "2026-09-22T00:10:00Z",
+  "note": "Labels written AFTER opening each object on 2026-09-22 (hosted curl, local suite runs, GitHub API). doc_asserts records what STATUS.md / SUBMISSION-PACK claimed at label time — the baseline arm trusts that without opening the object. Gold is the object. A set where null (always NOT_HELD) can beat baseline is intentional: stale docs are the defect under test.",
+  "host": "https://agent-science-568004190078.us-central1.run.app",
+  "items": [
+    {
+      "id": "AC1",
+      "claim": "Hosted GET /health exposes engine_default: adk for partner admissibility.",
+      "doc_source": "docs/STATUS.md Hosted table · docs/PARTNER-INTEGRATIONS-2026-08-30.md",
+      "doc_asserts": "HELD",
+      "expected": "NOT_HELD",
+      "probe": "hosted_health_has_key",
+      "probe_args": {"key": "engine_default"},
+      "why": "Live revision agent-science-00028-hed /health body is only ok/service/mode/revision — partner fields stripped. FINDING-hosted-health-partner-strip-2026-09-16.md still RED until Oscar deploy."
+    },
+    {
+      "id": "AC2",
+      "claim": "Hosted GET /partners returns the partner manifest JSON anonymously.",
+      "doc_source": "docs/STATUS.md gates · hack.md stranger path",
+      "doc_asserts": "HELD",
+      "expected": "NOT_HELD",
+      "probe": "hosted_partners_json",
+      "probe_args": {},
+      "why": "Anonymous /partners follows to Sign-in HTML, not JSON checklist."
+    },
+    {
+      "id": "AC3",
+      "claim": "Hosted GET /visibility/ui is a live full websearch panel for judges.",
+      "doc_source": "docs/STATUS.md · SUBMISSION-PACK Devpost §0 Try it URL",
+      "doc_asserts": "HELD",
+      "expected": "NOT_HELD",
+      "probe": "hosted_visibility_live_panel",
+      "probe_args": {},
+      "why": "Page body states '/visibility/ui is a local-only research route' — not the anonymous panel docs advertise."
+    },
+    {
+      "id": "AC4",
+      "claim": "Hosted revision is agent-science-00018-n4s.",
+      "doc_source": "docs/STATUS.md Hosted table",
+      "doc_asserts": "HELD",
+      "expected": "NOT_HELD",
+      "probe": "hosted_revision_equals",
+      "probe_args": {"revision": "agent-science-00018-n4s"},
+      "why": "Live /health.revision is agent-science-00028-hed — STATUS carried a stale revision id."
+    },
+    {
+      "id": "AC5",
+      "claim": "Public repo flip is still an open Oscar gate (repo private until submit).",
+      "doc_source": "docs/SUBMISSION-PACK-2026-08-29.md Oscar checklist",
+      "doc_asserts": "HELD",
+      "expected": "NOT_HELD",
+      "probe": "github_repo_private",
+      "probe_args": {"owner": "Morkeeth", "repo": "agent-science"},
+      "why": "GitHub API visibility=public (public since 2026-08-22). Checklist row is stale."
+    },
+    {
+      "id": "AC6",
+      "claim": "python3 tests/test_watch_it_go_red.py reports 72/72.",
+      "doc_source": "docs/SUBMISSION-PACK-2026-08-29.md controls table",
+      "doc_asserts": "HELD",
+      "expected": "HELD",
+      "probe": "local_suite_count",
+      "probe_args": {"script": "tests/test_watch_it_go_red.py", "passed": 72, "total": 72},
+      "why": "Re-run at object on label night."
+    },
+    {
+      "id": "AC7",
+      "claim": "python3 tests/test_registry_surface.py reports 16/16.",
+      "doc_source": "docs/SUBMISSION-PACK-2026-08-29.md controls table",
+      "doc_asserts": "HELD",
+      "expected": "HELD",
+      "probe": "local_suite_count",
+      "probe_args": {"script": "tests/test_registry_surface.py", "passed": 16, "total": 16},
+      "why": "Re-run at object on label night."
+    },
+    {
+      "id": "AC8",
+      "claim": "Offline compound exhibit: Run B parallel_calls < Run A and corpus_hits B >= 1.",
+      "doc_source": "docs/COMPOUND-EXHIBIT-2026-08-29.md · SUBMISSION-PACK",
+      "doc_asserts": "HELD",
+      "expected": "HELD",
+      "probe": "offline_compound_pass",
+      "probe_args": {},
+      "why": "scripts/compound_exhibit_receipt.py exit 0; table 2→1 Parallel, corpus_hits=2."
+    },
+    {
+      "id": "AC9",
+      "claim": "Hosted GET /health returns ok: true (liveness).",
+      "doc_source": "hack.md LIVE URL",
+      "doc_asserts": "HELD",
+      "expected": "HELD",
+      "probe": "hosted_health_ok",
+      "probe_args": {},
+      "why": "Liveness holds; partner fields do not — AC1 separates those."
+    },
+    {
+      "id": "AC10",
+      "claim": "PLANTED RED CONTROL — hosted /health contains field __planted_red_control__.",
+      "doc_source": "fixtures/artifact-claims/set.json (this file)",
+      "doc_asserts": "HELD",
+      "expected": "NOT_HELD",
+      "probe": "hosted_health_has_key",
+      "probe_args": {"key": "__planted_red_control__"},
+      "why": "Control that must stay NOT_HELD. If object arm ever marks this HELD, the probe harness is lying."
+    }
+  ]
+}

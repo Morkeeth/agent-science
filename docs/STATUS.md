@@ -2,7 +2,7 @@
 doc: status
 project: Agent Science
 canonical: true
-last-updated: 2026-09-16T19:00:00Z
+last-updated: 2026-09-22T00:30:00Z
 deadline: 2026-09-09T14:00:00-07:00
 ---
 
@@ -11,7 +11,7 @@ deadline: 2026-09-09T14:00:00-07:00
 > **For Claude / fleet:** this file is the single “where we are” surface.  
 > `hack.md` = process · `CLAUDE.md` = entry · this file = gates + evidence.
 
-**Last gate run:** 2026-09-16 — partner admissibility wave · `bench_check_docs.py` **128/128** · `test_watch_it_go_red.py` **72/72** · live `/health` partner fields **RED** until Oscar deploy (`docs/FINDING-hosted-health-partner-strip-2026-09-16.md`)
+**Last gate run:** 2026-09-22 — night wave artifact-claims · `eval_artifact_claims.py` NULL **6/10** > doc-baseline **4/10** · OBJECT **10/10** · `bench_check_docs.py` **128/128** · `test_watch_it_go_red.py` **72/72** · live `/health` partner fields still **RED** on `00028-hed` until Oscar deploy
 
 ---
 
@@ -60,18 +60,24 @@ deadline: 2026-09-09T14:00:00-07:00
 
 ---
 
-## Hosted (now)
+## Hosted (now) — measured 2026-09-22 at object
 
 | | |
 |---|---|
 | **URL** | https://agent-science-568004190078.us-central1.run.app |
-| **Revision** | `agent-science-00018-n4s` · `parallel_sdk: true` · **`/truths/ui` live** |
-| **Health** | `engine_default: adk` · 265 claims · hit rate ~0.80 |
-| **New** | `GET /visibility/ui` — full websearch panel for judges (film this) |
-| **New** | `GET /truths/ui` — truths dashboard |
-| **Stats** | 265 claims · hit rate ~0.80 · queries logged growing |
+| **Revision** | `agent-science-00028-hed` · mode `private-workspaces` |
+| **Health** | `ok: true` only — **missing** `engine_default` / `gemini` / `parallel` (partner strip still live) |
+| **Public stranger** | `/` + `/judge` + `/judge/demo` (read-only example) · `/login` for workspace |
+| **Not anonymous on hosted** | `/visibility/ui` · `/truths/ui` · `/registry` · `/stats` · `/search` · `/clear` — local-only or Sign-in |
+| **Stats claim count** | **UNVERIFIED** tonight (`/stats` auth-gated) — do not carry older "265 / 0.80" |
 
-**Compound (sealed):** `longrun-0831-1320` A=**1** → B=**0** Parallel · B `corpus_hits=1`
+**Compound (sealed offline):** `docs/COMPOUND-EXHIBIT-2026-08-29.md` A=**2** → B=**1** Parallel · B `corpus_hits=2`  
+**Compound (sealed hosted historical):** `longrun-0831-1320` A=**1** → B=**0** · see `SEALED-PREDICTION` — not re-run 2026-09-22 (no keys)
+
+**Local partner prove (in tree, not live):** `bash scripts/prove_partner_health_local.sh` → `engine_default: adk`  
+**Deploy prep:** `docs/DEPLOY-PREP-2026-09-22.md` · Oscar only
+
+**Artifact honesty gate:** `python3 scripts/eval_artifact_claims.py` — `docs/QWEN-EVAL-ARTIFACT-CLAIMS-2026-09-22.md`
 
 ---
 
@@ -105,6 +111,7 @@ bash scripts/full_gate.sh
 
 | When (UTC) | What |
 |------------|------|
+| 2026-09-22 night | Artifact-claims gate — NULL beat doc-baseline; STATUS hosted table corrected; live compound BLOCKED |
 | 2026-09-01 06:00 | **Hammer** — `/visibility/ui` hosted · demo_truth_layer.sh · README truth-layer lead · Devpost §0 |
 | 2026-08-31 21:23 | Truth layer night — transparency, CONTRARY, stack-fit, community notes, `/truths/ui` (branch) |
 | 2026-08-31 21:55 | Competitor research — websearch field map + steal angles → `RESEARCH-WEBSEARCH-COMPETITORS-2026-08-31.md` |

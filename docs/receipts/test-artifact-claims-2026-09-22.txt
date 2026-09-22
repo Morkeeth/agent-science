@@ -1,0 +1,5 @@
+PASS  test_artifact_claims_gate_goes_red_when_probe_lies
+PASS  test_artifact_claims_object_arm_matches_gold
+PASS  test_planted_red_control_is_labelled_not_held
+
+3/3 passed

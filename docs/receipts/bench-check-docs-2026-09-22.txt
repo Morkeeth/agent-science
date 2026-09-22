@@ -1,0 +1,16 @@
+bench --check-docs · SUBMISSION-PACK counts at object
+
+  OK    watch_it_go_red        doc=72 measured=72/72
+  OK    adk_default_path       doc=5 measured=5/5
+  OK    registry_surface       doc=16 measured=16/16
+  OK    cross_subject_reuse    doc=2 measured=2/2
+  OK    backfill_seeds_reuse   doc=2 measured=2/2
+  OK    clear_corpus           doc=4 measured=4/4
+  OK    search_path            doc=5 measured=5/5
+  OK    source_map             doc=3 measured=3/3
+  OK    refusal_correctness    doc=6 measured=6/6
+  OK    partner_runtime        doc=7 measured=7/7
+  OK    parallel_integration   doc=6 measured=6/6
+  OK    total                  doc=128 measured=128/128
+
+ALL 128/128 match SUBMISSION-PACK

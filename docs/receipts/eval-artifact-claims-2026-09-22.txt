@@ -1,0 +1,30 @@
+ARTIFACT-CLAIMS EVAL — every claim at its object
+NULL arm:     always NOT_HELD
+BASELINE arm: believe doc_asserts (no object open)
+OBJECT arm:   probe hosted/local/GitHub at runtime
+Host: https://agent-science-568004190078.us-central1.run.app
+Set:  fixtures/artifact-claims/set.json labelled_at=2026-09-22T00:10:00Z
+
+id     gold       null       baseline   object     n_ok b_ok o_ok  evidence
+AC1    NOT_HELD   NOT_HELD   HELD       NOT_HELD   True False True health_keys=['mode', 'ok', 'revision', 'service']
+AC2    NOT_HELD   NOT_HELD   HELD       NOT_HELD   True False True http=200 non-json signin=True final=https://agent-science-33
+AC3    NOT_HELD   NOT_HELD   HELD       NOT_HELD   True False True http=200 local_only=True live_markers=0
+AC4    NOT_HELD   NOT_HELD   HELD       NOT_HELD   True False True revision='agent-science-00028-hed' want='agent-science-00018
+AC5    NOT_HELD   NOT_HELD   HELD       NOT_HELD   True False True private=False visibility=public
+AC6    HELD       NOT_HELD   HELD       HELD       False True True measured=72/72 exit=0
+AC7    HELD       NOT_HELD   HELD       HELD       False True True measured=16/16 exit=0
+AC8    HELD       NOT_HELD   HELD       HELD       False True True A=2 B=1 corpus_hits=2 exit=0
+AC9    HELD       NOT_HELD   HELD       HELD       False True True ok=True revision='agent-science-00028-hed'
+AC10   NOT_HELD   NOT_HELD   HELD       NOT_HELD   True False True health_keys=['mode', 'ok', 'revision', 'service']
+
+NULL:      6/10 = 0.600  95% CI [0.313, 0.832]
+BASELINE:  4/10 = 0.400  95% CI [0.168, 0.687]
+OBJECT:    10/10 = 1.000  95% CI [0.722, 1.000]
+Delta (object - baseline): +6
+Delta (null - baseline):   +2
+McNemar baseline vs object: p=0.0312 (b=0 c=6 discordant)
+McNemar baseline vs null:   p=0.7539 (b=4 c=6 discordant)
+FINDING: NULL beats BASELINE — trusting STATUS/SUBMISSION-PACK without opening the object is worse than refusing every claim on this set.
+False-HELD rate NULL: 0/6
+False-HELD rate BASELINE: 6/6
+False-HELD rate OBJECT: 0/6

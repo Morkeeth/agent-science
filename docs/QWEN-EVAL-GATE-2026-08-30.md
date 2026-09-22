@@ -124,3 +124,5 @@ Re-derives all 9 suite counts against `docs/SUBMISSION-PACK-2026-08-29.md` — e
 - [x] Offline path with no API key
 - [x] Wilson CI + McNemar (n=6)
 - [x] Honesty carries worst number (tie + RC5 false-GREEN both arms)
+- [x] Every artifact claim measured at object — `scripts/eval_artifact_claims.py` (2026-09-22)
+- [x] Null arm on delivered labels — `scripts/eval_null_arm.py` (false-SOURCED metric)

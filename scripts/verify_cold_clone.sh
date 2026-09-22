@@ -47,10 +47,11 @@ if grep -q 'corpus_hits B ≥ 1: \*\*NO\*\*' /tmp/compound-exhibit.out; then
 fi
 
 echo
-echo "9. Eval gate (baseline + ablation + scorer symmetry)..."
+echo "9. Eval gate (baseline + ablation + scorer symmetry + null arm)..."
 python3 scripts/eval_refusal_baseline.py 2>&1 | tail -3
 python3 scripts/eval_refusal_ablation.py 2>&1 | tail -2
 python3 scripts/eval_scorer_symmetry.py 2>&1 | tail -3
+python3 scripts/eval_null_arm.py 2>&1 | tail -6
 
 echo
 echo "10. Private-workspaces partner health (local, no network)..."
@@ -58,3 +59,5 @@ bash scripts/prove_partner_health_local.sh 2>&1 | tail -5
 
 echo
 echo "=== cold-clone verify OK ==="
+echo "Optional networked honesty gate (needs outbound HTTPS):"
+echo "  python3 scripts/eval_artifact_claims.py"

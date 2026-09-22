@@ -1,0 +1,23 @@
+NULL-ARM EVAL — refusal-correctness held-out set
+NULL:      always UNSOURCED
+BASELINE:  substring → gap label
+SHIPPING:  judge_claim → gap label
+
+id     gold       null       baseline   shipping   n b s
+RC1    SOURCED    UNSOURCED  SOURCED    SOURCED    F T T
+RC2    SOURCED    UNSOURCED  SOURCED    SOURCED    F T T
+RC3    UNSOURCED  UNSOURCED  UNSOURCED  UNSOURCED  T T T
+RC4    UNSOURCED  UNSOURCED  UNSOURCED  UNSOURCED  T T T
+RC5    UNSOURCED  UNSOURCED  SOURCED    UNSOURCED  T F T
+RC6    SOURCED    UNSOURCED  SOURCED    SOURCED    F T T
+
+NULL:      3/6 = 0.500  95% CI [0.188, 0.812]
+BASELINE:  5/6 = 0.833  95% CI [0.436, 0.970]
+SHIPPING:  6/6 = 1.000  95% CI [0.610, 1.000]
+Delta (shipping - null):     +3
+Delta (shipping - baseline): +1
+McNemar null vs shipping:    p=0.2500 (b=0 c=3 discordant)
+False-SOURCED rate NULL: 0/3
+False-SOURCED rate BASELINE: 1/3
+False-SOURCED rate SHIPPING: 0/3
+FINDING: on false-SOURCED, NULL ties or beats SHIPPING and beats BASELINE — accuracy alone hid the overclaim rate.
