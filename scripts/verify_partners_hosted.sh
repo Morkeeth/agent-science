@@ -46,7 +46,16 @@ print('health checks OK · mode=', d.get('mode'), '· revision=', d.get('revisio
 
 echo
 echo "--- 2. /partners (track manifest, public) ---"
-PARTNERS_JSON="$(curl -sf "$BASE/partners")"
+# Do not follow redirects: a 303 to login is the private-workspaces strip defect
+# (watched live 2026-09-22 on revision agent-science-00028-hed).
+PARTNERS_CODE="$(curl -s -o /tmp/partners_hosted_body.json -w '%{http_code}' "$BASE/partners")"
+PARTNERS_JSON="$(cat /tmp/partners_hosted_body.json)"
+echo "HTTP $PARTNERS_CODE"
+if [[ "$PARTNERS_CODE" != "200" ]]; then
+  echo "FAIL: /partners must be public JSON on this URL (no 303 to login)."
+  echo "body: ${PARTNERS_JSON:0:200}"
+  exit 1
+fi
 echo "$PARTNERS_JSON" | python3 -m json.tool | head -40
 python3 -c "
 import json, sys

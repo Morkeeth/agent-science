@@ -1,6 +1,6 @@
 # PARTNER INTEGRATIONS — Agent Science · Sep 9 path
 
-**Date:** 2026-08-30 · **Last verified:** 2026-09-16 · **Repo:** Morkeeth/agent-science · **Scope:** all four partners wired in code; deploy is Oscar's click.
+**Date:** 2026-08-30 · **Last verified:** 2026-09-22 · **Repo:** Morkeeth/agent-science · **Scope:** all four partners wired in code; deploy is Oscar's click.
 
 Each partner must be **called at runtime** on the default path — not documented only.
 
@@ -15,12 +15,37 @@ Cloud Run sets `K_SERVICE`, so all traffic goes through `cloud/case_http.py` Wor
 | `POST /clear`, `/search`, `/ingest` | **workspace token / session** | Local-only without auth; not a public desk anymore |
 | `/cases`, `/api/cases` | **workspace** | Private research |
 
-**Finding:** revision `agent-science-00028-hed` returned a stripped `/health` (`ok`/`service`/`mode`/`revision` only). That is a false-green class defect — see `docs/FINDING-hosted-health-partner-strip-2026-09-16.md`. Fix is in tree; live stays RED until Oscar `deploy.sh`.
+**Finding (2026-09-16):** revision `agent-science-00028-hed` returned a stripped `/health` (`ok`/`service`/`mode`/`revision` only). See `docs/FINDING-hosted-health-partner-strip-2026-09-16.md`. Fix is in tree; live stays RED until Oscar `deploy.sh`.
 
-**Local prove (no network, no real keys):**
+**Re-measured 2026-09-22 (same revision still live):**
 
 ```bash
+curl -sS https://agent-science-568004190078.us-central1.run.app/health | python3 -m json.tool
+# keys still only: mode, ok, revision, service
+curl -sS -o /dev/null -w '%{http_code}\n' https://agent-science-568004190078.us-central1.run.app/partners
+# 303 → run.app alias (login) — not public JSON
+python3 scripts/partner_admissibility_gate.py
+# Arm A (ok=true) PASS · Arm B (partner fields) FAIL · Arm C (local unpatched ADK) PASS · exit 2
+```
+
+**Finding (2026-09-22):** `prove_partner_health_local.sh` used to patch `adk_available=True`, so local OK never proved Agent Builder importable. See `docs/FINDING-adk-prove-patched-2026-09-22.md`.
+
+**Local prove (no network; real ADK import by default):**
+
+```bash
+pip install -r requirements.txt   # once — needs google-adk==2.7.1
 bash scripts/prove_partner_health_local.sh
+# expect: ADK import REAL · prove_mode=unpatched · engine_default=adk
+
+# Cold clone without pip (shape only — stamps FINDING):
+PROVE_ALLOW_ADK_PATCH=1 bash scripts/prove_partner_health_local.sh
+```
+
+**Three-arm gate (ours vs PeriodCheck baseline):**
+
+```bash
+python3 scripts/partner_admissibility_gate.py
+# exit 0 only when hosted B+partners green AND local C green
 ```
 
 ---
@@ -181,8 +206,11 @@ curl -s localhost:8099/health
 
 **Hosted partner prove without deploy wait:**
 ```bash
-bash scripts/prove_partner_health_local.sh
-python3 tests/test_adk_default_path.py   # 5/5
+pip install -r requirements.txt                 # once for real ADK
+bash scripts/prove_partner_health_local.sh      # unpatched · engine_default=adk
+python3 tests/test_adk_default_path.py          # 5/5
+python3 scripts/partner_admissibility_gate.py   # exit 2 until Oscar deploy
+python3 tests/test_partner_admissibility_gate.py  # 6/6
 ```
 
 ---

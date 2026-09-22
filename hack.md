@@ -2,7 +2,7 @@
 doc: hack
 project: Agent Science
 phase: SHIP
-last-touched: 2026-09-16 19:10 UTC
+last-touched: 2026-09-22 00:20 UTC
 canonical: true
 event: Agentic Cinema · Parallel track · deadline 2026-09-09 14:00 PDT
 supersedes: docs/PHASE0-LADDER.md ClickHouse-track note (runtime track is Parallel)
@@ -307,7 +307,55 @@ Full record: `fleet-ops (internal)/retros/QWEN-LOSS-RETRO-2026-08-30.md` (correc
 
 ---
 
-## 🎯 NOW — Partner admissibility restore (private-workspaces health)
+## 🎯 NOW — Partner admissibility honesty (patched prove + three-arm gate)
+
+**Slice:** Local ADK prove was a silent patch; hosted partner fields still stripped on `00028-hed`. Ship a three-arm gate that can embarrass us (naive ok=true vs partner fields) and measure PeriodCheck's health at their object.
+
+### Build (this session)
+
+- [x] Finding — patched `prove_partner_health_local.sh` · `docs/FINDING-adk-prove-patched-2026-09-22.md`
+- [x] Unpatched prove — real `google-adk` import by default; `PROVE_ALLOW_ADK_PATCH=1` for cold clone only
+- [x] Three-arm gate — `python3 scripts/partner_admissibility_gate.py` (A naive · B fields · C unpatched + PeriodCheck)
+- [x] RED tests — `python3 tests/test_partner_admissibility_gate.py` · **6/6**
+- [x] `verify_partners_hosted.sh` — fail on `/partners` non-200 (303 watched)
+- [x] Partner doc + SUBMISSION-PACK honesty (hosted ADK unchecked until deploy)
+- [x] Promise line — README clearance wedge (outcome · proof · constraint)
+- [x] Qwen eval re-derive — baseline/ablation delta +1 at object
+- [x] Design-partner loop — prove modes + hosted RED honesty
+- [x] Live compound — honest BLOCKED (no Parallel key / workspace token)
+
+### Verify (one command each)
+
+```bash
+git pull && python3 tests/test_watch_it_go_red.py                    # 72/72
+python3 tests/test_adk_default_path.py                               # 5/5
+python3 tests/test_partner_admissibility_gate.py                     # 6/6
+bash scripts/prove_partner_health_local.sh                           # unpatched · engine_default=adk
+python3 scripts/partner_admissibility_gate.py                        # exit 2 until Oscar deploy
+python3 scripts/bench_check_docs.py                                  # 128/128
+python3 scripts/eval_refusal_baseline.py && python3 scripts/eval_refusal_ablation.py
+bash scripts/verify_partners_hosted.sh                               # exit 1 on live strip (watched RED)
+# After Oscar deploy only:
+python3 scripts/partner_admissibility_gate.py                        # expect exit 0
+```
+
+### Receipt
+
+- `docs/RECEIPT-partner-admissibility-night-2026-09-22.md`
+- `docs/RECEIPT-partner-admissibility-gate-2026-09-22.json`
+- `docs/FINDING-adk-prove-patched-2026-09-22.md`
+- `docs/BLOCKED-live-compound-2026-09-22.md`
+
+### BLOCKED
+
+- Live hosted `/health` partner fields — **until Oscar `deploy.sh`** (revision still `00028-hed`)
+- Live `/partners` public JSON — **HTTP 303** on custom domain until deploy
+- Live compound / Parallel call on hosted `/clear` — **PARALLEL_API_KEY + WORKSPACE_TOKEN** missing on agent VM
+- Key rotation — Oscar console (`AS-KEYS-ROTATE`)
+
+---
+
+## 🎯 NOW (prior) — Partner admissibility restore (private-workspaces health)
 
 **Slice:** Hosted WorkspaceHTTP stripped partner fields from `/health`; restore public partner proof + doc + controls. Live stays RED until Oscar deploy.
 
@@ -571,6 +619,8 @@ bash scripts/verify_cold_clone.sh                                               
 
 | When | What | Command | Outcome |
 |------|------|---------|---------|
+| 2026-09-22 night | Patched ADK prove found + fixed | `prove_partner_health_local.sh` · `partner_admissibility_gate.py` | Unpatched **engine_default=adk** · gate **exit 2** (A PASS/B FAIL/C PASS) · PeriodCheck `/api/health` also shallow · 72/72 · 128/128 · eval delta +1 |
+| 2026-09-22 night | `/partners` 303 watched | `curl -s -o /dev/null -w '%{http_code}' …/partners` | **303** → run.app · verify script now fails non-200 |
 | 2026-09-16 night | Offline compound exit 3 (paraphrase≠assertion) | `compound_exhibit_receipt.py` · cold-clone step 8–10 | **A=2→B=1 Parallel, corpus_hits=2** after exact-assertion B arm · cold-clone OK |
 | 2026-09-16 night | Hosted health partner strip found + fixed in tree | `curl …/health` · `prove_partner_health_local.sh` · hosted_flow tests | Live **RED** (`00028-hed` missing partner fields) · local prove **engine_default=adk** · 72/72 · 128/128 |
 | 2026-09-16 night | Qwen eval re-derive | `eval_refusal_baseline.py` · `eval_refusal_ablation.py` | baseline/ablation **5/6** vs shipping **6/6**, delta +1, McNemar p=1.0 |
@@ -627,7 +677,22 @@ A failed stage selects the next product change; it does not trigger repeated bro
 
 General reference examples (always re-read for the event): https://agentic-cinema.devpost.com/ and https://ethglobal.com/events/ethonline2026/info/details and https://ethglobal.com/events/ethonline2026/prizes .
 
-## Current stage record · 2026-09-16 · partner admissibility repair
+## Current stage record · 2026-09-22 · partner admissibility honesty
+
+- **Intended user outcome:** a judge or Oscar can tell, from one command, whether
+  partner wiring is real on hosted health — and a local prove cannot green by patching ADK.
+- **Action actually observed:** live `00028-hed` `/health` still stripped; `/partners`
+  HTTP 303. Old local prove patched `adk_available=True`. After `pip install google-adk==2.7.1`,
+  unpatched prove returns `engine_default=adk`. Three-arm gate: A PASS, B FAIL, C PASS, exit 2.
+  PeriodCheck `/api/health` is also liveness-only (`status=ready`).
+- **Exact evidence:** `docs/FINDING-adk-prove-patched-2026-09-22.md` ·
+  `docs/RECEIPT-partner-admissibility-night-2026-09-22.md` ·
+  `python3 scripts/partner_admissibility_gate.py` · watch_it_go_red 72/72 · bench 128/128.
+- **Largest product gap:** live Cloud Run still serves stripped health until Oscar deploy;
+  no Parallel/workspace token on this VM for live clear/compound.
+- **Next build change:** Oscar `deploy.sh` then gate exit 0; with `WORKSPACE_TOKEN`, prove `/clear`.
+
+**Prior stage record · 2026-09-16 · partner admissibility repair**
 
 - **Intended user outcome:** a judge or Oscar deploy verify can read partner wiring from
   public `/health` + `/partners` without a workspace key; clearance still refuses paraphrase.

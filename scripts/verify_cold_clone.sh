@@ -54,7 +54,10 @@ python3 scripts/eval_scorer_symmetry.py 2>&1 | tail -3
 
 echo
 echo "10. Private-workspaces partner health (local, no network)..."
-bash scripts/prove_partner_health_local.sh 2>&1 | tail -5
+# Cold clone may lack google-adk (no pip after clone). Patch is allowed only
+# here, and prove stamps prove_mode=adk-patched + FINDING — not a silent green.
+# For a real ADK prove: pip install -r requirements.txt && bash scripts/prove_partner_health_local.sh
+PROVE_ALLOW_ADK_PATCH=1 bash scripts/prove_partner_health_local.sh 2>&1 | tail -8
 
 echo
 echo "=== cold-clone verify OK ==="

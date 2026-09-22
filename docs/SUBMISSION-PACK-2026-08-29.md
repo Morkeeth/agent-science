@@ -32,10 +32,10 @@ Offline compound receipt writes `docs/COMPOUND-EXHIBIT-2026-08-29.md` with A=2�
 | Public repo | Stranger can clone | [ ] | Private until submit — flip visibility on GitHub |
 | OSI licence | Open-source approved | [x] | `LICENSE` (MIT) |
 | Sealed prediction | Pre-registered, falsifiable | [x] | `docs/SEALED-PREDICTION-2026-08-31.md` — hosted A=1→B=0, corpus_hits=1 |
-| Partner integrations | All four called at runtime | [x] docs | `docs/PARTNER-INTEGRATIONS-2026-08-30.md` |
-| ADK default path | `engine_default: adk` | [x] local / [x] hosted | `docs/RECEIPT-adk-default-path-2026-08-30.md` |
+| Partner integrations | All four called at runtime | [x] code · [ ] hosted health | `docs/PARTNER-INTEGRATIONS-2026-08-30.md` · gate exit 2 on `00028-hed` |
+| ADK default path | `engine_default: adk` | [x] local unpatched / [ ] hosted | `docs/RECEIPT-partner-admissibility-night-2026-09-22.md` · live strip until Oscar deploy |
 
-**Controls re-measured 2026-09-03** (run each at object):
+**Controls re-measured 2026-09-22** (run each at object):
 
 | Suite | Command | Result |
 |-------|---------|--------|
@@ -57,7 +57,9 @@ Offline compound receipt writes `docs/COMPOUND-EXHIBIT-2026-08-29.md` with A=2�
 
 **Compound exhibit (offline, 2026-09-03):** `python3 scripts/compound_exhibit_receipt.py` · A=**2**→B=**1** Parallel · B corpus hits=**2** — `docs/COMPOUND-EXHIBIT-2026-08-29.md`. Live hosted (2026-08-31): `long_run_goal.sh` · A=**1**→B=**0** · sealed `docs/SEALED-PREDICTION-2026-08-31.md`. Orphan-works full script: run B **504** — do not claim on video.
 
-**Eval gate:** `docs/QWEN-EVAL-GATE-2026-08-30.md` — baseline **5/6 = 0.833** vs shipping **6/6 = 1.000**, delta +1 (RC5); McNemar p=1.0000 at n=6. Holdout + symmetrical scorer re-run 2026-09-03: `docs/RECEIPT-night-wave-2026-09-03.md`.
+**Eval gate (re-run 2026-09-22):** baseline **5/6 = 0.833** vs shipping **6/6 = 1.000**, delta +1 (RC5); McNemar p=1.0000 at n=6. Ablation same delta. Partner three-arm gate: A PASS / B FAIL / C PASS · exit 2 — `docs/RECEIPT-partner-admissibility-night-2026-09-22.md`.
+
+**Date line:** 2026-09-22 · hosted revision still `agent-science-00028-hed` (partner fields stripped).
 
 ---
 

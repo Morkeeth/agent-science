@@ -2,6 +2,8 @@
 
 Research a builder question, inspect the source evidence, and record a decision that can change when its evidence changes.
 
+**Clearance wedge (outcome · proof · constraint):** paste a documentary script → every checkable claim comes back as a **verbatim quote + source URL**, or **UNSOURCED** with a named reason. If the document does not contain the exact passage, the desk **refuses** — never paraphrase, never infer.
+
 Agent Science is a CLI/MCP research companion for coding work. Public-source discovery, versioned evidence, decisions and repo experiments work locally without a hosted account. The CLI and MCP interface keep the question, exact source quotations, source snapshots, actual search attempts, repo context and decision history together.
 
 ## Use it from your terminal

@@ -12,7 +12,9 @@
 > UNSOURCED with a named reason — plus a truth shelf that compounds so the second ask is free.
 >
 > **Proof:** hosted compound exhibit — Run A **1** Parallel call, Run B **0** with
-> `corpus_hits=1` on repeat. Four partners wired at runtime: Vertex, Parallel, Cloud Run, ADK.
+> `corpus_hits=1` on repeat. Four partners wired in code (Vertex, Parallel, Cloud Run, ADK);
+> **hosted `/health` partner fields still RED** on revision `00028-hed` until Oscar deploy
+> (`python3 scripts/partner_admissibility_gate.py` → exit 2, Arm A PASS / Arm B FAIL — 2026-09-22).
 >
 > **Constraint:** if the document does not contain the exact passage, refuse — never paraphrase,
 > never infer. We refused our own pitch headline in the product because of this rule

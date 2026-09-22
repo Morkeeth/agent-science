@@ -39,8 +39,14 @@ Second script on the **same subject** should show `corpus_hits ≥ 1` and fewer 
 
 ```bash
 bash scripts/new_user_trial.sh
+# Shape prove without pip (stamps prove_mode=adk-patched + FINDING — not real ADK):
+PROVE_ALLOW_ADK_PATCH=1 bash scripts/prove_partner_health_local.sh
+# Real ADK prove (after pip install -r requirements.txt):
 bash scripts/prove_partner_health_local.sh
+python3 scripts/partner_admissibility_gate.py   # compares hosted vs PeriodCheck baseline
 ```
+
+**Hosted honesty (2026-09-22):** live `/health` on revision `00028-hed` is still stripped; `/partners` is HTTP 303. Do not tell the partner "partners are green on the URL" until Oscar deploys and `partner_admissibility_gate.py` exits 0.
 
 ---
 
