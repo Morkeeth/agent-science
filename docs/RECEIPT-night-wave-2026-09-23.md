@@ -10,7 +10,7 @@
 2. **`scripts/eval_cost_billing.py`** + pinned Parallel price card dated **2026-09-23T00:12:00Z**  
    Exit 2 BLOCKED without billing export — PRIOR LOSS "Cost from billing" stays unchecked.
 3. **SUBMISSION-PACK truth refresh** — public-repo row, claims-on-disk **238**, tip pin `@ main`, stranger block + gates.
-4. **Controls:** `tests/test_eval_artifact_claims.py` (4/4), cold-clone step 11, full_gate 5a2, `deploy_prep.sh` partner_runtime **7/7**.
+4. **Controls:** `tests/test_eval_artifact_claims.py` (**5/5**), cold-clone step 11, full_gate 5a2, `deploy_prep.sh` partner_runtime **7/7**, demo duration AC11 (**179.675 s ≤ 180**).
 5. Deploy prep doc + live-compound BLOCKED receipt (no keys on this VM).
 
 ## FIRST RUN (pack still dirty) — the embarrassment
@@ -68,7 +68,7 @@ GATE OK — live claims FRESH; planted AC10 STALE; shipping 11/11 beats null 10/
 3. **Cost-from-billing remains UNCHECKED** — price card is dated, but no Parallel billing export exists on this VM. Estimates ($0.015 offline / $0.005 sealed at advanced $0.005) are orientation only.
 4. **Live hosted `/health` still missing partner fields** on revision `agent-science-00028-hed` — tree fix from 2026-09-16 not deployed (Oscar).
 5. **Live compound not run** — `PARALLEL_API_KEY` / `GEMINI_API_KEY` / workspace token absent; offline compound remains authoritative.
-6. **McNemar on artifact gate n=10 is not significant** (p=1.0 after repair, p=0.125 on first dirty run) — tendency only, same honesty bar as refusal n=6.
+6. **McNemar on artifact gate n=11 is not significant** (p=1.0 after repair, p=0.125 on first dirty run at n=10) — tendency only, same honesty bar as refusal n=6.
 7. **`deploy_prep.sh` had been printing partner_runtime 5/5** while the suite is 7/7 — fixed tonight; caught by reading the script, not by a prior control.
 8. **`compound_exhibit_receipt.py` hardcoded "(29 SOURCED + …)"** while the registry object was **25 GREEN / 213 refused** after boot — same failure mode as the week’s carried-number bugs. Fixed to print `refusal_log.stats()` cleared/refused.
 

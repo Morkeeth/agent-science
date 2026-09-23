@@ -327,8 +327,8 @@ Full record: `fleet-ops (internal)/retros/QWEN-LOSS-RETRO-2026-08-30.md` (correc
 git pull && python3 tests/test_watch_it_go_red.py                    # 72/72
 python3 scripts/boot_registry.py                                     # registry 238
 python3 scripts/bench_check_docs.py                                  # 128/128
-python3 scripts/eval_artifact_claims.py                              # GATE OK · ship 10/10 > null 9/10
-python3 tests/test_eval_artifact_claims.py                           # 4/4
+python3 scripts/eval_artifact_claims.py                              # GATE OK · ship 11/11 > null 10/11
+python3 tests/test_eval_artifact_claims.py                           # 5/5
 python3 scripts/eval_cost_billing.py                                 # exit 2 BLOCKED
 python3 scripts/eval_refusal_baseline.py                             # 5/6 vs 6/6
 python3 scripts/compound_exhibit_receipt.py                          # offline A=2→B=1
