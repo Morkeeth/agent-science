@@ -80,6 +80,14 @@
       "measure_args": {"allow_plus": true}
     },
     {
+      "id": "AC11",
+      "description": "Local demo mp4 duration must be ≤ 180s (video hard-fail bar)",
+      "artifact": "docs/SUBMISSION-PACK-2026-08-29.md",
+      "claim_regex": "≤ 180 s|≤180s|beats sum \\*\\*(\\d+) s\\*\\*",
+      "measure": "demo_mp4_duration_s",
+      "measure_args": {"path": "demo/demo-final.mp4", "max_s": 180}
+    },
+    {
       "id": "AC10",
       "description": "Planted stale — null/baseline must miss; shipping must catch",
       "artifact": "fixtures/artifact-claims/planted-stale.md",

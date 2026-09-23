@@ -124,6 +124,24 @@ def _measure(item: dict) -> object:
         return out
     if kind == "registry_claim_count":
         return _registry_count()
+    if kind == "demo_mp4_duration_s":
+        path = ROOT / args["path"]
+        if not path.is_file():
+            raise RuntimeError(f"demo missing: {path}")
+        out = subprocess.check_output(
+            [
+                "ffprobe",
+                "-v",
+                "error",
+                "-show_entries",
+                "format=duration",
+                "-of",
+                "default=noprint_wrappers=1:nokey=1",
+                str(path),
+            ],
+            text=True,
+        ).strip()
+        return float(out)
     if kind == "pack_must_not_match":
         artifact = (ROOT / item["artifact"]).read_text()
         truth = (ROOT / args["truth_doc"]).read_text()
@@ -183,7 +201,6 @@ def _gold_label(item: dict, claimed, measured) -> str:
         if claimed is None:
             return "STALE"
         allow_plus = bool((item.get("measure_args") or {}).get("allow_plus"))
-        # Detect trailing + from original artifact text
         artifact = (ROOT / item["artifact"]).read_text()
         m = re.search(item["claim_regex"], artifact)
         has_plus = bool(m and "+" in m.group(0)) if allow_plus else False
@@ -191,6 +208,12 @@ def _gold_label(item: dict, claimed, measured) -> str:
         if has_plus:
             return "FRESH" if measured >= n else "STALE"
         return "FRESH" if measured == n else "STALE"
+    if kind == "demo_mp4_duration_s":
+        # Claim is the ≤180s hard-fail bar; FRESH iff the demo object is under the bar.
+        max_s = float((item.get("measure_args") or {}).get("max_s", 180))
+        if claimed is None:
+            return "STALE"
+        return "FRESH" if float(measured) <= max_s else "STALE"
     return "STALE"
 
 

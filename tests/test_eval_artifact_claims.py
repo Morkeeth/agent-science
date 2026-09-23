@@ -60,6 +60,13 @@ def test_cost_billing_goes_red_without_export():
     assert "Price card date:" in out
 
 
+def test_compound_receipt_script_does_not_carry_sourced_count():
+    """Watch the carried-number failure: script must derive GREEN count, not print 29."""
+    src = (ROOT / "scripts/compound_exhibit_receipt.py").read_text()
+    assert "29 SOURCED" not in src
+    assert "refusal_log.stats" in src or "st.get(\"cleared\")" in src or "st[\"cleared\"]" in src
+
+
 if __name__ == "__main__":
     quiet = "-q" in sys.argv
     fns = [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
