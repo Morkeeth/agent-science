@@ -32,11 +32,11 @@ Null/baseline **6/10**; shipping **10/10**. McNemar null vs shipping: b=0 c=4.
 Command: `python3 scripts/eval_artifact_claims.py` → exit **0**
 
 ```
-Null:      9/10 = 0.900
-Baseline:  9/10 = 0.900
-Shipping:  10/10 = 1.000
+Null:      10/11 = 0.909
+Baseline:  10/11 = 0.909
+Shipping:  11/11 = 1.000
 STALE at object: AC10
-GATE OK — live claims FRESH; planted AC10 STALE; shipping 10/10 beats null 9/10.
+GATE OK — live claims FRESH; planted AC10 STALE; shipping 11/11 beats null 10/11.
 ```
 
 ## VERIFIED (commands run at object)
@@ -49,8 +49,9 @@ GATE OK — live claims FRESH; planted AC10 STALE; shipping 10/10 beats null 9/1
 | partner_runtime | `python3 tests/test_partner_runtime.py` | 7/7 |
 | refusal baseline | `python3 scripts/eval_refusal_baseline.py` | 5/6 vs 6/6, delta +1 |
 | scorer symmetry | `python3 scripts/eval_scorer_symmetry.py` | 5/6 vs 6/6 |
-| artifact claims | `python3 scripts/eval_artifact_claims.py` | GATE OK (after repair) |
-| artifact tests | `python3 tests/test_eval_artifact_claims.py` | 4/4 |
+| artifact claims | `python3 scripts/eval_artifact_claims.py` | GATE OK · ship 11/11 > null 10/11 |
+| artifact tests | `python3 tests/test_eval_artifact_claims.py` | 5/5 |
+| demo duration | `ffprobe … demo/demo-final.mp4` | 179.675 s ≤ 180 |
 | cost billing | `python3 scripts/eval_cost_billing.py` | exit 2 BLOCKED |
 | repo visibility | `gh api repos/Morkeeth/agent-science --jq .visibility` | `public` |
 | registry count | `SELECT COUNT(*) FROM claims` after boot | 238 |
