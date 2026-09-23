@@ -626,6 +626,7 @@ bash scripts/verify_cold_clone.sh                                               
 
 | When | What | Command | Outcome |
 |------|------|---------|---------|
+| 2026-09-23 night | parallel_sdk assert vs urllib-rest | `sdk_available()` · verify_partners_hosted.sh | FINDING: shipping gate needs SDK; this VM urllib-only — docs/FINDING-parallel-sdk-assert-vs-urllib-2026-09-23.md |
 | 2026-09-23 night | Call-proof land + judge surfaces + naive baseline | `prove_partner_calls_local.py` · `prove_judge_surfaces_local.sh` · `eval_hosted_partner_baseline.py` · PeriodCheck curl | film public locally · **naive 3/3 vs shipping 0/3** · PeriodCheck health **500** · 72/72 · 9/9 · 130/130 |
 | 2026-09-20 night | Gemini health env-alone false green | `resolve_gemini_path` · `prove_partner_calls_local.py` · `watch_hosted_partner_health.sh` | **callable fix** · call-prove OK · live **RED** on `00028-hed` · PeriodCheck baseline 14 Parallel / 13 gold · partner_runtime **9/9** · pack **130/130** |
 | 2026-09-16 night | Offline compound exit 3 (paraphrase≠assertion) | `compound_exhibit_receipt.py` · cold-clone step 8–10 | **A=2→B=1 Parallel, corpus_hits=2** after exact-assertion B arm · cold-clone OK |

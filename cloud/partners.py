@@ -151,6 +151,7 @@ def manifest(*, gemini_path: str | None = None, adk_default: bool | None = None)
             "docs/FINDING-hosted-judge-surfaces-missing-2026-09-18.md",
             "docs/FINDING-partners-checklist-hardcoded-2026-09-18.md",
             "docs/BASELINE-periodcheck-partner-proof-2026-09-20.md",
+            "docs/FINDING-parallel-sdk-assert-vs-urllib-2026-09-23.md",
         ],
         "repo_root": str(root),
     }
