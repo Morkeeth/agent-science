@@ -1,6 +1,6 @@
 # RECEIPT — Partner call-proof + judge surfaces night · 2026-09-23
 
-**Branch:** `cursor/partner-callproof-honesty-c0b0` · tip `053ac58`  
+**Branch:** `cursor/partner-callproof-honesty-c0b0` · tip `c6505e7`  
 **Slice:** Callable Gemini health ≠ env presence; Parallel checklist from key; PeriodCheck
 baseline re-opened; public judge film surfaces on WorkspaceHTTP; naive baseline that
 beats shipping on live.
