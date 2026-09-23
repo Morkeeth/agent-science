@@ -2,7 +2,7 @@
 doc: status
 project: Agent Science
 canonical: true
-last-updated: 2026-09-20T18:15:00Z
+last-updated: 2026-09-23T00:20:00Z
 deadline: 2026-09-09T14:00:00-07:00
 ---
 
@@ -11,7 +11,7 @@ deadline: 2026-09-09T14:00:00-07:00
 > **For Claude / fleet:** this file is the single “where we are” surface.  
 > `hack.md` = process · `CLAUDE.md` = entry · this file = gates + evidence.
 
-**Last gate run:** 2026-09-20 — partner call-proof honesty · `bench_check_docs.py` **130/130** · `test_watch_it_go_red.py` **72/72** · `prove_partner_calls_local.py` OK · live `/health` **RED** (`watch_hosted_partner_health.sh`) · gemini env-alone false-green fixed (`docs/FINDING-gemini-health-env-alone-2026-09-20.md`) · PeriodCheck baseline (`docs/BASELINE-periodcheck-partner-proof-2026-09-20.md`)
+**Last gate run:** 2026-09-23 — partner call-proof + judge surfaces · `bench_check_docs.py` **130/130** · `test_watch_it_go_red.py` **72/72** · `prove_partner_calls_local.py` OK · `prove_judge_surfaces_local.sh` OK · live baseline **naive 3/3 vs shipping 0/3** · live `/health` **RED** · PeriodCheck health **500** (eval JSON still has Parallel IDs)
 
 ---
 

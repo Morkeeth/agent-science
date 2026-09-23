@@ -1,10 +1,10 @@
 # PARTNER INTEGRATIONS — Agent Science · Sep 9 path
 
-**Date:** 2026-08-30 · **Last verified:** 2026-09-20 · **Repo:** Morkeeth/agent-science · **Scope:** all four partners wired in code; deploy is Oscar's click.
+**Date:** 2026-08-30 · **Last verified:** 2026-09-23 · **Repo:** Morkeeth/agent-science · **Scope:** all four partners wired in code; deploy is Oscar's click.
 
 Each partner must be **called at runtime** on the default path — not documented only.
 
-### Hosted mode (private-workspaces) — measured 2026-09-20
+### Hosted mode (private-workspaces) — measured 2026-09-23
 
 Cloud Run sets `K_SERVICE`, so all traffic goes through `cloud/case_http.py` WorkspaceHTTP.
 
@@ -12,20 +12,26 @@ Cloud Run sets `K_SERVICE`, so all traffic goes through `cloud/case_http.py` Wor
 |-------|------|------|
 | `GET /health` | **public** | Partner proof JSON (`gemini`, `parallel`, `engine_default`, receipt ids, …) + `mode` + `revision` |
 | `GET /partners` | **public** | Track checklist JSON for judges |
+| `GET /truths/ui`, `/visibility[/ui]`, `/popular[/ui]` | **public** | Film/judge read-only faces (`live` defaults **false**) |
 | `POST /clear`, `/search`, `/ingest` | **workspace token / session** | Local-only without auth; not a public desk anymore |
 | `/cases`, `/api/cases` | **workspace** | Private research |
 
 **Findings (still live RED until Oscar deploy):**
 
 - revision `agent-science-00028-hed` stripped `/health` — `docs/FINDING-hosted-health-partner-strip-2026-09-16.md`
-- `gemini: true` from `GCP_PROJECT` alone without ADC token — fixed in tree 2026-09-20 — `docs/FINDING-gemini-health-env-alone-2026-09-20.md`
+- `gemini: true` from `GCP_PROJECT` alone without ADC token — fixed in tree — `docs/FINDING-gemini-health-env-alone-2026-09-20.md`
+- `/truths/ui` + `/visibility/ui` → **303** on live (not mounted on old revision) — `docs/FINDING-hosted-judge-surfaces-missing-2026-09-18.md`
+- Naive `ok:true` / HTTP&lt;500 **beats** shipping partner+film gates on live — `python3 scripts/eval_hosted_partner_baseline.py` → 3/3 vs 0/3
 
 **Local prove (no network, no real keys):**
 
 ```bash
 bash scripts/prove_partner_health_local.sh          # shape + public routes
 python3 scripts/prove_partner_calls_local.py        # Parallel transport call + ADK path
+bash scripts/prove_judge_surfaces_local.sh          # truths/visibility/popular public; registry shut
 bash scripts/watch_hosted_partner_health.sh         # expect RED until deploy
+python3 scripts/eval_hosted_partner_baseline.py     # expect exit 2 until deploy (naive wins)
+python3 scripts/eval_hosted_partner_baseline.py --offline-fixtures
 ```
 
 ---

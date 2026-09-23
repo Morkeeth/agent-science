@@ -12,7 +12,8 @@
 git clone https://github.com/Morkeeth/agent-science.git && cd agent-science
 bash scripts/verify_cold_clone.sh
 # includes: 72/72 · ADK path · partners · 130/130 docs · holdout · offline compound ·
-#           baseline/ablation/scorer · prove_partner_health_local · prove_partner_calls_local
+#           baseline/ablation/scorer · prove_partner_health/calls · judge surfaces ·
+#           hosted partner baseline offline fixtures
 python3 tests/test_registry_surface.py -q
 python3 scripts/compound_exhibit_receipt.py
 bash scripts/demo_truth_layer.sh
@@ -32,10 +33,11 @@ Offline compound receipt writes `docs/COMPOUND-EXHIBIT-2026-08-29.md` with A=2�
 | Public repo | Stranger can clone | [ ] | Private until submit — flip visibility on GitHub |
 | OSI licence | Open-source approved | [x] | `LICENSE` (MIT) |
 | Sealed prediction | Pre-registered, falsifiable | [x] | `docs/SEALED-PREDICTION-2026-08-31.md` — hosted A=1→B=0, corpus_hits=1 |
-| Partner integrations | All four called at runtime | [x] local call-proof / [ ] hosted until Oscar deploy | `docs/PARTNER-INTEGRATIONS-2026-08-30.md` · `docs/RECEIPT-partner-callproof-2026-09-20.md` |
-| ADK default path | `engine_default: adk` | [x] local / [ ] hosted (`00028-hed` stripped) | `docs/RECEIPT-adk-default-path-2026-08-30.md` · live watch RED 2026-09-20 |
+| Partner integrations | All four called at runtime | [x] local call-proof / [ ] hosted until Oscar deploy | `docs/PARTNER-INTEGRATIONS-2026-08-30.md` · `docs/RECEIPT-partner-callproof-night-2026-09-23.md` |
+| ADK default path | `engine_default: adk` | [x] local / [ ] hosted (`00028-hed` stripped) | `docs/RECEIPT-adk-default-path-2026-08-30.md` · live watch RED 2026-09-23 |
+| Judge film surfaces | public `/truths/ui` + `/visibility/ui` | [x] local / [ ] hosted 303 until deploy | `docs/FINDING-hosted-judge-surfaces-missing-2026-09-18.md` |
 
-**Controls re-measured 2026-09-20** (run each at object):
+**Controls re-measured 2026-09-23** (run each at object):
 
 | Suite | Command | Result |
 |-------|---------|--------|

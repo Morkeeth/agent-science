@@ -61,4 +61,12 @@ echo "11. Partner call-proof (mocked Parallel + ADK path)..."
 python3 scripts/prove_partner_calls_local.py 2>&1 | tail -3
 
 echo
+echo "12. Judge film surfaces (local private-workspaces, no network)..."
+bash scripts/prove_judge_surfaces_local.sh 2>&1 | tail -5
+
+echo
+echo "13. Hosted partner baseline (offline fixtures — naive vs shipping)..."
+python3 scripts/eval_hosted_partner_baseline.py --offline-fixtures 2>&1 | tail -5
+
+echo
 echo "=== cold-clone verify OK ==="

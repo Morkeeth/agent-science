@@ -3,7 +3,7 @@
 **Audience:** Oscar sends to one real clearance / research lead.  
 **Goal:** one production runs a real question or script through the desk; friction list lands in `CURSOR-LOG.md`.
 
-**Hosted reality (2026-09-16):** Cloud Run is **private-workspaces**. Unauthenticated paste-to-`/clear` is gone. Partners sign in with a workspace access key Oscar issues; public surfaces are `/health`, `/partners`, and the judge pages Oscar points them at.
+**Hosted reality (2026-09-23):** Cloud Run is **private-workspaces**. Unauthenticated paste-to-`/clear` is gone. Partners sign in with a workspace access key Oscar issues; public surfaces (in tree; live RED until deploy) are `/health`, `/partners`, `/truths/ui`, `/visibility/ui`, `/popular/ui`.
 
 ---
 

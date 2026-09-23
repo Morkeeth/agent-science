@@ -2,7 +2,7 @@
 doc: hack
 project: Agent Science
 phase: SHIP
-last-touched: 2026-09-20 18:10 UTC
+last-touched: 2026-09-23 00:20 UTC
 canonical: true
 event: Agentic Cinema · Parallel track · deadline 2026-09-09 14:00 PDT
 supersedes: docs/PHASE0-LADDER.md ClickHouse-track note (runtime track is Parallel)
@@ -307,9 +307,11 @@ Full record: `fleet-ops (internal)/retros/QWEN-LOSS-RETRO-2026-08-30.md` (correc
 
 ---
 
-## 🎯 NOW — Partner call-proof honesty (callable ≠ configured)
+## 🎯 NOW — Partner call-proof + judge surfaces (callable ≠ configured)
 
-**Slice:** `/health` gemini claimed Vertex from `GCP_PROJECT` alone; Parallel checklist was hardcoded true; live still stripped on `00028-hed`. Ship callable health + call-prove + PeriodCheck baseline. Deploy stays Oscar.
+**Slice:** `/health` gemini claimed Vertex from `GCP_PROJECT` alone; Parallel checklist was
+hardcoded true; live still stripped on `00028-hed`; film UIs 303. Ship callable health +
+call-prove + public judge surfaces + baselines that can beat us. Deploy stays Oscar.
 
 ### Build (this session)
 
@@ -319,8 +321,10 @@ Full record: `fleet-ops (internal)/retros/QWEN-LOSS-RETRO-2026-08-30.md` (correc
 - [x] RED control `t_gemini_project_env_alone_is_not_callable` + receipt health test → partner_runtime **9/9**
 - [x] `python3 scripts/prove_partner_calls_local.py` — mocked Parallel LIVE_CALLS + ADK engine select
 - [x] `bash scripts/watch_hosted_partner_health.sh` — EXPECT_STATE=red watched on live
-- [x] PeriodCheck baseline at their objects — `docs/BASELINE-periodcheck-partner-proof-2026-09-20.md`
-- [x] Partner doc + DESIGN-PARTNER-LOOP + SUBMISSION-PACK **130/130** + hosted ADK honesty
+- [x] Public `/truths/ui` `/visibility` `/popular` on WorkspaceHTTP — `prove_judge_surfaces_local.sh`
+- [x] Naive vs shipping baseline — `eval_hosted_partner_baseline.py` live **naive 3/3 · shipping 0/3**
+- [x] PeriodCheck baseline re-opened 2026-09-23 (health **500**; eval still has Parallel IDs)
+- [x] Partner doc + SUBMISSION honesty + cold-clone steps 11–13 · pack **130/130**
 - [x] Live compound — honest BLOCKED (re-probed; no Parallel key / workspace token)
 
 ### Verify (one command each)
@@ -329,10 +333,12 @@ Full record: `fleet-ops (internal)/retros/QWEN-LOSS-RETRO-2026-08-30.md` (correc
 git pull && python3 tests/test_watch_it_go_red.py                    # 72/72
 python3 tests/test_adk_default_path.py                               # 5/5
 python3 tests/test_partner_runtime.py                                # 9/9
-python3 -m unittest tests.test_hosted_flow -v                        # hosted health+partners public
-bash scripts/prove_partner_health_local.sh                           # private-workspaces partner fields
-python3 scripts/prove_partner_calls_local.py                         # call-proof (mocked Parallel)
+python3 -m unittest tests.test_hosted_flow -v                        # health+partners+film public
+bash scripts/prove_partner_health_local.sh
+python3 scripts/prove_partner_calls_local.py
+bash scripts/prove_judge_surfaces_local.sh
 bash scripts/watch_hosted_partner_health.sh                          # WATCH RED OK until Oscar deploy
+python3 scripts/eval_hosted_partner_baseline.py                      # expect exit 2 until deploy
 python3 scripts/bench_check_docs.py                                  # 130/130
 python3 scripts/eval_refusal_baseline.py && python3 scripts/eval_refusal_ablation.py
 # After Oscar deploy only:
@@ -342,14 +348,15 @@ bash scripts/verify_partners_hosted.sh
 
 ### Receipt
 
-- `docs/RECEIPT-partner-callproof-2026-09-20.md`
+- `docs/RECEIPT-partner-callproof-night-2026-09-23.md`
 - `docs/FINDING-gemini-health-env-alone-2026-09-20.md`
+- `docs/FINDING-hosted-judge-surfaces-missing-2026-09-18.md`
 - `docs/BASELINE-periodcheck-partner-proof-2026-09-20.md`
 - `docs/BLOCKED-live-compound-2026-09-16.md`
 
 ### BLOCKED
 
-- Live hosted `/health` partner fields — **until Oscar `deploy.sh`** (revision still `00028-hed`)
+- Live hosted `/health` partner fields + film UIs — **until Oscar `deploy.sh`** (revision still `00028-hed`)
 - Live compound / Parallel call on hosted `/clear` — **PARALLEL_API_KEY + WORKSPACE_TOKEN** missing on agent VM
 - Key rotation — Oscar console (`AS-KEYS-ROTATE`)
 
@@ -619,6 +626,7 @@ bash scripts/verify_cold_clone.sh                                               
 
 | When | What | Command | Outcome |
 |------|------|---------|---------|
+| 2026-09-23 night | Call-proof land + judge surfaces + naive baseline | `prove_partner_calls_local.py` · `prove_judge_surfaces_local.sh` · `eval_hosted_partner_baseline.py` · PeriodCheck curl | film public locally · **naive 3/3 vs shipping 0/3** · PeriodCheck health **500** · 72/72 · 9/9 · 130/130 |
 | 2026-09-20 night | Gemini health env-alone false green | `resolve_gemini_path` · `prove_partner_calls_local.py` · `watch_hosted_partner_health.sh` | **callable fix** · call-prove OK · live **RED** on `00028-hed` · PeriodCheck baseline 14 Parallel / 13 gold · partner_runtime **9/9** · pack **130/130** |
 | 2026-09-16 night | Offline compound exit 3 (paraphrase≠assertion) | `compound_exhibit_receipt.py` · cold-clone step 8–10 | **A=2→B=1 Parallel, corpus_hits=2** after exact-assertion B arm · cold-clone OK |
 | 2026-09-16 night | Hosted health partner strip found + fixed in tree | `curl …/health` · `prove_partner_health_local.sh` · hosted_flow tests | Live **RED** (`00028-hed` missing partner fields) · local prove **engine_default=adk** · 72/72 · 128/128 |
@@ -676,7 +684,26 @@ A failed stage selects the next product change; it does not trigger repeated bro
 
 General reference examples (always re-read for the event): https://agentic-cinema.devpost.com/ and https://ethglobal.com/events/ethonline2026/info/details and https://ethglobal.com/events/ethonline2026/prizes .
 
-## Current stage record · 2026-09-20 · partner call-proof honesty
+## Current stage record · 2026-09-23 · partner call-proof + judge surfaces
+
+- **Intended user outcome:** a judge or film preflight can read partner wiring and film
+  surfaces without a workspace key; `/health` claims only callable Gemini; a naive
+  `ok:true` baseline cannot silently beat shipping partner+film gates.
+- **Action actually observed:** live `00028-hed` still stripped; `/partners` and
+  `/truths/ui` **303**. Local prove: call-proof OK, judge surfaces OK.
+  `eval_hosted_partner_baseline.py` → **naive 3/3 · shipping 0/3**. PeriodCheck
+  `/api/health` **500**; their eval JSON still carries Parallel search_ids (14 entries /
+  25 unique). Pre-fix: `GCP_PROJECT` alone claimed `gemini: true` with no token.
+- **Exact evidence:** `docs/RECEIPT-partner-callproof-night-2026-09-23.md` ·
+  `bash scripts/prove_judge_surfaces_local.sh` ·
+  `python3 scripts/eval_hosted_partner_baseline.py` · PeriodCheck objects ·
+  partner_runtime 9/9 · pack 130/130 · watch_it_go_red 72/72.
+- **Largest product gap:** live Cloud Run still serves stripped/absent surfaces until
+  Oscar deploy; no Parallel key / workspace token on this VM for live `/clear`.
+- **Next build change:** Oscar `deploy.sh` then green watch + `verify_partners_hosted.sh`;
+  with token, compound or keep BLOCKED honestly.
+
+**Prior stage record · 2026-09-20 · partner call-proof honesty**
 
 - **Intended user outcome:** a judge or Oscar deploy verify can trust `/health` partner
   fields as **callable** (token/key), not env presence; Parallel checklist reflects a key;
@@ -685,7 +712,7 @@ General reference examples (always re-read for the event): https://agentic-cinem
 - **Action actually observed:** live `00028-hed` still stripped. Locally, `GCP_PROJECT` alone
   previously claimed `gemini: true` while `vertex_token()` was absent — fixed. Call-prove
   script stamps mocked Parallel `search_id` + ADK engine select. PeriodCheck
-  `live-evaluation.json`: 14 successful research, 13/13 gold, 36 search_id mentions.
+  `live-evaluation.json`: 14 successful research, 13/13 gold (counts from that night's open).
 - **Exact evidence:** `docs/FINDING-gemini-health-env-alone-2026-09-20.md` ·
   `docs/BASELINE-periodcheck-partner-proof-2026-09-20.md` ·
   `python3 scripts/prove_partner_calls_local.py` ·
