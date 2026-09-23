@@ -1,0 +1,91 @@
+{
+  "purpose": "PRIOR LOSS gate — every artifact claim measured at the submitted commit. Null and trust-doc arms never open the object; shipping must.",
+  "labelled_before_tuning": true,
+  "items": [
+    {
+      "id": "AC1",
+      "description": "SUBMISSION-PACK watch_it_go_red count",
+      "artifact": "docs/SUBMISSION-PACK-2026-08-29.md",
+      "claim_regex": "\\|\\s*watch_it_go_red\\s*\\|[^|]*\\|\\s*\\*\\*(\\d+)/(\\d+)\\*\\*",
+      "measure": "suite_pass_total",
+      "measure_args": {"path": "tests/test_watch_it_go_red.py"}
+    },
+    {
+      "id": "AC2",
+      "description": "SUBMISSION-PACK registry_surface count",
+      "artifact": "docs/SUBMISSION-PACK-2026-08-29.md",
+      "claim_regex": "\\|\\s*registry_surface\\s*\\|[^|]*\\|\\s*\\*\\*(\\d+)/(\\d+)\\*\\*",
+      "measure": "suite_pass_total",
+      "measure_args": {"path": "tests/test_registry_surface.py"}
+    },
+    {
+      "id": "AC3",
+      "description": "SUBMISSION-PACK partner_runtime count",
+      "artifact": "docs/SUBMISSION-PACK-2026-08-29.md",
+      "claim_regex": "\\|\\s*partner_runtime\\s*\\|[^|]*\\|\\s*\\*\\*(\\d+)/(\\d+)\\*\\*",
+      "measure": "suite_pass_total",
+      "measure_args": {"path": "tests/test_partner_runtime.py"}
+    },
+    {
+      "id": "AC4",
+      "description": "SUBMISSION-PACK total suite count",
+      "artifact": "docs/SUBMISSION-PACK-2026-08-29.md",
+      "claim_regex": "\\|\\s*\\*\\*Total\\*\\*\\s*\\|\\s*\\d+ suites\\s*\\|\\s*\\*\\*(\\d+)/(\\d+)\\*\\*",
+      "measure": "bench_docs_total",
+      "measure_args": {}
+    },
+    {
+      "id": "AC5",
+      "description": "Gap report 561 of 600 at fixture object",
+      "artifact": "docs/SUBMISSION-PACK-2026-08-29.md",
+      "claim_regex": "\\*\\*(\\d+) of (\\d+) \\(94%\\)\\*\\*",
+      "measure": "fixture_fraction",
+      "measure_args": {"path": "fixtures/gap-report-600.md", "regex": "(\\d+) of (\\d+)"}
+    },
+    {
+      "id": "AC6",
+      "description": "Second-question flip 247 of 600 at fixture object",
+      "artifact": "docs/SUBMISSION-PACK-2026-08-29.md",
+      "claim_regex": "\\*\\*(\\d+) of (\\d+) \\(41%\\)\\*\\*|(\\d+) of (\\d+) flip",
+      "measure": "fixture_fraction",
+      "measure_args": {"path": "fixtures/shift-ai-training-vs-noncommercial.md", "regex": "(\\d+) of (\\d+) items"}
+    },
+    {
+      "id": "AC7",
+      "description": "Devpost paste pins main or exact HEAD short-hash (no drifting stale tip)",
+      "artifact": "docs/SUBMISSION-PACK-2026-08-29.md",
+      "claim_regex": "agent-science` @ `([0-9a-f]{7,}|main)`",
+      "measure": "git_head_or_main",
+      "measure_args": {}
+    },
+    {
+      "id": "AC8",
+      "description": "Public-repo status row must not claim private-until-submit",
+      "artifact": "docs/SUBMISSION-PACK-2026-08-29.md",
+      "claim_regex": "\\|\\s*Public repo\\s*\\|[^\\n]*",
+      "measure": "public_repo_row",
+      "measure_args": {
+        "forbidden": "Private until submit",
+        "required": "Public since 2026-08-22",
+        "truth_doc": "hack.md",
+        "truth_regex": "public since 2026-08-22"
+      }
+    },
+    {
+      "id": "AC9",
+      "description": "Claims-on-disk figure matches registry after boot",
+      "artifact": "docs/SUBMISSION-PACK-2026-08-29.md",
+      "claim_regex": "\\*\\*(\\d+)\\+? claims\\*\\* on disk",
+      "measure": "registry_claim_count",
+      "measure_args": {"allow_plus": true}
+    },
+    {
+      "id": "AC10",
+      "description": "Planted stale — null/baseline must miss; shipping must catch",
+      "artifact": "fixtures/artifact-claims/planted-stale.md",
+      "claim_regex": "claims on disk: \\*\\*(\\d+)\\*\\*",
+      "measure": "registry_claim_count",
+      "measure_args": {"allow_plus": false}
+    }
+  ]
+}

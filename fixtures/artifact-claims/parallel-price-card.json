@@ -1,0 +1,18 @@
+{
+  "source_url": "https://docs.parallel.ai/getting-started/pricing",
+  "fetched_at": "2026-09-23T00:12:00Z",
+  "note": "Pinned from docs.parallel.ai on the fetch date. Re-fetch before treating as current billing.",
+  "search_usd_per_request": {
+    "turbo": 0.001,
+    "fast": 0.001,
+    "basic": 0.005,
+    "advanced": 0.005
+  },
+  "search_default_results": 10,
+  "additional_result_usd": 0.001,
+  "verbatim_component_table": [
+    {"component": "Per 1,000 turbo or fast requests (default 10 results)", "cost_per_1000": 1},
+    {"component": "Per 1,000 basic or advanced requests (default 10 results)", "cost_per_1000": 5},
+    {"component": "Per 1,000 additional page results & excerpts", "cost_per_1000": 1}
+  ]
+}

@@ -2,7 +2,7 @@
 doc: status
 project: Agent Science
 canonical: true
-last-updated: 2026-09-16T19:00:00Z
+last-updated: 2026-09-23T00:20:00Z
 deadline: 2026-09-09T14:00:00-07:00
 ---
 
@@ -11,7 +11,7 @@ deadline: 2026-09-09T14:00:00-07:00
 > **For Claude / fleet:** this file is the single “where we are” surface.  
 > `hack.md` = process · `CLAUDE.md` = entry · this file = gates + evidence.
 
-**Last gate run:** 2026-09-16 — partner admissibility wave · `bench_check_docs.py` **128/128** · `test_watch_it_go_red.py` **72/72** · live `/health` partner fields **RED** until Oscar deploy (`docs/FINDING-hosted-health-partner-strip-2026-09-16.md`)
+**Last gate run:** 2026-09-23 — artifact-claims night wave · `eval_artifact_claims.py` GATE OK (ship 10/10 > null 9/10) · `bench_check_docs.py` **128/128** · `test_watch_it_go_red.py` **72/72** · cost billing **BLOCKED** · live `/health` partner fields still **RED** on `00028-hed` · receipt `docs/RECEIPT-night-wave-2026-09-23.md`
 
 ---
 

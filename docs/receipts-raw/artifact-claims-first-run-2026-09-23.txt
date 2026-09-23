@@ -1,0 +1,24 @@
+ARTIFACT-CLAIMS EVAL — measure at object or refuse
+null arm:      always FRESH (never opens the object)
+baseline arm:  trust-doc (artifact is self-consistent → always FRESH)
+shipping arm:  remeasure at object
+
+id     gold    null    base    ship    claimed            measured
+AC1    FRESH   FRESH   FRESH   FRESH   72/72              72/72
+AC2    FRESH   FRESH   FRESH   FRESH   16/16              16/16
+AC3    FRESH   FRESH   FRESH   FRESH   7/7                7/7
+AC4    FRESH   FRESH   FRESH   FRESH   128/128            128/128
+AC5    FRESH   FRESH   FRESH   FRESH   561/600            561/600
+AC6    FRESH   FRESH   FRESH   FRESH   247/600            247/600
+AC7    STALE   FRESH   FRESH   STALE   e6793ab            d56aeb8
+AC8    STALE   FRESH   FRESH   STALE   Private until submit {"consistent": false, "forbidden_present": true, "truth_public": true}
+AC9    STALE   FRESH   FRESH   STALE   265                238
+AC10   STALE   FRESH   FRESH   STALE   999999             238
+
+Null:      6/10 = 0.600  95% CI [0.313, 0.832]
+Baseline:  6/10 = 0.600  95% CI [0.313, 0.832]
+Shipping:  10/10 = 1.000  95% CI [0.722, 1.000]
+McNemar null vs shipping:     p=0.1250 (b=0 c=4 discordant)
+McNemar baseline vs shipping: p=0.1250 (b=0 c=4 discordant)
+STALE at object: AC7, AC8, AC9, AC10
+FINDING: live artifact claims are STALE at object: AC7, AC8, AC9 — repair SUBMISSION-PACK (or the measure), then re-run. Null/baseline missed every STALE row.

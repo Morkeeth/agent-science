@@ -124,3 +124,5 @@ Re-derives all 9 suite counts against `docs/SUBMISSION-PACK-2026-08-29.md` — e
 - [x] Offline path with no API key
 - [x] Wilson CI + McNemar (n=6)
 - [x] Honesty carries worst number (tie + RC5 false-GREEN both arms)
+- [x] Every artifact claim measured at commit — `python3 scripts/eval_artifact_claims.py` (2026-09-23: first run RED on AC7/AC8/AC9; shipping beats null)
+- [ ] Cost from billing — `eval_cost_billing.py` dates price card but exits 2 without billing export

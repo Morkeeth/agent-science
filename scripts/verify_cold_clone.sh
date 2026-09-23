@@ -57,4 +57,9 @@ echo "10. Private-workspaces partner health (local, no network)..."
 bash scripts/prove_partner_health_local.sh 2>&1 | tail -5
 
 echo
+echo "11. Artifact-claims gate (null vs shipping; planted STALE)..."
+python3 scripts/boot_registry.py >/tmp/boot_registry.cold 2>&1 || true
+python3 scripts/eval_artifact_claims.py 2>&1 | tail -8
+
+echo
 echo "=== cold-clone verify OK ==="

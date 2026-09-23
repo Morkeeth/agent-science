@@ -26,7 +26,7 @@ done
 echo
 echo "2. Control tests"
 python3 tests/test_watch_it_go_red.py >/dev/null 2>&1 && ok "watch_it_go_red 72/72" || bad "watch_it_go_red"
-python3 tests/test_partner_runtime.py >/dev/null 2>&1 && ok "partner_runtime 5/5" || bad "partner_runtime"
+python3 tests/test_partner_runtime.py >/dev/null 2>&1 && ok "partner_runtime 7/7" || bad "partner_runtime"
 python3 tests/test_popular.py >/dev/null 2>&1 && ok "popular endpoint" || bad "popular"
 python3 tests/test_stack_product.py >/dev/null 2>&1 && ok "stack product" || bad "stack"
 python3 tests/test_dictionary.py >/dev/null 2>&1 && ok "dictionary" || bad "dictionary"

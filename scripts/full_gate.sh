@@ -40,6 +40,22 @@ echo "--- 5a. Qwen eval gates (holdout + scorer symmetry) ---"
 python3 scripts/eval_verify_holdout.py
 python3 scripts/eval_scorer_symmetry.py
 
+echo "--- 5a2. Artifact-claims + cost-from-billing ---"
+python3 scripts/boot_registry.py >/tmp/boot_registry.full 2>&1 || true
+python3 scripts/eval_artifact_claims.py
+# Cost gate is allowed to BLOCK without billing export (exit 2); fail only on crash/misconfig.
+set +e
+python3 scripts/eval_cost_billing.py
+cost_rc=$?
+set -e
+if [[ "$cost_rc" -ne 0 && "$cost_rc" -ne 2 ]]; then
+  echo "cost billing gate crashed (rc=$cost_rc)"
+  exit "$cost_rc"
+fi
+if [[ "$cost_rc" -eq 2 ]]; then
+  echo "NOTE: cost-from-billing BLOCKED (no export) — PRIOR LOSS checkbox stays open"
+fi
+
 echo "--- 5b. Privacy (no home/~/CODE paths in tracked files) ---"
 bash scripts/privacy_grep.sh
 
