@@ -21,6 +21,39 @@ agent-science case list --query "fresh sessions" --root .
 
 The longer `python3 -m clearance` form below works from this checkout too.
 
+## Reuse an answer, and know how old its evidence is
+
+Every answer that cites a source now carries the age of that evidence: when the cited
+document was fetched, what it hashed to, and when the source was last re-opened.
+
+```
+$ agent-science lookup 'PEP 8 says to "Limit all lines to a maximum of 79 characters".'
+[SOURCED] PEP 8 says to "Limit all lines to a maximum of 79 characters".
+  source: https://peps.python.org/pep-0008/
+  span: "Maximum Line Length Limit all lines to a maximum of 79 characters."
+  tier=free · via registry · 0 Parallel API
+  evidence: 0.0d old · fetched=2026-09-07T07:02:07.182511+00:00 · sha256=ef6df9586ed3
+  last re-read: never — run `recheck` to re-open the source
+```
+
+An age is not a verification. To go back and read the sources again:
+
+```bash
+agent-science recheck            # compare cached snapshots, no network call
+agent-science recheck --live     # re-fetch the sources
+agent-science recheck --live --url https://peps.python.org/pep-0008/
+```
+
+A claim whose cited span has disappeared from its source is moved back to UNKNOWN with
+the cause `source_does_not_state_it`, and every saved answer resting on that URL is
+listed with its denominator. A document that merely changed around an intact span keeps
+its verdict and is re-bound to the new snapshot. A source that could not be read is
+reported `unchecked`; it is never reported unchanged. The same report is available to an
+agent through the `science_recheck` MCP tool.
+
+A related question retrieves related claims as **candidates**. Their verdicts are never
+reused as an answer: only the identical assertion can be replayed.
+
 ## Investigate a question over time
 
 ```bash
