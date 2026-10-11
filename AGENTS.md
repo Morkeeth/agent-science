@@ -1,19 +1,3 @@
-<!-- STATE:start -->
-## SHARED WORK STATE · revision e2daf56ba4f1 · rendered 2026-09-15 · scope repo cleared
-This repo's rows of the one shared work state. Authorities: todo.md (human), TASKS.yaml (ids), board clocks, Oscar's rulings (local only). Views such as GLANCE, SLASK and ZUP are adapters over the same revision.
-**A CLOSED task stays closed. Do not requeue, re-verify or re-poll it.**
-Before acting, record that you read this revision, exact session and exact rev: `python3 ~/CODE/fleet-ops/state/state.py ack --session <your session id> --consumer <claude|codex|cursor> --rev e2daf56ba4f1`. In a cloud sandbox instead append `{"session":"<your session id>","consumer":"<claude|codex|cursor>","rev":"e2daf56ba4f1","ts":"<iso>","stage":"acknowledged"}` to `.fleet/ACK.jsonl` in this repo and commit it.
-
-### CLOSED. Not open work.
-- **AS-NIGHTPLAN-2026-09-05** · Overnight research engine build (nightplan) · **DONE**. status `done` in TASKS.yaml
-
-### OPEN
-- **AS-KEYS-ROTATE** · Rotate Gemini + Parallel keys (plaintext Cloud Run revision) · owner oscar · `cleared` · due 2026-09-09T14:00
-  - next: Rotate both keys at aistudio.google.com + parallel.ai; then agent redeploys without --set-env-vars secrets
-
-### ACKNOWLEDGED THIS REVISION: nobody yet
-<!-- STATE:end -->
-
 # Product direction — operator ruling, 2026-09-04
 
 CLI/MCP is the primary Agent Science workflow. Research, evidence inspection, decisions, repo experiments and review belong in the terminal or coding agent. The dashboard is an optional evidence inspector; it must not become a required workflow or require a hosted account for local work. Preserve the design developed with Claude. Extending capabilities does not authorize a new visual design or replacing the product front door.
