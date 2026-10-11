@@ -1,3 +1,5 @@
+> Current release map: [PUBLIC-RELEASE-2026-09-07.md](PUBLIC-RELEASE-2026-09-07.md). Hosted mode is private workspaces. Public-route and runtime claims below are historical and are not the current judge instructions. Use `submission/DEVPOST-PASTE.md` for the reconciled, still-unready draft.
+
 # SUBMISSION PACK — Agentic Cinema · slice 7
 
 **Date:** 2026-09-03 · **Repo:** https://github.com/Morkeeth/agent-science @ `main`  

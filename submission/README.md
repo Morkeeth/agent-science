@@ -2,6 +2,8 @@
 
 **Deadline:** Sep 9 2026 14:00 PDT · **Track:** Parallel
 
+> Release review 7 September: use `DEVPOST-PASTE.md`. Hosted health is not judge acceptance; local legacy routes are not public hosted routes. No current submission-ready claim.
+
 ## Ship checklist
 
 | # | Item | Path / action |

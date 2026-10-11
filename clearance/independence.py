@@ -30,7 +30,7 @@ _DERIVED = (
     ("webcache.googleusercontent.com", "cache of another page"),
     ("web.archive.org", "archived copy — the snapshot, not the live object"),
     ("britannica.com", "encyclopaedia — tertiary"),
-    ("everipedia", "Wikipedia fork"),
+    ("everipedia.org", "Wikipedia fork"),
 )
 
 # Hosts that are the thing itself.
@@ -80,13 +80,22 @@ _PRIMARY = (
 
 def classify(url: str) -> tuple[str, str]:
     """(class, why). class is 'primary', 'derived' or 'unclassified'."""
-    host = (urlparse(url).netloc or "").lower()
-    path = (urlparse(url).path or "").lower()
+    try:
+        parsed = urlparse(url)
+        if parsed.scheme.lower() not in ("http", "https") or not parsed.hostname:
+            return "unclassified", "not an absolute HTTP(S) source URL"
+        # Parse the hostname, never match credentials, ports or a substring.
+        host = parsed.hostname.lower().rstrip(".").encode("idna").decode("ascii")
+        _ = parsed.port  # reject malformed/out-of-range ports
+        path = (parsed.path or "").lower()
+    except (ValueError, UnicodeError):
+        return "unclassified", "invalid source URL"
     for frag, why in _DERIVED:
-        if frag in host or frag in path:
+        if host == frag or host.endswith("." + frag):
             return "derived", why
     for frag, why in _PRIMARY:
-        if host.endswith(frag) or frag in host:
+        domain = frag.lstrip(".")
+        if (host == domain and "." in domain) or host.endswith("." + domain):
             return "primary", why
     return "unclassified", "not on either list — a human should look"
 
@@ -95,7 +104,7 @@ def note(url: str) -> str:
     """One line to print beside a verdict. Never a refusal."""
     cls, why = classify(url)
     if cls == "primary":
-        return f"source class: PRIMARY ({why})"
+        return f"source class: PRIMARY ({why}; hostname hint only, not verified authorship or claim support)"
     if cls == "derived":
         return (f"source class: DERIVED ({why}). "
                 "If the script was researched from this, the check is a round trip. "
