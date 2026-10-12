@@ -140,6 +140,55 @@ def t_requirements_pins_parallel_web():
     assert "google-adk==" in req
 
 
+def _urllib_rest_health() -> dict:
+    """Working Parallel via REST fallback — SDK wheel absent, key present."""
+    return {
+        "ok": True,
+        "service": "agent-science",
+        "gemini": True,
+        "gemini_path": "vertex:hack-fleet",
+        "parallel": True,
+        "parallel_sdk": False,
+        "parallel_sdk_version": None,
+        "parallel_transport": "urllib-rest",
+        "agent_builder": True,
+        "engine_default": "adk",
+    }
+
+
+def t_shipping_health_accepts_urllib_rest_without_sdk():
+    """SDK assert must not false-red a callable urllib-rest Parallel path.
+
+    FINDING-parallel-sdk-assert-vs-urllib-2026-09-23: verify required
+    parallel_sdk=True even when parallel=True and transport=urllib-rest.
+    """
+    from cloud.partners import shipping_health_ok
+
+    ok, why = shipping_health_ok(_urllib_rest_health())
+    assert ok, f"urllib-rest with key must be shipping-green, got: {why}"
+
+
+def t_shipping_health_still_reds_stripped_or_uncallable_parallel():
+    from cloud.partners import shipping_health_ok
+
+    stripped = {"ok": True, "service": "agent-science", "mode": "private-workspaces"}
+    ok, why = shipping_health_ok(stripped)
+    assert not ok, "stripped health must stay red"
+    assert "gemini" in why or "parallel" in why
+
+    no_key = dict(_urllib_rest_health())
+    no_key["parallel"] = False
+    ok, why = shipping_health_ok(no_key)
+    assert not ok, "parallel=false must stay red"
+    assert "parallel" in why
+
+    sdk_path = dict(_urllib_rest_health())
+    sdk_path["parallel_sdk"] = True
+    sdk_path["parallel_transport"] = "parallel-web"
+    ok, why = shipping_health_ok(sdk_path)
+    assert ok, f"SDK transport must stay green, got: {why}"
+
+
 if __name__ == "__main__":
     fns = [v for k, v in sorted(globals().items()) if k.startswith("t_") and callable(v)]
     failed = 0
