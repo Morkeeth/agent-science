@@ -4,9 +4,10 @@ import pathlib
 import subprocess
 import sys
 
-import clearance
-
 ROOT = pathlib.Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))   # so `python3 tests/test_mcp_version.py` works too
+
+import clearance  # noqa: E402
 
 
 def test_initialize_reports_package_version():
