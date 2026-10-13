@@ -9,7 +9,7 @@ import json
 import sys
 import sqlite3
 
-from clearance import ingest, query_analytics, stack_search
+from clearance import __version__, ingest, query_analytics, stack_search
 
 TOOLS = [
     {
@@ -429,7 +429,7 @@ def main():
                 "result": {
                     "protocolVersion": "2024-11-05",
                     "capabilities": {"tools": {"listChanged": False}},
-                    "serverInfo": {"name": "agent-science", "version": "0.5.0"},
+                    "serverInfo": {"name": "agent-science", "version": __version__},
                 },
             })
         elif method == "notifications/initialized":
