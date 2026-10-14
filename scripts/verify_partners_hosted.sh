@@ -25,23 +25,18 @@ HEALTH_JSON="$(curl -sf "$BASE/health")"
 echo "$HEALTH_JSON" | python3 -m json.tool
 python3 -c "
 import json, sys
+from pathlib import Path
+sys.path.insert(0, str(Path('${ROOT}')))
+from cloud.partners import shipping_health_ok
 d = json.loads(sys.argv[1])
 # A body that is only ok/service/mode/revision is a FALSE GREEN — watched on
 # revision agent-science-00028-hed (2026-09-16).
-req = {
-    'ok': True,
-    'gemini': True,
-    'parallel': True,
-    'parallel_sdk': True,
-    'agent_builder': True,
-    'engine_default': 'adk',
-}
-for k, v in req.items():
-    got = d.get(k)
-    assert got == v, f'{k}: expected {v!r}, got {got!r} (keys={sorted(d)})'
-path = d.get('gemini_path') or ''
-assert path.startswith('vertex:'), f'gemini_path must be vertex ADC, got {path!r}'
-print('health checks OK · mode=', d.get('mode'), '· revision=', d.get('revision'))
+# parallel_sdk=True is track preference, not Parallel callable — urllib-rest
+# with a key is shipping-green (FINDING-parallel-sdk-assert-vs-urllib-2026-09-23).
+ok, why = shipping_health_ok(d)
+assert ok, why
+print('health checks OK · mode=', d.get('mode'), '· revision=', d.get('revision'),
+      '· transport=', d.get('parallel_transport'), '· sdk=', d.get('parallel_sdk'))
 " "$HEALTH_JSON"
 
 echo
