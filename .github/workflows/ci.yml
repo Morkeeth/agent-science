@@ -1,0 +1,64 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  # The oldest interpreter the README promises for the standard-library path.
+  floor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+      - name: Compile everything
+        run: python3 -m compileall -q clearance scripts cloud tests agent_science.py ask_registry.py clear_corpus.py
+      - name: CLI and MCP server start
+        run: |
+          python3 -m clearance --help
+          python3 tests/test_mcp_version.py
+          python3 tests/test_secret_surfaces.py
+
+  # The local steps of scripts/full_gate.sh, in its order. The hosted steps of
+  # that script (cold clone, long run, stranger trial) call the deployed
+  # service and stay out of CI.
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: |
+          pip install -r requirements.txt pytest playwright
+          python3 -m playwright install --with-deps chromium
+      - name: Secret surfaces
+        run: python3 tests/test_secret_surfaces.py
+      - name: Seed and mutation controls
+        run: |
+          python3 scripts/seed_document_cache.py
+          python3 tests/test_watch_it_go_red.py
+      - name: Script suites
+        run: |
+          for t in test_partner_runtime test_parallel_integration test_adk_default_path \
+                   test_dictionary test_registry_surface test_routing test_popular \
+                   test_stack_product test_refusal_correctness test_visibility_transparency \
+                   test_contrary_verdict test_stack_fit test_community_notes; do
+            python3 "tests/$t.py"
+          done
+      # Every file under tests/, not a chosen list. test_watch_it_go_red.py runs
+      # above as a script because it exits at import.
+      - name: Pytest, whole tests directory
+        run: python3 -m pytest -q --ignore=tests/test_watch_it_go_red.py tests
+      - name: Docs and privacy gates
+        run: |
+          python3 scripts/bench_check_docs.py
+          python3 scripts/eval_verify_holdout.py
+          python3 scripts/eval_scorer_symmetry.py
+          bash scripts/privacy_grep.sh

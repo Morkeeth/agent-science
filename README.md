@@ -21,6 +21,12 @@ agent-science case list --query "fresh sessions" --root .
 
 The longer `python3 -m clearance` form below works from this checkout too.
 
+### Python version
+
+- The CLI and the MCP server use the standard library only and need **Python 3.9 or newer**. The code calls `str.removeprefix` and annotates with built-in generics such as `list[str]`, both new in 3.9. Probe, 13 October 2026, on CPython 3.9.6: `python3 -m compileall clearance scripts cloud tests` is clean, 59 of 60 `clearance` modules import (the one that does not is `pdf_source`, which needs `pypdf`), and seven script suites pass. No older interpreter was on the machine, so 3.8 is untested and expected to fail.
+- The SDK and ADK paths (`pip install -r requirements.txt`) need **Python 3.10 or newer**, because the pinned `google-adk==2.7.1` declares `>=3.10`.
+- The container runs Python 3.12 (`Dockerfile`).
+
 ## Investigate a question over time
 
 ```bash
