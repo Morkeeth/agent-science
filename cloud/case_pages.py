@@ -63,7 +63,7 @@ def shell(title, body, csrf='', authenticated=True):
             '<meta name="referrer" content="same-origin">'
             f'<title>{esc(title)} · Agent Science</title><style>{CSS}</style></head><body>'
             '<a class="skip" href="#main">Skip to content</a><header><div class="top">'
-            '<a class="brand" href="/cases">Agent <span>Science</span></a>' + nav + '</div></header>'
+            f'<a class="brand" href="{"/cases" if authenticated else "/"}">Agent <span>Science</span></a>' + nav + '</div></header>'
             f'<main id="main">{body}</main><footer>Agent Science · Sources, decisions, and what changed between them.</footer></body></html>')
 
 
@@ -296,3 +296,16 @@ def source_page(case_id, source, csrf=''):
 
 def error_page(message, code=400):
     return shell('Request could not be completed', f'<div class="login"><p class="eyebrow">Request {esc(code)}</p><h1>That action needs another look.</h1><div class="error" role="alert">{esc(message)}</div><a class="button secondary" href="/cases">Return to cases</a></div>', authenticated=False)
+
+
+def public_release(url='', classification=None, legacy_path=''):
+    """Public method inspection. Never reads a workspace or fetches a source."""
+    result = ''
+    if classification is not None:
+        kind, basis = classification
+        result = f'<section class="panel stamp"><h2>Publisher hint: {esc(kind.upper())}</h2><p>{esc(basis)}</p><p>Basis: hostname matching only. Author identity, independent corroboration, freshness and claim support are not established by this check.</p><p class="wrap">{esc(url)}</p></section>'
+    legacy = (f'<p class="notice">{esc(legacy_path)} is a local-only research route. It is not an anonymous hosted research endpoint.</p>' if legacy_path else '')
+    body = f'''<section class="hero"><p class="eyebrow">Agent Science · public entry</p><h1>Inspect the evidence.<br>Keep the uncertainty.</h1><p class="lede">Research cases keep sources, opposing evidence and decisions together. The hosted research workspace requires an access key; this public check shows one part of the source method.</p></section>
+{legacy}<section class="panel stamp"><h2>Follow one claim through the evidence</h2><p>Inspect real public document excerpts and an explicitly authored conclusion. This read-only example makes no model or search call.</p><a class="button" href="/judge/demo">Open the public research example</a></section><div class="layout"><section><div class="panel"><h2>Check a source hostname</h2><p>A government-looking URL is not proof of authority. This check does not fetch the URL, run a model, or save a research case.</p><form action="/judge" method="get"><label for="source-url">Source URL</label><input id="source-url" name="url" type="url" maxlength="2048" required value="{esc(url)}" placeholder="https://example.gov.attacker.invalid/report"><p class="quiet">Try a real publisher or a misleading hostname.</p><button type="submit">Inspect hostname</button></form></div>{result}</section>
+<aside><div class="panel"><h2>Use the research workspace</h2><p>With an access key: create a case, inspect source snapshots, record a decision, then revisit changed evidence. Workspace data stays private.</p><a class="button" href="/login">Open workspace sign-in</a><p class="quiet">Live provider research is a separate configured operation. This page does not establish that a paid provider call ran.</p></div><div class="panel"><h2>Run locally</h2><p>The public repository includes the CLI/MCP research workflow. Older links to /clear, /front, /visibility/ui and /truths/ui describe local routes, not anonymous cloud access.</p><a href="https://github.com/Morkeeth/agent-science">Source and installation instructions</a><p><a href="/health">Hosted mode and revision</a></p></div></aside></div>'''
+    return shell('Agent Science · public entry', body, authenticated=False)

@@ -1,0 +1,28 @@
+{
+  "kind": "Public, authored read-only demonstration; real document quotes, no live model/search result claimed",
+  "claim": "Python requires every line to contain at most 79 characters.",
+  "sources": [
+    {
+      "id": "pep8",
+      "url": "https://peps.python.org/pep-0008/",
+      "final_url": "https://peps.python.org/pep-0008/",
+      "title": "PEP 8 \u2014 Python style guidance",
+      "quote": "Limit all lines to a maximum of 79 characters.",
+      "document_sha256": "9f4e669bee0fab4b1b0e60321b9ca8822b2f1e61a6ebe0243760294eaba0248e",
+      "fetched_at": "2026-09-07T12:04:31.860462+00:00",
+      "scope": "PEP 8 also allows an agreeing team to choose longer code lines, up to 99. The standard library follows the more conservative limit."
+    },
+    {
+      "id": "black",
+      "url": "https://black.readthedocs.io/en/stable/the_black_code_style/current_style.html",
+      "final_url": "https://black.readthedocs.io/en/stable/the_black_code_style/current_style.html",
+      "title": "Black \u2014 formatter default",
+      "quote": "Black defaults to 88 characters per line",
+      "document_sha256": "f04cfc6daf30a5e0a7d41fe8c6e9ca43a70ac44ce46858dc2a1de3d3d1fdefb5",
+      "fetched_at": "2026-09-07T12:04:32.062106+00:00",
+      "scope": "This is a configurable formatter default, not a universal Python language requirement. It does not establish that one line length improves every project."
+    }
+  ],
+  "assessment": "The claim is too broad. PEP 8 gives style guidance with a team exception; Black uses a different configurable default. Neither document makes 79 a language-wide requirement.",
+  "unknown": "This example does not measure developer productivity, prove author identity, or establish independent scientific corroboration."
+}

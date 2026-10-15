@@ -75,6 +75,24 @@ TOOLS = [
         "inputSchema": {"type": "object", "properties": {}},
     },
     {
+        "name": "science_recheck",
+        "description": (
+            "Re-read the sources behind saved answers and report what changed. A claim "
+            "whose cited span has disappeared from its source is moved back to UNKNOWN "
+            "and every answer resting on that URL is listed. Use before trusting a "
+            "reused answer, or after a source is known to have moved. live=false "
+            "compares cached snapshots and makes no network call."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "url": {"type": "string", "description": "re-read only claims citing this URL"},
+                "live": {"type": "boolean", "description": "re-fetch the sources", "default": False},
+                "limit": {"type": "integer", "default": 200},
+            },
+        },
+    },
+    {
         "name": "science_ingest",
         "description": (
             "Ingest a researched claim+URL into the registry (verify against source, "
@@ -354,6 +372,17 @@ def handle_tool(name: str, arguments: dict) -> str:
 
     if name == "science_stats":
         return json.dumps(stack_search.stats(), indent=2)
+
+    if name == "science_recheck":
+        from clearance import recheck as R
+        try:
+            return R.format_report(R.recheck(
+                url=arguments.get("url"),
+                live=bool(arguments.get("live", False)),
+                limit=int(arguments.get("limit", 200)),
+            ))
+        except (ValueError, OSError, sqlite3.Error) as exc:
+            return json.dumps({"error": str(exc)})
 
     if name == "science_visibility":
         from clearance import visibility
