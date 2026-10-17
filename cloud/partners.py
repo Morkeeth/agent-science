@@ -67,6 +67,46 @@ def health_payload(*, mode: str | None = None, revision: str | None = None) -> d
     return out
 
 
+def shipping_health_ok(health: dict | None) -> tuple[bool, str]:
+    """Same asserts as verify_partners_hosted.sh step 1.
+
+    Parallel callable ≠ SDK installed. A key + urllib-rest transport is a
+    working Parallel path (clearance/search.py REST fallback). Requiring
+    parallel_sdk=True false-reds that shape — FINDING-parallel-sdk-assert-vs-urllib-2026-09-23.
+    """
+    if not isinstance(health, dict):
+        return False, "body not JSON object"
+    req = {
+        "ok": True,
+        "gemini": True,
+        "parallel": True,
+        "agent_builder": True,
+        "engine_default": "adk",
+    }
+    for k, v in req.items():
+        got = health.get(k)
+        if got != v:
+            return False, f"{k}: expected {v!r}, got {got!r} (keys={sorted(health)})"
+    if "parallel_sdk" not in health:
+        return False, f"parallel_sdk missing (keys={sorted(health)})"
+    if not isinstance(health.get("parallel_sdk"), bool):
+        return False, f"parallel_sdk must be bool, got {health.get('parallel_sdk')!r}"
+    transport = health.get("parallel_transport")
+    allowed = ("parallel-web", "urllib-rest")
+    if transport not in allowed:
+        return False, (
+            f"parallel_transport: expected one of {allowed!r}, got {transport!r}"
+        )
+    if transport == "parallel-web" and health.get("parallel_sdk") is not True:
+        return False, "parallel-web transport requires parallel_sdk=True"
+    if transport == "urllib-rest" and health.get("parallel_sdk") is not False:
+        return False, "urllib-rest transport requires parallel_sdk=False"
+    path = health.get("gemini_path") or ""
+    if not str(path).startswith("vertex:"):
+        return False, f"gemini_path must be vertex ADC, got {path!r}"
+    return True, "partner fields present"
+
+
 def manifest(*, gemini_path: str | None = None, adk_default: bool | None = None) -> dict:
     if gemini_path is None:
         gemini_path = resolve_gemini_path()
