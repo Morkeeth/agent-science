@@ -1,0 +1,54 @@
+{
+  "purpose": "PRIOR LOSS gate — every artifact claim measured at the submitted commit. Null and trust-doc arms never open the object; shipping must. Items here are those that remount cleanly on current main without a SUBMISSION-PACK count refresh (AC1/AC4 need offline seed fixtures; AC7–AC9 need pack remount).",
+  "labelled_before_tuning": true,
+  "items": [
+    {
+      "id": "AC2",
+      "description": "SUBMISSION-PACK registry_surface count",
+      "artifact": "docs/SUBMISSION-PACK-2026-08-29.md",
+      "claim_regex": "\\|\\s*registry_surface\\s*\\|[^|]*\\|\\s*\\*\\*(\\d+)/(\\d+)\\*\\*",
+      "measure": "suite_pass_total",
+      "measure_args": {"path": "tests/test_registry_surface.py"}
+    },
+    {
+      "id": "AC3",
+      "description": "SUBMISSION-PACK partner_runtime count",
+      "artifact": "docs/SUBMISSION-PACK-2026-08-29.md",
+      "claim_regex": "\\|\\s*partner_runtime\\s*\\|[^|]*\\|\\s*\\*\\*(\\d+)/(\\d+)\\*\\*",
+      "measure": "suite_pass_total",
+      "measure_args": {"path": "tests/test_partner_runtime.py"}
+    },
+    {
+      "id": "AC5",
+      "description": "Gap report 561 of 600 at fixture object",
+      "artifact": "docs/SUBMISSION-PACK-2026-08-29.md",
+      "claim_regex": "\\*\\*(\\d+) of (\\d+) \\(94%\\)\\*\\*",
+      "measure": "fixture_fraction",
+      "measure_args": {"path": "fixtures/gap-report-600.md", "regex": "(\\d+) of (\\d+)"}
+    },
+    {
+      "id": "AC6",
+      "description": "Second-question flip 247 of 600 at fixture object",
+      "artifact": "docs/SUBMISSION-PACK-2026-08-29.md",
+      "claim_regex": "\\*\\*(\\d+) of (\\d+) \\(41%\\)\\*\\*|(\\d+) of (\\d+) flip",
+      "measure": "fixture_fraction",
+      "measure_args": {"path": "fixtures/shift-ai-training-vs-noncommercial.md", "regex": "(\\d+) of (\\d+) items"}
+    },
+    {
+      "id": "AC11",
+      "description": "Local demo mp4 duration must be ≤ 180s (video hard-fail bar)",
+      "artifact": "docs/SUBMISSION-PACK-2026-08-29.md",
+      "claim_regex": "≤ 180 s|≤180s|beats sum \\*\\*(\\d+) s\\*\\*",
+      "measure": "demo_mp4_duration_s",
+      "measure_args": {"path": "demo/demo-final.mp4", "max_s": 180}
+    },
+    {
+      "id": "AC10",
+      "description": "Planted stale — null/baseline must miss; shipping must catch",
+      "artifact": "fixtures/artifact-claims/planted-stale.md",
+      "claim_regex": "claims on disk: \\*\\*(\\d+)\\*\\*",
+      "measure": "registry_claim_count",
+      "measure_args": {"allow_plus": false}
+    }
+  ]
+}

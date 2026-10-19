@@ -194,7 +194,7 @@ def _control_output(script: str) -> str:
     return r.stdout.strip() or r.stderr.strip()
 
 
-def _write_receipt(run: dict, *, backfill_rows: int) -> None:
+def _write_receipt(run: dict, *, backfill_rows: int, sourced: int = 0, refused: int = 0) -> None:
     if run.get("error"):
         body = f"""# COMPOUND EXHIBIT — orphan-works A/B
 
@@ -208,7 +208,7 @@ def _write_receipt(run: dict, *, backfill_rows: int) -> None:
 
 ## Registry backfill
 
-`python3 clear_corpus.py research-corpus --backfill` → **{backfill_rows} rows** in `cache/refusal_log.db`
+`python3 clear_corpus.py research-corpus --backfill` → **{backfill_rows} rows** ({sourced} GREEN / {refused} refused) in `cache/refusal_log.db`
 """
         RECEIPT.write_text(body, encoding="utf-8")
         return
@@ -263,7 +263,7 @@ def _write_receipt(run: dict, *, backfill_rows: int) -> None:
         "## Registry backfill",
         "",
         f"`python3 clear_corpus.py research-corpus --backfill` → **{backfill_rows} rows** "
-        f"(29 SOURCED + proven-unprovable refusals) in `cache/refusal_log.db`",
+        f"({sourced} GREEN / {refused} refused) in `cache/refusal_log.db`",
         "",
         "## Controls",
         "",
@@ -288,10 +288,13 @@ def main() -> int:
     from clearance import refusal_log
 
     con = refusal_log.connect(refusal_log.DB)
-    backfill_rows = refusal_log.stats(con)["n"]
+    st = refusal_log.stats(con)
+    backfill_rows = st["n"]
+    sourced = int(st.get("cleared") or 0)
+    refused = int(st.get("refused") or 0)
 
     run = _run_live() if _has_keys() else _run_offline()
-    _write_receipt(run, backfill_rows=backfill_rows)
+    _write_receipt(run, backfill_rows=backfill_rows, sourced=sourced, refused=refused)
     print(RECEIPT.read_text())
 
     if run.get("error"):
