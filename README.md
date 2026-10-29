@@ -1,8 +1,11 @@
 # Agent Science
 
-Research a builder question, inspect the source evidence, and record a decision that can change when its evidence changes.
+**Agent Science lets coding agents research a builder question and keep the evidence, so your decision can change when its source changes.**
 
-Agent Science is a CLI/MCP research companion for coding work. Public-source discovery, versioned evidence, decisions and repo experiments work locally without a hosted account. The CLI and MCP interface keep the question, exact source quotations, source snapshots, actual search attempts, repo context and decision history together.
+An agent answers from memory and paraphrase, and by the next session the quote, the source version and the searches that found it are gone.
+For developers who decide what to build with coding agents and want to reopen why, later, with the receipts.
+It is a CLI and MCP server that keeps the question, verbatim source quotations, source snapshots, search attempts, repo context and decision history together, and can check for new evidence when resumed.
+Verify once, cite verbatim or refuse. Runs locally on standard-library Python with no hosted account; started as an Agentic Cinema entry (Parallel track). Install: `python3 scripts/install-cli.py`.
 
 ## Use it from your terminal
 
