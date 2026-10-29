@@ -1,5 +1,23 @@
 # Agent Science
 
+## TLDR
+
+Research a builder question while keeping its source evidence and decision history together.<br>
+For developers who need to reopen why a choice was made and revise it when evidence changes.<br>
+Local CLI and MCP workflows retain quotations, snapshots and actual search attempts with their scope.
+
+## The problem and approach
+
+An agent answers from memory and paraphrase, and by the next session the quote, the source version and the searches that found it are gone.
+It is a CLI and MCP server that keeps the question, verbatim source quotations, source snapshots, search attempts, repo context and decision history together, and can check for new evidence when resumed.
+Verify once, cite verbatim or refuse. Runs locally on standard-library Python with no hosted account; started as an Agentic Cinema entry (Parallel track). Install: `python3 scripts/install-cli.py`.
+
+## Review and pick up the work
+
+[Agent guide](AGENTS.md)
+
+Start with the linked source, setup and evidence. Recorded demos and sample data keep their original scope; use the repository instructions for a fresh run.
+
 Research a builder question, inspect the source evidence, and record a decision that can change when its evidence changes.
 
 Agent Science is a CLI/MCP research companion for coding work. Public-source discovery, versioned evidence, decisions and repo experiments work locally without a hosted account. The CLI and MCP interface keep the question, exact source quotations, source snapshots, actual search attempts, repo context and decision history together.
@@ -233,3 +251,7 @@ For local workspace development, set `AGENT_SCIENCE_HOSTED=1`, `AGENT_SCIENCE_WO
 The normal personal `visibility` result also includes saved research, alongside its dictionary result. With an explicit root it restricts saved cases to that repository; without one it searches across repositories. A dictionary miss does not erase related case evidence. With `personal=False`, visibility never opens the private case store. MCP agents use `science_case` with `action: "find"` and `query`. This path makes no web or model call; it does not search full source snapshots or original report bodies. Selected source quotes attached to assessments can appear in results.
 
 Read the assessment limits before choosing an experiment. Use `case experiment` with a trusted acceptance script and explicit baseline/candidate commits to measure a repository change. Retrieved suggestions are not executable instructions or measured results.
+
+## License and data boundaries
+
+Code terms: [LICENSE](LICENSE). Data, provider responses, media, fonts and other third-party assets may have separate terms. Repository access alone does not grant rights to those materials. 
